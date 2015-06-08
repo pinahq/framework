@@ -1,0 +1,28 @@
+{
+    "name": "pinahq/framework",
+    "description": "The Pina2 Framework.",
+    "keywords": ["framework", "pina2"],
+    "license": "MIT",
+    "homepage": "http://pinahq.com",
+    "support": {
+        "issues": "https://github.com/pinahq/framework/issues",
+        "source": "https://github.com/pinahq/framework"
+    },
+    "authors": [
+        {
+            "name": "Alex Yashin",
+            "email": "alex@alex-yashin.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "smarty/smarty":"2.6.*",
+        "monolog/monolog": "1.13.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pina\\": "src/Pina/"
+        }
+    },
+    "minimum-stability": "dev"
+}
