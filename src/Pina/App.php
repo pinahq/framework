@@ -13,7 +13,7 @@ class App
         return self::$config['apps'];
     }
     
-    public function init($env, $configPath)
+    public static function init($env, $configPath)
     {
         self::env($env);
         
