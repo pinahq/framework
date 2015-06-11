@@ -66,6 +66,16 @@ class SQL
         return $this->join('left', $table, $field, $table2, $field2);
     }
 
+    public function innerJoin($table, $field, $table2, $field2)
+    {
+        return $this->join('inner', $table, $field, $table2, $field2);
+    }
+    
+    public function rightJoin($table, $field, $table2, $field2)
+    {
+        return $this->join('right', $table, $field, $table2, $field2);
+    }
+    
     public function where($condition)
     {
         $this->where[] = $condition;
@@ -136,6 +146,10 @@ class SQL
 
     protected function extractTableLink($table)
     {
+        if(strpos($table, 'AS') !== false) {
+            return substr($table, strpos($table, 'AS') + 3);
+        }
+        
         if (strpos($table, " ") > 0) {
             return strstr($table, " ");
         }
@@ -574,4 +588,34 @@ class SQL
         $sql = "TRUNCATE $this->from";
         return $this->db->query($sql);
     }
+    
+    public function copyGetId($replaces = array())
+    {
+        $this->copy($replaces);
+        return $this->db->insertId();
+    }
+    
+    public function copy($replaces = array())
+    {
+        $fields = array_diff(array_keys($this->fields), array($this->primaryKey));
+        
+        $select = $fields;
+        foreach($select as $k => $selectField)
+        {
+            if (isset($replaces[$selectField])) {
+                $select[$k] = "'$replaces[$selectField]'";
+            }
+        }
+        
+        $sql = "
+            INSERT INTO $this->table (". implode(",", $fields) .")
+            SELECT ". implode(",", $select) ."
+        ";
+        
+        $sql .= ' FROM ' . $this->from;
+        $sql .= $this->getWhere();
+        
+        return $this->db->query($sql);
+    }
+    
 }
