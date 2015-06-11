@@ -43,7 +43,6 @@ class DB
                 redirect("install.php");
                 exit;
             }
-            ErrorReporter::notify('mysql', mysql_error());
             die('db access error');
         }
 
@@ -73,7 +72,6 @@ class DB
 
         $rc = mysql_query($sql, $this->conn);
         if (!$rc && !$ignore) {
-            ErrorReporter::notify('mysql', mysql_error() . ": " . $sql);
         }
 
         list($msec, $sec) = explode(' ', microtime());
