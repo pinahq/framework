@@ -26,7 +26,9 @@ class JsonResponse extends Response
     {
         $this->badRequest();
         $this->contentType('application/json');
-        echo Language::rewrite(json_encode($this->makePacket('fail'), JSON_UNESCAPED_UNICODE));
+        $c = json_encode($this->makePacket('fail'), JSON_UNESCAPED_UNICODE);
+        Language::rewrite($c);
+        echo $c;
         die();
     }
     
@@ -35,6 +37,8 @@ class JsonResponse extends Response
         $this->header('Pina-Response: Json');
         $this->ok();
         $this->contentType('application/json');
-        return Language::rewrite(json_encode($this->makePacket('ok'), JSON_UNESCAPED_UNICODE));
+        $c = json_encode($this->makePacket('ok'), JSON_UNESCAPED_UNICODE);
+        Language::rewrite($c);
+        return $c;
     }
 }
