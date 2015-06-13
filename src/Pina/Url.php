@@ -89,7 +89,7 @@ class Url
 
             $r[] = $parts[$i];
             $i++;
-            if ($i == $cnt - 1 && in_array($parts[$i], array('create'))) {
+            if ($i == $cnt - 1 && in_array($parts[$i], array('create', 'block'))) {
                 $a = $parts[$i];
                 break;
             }
