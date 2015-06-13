@@ -8,7 +8,6 @@ class Middleware
     private static $routes = array();
     private static $before = array();
     private static $after = array();
-    private static $finalize = array();
 
     public static function bind($resource, $target)
     {
@@ -46,8 +45,6 @@ class Middleware
             self::$after[] = $line;
         } elseif ($mode == 'before') {
             self::$before[] = $line;
-        } elseif ($mode == 'finalize') {
-            self::$finalize[] = $line;
         }
     }
 
@@ -60,25 +57,20 @@ class Middleware
     {
         self::shedule('before', $resource, $actions, $middleware);
     }
-    
-    public static function finalize($resource, $actions, $middleware)
-    {
-        self::shedule('finalize', $resource, $actions, $middleware);
-    }
 
-    public static function process($mode, $resource, $action, $data, $method, &$context)
+    public static function process($mode, $resource, $action, $data, $method)
     {
         $list = array();
         if ($mode == 'after') {
             $list = self::$after;
         } elseif ($mode == 'before') {
             $list = self::$before;
-        } elseif ($mode == 'finalize') {
-            $list = self::$finalize;
         }
 
-        if (empty($list)) return;
-        
+        if (empty($list)) {
+            return;
+        }
+
         $resource = Url::trim($resource);
         $matches = false;
         foreach (self::$routes as $route) {
@@ -93,13 +85,7 @@ class Middleware
             if ($line['preg'] == '*' || preg_match("/^" . $line['preg'] . "$/si", $resource, $matches)) {
 
                 if ($line["actions"] == "*" || (is_array($line['actions']) && in_array($action, $line['actions']))) {
-
-                    if ($mode == 'finalize') {
-                        $ps = array(&$context);
-                        call_user_func_array($line['middleware'], $ps);
-                    } else {
-                        $result = Request::middleware($line['middleware'], $method, $data);
-                    }
+                    $result = Request::middleware($line['middleware'], $method, $data);
                 }
             }
         }
@@ -107,19 +93,12 @@ class Middleware
 
     public static function processBefore($resource, $action, $data, $method)
     {
-        $c = false;
-        self::process('before', $resource, $action, $data, $method, $c);
+        self::process('before', $resource, $action, $data, $method);
     }
 
     public static function processAfter($resource, $action, $data, $method)
     {
-        $c = false;
-        self::process('after', $resource, $action, $data, $method, $c);
+        self::process('after', $resource, $action, $data, $method);
     }
-    
-    public static function processFinalize($resource, $action, $data, $method, &$c)
-    {
-        self::process('finalize', $resource, $action, $data, $method, $c);
-    }    
 
 }

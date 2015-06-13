@@ -309,7 +309,6 @@ class Request
         if ($isExternal)
         {
             Language::rewrite($r);
-            Middleware::processFinalize($resource, $action, self::$stack[$top], $method, $r);
         }
         return $r;
     }
