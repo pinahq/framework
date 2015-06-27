@@ -55,23 +55,27 @@ class SQL
         return $this;
     }
 
-    public function join($type, $table, $field, $table2, $field2)
+    public function join($type, $table, $field, $table2 = false, $field2 = false)
     {
-        $this->joins[$type][$table] = array($field => array($table2 => $field2));
+        if (!empty($table2) && !empty($field2)) {
+            $this->joins[$type][$table] = array($field => array($table2 => $field2));
+        } else if (is_array($field)) {
+            $this->joins[$type][$table] = $field;
+        }
         return $this;
     }
     
-    public function leftJoin($table, $field, $table2, $field2)
+    public function leftJoin($table, $field, $table2 = false, $field2 = false)
     {
         return $this->join('left', $table, $field, $table2, $field2);
     }
 
-    public function innerJoin($table, $field, $table2, $field2)
+    public function innerJoin($table, $field, $table2 = false, $field2 = false)
     {
         return $this->join('inner', $table, $field, $table2, $field2);
     }
     
-    public function rightJoin($table, $field, $table2, $field2)
+    public function rightJoin($table, $field, $table2 = false, $field2 = false)
     {
         return $this->join('right', $table, $field, $table2, $field2);
     }
