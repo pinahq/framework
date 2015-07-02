@@ -516,6 +516,8 @@ class SQL
 
     public function insert($data, $fields = false)
     {
+        if (empty($data) || !is_array($data) || count($data) == 0) return false;
+        
         if (!isset($data[0])) {
             $q = "INSERT INTO `" . $this->from . "` SET " . $this->getSetCondition($data, $fields);
             return $this->db->query($q);
@@ -546,6 +548,8 @@ class SQL
             }
             $sql .= "(" . $sql_line . ")";
         }
+        
+        if (empty($sql)) return false;
 
         $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $sql;
         return $this->db->query($sql);
@@ -559,9 +563,12 @@ class SQL
 
     public function put($data, $fields = false)
     {
+        $set = $this->getSetCondition($data, $fields);
+        if (empty($set)) return false;
+        
         $sql = "
-			INSERT INTO `" . $this->from . "` SET " . $this->getSetCondition($data, $fields) . "
-			ON DUPLICATE KEY UPDATE " . $this->getSetCondition($data, $fields) . "
+			INSERT INTO `" . $this->from . "` SET " . $set . "
+			ON DUPLICATE KEY UPDATE " . $set . "
 		";
         return $this->db->query($sql);
     }
@@ -574,15 +581,23 @@ class SQL
 
     public function update($data, $fields = false)
     {
-        $sql = "UPDATE `" . $this->from . "` SET ";
-        $sql .= $this->getSetCondition($data, $fields);
+        if (empty($data) || !is_array($data) || count($data) == 0) return false;
+
+        $set = $this->getSetCondition($data, $fields);
+        if (empty($set)) return false;
+
+
+        $sql = "UPDATE `" . $this->from . "` ";
+        $sql .= $this->getJoins();
+        $sql .= ' SET '.$set;
         $sql .= $this->getWhere();
         return $this->db->query($sql);
     }
 
     public function delete()
     {
-        $sql = "DELETE FROM " . $this->from;
+        $sql = "DELETE ".$this->table." FROM " . $this->from. ' ';
+        $sql .= $this->getJoins();
         $sql .= $this->getWhere();
         return $this->db->query($sql);
     }

@@ -103,13 +103,13 @@ class TableDataGateway extends SQL
     public function put($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
-        return parent::put($data, array_keys($this->fields));
+        return parent::put($data, $fields);
     }
     
     public function putGetId($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
-        return parent::putGetId($data, array_keys($this->fields));
+        return parent::putGetId($data, $fields);
     }
 
     public function update($data, $fields = false)
@@ -119,7 +119,7 @@ class TableDataGateway extends SQL
         }
         
         $this->adjustDataAndFields($data, $fields);
-        return parent::update($data, array_keys($this->fields));
+        return parent::update($data, $fields);
     }
 
     public function whereId($id)
