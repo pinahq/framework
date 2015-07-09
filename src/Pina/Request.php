@@ -222,6 +222,8 @@ class Request
 
     static public function isAvailable($resource, $method)
     {
+        if (App::env() == "cli") return true;
+        
         list($controller, $action) = Url::route($resource, $method);
         $module = Url::module($controller);
 
