@@ -57,8 +57,18 @@ class Access
                     unset($matches[0]);
                     $matches = array_values($matches);
                     $params = array_combine($line[self::ACCESS_FIELD_MAP], $matches);
-                    if (!empty($params['user_id']) && Auth::userId() == $params['user_id']) {
-                        $groupMatched = true;
+                    if (!empty($params['user_id'])) {
+                        if (empty(self::$config)) {
+                            self::$config = Config::load('access');
+                        }
+                        if (!empty(self::$config['auth'])) {
+                            $cl = self::$config['auth'];
+                            $cl::init();
+                            if ($cl::userId() == $params['user_id'])
+                            {
+                                $groupMatched = true;
+                            }
+                        }
                     }
                 }
 
