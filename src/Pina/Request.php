@@ -240,7 +240,6 @@ class Request
         if (is_file($path . "/default/Modules/" . $handler . ".php")) {
             include $path . "/default/Modules/" . $handler . ".php";
         } else {
-            self::$stack['handler'] = $handler;
             $handler = 'Core/frontend/errors/not-found';
             include $path . "/default/Modules/" . $handler . ".php";
         }
