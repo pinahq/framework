@@ -240,8 +240,7 @@ class Request
         if (is_file($path . "/default/Modules/" . $handler . ".php")) {
             include $path . "/default/Modules/" . $handler . ".php";
         } else {
-            $handler = 'Core/frontend/errors/not-found';
-            include $path . "/default/Modules/" . $handler . ".php";
+            self::notFound();
         }
     }
 
@@ -300,12 +299,14 @@ class Request
         if ($isExternal && self::$response->code == '404 Not Found') {
             list($controller, $action, $data) = Url::route('errors/not-found', 'get');
             $handler = Url::handler($controller, $action);
+            self::$response->result("error", self::$response->code);
         }
         
         
         if ($isExternal && self::$response->code == '403 Forbidden') {
             list($controller, $action, $data) = Url::route('errors/not-found', 'get');
             $handler = Url::handler($controller, $action);
+            self::$response->result("error", self::$response->code);
         }
 
         $r = self::$response->fetch($handler, $isExternal);
