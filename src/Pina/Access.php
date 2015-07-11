@@ -33,7 +33,8 @@ class Access
     {
         $resource = Url::trim($resource);
         foreach (self::$data as $line) {
-            if (preg_match("/^" . $line[self::ACCESS_FIELD_PREG] . "$/si", $resource, $matches)) {
+            $preg = $line[self::ACCESS_FIELD_PREG]."\/";
+            if (preg_match("/^" . $preg . "/si", $resource."/", $matches)) {
                 if ($line[self::ACCESS_FIELD_ACTIONS] == "*") {
                     return true;
                 }
@@ -49,7 +50,8 @@ class Access
     {
         $resource = Url::trim($resource);
         foreach (self::$data as $line) {
-            if (preg_match("/^" . $line[self::ACCESS_FIELD_PREG] . "$/si", $resource, $matches)) {
+            $preg = $line[self::ACCESS_FIELD_PREG]."\/";
+            if (preg_match("/^" . $preg. "/si", $resource."/", $matches)) {
                 $groupMatched = false;
                 if (in_array($group, $line[self::ACCESS_FIELD_GROUPS])) {
                     $groupMatched = true;
