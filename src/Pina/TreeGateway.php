@@ -33,9 +33,13 @@ class TreeGateway extends TableDataGateway
 
     public function findParents($id, $level = 0)
     {
-        $id = intval($id);
-        if ($id == 0) {
-            return false;
+        if(is_array($id)) {
+            $id = array_map('intval', $id);
+        } else {
+            $id = intval($id);
+            if ($id == 0) {
+                return false;
+            }
         }
 
         return $this
@@ -46,9 +50,13 @@ class TreeGateway extends TableDataGateway
 
     public function findChilds($id, $level = 0)
     {
-        $id = intval($id);
-        if ($id == 0) {
-            return false;
+        if(is_array($id)) {
+            $id = array_map('intval', $id);
+        } else {
+            $id = intval($id);
+            if ($id == 0) {
+                return false;
+            }
         }
 
         return $this->whereBy($this->treeFields['parent'], $id)
