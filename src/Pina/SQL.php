@@ -210,9 +210,9 @@ class SQL
                     $op = '=';
 
                     if (is_array($val) &&
-                        !empty($val[0]) &&
-                        !empty($val[1]) &&
-                        in_array($val[0], array('!=', '=', '>', '<', '<>'))
+                            !empty($val[0]) &&
+                            !empty($val[1]) &&
+                            in_array($val[0], array('!=', '=', '>', '<', '<>'))
                     ) {
                         $op = $val[0];
                         $val = $val[1];
@@ -515,7 +515,9 @@ class SQL
 
     public function insert($data, $fields = false)
     {
-        if (empty($data) || !is_array($data) || count($data) == 0) return false;
+        if (empty($data) || !is_array($data) || count($data) == 0) {
+            return false;
+        }
 
         if (!is_array(reset($data))) {
             $q = "INSERT INTO `" . $this->from . "` SET " . $this->getSetCondition($data, $fields);
@@ -548,7 +550,9 @@ class SQL
             $sql .= "(" . $sql_line . ")";
         }
 
-        if (empty($sql)) return false;
+        if (empty($sql)) {
+            return false;
+        }
 
         $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $sql;
         return $this->db->query($sql);
@@ -563,7 +567,9 @@ class SQL
     public function put($data, $fields = false)
     {
         $set = $this->getSetCondition($data, $fields);
-        if (empty($set)) return false;
+        if (empty($set)) {
+            return false;
+        }
 
         $sql = "
 			INSERT INTO `" . $this->from . "` SET " . $set . "
@@ -580,10 +586,14 @@ class SQL
 
     public function update($data, $fields = false)
     {
-        if (empty($data) || !is_array($data) || count($data) == 0) return false;
+        if (empty($data) || !is_array($data) || count($data) == 0) {
+            return false;
+        }
 
         $set = $this->getSetCondition($data, $fields);
-        if (empty($set)) return false;
+        if (empty($set)) {
+            return false;
+        }
 
 
         $sql = "UPDATE `" . $this->from . "` ";
