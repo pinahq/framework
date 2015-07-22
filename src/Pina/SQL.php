@@ -3,11 +3,10 @@
 namespace Pina;
 
 /*
- * TODO: 
+ * TODO:
  * 1) добавить возможность использовать подзапросы в select/from/where
  * 2) для Join возможность использовать and/or в условии соединения
  */
-
 
 class SQL
 {
@@ -28,7 +27,7 @@ class SQL
     {
         return new SQL($table, $db);
     }
-    
+
     public function init()
     {
         $this->select = array();
@@ -64,7 +63,7 @@ class SQL
         }
         return $this;
     }
-    
+
     public function leftJoin($table, $field, $table2 = false, $field2 = false)
     {
         return $this->join('left', $table, $field, $table2, $field2);
@@ -74,12 +73,12 @@ class SQL
     {
         return $this->join('inner', $table, $field, $table2, $field2);
     }
-    
+
     public function rightJoin($table, $field, $table2 = false, $field2 = false)
     {
         return $this->join('right', $table, $field, $table2, $field2);
     }
-    
+
     public function where($condition)
     {
         $this->where[] = $condition;
@@ -90,7 +89,7 @@ class SQL
     {
         return $this->where($this->getByCondition($field, $needle));
     }
-    
+
     public function whereNotBy($field, $needle)
     {
         return $this->where($this->getByCondition($field, $needle, true));
@@ -107,7 +106,7 @@ class SQL
         $this->having[] = $having;
         return $this;
     }
-    
+
     public function union($sql)
     {
         $this->unions[] = $sql;
@@ -140,20 +139,20 @@ class SQL
     public function paging(&$paging)
     {
         $paging->setTotal($this->count());
-        
+
         $limitStart = intval($paging->getStart());
         $limitCount = intval($paging->getCount());
         $this->limit($limitStart, $limitCount);
-        
+
         return $this;
     }
 
     protected function extractTableLink($table)
     {
-        if(strpos($table, 'AS') !== false) {
+        if (strpos($table, 'AS') !== false) {
             return substr($table, strpos($table, 'AS') + 3);
         }
-        
+
         if (strpos($table, " ") > 0) {
             return strstr($table, " ");
         }
@@ -230,7 +229,7 @@ class SQL
 
                         $on .= $keys[0] . '.' . $vals[0];
                     } else {
-                        $on .= "'".$val."'";
+                        $on .= "'" . $val . "'";
                     }
 
                     $ons[] = $on;
@@ -279,19 +278,19 @@ class SQL
         }
         return $sql;
     }
-    
+
     public function getUnions()
     {
         if (empty($this->unions)) {
             return '';
         }
-        
+
         $sql = '';
         foreach ($this->unions as $union) {
             $sql .= ' UNION ';
             $sql .= $union->make();
         }
-        
+
         return $sql;
     }
 
@@ -325,7 +324,7 @@ class SQL
 
         return join($flds);
     }
-    
+
     public function make()
     {
         $sql = 'SELECT ';
@@ -340,12 +339,12 @@ class SQL
         $sql .= $this->getHaving();
         $sql .= $this->getOrderBy();
         $sql .= $this->getLimit();
-        
+
         $sql .= $this->getUnions();
-        
+
         return $sql;
     }
-    
+
     public function debug()
     {
         echo $this->make();
@@ -361,30 +360,30 @@ class SQL
             echo '</pre>';
             exit;
         }
-        
+
         if ($this->from == '') {
             return '';
         }
-        
+
         return $this->db->table($this->make());
     }
 
     public function first()
     {
         $this->limit(1);
-        
+
         return $this->db->row($this->make());
     }
-    
+
     public function value($name, $useLimit = true)
     {
         if ($useLimit) {
             $this->limit(1);
         }
-        
+
         return $this->db->one($this->select($name)->make());
     }
-    
+
     public function column($name)
     {
         return $this->db->col($this->select($name)->make());
@@ -412,43 +411,43 @@ class SQL
 
         return $this->db->one($sql);
     }
-    
+
     private function aggregate($func, $what)
     {
         if ($this->from == '') {
             return '';
         }
 
-        $sql = 'SELECT '.$func.'('.$what.')';
+        $sql = 'SELECT ' . $func . '(' . $what . ')';
         $sql .= ' FROM ' . $this->from;
 
         $sql .= $this->getJoins();
         $sql .= $this->getWhere();
         $sql .= $this->getGroupBy();
-        
+
         return $this->db->one($sql);
     }
-    
+
     public function max($what)
     {
         return $this->aggregate('max', $what);
     }
-    
+
     public function min($what)
     {
         return $this->aggregate('min', $what);
     }
-    
+
     public function avg($what)
     {
         return $this->aggregate('avg', $what);
     }
-    
+
     public function sum($what)
     {
         return $this->aggregate('sum', $what);
     }
-    
+
     public function exists()
     {
         return $this->limit(1)->count();
@@ -474,7 +473,7 @@ class SQL
         if ($first) {
             return false;
         }
-        
+
         return $result;
     }
 
@@ -482,7 +481,7 @@ class SQL
     {
         $field = $this->db->escape($field);
 
-        $cond = $this->from.".".$field;
+        $cond = $this->from . "." . $field;
 
         if (is_array($needle)) {
             if ($reverseCond) {
@@ -517,13 +516,13 @@ class SQL
     public function insert($data, $fields = false)
     {
         if (empty($data) || !is_array($data) || count($data) == 0) return false;
-        
-        if (!isset($data[0])) {
+
+        if (!is_array(reset($data))) {
             $q = "INSERT INTO `" . $this->from . "` SET " . $this->getSetCondition($data, $fields);
             return $this->db->query($q);
         }
 
-        $keys = array_keys($data[0]);
+        $keys = array_keys(current($data));
 
         if (is_array($fields)) {
             $keys = array_intersect($keys, $fields);
@@ -548,13 +547,13 @@ class SQL
             }
             $sql .= "(" . $sql_line . ")";
         }
-        
+
         if (empty($sql)) return false;
 
         $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $sql;
         return $this->db->query($sql);
     }
-    
+
     public function insertGetId($data, $fields = false)
     {
         $this->insert($data, $fields);
@@ -565,14 +564,14 @@ class SQL
     {
         $set = $this->getSetCondition($data, $fields);
         if (empty($set)) return false;
-        
+
         $sql = "
 			INSERT INTO `" . $this->from . "` SET " . $set . "
 			ON DUPLICATE KEY UPDATE " . $set . "
 		";
         return $this->db->query($sql);
     }
-    
+
     public function putGetId($data, $fields = false)
     {
         $this->put($data, $fields);
@@ -589,52 +588,51 @@ class SQL
 
         $sql = "UPDATE `" . $this->from . "` ";
         $sql .= $this->getJoins();
-        $sql .= ' SET '.$set;
+        $sql .= ' SET ' . $set;
         $sql .= $this->getWhere();
         return $this->db->query($sql);
     }
 
     public function delete()
     {
-        $sql = "DELETE ".$this->table." FROM " . $this->from. ' ';
+        $sql = "DELETE " . $this->table . " FROM " . $this->from . ' ';
         $sql .= $this->getJoins();
         $sql .= $this->getWhere();
         return $this->db->query($sql);
     }
-    
+
     public function truncate()
     {
         $sql = "TRUNCATE $this->from";
         return $this->db->query($sql);
     }
-    
+
     public function copyGetId($replaces = array())
     {
         $this->copy($replaces);
         return $this->db->insertId();
     }
-    
+
     public function copy($replaces = array())
     {
         $fields = array_diff(array_keys($this->fields), array($this->primaryKey));
-        
+
         $select = $fields;
-        foreach($select as $k => $selectField)
-        {
+        foreach ($select as $k => $selectField) {
             if (isset($replaces[$selectField])) {
                 $select[$k] = "'$replaces[$selectField]'";
             }
         }
-        
+
         $sql = "
-            INSERT INTO $this->table (". implode(",", $fields) .")
-            SELECT ". implode(",", $select) ."
+            INSERT INTO $this->table (" . implode(",", $fields) . ")
+            SELECT " . implode(",", $select) . "
         ";
-        
+
         $sql .= ' FROM ' . $this->from;
         $sql .= $this->getWhere();
-        
+
         return $this->db->query($sql);
     }
-    
+
 }
