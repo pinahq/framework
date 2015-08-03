@@ -6,5 +6,12 @@ function smarty_function_link($params, &$view)
         return '';
     }
         
-	return \Pina\App::link($params['get'], $params);
+	$link = \Pina\App::link($params['get'], $params);
+    
+    if (isset($params['assign'])) {
+        $smarty->assign($params['assign'], $link);
+        $link = '';
+    }
+    
+    return $link;
 }
