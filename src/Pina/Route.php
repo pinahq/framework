@@ -17,8 +17,18 @@ class Route
     public static function owner($controller)
     {
         $controller = trim($controller, "/");
+        if (!empty(self::$owners[$controller])) {
+            return self::$owners[$controller];
+        }
+        
         $parts = explode("/", $controller);
-        return isset(self::$owners[$parts[0]])?self::$owners[$parts[0]]:false;
+        for ($i = count($parts) - 2; $i >= 0; $i--) {
+            $c = implode("/", array_slice($parts, 0, $i+1));
+            if (isset(self::$owners[$c])) {
+                return self::$owners[$c];
+            }
+        }
+        return false;
     }
 
     public static function bind($from, $to)
