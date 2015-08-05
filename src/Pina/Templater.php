@@ -117,13 +117,13 @@ class Templater extends \Smarty
 
         $vars_backup = $view->_tpl_vars;
 
+        $ps = array();
         foreach ($params as $k => $v) {
-            if (empty($v)) {
-                continue;
-            }
-            $params['get'] = str_replace(":" . $k . "/", $v . "/", $params['get']);
+            $ps[':'.$k] = $v;
         }
-        
+
+        $params['get'] = strtr($params['get'], $ps);
+
         $result = Request::internal($params['get'], 'get', $params);
 
         if (is_array($request->error_messages) && count($request->error_messages)) {
