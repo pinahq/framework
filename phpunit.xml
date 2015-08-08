@@ -11,6 +11,7 @@
     <testsuites>
         <testsuite name="Auth">
             <file>tests/Url.php</file>
+            <file>tests/Route.php</file>
         </testsuite>
     </testsuites>
     <php>
