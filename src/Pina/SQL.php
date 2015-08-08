@@ -95,7 +95,7 @@ class SQL
         return $this->where($this->getByCondition($field, $needle, true));
     }
     
-    public function whereByParams($ps)
+    public function whereFields($ps)
     {
         if (!is_array($ps)) {
             return;
