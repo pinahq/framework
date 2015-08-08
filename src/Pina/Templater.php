@@ -70,6 +70,7 @@ class Templater extends \Smarty
             return '';
         }
         
+        $params['get'] = Url::resource($params['get'], $params);
         $params['get'] = Route::route($params['get'], $params);
 
         if (!Request::isAvailable($params['get'], 'get')) {
@@ -77,7 +78,7 @@ class Templater extends \Smarty
         }
 
         $vars_backup = $view->_tpl_vars;
-
+        
         if (is_array($params)) {
             foreach ($params as $name => $value) {
                 $view->assign($name, $value);
@@ -85,6 +86,7 @@ class Templater extends \Smarty
         }
 
         list($controller, $action, $data) = Url::route($params['get'], 'get');
+        $params = array_merge($params, $data);
         $handler = Url::handler($controller, $action);
 
         if (empty($handler)) {
@@ -94,7 +96,8 @@ class Templater extends \Smarty
         if (!empty($params['display'])) {
             $handler .= '.' . $params['display'];
         }
-
+        
+        $view->assign('params', $params);
         $result = $view->fetch('Modules/' . $handler . '.tpl');
 
         $view->_tpl_vars = $vars_backup;
@@ -116,14 +119,8 @@ class Templater extends \Smarty
         }
 
         $vars_backup = $view->_tpl_vars;
-
-        $ps = array();
-        foreach ($params as $k => $v) {
-            $ps[':'.$k] = $v;
-        }
-
-        $params['get'] = strtr($params['get'], $ps);
-
+        
+        $params['get'] = Url::resource($params['get'], $params);
         $result = Request::internal($params['get'], 'get', $params);
 
         if (is_array($request->error_messages) && count($request->error_messages)) {
