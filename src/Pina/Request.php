@@ -9,9 +9,6 @@ class Request
     static public $stack = array();
     static public $top = -1;
 
-    static public $resource = '';
-    static public $method = '';
-
     static public function init($response, $data = array())
     {
         self::$response = $response;
@@ -64,7 +61,11 @@ class Request
             return;
         }
         
-        $resource = Url::trim(self::$resource);
+        if (empty(self::$stack[$top]['__resource'])) {
+            return;
+        }
+        
+        $resource = Url::trim(self::$stack[$top]['__resource']);
         $pattern = Url::trim($pattern);
         $parsed = Url::parse($resource, $pattern);
         foreach ($parsed as $k => $v) {
@@ -285,8 +286,7 @@ class Request
             return;
         }
         
-        self::$resource = $resource;
-        self::$method = $method;
+        self::$stack[$top]["__resource"] = $resource;
 
         $isExternal = $top == 0;
 
