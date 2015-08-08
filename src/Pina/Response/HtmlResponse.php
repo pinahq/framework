@@ -23,7 +23,14 @@ class HtmlResponse extends Response
 
     public function fail()
     {
-        throw new \Exception(join("\n", $this->error_messages));
+        $message = '';
+        foreach ($this->messages as $k => $v) {
+            $message .= $v[1]."\r\n";
+        }
+        
+        echo '<html><head><meta charset="'.App::charset().'" /></head><body>'.$message.'</body></html>';
+        $this->badRequest();
+        exit;
     }
 
     public function result($name, $value)
