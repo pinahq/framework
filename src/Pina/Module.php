@@ -9,7 +9,7 @@ class Module
     private static $default_modules = array();
 
     public static function init()
-    {
+    {        
         $config = Config::load('modules');
         self::$default_modules = $config['default'];
         
@@ -29,7 +29,8 @@ class Module
         self::$enabled_modules = array_merge(self::$default_modules, $enabled_modules);
         
         $app = App::get();
-
+        
+        Access::reset();
         foreach (self::$enabled_modules as $v) {
             $path = App::path() .'/default/Modules/'. $v . '/' . $app . '/init.php';
             if (is_file($path)) {

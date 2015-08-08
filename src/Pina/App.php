@@ -151,7 +151,7 @@ class App
     
     public static function link($pattern, $params = array())
     {
-        $resource = Url::resource($pattern, $params);
+        $resource = Route::resource($pattern, $params);
         unset($params['get']);
         $ps = '';
         foreach ($params as $k => $v)

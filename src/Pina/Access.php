@@ -12,6 +12,15 @@ class Access
     const ACCESS_FIELD_MAP = 1;
     const ACCESS_FIELD_ACTIONS = 2;
     const ACCESS_FIELD_GROUPS = 3;
+    
+    public static function reset()
+    {
+        if (App::env() !== "test") {
+            return;
+        }
+        
+        self::$data = array();
+    }
 
     public static function permit($pattern, $actions, $groups = array())
     {

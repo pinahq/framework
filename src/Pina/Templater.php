@@ -70,8 +70,7 @@ class Templater extends \Smarty
             return '';
         }
         
-        $params['get'] = Url::resource($params['get'], $params);
-        $params['get'] = Route::route($params['get'], $params);
+        $params['get'] = Route::resource($params['get'], $params);
 
         if (!Request::isAvailable($params['get'], 'get')) {
             return;
@@ -120,7 +119,7 @@ class Templater extends \Smarty
 
         $vars_backup = $view->_tpl_vars;
         
-        $params['get'] = Url::resource($params['get'], $params);
+        $params['get'] = Route::resource($params['get'], $params);
         $result = Request::internal($params['get'], 'get', $params);
 
         if (is_array($request->error_messages) && count($request->error_messages)) {

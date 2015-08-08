@@ -109,7 +109,7 @@ class Core
         static $data = false;
 
         if (!empty($pattern)) {
-            $data = Url::resource($pattern, $params);   
+            $data = Route::resource($pattern, $params);   
         }
         
         if (empty($data)) {

@@ -290,7 +290,6 @@ class Request
 
         $isExternal = $top == 0;
 
-        $resource = Route::route($resource, self::$stack[$top]);
         if (!self::isAvailable($resource, $method)) {
             if ($isExternal) {
                 $resource = 'errors/access-denied';

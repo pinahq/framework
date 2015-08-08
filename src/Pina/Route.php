@@ -5,8 +5,8 @@ namespace Pina;
 class Route
 {
 
-    private static $routes = array();
     private static $owners = array();
+    private static $context = array();
 
     public static function own($controller, $module)
     {
@@ -30,30 +30,22 @@ class Route
         }
         return false;
     }
-
-    public static function bind($from, $to)
+    
+    public static function context($key = null, $value = null)
     {
-        list($preg, $map) = Url::preg($from);
-        self::$routes[$preg] = array($to, $map);
-    }
-
-    public static function route($resource, &$data)
-    {
-        $resource = Url::trim($resource);
-
-        foreach (self::$routes as $k => $v) {
-            if (preg_match("/^" . $k . "$/si", $resource, $matches)) {
-                unset($matches[0]);
-                $matches = array_values($matches);
-                $params = array_combine($v[1], $matches);
-                foreach ($params as $kk => $vv) {
-                    $v[0] = trim(str_replace(':' . $kk . '/', $vv . '/', $v[0] . '/'), '/');
-                }
-                $data = Arr::merge($data, $params);
-                return $v[0];
-            }
+        if ($key === null) {
+            return self::$context;
         }
-        return $resource;
+        if ($value === null) {
+            return isset(self::$content[$key])?self::$content[$key]:false;
+        }
+        self::$context[$key] = $value;
+    }
+    
+    public static function resource($pattern, $parsed)
+    {
+        $parsed = Arr::merge(self::$context, $parsed);
+        return Url::resource($pattern, $parsed);
     }
 
 }
