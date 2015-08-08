@@ -9,6 +9,9 @@ class Request
     static public $stack = array();
     static public $top = -1;
 
+    static public $resource = '';
+    static public $method = '';
+
     static public function init($response, $data = array())
     {
         self::$response = $response;
@@ -52,6 +55,21 @@ class Request
         }
 
         self::$stack[$top][$name] = $value;
+    }
+    
+    static public function match($pattern)
+    {
+        $top = count(self::$stack) - 1;
+        if ($top < 0) {
+            return;
+        }
+        
+        $resource = Url::trim(self::$resource);
+        $pattern = Url::trim($pattern);
+        $parsed = Url::parse($resource, $pattern);
+        foreach ($parsed as $k => $v) {
+            self::set($k, $v);
+        }
     }
 
     // выполнение контроллера сопровождается предупреждением
@@ -266,6 +284,9 @@ class Request
         if ($top < 0) {
             return;
         }
+        
+        self::$resource = $resource;
+        self::$method = $method;
 
         $isExternal = $top == 0;
 
