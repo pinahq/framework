@@ -2,6 +2,7 @@
 
 use Pina\App;
 use Pina\Composer;
+use Pina\Route;
 
 function smarty_function_form($ps, &$view)
 {
@@ -16,12 +17,7 @@ function smarty_function_form($ps, &$view)
     
 
     $add = '';
-    if (!empty($ps["action"]) && strpos($ps['action'], '/:') !== false) {
-        foreach ($ps as $k => $p) {
-            $ps["action"] = str_replace(':' . $k, $p, $ps["action"]);
-        }
-    }
-    
+    $ps['action'] = Route::resource($ps['action'], $ps);
     $resource = $ps['action'];
     
     if (!empty($ps['action']) && !empty($ps['method'])) {
