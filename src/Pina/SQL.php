@@ -94,6 +94,18 @@ class SQL
     {
         return $this->where($this->getByCondition($field, $needle, true));
     }
+    
+    public function whereByParams($ps)
+    {
+        if (!is_array($ps)) {
+            return;
+        }
+        
+        foreach ($ps as $k => $v) {
+            $this->whereBy($k, $v);
+        }
+        return $this;
+    }
 
     public function groupBy($table, $field)
     {
