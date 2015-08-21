@@ -136,7 +136,7 @@ class Request
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
-            return array();
+            return '';
         }
         
         if (!empty(self::$stack[$top]['__raw'])) {
