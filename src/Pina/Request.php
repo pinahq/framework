@@ -9,11 +9,16 @@ class Request
     static public $stack = array();
     static public $top = -1;
 
-    static public function init($response, $data = array())
+    static public function init($response, $data)
     {
         self::$response = $response;
         self::$stack = array();
-        array_push(self::$stack, $data);
+        
+        if (is_array($data)) {
+            array_push(self::$stack, $data);
+        } else {
+            array_push(self::$stack, array('__raw' => $data));
+        }
     }
 
     static public function internal($resource, $method, $data = array())
@@ -125,6 +130,20 @@ class Request
             }
         }
         return $res;
+    }
+
+    public static function raw() 
+    {
+        $top = count(self::$stack) - 1;
+        if ($top < 0) {
+            return array();
+        }
+        
+        if (!empty(self::$stack[$top]['__raw'])) {
+            return self::$stack[$top]['__raw'];
+        }
+        
+        return file_get_contents('php://input');
     }
 
     static public function filterSub($fs, &$data)
