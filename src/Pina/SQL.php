@@ -637,4 +637,18 @@ class SQL
         return $this->db->query($sql);
     }
     
+    public function startTransaction()
+    {
+        return $this->db->query("START TRANSACTION");
+    }
+
+    public function commit()
+    {
+        return $this->db->query("COMMIT");
+    }
+
+    public function rollback()
+    {
+        return $this->db->query("ROLLBACK");
+    }    
 }
