@@ -41,9 +41,11 @@ class Core
         if ($_SERVER["REQUEST_METHOD"] == 'GET') {
             $data = $_GET;
         } elseif ($_SERVER["REQUEST_METHOD"] == 'POST') {
+            $data['__raw'] = file_get_contents('php://input');
             $data = $_POST;
         } else {
             $putdata = file_get_contents('php://input');
+            $data['__raw'] = $putdata;
             $exploded = explode('&', $putdata);
 
             foreach ($exploded as $pair) {
