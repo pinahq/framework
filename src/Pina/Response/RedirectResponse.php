@@ -24,7 +24,11 @@ class RedirectResponse extends Response
     {
         $this->header('Pina-Response: Redirect');
         $this->contentType('text/html');
-        $this->location($_SERVER["HTTP_REFERER"]);
+        if (!empty($_SERVER["HTTP_REFERER"])) {
+            $this->location($_SERVER["HTTP_REFERER"]);
+        } else {
+            $this->location('/');
+        }
     }
     
     /* 
