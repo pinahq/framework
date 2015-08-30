@@ -7,7 +7,11 @@ class RedirectResponse extends Response
 
     public function fail()
     {
-        $this->location($_SERVER["HTTP_REFERER"]);
+        if (!empty($_SERVER["HTTP_REFERER"])) {
+            $this->location($_SERVER["HTTP_REFERER"]);
+        } else {
+            $this->location('/');
+        }
         exit;
     }
 
