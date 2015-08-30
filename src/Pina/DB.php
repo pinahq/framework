@@ -30,7 +30,6 @@ class DB
 
         if (empty($rc) || !in_array(mysql_errno($rc), array(0, 1146))) {
             if (empty($configDB[$alias]['base'])) {
-                header("Location: install.php");
                 exit;
             }
             Log::error('mysql', mysql_error());
@@ -40,7 +39,6 @@ class DB
         mysql_select_db($configDB[$alias]['base'], $rc);
         if (empty($rc) || mysql_errno($rc)) {
             if (empty($configDB[$alias]['base'])) {
-                redirect("install.php");
                 exit;
             }
             die('db access error');
@@ -221,7 +219,7 @@ class DB
         echo '</div>';
         flush();
         
-        Log::error('mysql', $errno . ': '.$error);
+        Log::error('mysql', $errno . ': '.$error.'; '.$sql);
     }
 
     public function errno()
