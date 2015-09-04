@@ -493,7 +493,7 @@ class SQL
     {
         $field = $this->db->escape($field);
 
-        $cond = $this->from . "." . $field;
+        $cond = strpos($field, '.')===false?($this->from . "." . $field):$field;
 
         if (is_array($needle)) {
             if ($reverseCond) {
