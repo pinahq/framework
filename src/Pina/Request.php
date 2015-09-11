@@ -239,7 +239,7 @@ class Request
         $fs = explode(' ', $clean_functions);
         foreach (self::$stack[$top] as $k => $v) {
             if (is_array(self::$stack[$top][$k])) {
-                $this->filterSub($fs, self::$stack[$top][$k]);
+                self::filterSub($fs, self::$stack[$top][$k]);
                 continue;
             }
 
