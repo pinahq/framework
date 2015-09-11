@@ -2,6 +2,13 @@
 
 namespace Pina;
 
+/*
+ * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах 
+ * и базовые методы, наследуется от конструктора запросов
+ * 
+ * @author Alex Yashin
+ * @copyright 2015
+ */
 class TableDataGateway extends SQL
 {
 
@@ -44,6 +51,16 @@ class TableDataGateway extends SQL
         if ($this->useAccountId) {
             $this->whereBy('account_id', $this->accountId);
         }
+    }
+    
+    /*
+     * Возвращает экземпляр конкретного класса
+     * @return TableDataGateway
+     */
+    static public function instance()
+    {
+        $cl = get_called_class();
+        return new $cl();
     }
     
     public function find($id)

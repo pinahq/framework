@@ -97,7 +97,7 @@ class Templater extends \Smarty
         }
         
         $view->assign('params', $params);
-        $result = $view->fetch('Modules/' . $handler . '.tpl');
+        $result = $view->fetch('file:' . $handler . '.tpl');
 
         $view->_tpl_vars = $vars_backup;
 

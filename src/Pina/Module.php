@@ -7,6 +7,7 @@ class Module
 
     private static $enabled_modules = array();
     private static $default_modules = array();
+    private static $paths = array();
 
     public static function init()
     {        
@@ -31,18 +32,41 @@ class Module
         $app = App::get();
         
         Access::reset();
+        self::$paths = array();
         foreach (self::$enabled_modules as $v) {
-            $path = App::path() .'/default/Modules/'. $v . '/' . $app . '/init.php';
+            
+            $cl = 'Pina\\Modules\\'.$v.'\\'.$v.'Module';
+            $path = '';
+            if (class_exists($cl)) {
+                $c = new $cl;
+                $path = $c->path();
+            } else {
+                $path = App::path() .'/default/Modules/'. $v;
+            }
+            self::$paths[$v] = $path;            
+        }
+        
+        foreach (self::$paths as $base) {
+            $path = $base.'/'.$app.'/init.php';
             if (is_file($path)) {
                 include_once $path;
             }
         }
-
+        
     }
 
     public static function isActive($module)
     {
         return in_array($module, self::$enabled_modules);
+    }
+    
+    public static function path($module)
+    {
+        if (!isset(self::$paths[$module])) {
+            return false;
+        }
+        
+        return self::$paths[$module];
     }
     
     public static function paths($postfix)

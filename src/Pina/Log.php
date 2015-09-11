@@ -62,7 +62,6 @@ class Log
     public static function warning($name, $message)
     {
         $logger = self::get($name);
-        print_r($logger);
         $logger->addWarning($message);
     }
 

@@ -52,7 +52,7 @@ class HtmlResponse extends Response
         $app = App::get();
 
         $this->view->assign('params', \Pina\Request::params());
-        $t = $this->view->fetch('Modules/' . $handler . '.tpl');
+        $t = $this->view->fetch('file:' . $handler . '.tpl');
         if ($first) {
             $this->view->assign("content", $t);
             ResourceManager::mode('layout');

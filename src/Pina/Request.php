@@ -275,8 +275,8 @@ class Request
     static private function runHandler($handler)
     {
         $path = App::path();
-        if (is_file($path . "/default/Modules/" . $handler . ".php")) {
-            include $path . "/default/Modules/" . $handler . ".php";
+        if (is_file($handler . ".php")) {
+            include $handler . ".php";
         } else {
             self::notFound();
         }
@@ -285,12 +285,12 @@ class Request
     static private function runInternalHandler($handler)
     {
         $path = App::path();
-        if (!is_file($path . "/default/Modules/" . $handler . ".php")) {
+        if (!is_file($handler . ".php")) {
             return false;
         }
 
         try {
-            include $path . "/default/Modules/" . $handler . ".php";
+            include $handler . ".php";
         } catch (Exception $e) {
             echo $e->getMessage();
             return false;
