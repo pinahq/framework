@@ -70,6 +70,21 @@ class Arr
 
         return $result;
     }
+    
+    public static function groupColumn($data, $key, $column)
+    {
+        $result = array();
+
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                $k = $d[$key];
+                unset($d[$key]);
+                $result[$k][] = $d[$column];
+            }
+        }
+
+        return $result;
+    }
 
     public static function mine($subject, $a)
     {
