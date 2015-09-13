@@ -4,7 +4,7 @@ namespace Pina;
 
 class App
 {
-    
+
     private static $app = false;
     private static $config = false;
 
@@ -12,25 +12,24 @@ class App
     {
         return self::$config['apps'];
     }
-    
+
     public static function init($env, $configPath)
     {
         self::env($env);
-        
+
         Config::initPath($configPath);
         self::$config = Config::load('app');
-        
+
         Language::init();
-        
+
         mb_internal_encoding(self::$config['charset']);
         mb_regex_encoding(self::$config['charset']);
 
         if (function_exists('date_default_timezone_set')) {
             date_default_timezone_set(self::$config['timezone']);
         }
-
     }
-    
+
     public static function run()
     {
         if (!Site::init(!empty($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : '')) {
@@ -72,9 +71,9 @@ class App
         Request::init($response, $data);
         echo Request::run($resource, $method);
     }
-    
+
     public static function path()
-    {        
+    {
         return self::$config['path'];
     }
 
@@ -82,22 +81,21 @@ class App
     {
         return self::$config['uploads'];
     }
-    
+
     public static function charset()
     {
         return self::$config['charset'];
     }
-    
+
     public static function templaterCache()
     {
         return self::$config['templater']['cache'];
     }
-    
+
     public static function templaterCompiled()
     {
         return self::$config['templater']['compiled'];
     }
-
 
     public static function env($env = '')
     {
@@ -116,7 +114,7 @@ class App
             self::$app = $app;
         }
     }
-    
+
     public static function get()
     {
         return self::$app;
@@ -133,7 +131,7 @@ class App
         }
         return 'frontend';
     }
-    
+
     public static function canUseResources()
     {
         if (empty($_SERVER['REQUEST_URI'])) {
@@ -142,52 +140,66 @@ class App
 
         $useResources = false;
         if (!empty($_SERVER['DOCUMENT_URI'])) {
-            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['DOCUMENT_URI']) !== 0;   
+            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['DOCUMENT_URI']) !== 0;
         } else {
             $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0;
         }
         return $useResources;
     }
-    
-    public static function link($pattern, $params = array())
+
+    public static function getParamsString($pattern, $params)
     {
-        $resource = Route::resource($pattern, $params);
-        unset($params['get']);
-        $ps = '';
-        foreach ($params as $k => $v)
-        {
-            if (strpos($pattern.'/', ':'.$k.'/') === false) {
+        $systemParamKeys = array('get', 'app', 'anchor');
+
+        $r = '';
+        foreach ($params as $k => $v) {
+            if (strpos($pattern . '/', ':' . $k . '/') === false && !in_array($k, $systemParamKeys)) {
                 if (!empty($ps)) {
-                    $ps .= '&';
+                    $r .= '&';
                 }
-                $ps .= $k.'='.$v;
+                $r .= $k . '=' . $v;
             }
         }
 
+        return $r;
+    }
+
+    public static function getLinkPrefix($params)
+    {
         $prefix = '';
-        $app = !empty($params['app'])?$params['app']:self::get();
-        if (!empty(self::$config['apps'][$app])) $prefix = self::$config['apps'][$app]."/";
-        
+        $app = !empty($params['app']) ? $params['app'] : self::get();
+        if (!empty(self::$config['apps'][$app])) {
+            $prefix = self::$config['apps'][$app] . "/";
+        }
+        return $prefix;
+    }
+
+    public static function link($pattern, $params = array())
+    {
         $useResources = self::canUseResources();
-        
         $url = '';
         if (!$useResources) {
             $url .= '/pina.php?get=';
         } else {
             $url .= '/';
         }
-        $url .= $prefix.ltrim($resource, '/');
+
+        $resource = Route::resource($pattern, $params);
+        $prefix = self::getLinkPrefix($params);
+        $ps = self::getParamsString($pattern, $params);
+
+        $url .= $prefix . ltrim($resource, '/');
         if (!$useResources) {
-            $url .= !empty($ps)?('&'.$ps):'';
+            $url .=!empty($ps) ? ('&' . $ps) : '';
         } else {
-            $url .= !empty($ps)?('?'.$ps):'';
+            $url .=!empty($ps) ? ('?' . $ps) : '';
         }
+
         if (!empty($params['anchor'])) {
             $url .= "#" . $params["anchor"];
         }
 
         return $url;
     }
-    
 
 }
