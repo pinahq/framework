@@ -107,8 +107,12 @@ class SQL
         return $this;
     }
 
-    public function groupBy($table, $field)
+    public function groupBy($table, $field = false)
     {
+        if (empty($field)) {
+            $this->groupBy[] = $table;
+            return $this;
+        }
         $this->groupBy[] = $table . '.' . $field;
         return $this;
     }
