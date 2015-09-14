@@ -154,7 +154,7 @@ class App
         $r = '';
         foreach ($params as $k => $v) {
             if (strpos($pattern . '/', ':' . $k . '/') === false && !in_array($k, $systemParamKeys)) {
-                if (!empty($ps)) {
+                if (!empty($r)) {
                     $r .= '&';
                 }
                 $r .= $k . '=' . $v;
