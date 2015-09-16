@@ -142,8 +142,7 @@ class Url
     static public function module($controller)
     {
         $controller = trim($controller, "/");
-        $parts = explode("/", $controller);
-        return Route::owner($parts[0]);
+        return Route::owner($controller);
     }
 
     static public function parse($resource, $pattern)
