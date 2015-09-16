@@ -37,7 +37,7 @@ class Route
             return self::$context;
         }
         if ($value === null) {
-            return isset(self::$content[$key])?self::$content[$key]:false;
+            return isset(self::$context[$key])?self::$context[$key]:false;
         }
         self::$context[$key] = $value;
     }
