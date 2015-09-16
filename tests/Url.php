@@ -95,26 +95,6 @@ class UrlTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider handlerProvider
-     */
-    public function testHandler($controller, $action, $expected)
-    {
-        App::set('backend');
-
-        $route = Url::handler($controller, $action);
-        $this->assertEquals($expected, $route);
-    }
-
-    public function handlerProvider()
-    {
-        Route::own('/menus', 'Menus');
-        return array(
-            array('menus/items', 'show', 'Menus/backend/menus/items/show'),
-            array('menus/', 'show', 'Menus/backend/menus/show'),
-        );
-    }
-
-    /**
      * @dataProvider moduleProvider
      */
     public function testModule($controller, $expected)
