@@ -10,6 +10,7 @@
          syntaxCheck="false">
     <testsuites>
         <testsuite name="Auth">
+            <file>tests/Access.php</file>
             <file>tests/Url.php</file>
             <file>tests/Route.php</file>
         </testsuite>
