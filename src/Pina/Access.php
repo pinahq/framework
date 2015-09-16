@@ -115,6 +115,8 @@ class Access
 
     public static function addGroup($group)
     {
+        if (empty($group)) return;
+
         self::$groups[] = $group;
     }
 
