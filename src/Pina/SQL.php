@@ -402,6 +402,7 @@ class SQL
 
     public function column($name)
     {
+        $this->select = array();
         return $this->db->col($this->select($name)->make());
     }
 
@@ -616,7 +617,8 @@ class SQL
         $sql .= $this->getJoins();
         $sql .= ' SET ' . $set;
         $sql .= $this->getWhere();
-        return $this->db->query($sql);
+        $this->db->query($sql);
+        return $this->db->affectedRows();
     }
 
     public function delete()
