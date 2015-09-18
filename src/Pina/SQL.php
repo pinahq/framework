@@ -87,12 +87,22 @@ class SQL
 
     public function whereBy($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle));
+        return $this->where($this->getByCondition($field, $needle, '='));
     }
 
     public function whereNotBy($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle, true));
+        return $this->where($this->getByCondition($field, $needle, '<>'));
+    }
+    
+    public function whereLike($field, $needle)
+    {
+        return $this->where($this->getByCondition($field, $needle, 'LIKE'));
+    }
+    
+    public function whereNotLike($field, $needle)
+    {
+        return $this->where($this->getByCondition($field, $needle, 'NOT LIKE'));
     }
     
     public function whereFields($ps)
@@ -493,42 +503,56 @@ class SQL
 
         return $result;
     }
-
-    public function getByCondition($field, $needle, $reverseCond = false)
+    
+    public function getByCondition($field, $needle, $operand = '=')
     {
         $field = $this->db->escape($field);
 
-        $cond = strpos($field, '.')===false?($this->from . "." . $field):$field;
+        $fieldCondition = strpos($field, '.')===false?($this->from . "." . $field):$field;
 
         if (is_array($needle)) {
-            if ($reverseCond) {
-                $cond .= " NOT IN (";
-            } else {
-                $cond .= " IN (";
+            switch ($operand) {
+                case '<>': return $fieldCondition . " NOT IN " . $this->getInCondition($needle);
+                case '=': return $fieldCondition . " IN " . $this->getInCondition($needle);
             }
-            $first = true;
-            if ($needle) {
-                foreach ($needle as $n) {
-                    if (!$first) {
-                        $cond .= ", ";
-                    }
-                    $cond .= "'" . $this->db->escape($n) . "'";
-                    $first = false;
+            
+            $condition = '';
+            foreach ($needle as $n) {
+                if (!empty($condition)) {
+                    $condition .= ' OR ';
                 }
-            } else {
-                $cond .= "''";
+                $condition .= $this->getByCondition($field, $n, $operand);
             }
-            $cond .= ")";
-        } else {
-            if ($reverseCond) {
-                $cond .= " <> '" . $this->db->escape($needle) . "'";
-            } else {
-                $cond .= " = '" . $this->db->escape($needle) . "'";
-            }
-        }
+            
+            return $condition;
 
-        return $cond;
+        } elseif (in_array($operand, array('<>', '=', 'LIKE', 'NOT LIKE'))) {
+            return $fieldCondition . ' ' . $operand . " '" . $this->db->escape($needle) . "'";
+        }
+        
+        return '';
     }
+    
+    public function getInCondition($needle)
+    {
+        $first = true;
+        $condition = '(';
+        if ($needle) {
+            foreach ($needle as $n) {
+                if (!$first) {
+                    $condition .= ",";
+                }
+                $condition .= "'" . $this->db->escape($n) . "'";
+                $first = false;
+            }
+        } else {
+            $condition .= "''";
+        }
+        $condition .= ")";
+        return $condition;
+
+    }
+
 
     public function insert($data, $fields = false)
     {
