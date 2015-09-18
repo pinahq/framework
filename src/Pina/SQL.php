@@ -165,7 +165,7 @@ class SQL
     public function paging(&$paging)
     {
         $paging->setTotal($this->count());
-
+        
         $limitStart = intval($paging->getStart());
         $limitCount = intval($paging->getCount());
         $this->limit($limitStart, $limitCount);
@@ -337,7 +337,7 @@ class SQL
 
         $keys = array_keys($this->groupBy);
         $vals = array_values($this->groupBy);
-
+        
         if (!empty($keys[0]) && !empty($vals[0])) {
             $table = $keys[0];
             $field = $vals[0];
@@ -412,8 +412,11 @@ class SQL
 
     public function column($name)
     {
+        $oldSelect = $this->select;
         $this->select = array();
-        return $this->db->col($this->select($name)->make());
+        $sql = $this->select($name)->make();
+        $this->select = $oldSelect;
+        return $this->db->col($sql);
     }
 
     public function __toString()
@@ -434,7 +437,10 @@ class SQL
 
         $sql .= $this->getJoins();
         $sql .= $this->getWhere();
-        $sql .= $this->getGroupBy();
+        
+        if ($what) {
+            $sql .= $this->getGroupBy();
+        }
 
         return $this->db->one($sql);
     }
