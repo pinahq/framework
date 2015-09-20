@@ -169,7 +169,7 @@ class FileManager
         }
 
         $gw = new static::$table;
-        if (!method_exists($fw, 'whereHash')) 
+        if (!method_exists($gw, 'whereHash')) 
         {
             return false;
         }
