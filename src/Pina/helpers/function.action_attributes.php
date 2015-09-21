@@ -2,6 +2,7 @@
 
 use Pina\Route;
 use Pina\Url;
+use Pina\App;
 
 function smarty_function_action_attributes($params, &$view)
 {
@@ -22,8 +23,11 @@ function smarty_function_action_attributes($params, &$view)
     $pattern = $params[$method];
     unset($params[$method]);
     
+    $resource = Route::resource($pattern, $params);
+    $prefix = App::getLinkPrefix($params);
+    
     $result  = ' data-method="'.$method.'"';
-    $result .= ' data-resource="'.Route::resource($pattern, $params).'"';
+    $result .= ' data-resource="'. $prefix . ltrim($resource, '/') . '"';
     list($preg, $map) = Url::preg($pattern);
     $result .= ' data-params="'.http_build_query(array_diff_key($params, array_flip($map))).'"';
     
