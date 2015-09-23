@@ -162,9 +162,9 @@ class SQL
         return $this;
     }
 
-    public function paging(&$paging)
+    public function paging(&$paging, $field = false)
     {
-        $paging->setTotal($this->count());
+        $paging->setTotal($this->pagingCount($field));
         
         $limitStart = intval($paging->getStart());
         $limitCount = intval($paging->getCount());
@@ -331,19 +331,14 @@ class SQL
         return $sql;
     }
 
-    public function getCountFields($what)
-    {
-        $flds = array();
+    public function getCountFields($field)
+    {        
+        if (empty($field)) {
+            $field = '*';
+        }
 
-        $keys = array_keys($this->groupBy);
-        $vals = array_values($this->groupBy);
-        
-        if (!empty($keys[0]) && !empty($vals[0])) {
-            $table = $keys[0];
-            $field = $vals[0];
-            $flds[] = 'COUNT(DISTINCT ' . $table . '.' . $field . ')';
-        } elseif (is_string($what)) {
-            $flds[] = 'COUNT(' . $what . ')';
+        if (is_string($field)) {
+            $flds[] = 'COUNT(' . $field . ')';
         } else {
             $flds[] = 'COUNT(*)';
         }
@@ -423,24 +418,39 @@ class SQL
     {
         return $this->make();
     }
-
-    public function count($what = false)
+    
+    public function pagingCount($field = false)
     {
         if ($this->from == '') {
             return '';
         }
 
         $sql = 'SELECT ';
-        $sql .= $this->getCountFields($what);
+        $sql .= $this->getCountFields($field);
+
+        $sql .= ' FROM ' . $this->from;
+
+        $sql .= $this->getJoins();
+        $sql .= $this->getWhere();
+
+        return $this->db->one($sql);
+    }
+
+    public function count($field = false)
+    {
+        if ($this->from == '') {
+            return '';
+        }
+
+        $sql = 'SELECT ';
+        $sql .= $this->getCountFields($field);
 
         $sql .= ' FROM ' . $this->from;
 
         $sql .= $this->getJoins();
         $sql .= $this->getWhere();
         
-        if ($what) {
-            $sql .= $this->getGroupBy();
-        }
+        $sql .= $this->getGroupBy();
 
         return $this->db->one($sql);
     }
