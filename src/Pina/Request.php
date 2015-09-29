@@ -5,9 +5,8 @@ namespace Pina;
 class Request
 {
 
-    static public $response = false;
-    static public $stack = array();
-    static public $top = -1;
+    static protected $response = false;
+    static protected $stack = array();
 
     static public function init($response, $data)
     {
@@ -272,9 +271,8 @@ class Request
             Access::isHandlerPermitted($resource, $action);
     }
 
-    static private function runHandler($handler)
+    static protected function runHandler($handler)
     {
-        $path = App::path();
         if (is_file($handler . ".php")) {
             include $handler . ".php";
         } else {
@@ -282,7 +280,7 @@ class Request
         }
     }
 
-    static private function runInternalHandler($handler)
+    static protected function runInternalHandler($handler)
     {
         $path = App::path();
         if (!is_file($handler . ".php")) {

@@ -177,7 +177,7 @@ class App
     public static function link($pattern, $params = array())
     {
         $useResources = self::canUseResources();
-        $url = '';
+        $url = 'http://'.Site::domain();
         if (!$useResources) {
             $url .= '/pina.php?get=';
         } else {

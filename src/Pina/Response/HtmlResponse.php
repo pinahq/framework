@@ -20,6 +20,14 @@ class HtmlResponse extends Response
 
         $this->view = $view;
     }
+    
+    public function setLayout($layout)
+    {
+        if (empty($this->view)) {
+            return;
+        }
+        $this->view->setLayout($layout);
+    }
 
     public function fail()
     {
@@ -43,11 +51,6 @@ class HtmlResponse extends Response
     {
         $this->header('Pina-Response: Json');
         $this->contentType('text/html');
-
-        if ($first && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
-        ) {
-            $first = false;
-        }
         
         $app = App::get();
 
@@ -59,7 +62,6 @@ class HtmlResponse extends Response
             $t = $this->view->fetch('Layout/'.$app.'/'. $this->view->getLayout(). '.tpl');
         }
 
-        //\Pina\Modules\Core\Language::rewrite($t);
         return $t;
     }
 
