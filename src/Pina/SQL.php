@@ -57,9 +57,9 @@ class SQL
     public function join($type, $table, $field, $table2 = false, $field2 = false)
     {
         if (!empty($table2) && !empty($field2)) {
-            $this->joins[$type][$table] = array($field => array($table2 => $field2));
+            $this->joins[] = array($type, $table, array($field => array($table2 => $field2)));
         } else if (is_array($field)) {
-            $this->joins[$type][$table] = $field;
+            $this->joins[] = array($type, $table, $field);
         }
         return $this;
     }
@@ -212,57 +212,57 @@ class SQL
     {
         // JOIN'ы
         $sql = '';
-        foreach ($this->joins as $type => $joins) {
+        foreach ($this->joins as $line) {
+            list($type, $table, $fields) = $line;
             $type = strtoupper($type);
 
             if ($type != 'LEFT' && $type != 'INNER') {
                 return '';
             }
 
-            foreach ($joins as $table => $fields) {
-                if ($table == '') {
+            if ($table == '') {
+                return '';
+            }
+
+            $sql .= " $type JOIN $table ON ";
+
+            $ons = array();
+
+            foreach ($fields as $field => $val) {
+                if ($field == '') {
                     return '';
                 }
 
-                $sql .= " $type JOIN $table ON ";
+                $op = '=';
 
-                $ons = array();
+                if (is_array($val) &&
+                        !empty($val[0]) &&
+                        !empty($val[1]) &&
+                        in_array($val[0], array('!=', '=', '>', '<', '<>'))
+                ) {
+                    $op = $val[0];
+                    $val = $val[1];
+                }
 
-                foreach ($fields as $field => $val) {
-                    if ($field == '') {
+                $on = $this->extractTableLink($table) . ".$field $op ";
+
+                if (is_array($val)) {
+                    $keys = array_keys($val);
+                    $vals = array_values($val);
+                    if (empty($keys[0]) || empty($vals[0])) {
                         return '';
                     }
 
-                    $op = '=';
-
-                    if (is_array($val) &&
-                            !empty($val[0]) &&
-                            !empty($val[1]) &&
-                            in_array($val[0], array('!=', '=', '>', '<', '<>'))
-                    ) {
-                        $op = $val[0];
-                        $val = $val[1];
-                    }
-
-                    $on = $this->extractTableLink($table) . ".$field $op ";
-
-                    if (is_array($val)) {
-                        $keys = array_keys($val);
-                        $vals = array_values($val);
-                        if (empty($keys[0]) || empty($vals[0])) {
-                            return '';
-                        }
-
-                        $on .= $keys[0] . '.' . $vals[0];
-                    } else {
-                        $on .= "'" . $val . "'";
-                    }
-
-                    $ons[] = $on;
+                    $on .= $keys[0] . '.' . $vals[0];
+                } else {
+                    $on .= "'" . $val . "'";
                 }
 
-                $sql .= join(' AND ', $ons);
+                $ons[] = $on;
             }
+
+            $sql .= join(' AND ', $ons);
+            
         }
         return $sql;
     }
