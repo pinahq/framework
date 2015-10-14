@@ -52,6 +52,7 @@ class Arr
         return $data;
     }
 
+    /* deprecated */
     public static function rearrange($data, $key, $unique = false)
     {
         $result = array();
@@ -65,6 +66,34 @@ class Arr
                 } else {
                     $result[$k][] = $d;
                 }
+            }
+        }
+
+        return $result;
+    }
+    
+    public static function group($data, $key)
+    {
+        $result = array();
+
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                $k = $d[$key];
+                $result[$k][] = $d;
+            }
+        }
+
+        return $result;
+    }
+    
+    public static function groupUnique($data, $key)
+    {
+        $result = array();
+
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                $k = $d[$key];
+                $result[$k] = $d;
             }
         }
 
