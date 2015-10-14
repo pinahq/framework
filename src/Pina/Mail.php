@@ -111,7 +111,7 @@ class Mail extends Request
             $mail->addAddress($u['address'], $u['name']);
         }
         
-        if (static::$config['reply']['address']) {
+        if (!empty(static::$config['reply']['address'])) {
             $mail->addReplyTo(static::$config['reply']['address'], !empty(static::$config['reply']['name'])?static::$config['reply']['name']:'');
         }
         
