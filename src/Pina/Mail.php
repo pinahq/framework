@@ -104,6 +104,8 @@ class Mail extends Request
             }
             $mail->SMTPSecure = static::$config['smtp']['secure'];
             $mail->Port = static::$config['smtp']['port'];
+        } else {
+            $mail->isMail();
         }
 
         $mail->setFrom(static::$config['from']['address'], !empty(static::$config['from']['name'])?static::$config['from']['name']:'');
