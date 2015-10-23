@@ -224,12 +224,13 @@ class SQL
                 return '';
             }
 
-            $sql .= " $type JOIN $table ON ";
+            $tableSql = " $type JOIN $table ON ";
 
             $ons = array();
 
             foreach ($fields as $field => $val) {
                 if ($field == '') {
+                    Log::error('SQL', 'empty join field '.print_r($line, 1));
                     return '';
                 }
 
@@ -250,7 +251,8 @@ class SQL
                     $keys = array_keys($val);
                     $vals = array_values($val);
                     if (empty($keys[0]) || empty($vals[0])) {
-                        return '';
+                        Log::error('SQL', 'bad join field '.print_r($line, 1));
+                        continue;
                     }
 
                     $on .= $keys[0] . '.' . $vals[0];
@@ -261,7 +263,7 @@ class SQL
                 $ons[] = $on;
             }
 
-            $sql .= join(' AND ', $ons);
+            $sql .= $tableSql.join(' AND ', $ons);
             
         }
         return $sql;
