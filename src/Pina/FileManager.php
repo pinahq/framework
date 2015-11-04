@@ -207,10 +207,10 @@ class FileManager
 
         $filename = static::prepareFilename($source, $filename);
 
-        $image_content = file_get_contents($source);
+        $image_content = @file_get_contents($source);
         if (empty($image_content)) return false;
 
-        file_put_contents(static::getFilePath($subject, $filename), $image_content);
+        file_put_contents(static::getFilePath($filename), $image_content);
         unset($image_content);
 
         return static::prepareData($filename);
