@@ -4,14 +4,20 @@ use Pina\App;
 use Pina\Composer;
 use Pina\Route;
 
-function smarty_function_form($ps, &$view)
+function smarty_block_form($ps, $content, &$view, &$repeat)
 {
+    if ($repeat) {
+        return;
+    }
+    
     $r = '<form';
     
     $prefix = '';
     $app = !empty($ps['app'])?$ps['app']:App::get();
     $apps = App::apps();
-    if (!empty($apps[$app])) $prefix = $apps[$app]."/";
+    if (!empty($apps[$app])) {
+        $prefix = $apps[$app]."/";
+    }
     
     $ps['action'] = $prefix.$ps['action'];
     
@@ -68,5 +74,5 @@ function smarty_function_form($ps, &$view)
     );
     //$r .= CSRFToken::formField($resource, $ps["method"]);
 
-    return $r;
+    return $r.$content.'</form>';
 }
