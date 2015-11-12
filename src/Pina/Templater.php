@@ -101,7 +101,7 @@ class Templater extends \Smarty
 
         $view->_tpl_vars = $vars_backup;
 
-        if (!empty($params['wrapper']) && $result) {
+        if (!empty($params['wrapper']) && !empty($result)) {
             list($start, $end) = static::wrapper($params['wrapper']);
             return $start . $result . $end;
         }
@@ -130,7 +130,7 @@ class Templater extends \Smarty
 
         $view->_tpl_vars = $vars_backup;
 
-        if (!empty($params['wrapper']) && $result) {
+        if (!empty($params['wrapper']) && !empty($result)) {
             list($start, $end) = static::wrapper($params['wrapper']);
             return $start . $result . $end;
         }
