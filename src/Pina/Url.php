@@ -182,6 +182,9 @@ class Url
     {
         $resource = $pattern;
         foreach ($parsed as $k => $v) {
+            if (empty($v)) {
+                $v = 0;
+            }
             $resource = trim(str_replace(':' . $k . '/', $v . '/', $resource . '/'), '/');
         }
         return $resource;
