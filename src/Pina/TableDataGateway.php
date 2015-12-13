@@ -9,6 +9,7 @@ namespace Pina;
  * @author Alex Yashin
  * @copyright 2015
  */
+
 class TableDataGateway extends SQL
 {
 
@@ -17,13 +18,11 @@ class TableDataGateway extends SQL
     public $orderBy = "";
     public $fields = false;
     public $indexes = array();
-
     public $siteId = 0;
     public $accountId = 0;
-
+    protected $context = array();
     public $useSiteId = false;
     public $useAccountId = false;
-
     public $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
     public function __construct($siteId = false)
@@ -35,7 +34,7 @@ class TableDataGateway extends SQL
 
         $db = DB::get();
         parent::__construct($this->table, $db);
-        
+
         if ($siteId !== false) {
             $this->siteId = intval($siteId);
             $this->accountId = Site::accountId($siteId);
@@ -43,7 +42,7 @@ class TableDataGateway extends SQL
             $this->siteId = Site::id();
             $this->accountId = Site::accountId();
         }
-        
+
         if ($this->useSiteId) {
             $this->whereBy('site_id', $this->siteId);
         }
@@ -52,7 +51,7 @@ class TableDataGateway extends SQL
             $this->whereBy('account_id', $this->accountId);
         }
     }
-    
+
     /*
      * Возвращает экземпляр конкретного класса
      * @return TableDataGateway
@@ -62,12 +61,18 @@ class TableDataGateway extends SQL
         $cl = get_called_class();
         return new $cl();
     }
-    
+
+    public function context($field, $value)
+    {
+        $this->context[$field] = $value;
+        return $this->whereBy($field, $value);
+    }
+
     public function find($id)
     {
         return $this->whereId($id)->first();
     }
-    
+
     public function id()
     {
         return $this->value($this->primaryKey);
@@ -80,7 +85,17 @@ class TableDataGateway extends SQL
         } else {
             $fields = array_keys($this->fields);
         }
-
+        
+        foreach ($this->context as $field => $value) {
+            if (!isset($data[0])) {
+                $data[$field] = $value;
+            } else {
+                foreach ($data as $k => $v) {
+                    $data[$k][$field] = $value;
+                }
+            }
+        }
+        
         if ($this->useSiteId) {
             $fields [] = 'site_id';
             if (!isset($data[0])) {
@@ -110,7 +125,7 @@ class TableDataGateway extends SQL
 
         return parent::insert($data, $fields);
     }
-    
+
     public function insertGetId($data = array(), $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
@@ -122,7 +137,7 @@ class TableDataGateway extends SQL
         $this->adjustDataAndFields($data, $fields);
         return parent::put($data, $fields);
     }
-    
+
     public function putGetId($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
@@ -134,7 +149,7 @@ class TableDataGateway extends SQL
         if (empty($data)) {
             return false;
         }
-        
+
         $this->adjustDataAndFields($data, $fields);
         return parent::update($data, $fields);
     }
@@ -144,15 +159,13 @@ class TableDataGateway extends SQL
         return $this->whereBy($this->primaryKey, $id);
     }
 
-
     public function enabled()
     {
         $prefix = str_replace("cody_", "", $this->table);
 
         return $this->whereBy($prefix . "_enabled", 'Y');
     }
-    
-    
+
     public function getSorting($s)
     {
 
@@ -180,19 +193,18 @@ class TableDataGateway extends SQL
             }
             $order .= $this->sorts[$v] . ' ' . ($isAsc ? 'asc' : 'desc');
         }
-        
+
         if (empty($order)) {
             return '';
         }
-        
+
         return $order;
     }
-    
+
     public function sort($s)
     {
         return $this->orderBy($this->getSorting($s));
     }
-    
 
     /**
      * Возвращает массив из возможных значений поля типа enum
@@ -241,15 +253,16 @@ class TableDataGateway extends SQL
             }
             if (empty($relations[$k])) {
                 Request::error(
-                        'Максимальная длина параметра превышена на '
-                        . ($data_length - $sql_size), $k
+                    'Максимальная длина параметра превышена на '
+                    . ($data_length - $sql_size), $k
                 );
             } else {
                 Request::error(
-                        'Максимальная длина параметра превышена на '
-                        . ($data_length - $sql_size), $relations[$k]
+                    'Максимальная длина параметра превышена на '
+                    . ($data_length - $sql_size), $relations[$k]
                 );
             }
         }
     }
+
 }
