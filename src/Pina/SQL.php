@@ -105,6 +105,21 @@ class SQL
         return $this->where($this->getByCondition($field, $needle, 'NOT LIKE'));
     }
     
+    public function whereBetween($field, $start, $end)
+    {
+        return $this->where($this->db->escape($field).' BETWEEN '.$this->db->escape($start).' AND '.$this->db->escape($end));
+    }
+    
+    public function whereNull($field)
+    {
+        return $this->where($field . ' IS NULL');
+    }
+    
+    public function whereNotNull($field, $needle)
+    {
+        return $this->where($field . ' IS NOT NULL');
+    }
+    
     public function whereFields($ps)
     {
         if (!is_array($ps)) {
@@ -522,7 +537,25 @@ class SQL
         return $result;
     }
     
-    public function getByCondition($field, $needle, $operand = '=')
+    public function getByCondition($fields, $needle, $operand = '=')
+    {
+        if (!is_array($fields)) {
+            return $this->getSimpleByCondition($fields, $needle, $operand);
+        }
+        
+        $fields = array_filter($fields);
+        
+        $q = '';
+        foreach ($fields as $field) {
+            if (!empty($q)) {
+                $q .= ' OR ';
+            }
+            $q .= $this->getSimpleByCondition($field, $needle, $operand);
+        }
+        return '('.$q.')';
+    }
+    
+    private function getSimpleByCondition($field, $needle, $operand = '=')
     {
         $field = $this->db->escape($field);
 
