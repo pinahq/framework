@@ -115,7 +115,7 @@ class SQL
         return $this->where($field . ' IS NULL');
     }
     
-    public function whereNotNull($field, $needle)
+    public function whereNotNull($field)
     {
         return $this->where($field . ' IS NOT NULL');
     }
