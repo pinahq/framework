@@ -53,6 +53,11 @@ class SQL
         $this->select[] = $field;
         return $this;
     }
+    
+    protected function selected()
+    {
+        return count($this->select) > 0;
+    }
 
     public function join($type, $table, $field, $table2 = false, $field2 = false)
     {
@@ -616,6 +621,78 @@ class SQL
             return $this->db->query($q);
         }
 
+        list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
+
+        $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
+        return $this->db->query($sql);
+    }
+
+    public function insertGetId($data, $fields = false)
+    {
+        $this->insert($data, $fields);
+        return $this->db->insertId();
+    }
+
+    public function put($data, $fields = false)
+    {
+        if (empty($data) || !is_array($data) || count($data) == 0) {
+            return false;
+        }
+        
+        if (!is_array(reset($data))) {
+            $set = $this->getSetCondition($data, $fields);
+            if (empty($set)) {
+                return false;
+            }
+
+            $sql = "
+                INSERT INTO `" . $this->from . "` SET " . $set . "
+                ON DUPLICATE KEY UPDATE " . $set . "
+            ";
+            return $this->db->query($sql);
+        }
+        
+        list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
+        $onDuplicate = $this->getOnDuplicateKeyCondition($keys);
+
+        $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES " . $values;
+        if (!empty($onDuplicate)) {
+            $sql .= " ON DUPLICATE KEY UPDATE ".$onDuplicate;
+        }
+        echo $sql;
+        return $this->db->query($sql);
+    }
+
+    public function putGetId($data, $fields = false)
+    {
+        $this->put($data, $fields);
+        return $this->db->insertId();
+    }
+    
+    private function getOnDuplicateKeyCondition($keys)
+    {
+        $keys = $this->getOnDuplicateKeys($keys);
+        if (empty($keys) || !is_array($keys)) {
+            return '';
+        }
+        
+        $q = '';
+        foreach ($keys as $key) {
+            if (!empty($q)) {
+                $q .= ',';
+            }
+            $q .= $key.' = VALUES('.$key.')';
+        }
+        return $q;
+    }
+    
+    protected function getOnDuplicateKeys($keys)
+    {
+        return $keys;
+    }
+    
+    private function getKeyValuesCondition($data, $fields)
+    {
         $keys = array_keys(current($data));
 
         if (is_array($fields)) {
@@ -645,35 +722,8 @@ class SQL
         if (empty($sql)) {
             return false;
         }
-
-        $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $sql;
-        return $this->db->query($sql);
-    }
-
-    public function insertGetId($data, $fields = false)
-    {
-        $this->insert($data, $fields);
-        return $this->db->insertId();
-    }
-
-    public function put($data, $fields = false)
-    {
-        $set = $this->getSetCondition($data, $fields);
-        if (empty($set)) {
-            return false;
-        }
-
-        $sql = "
-			INSERT INTO `" . $this->from . "` SET " . $set . "
-			ON DUPLICATE KEY UPDATE " . $set . "
-		";
-        return $this->db->query($sql);
-    }
-
-    public function putGetId($data, $fields = false)
-    {
-        $this->put($data, $fields);
-        return $this->db->insertId();
+        
+        return array($keys, $sql);
     }
 
     public function update($data, $fields = false)

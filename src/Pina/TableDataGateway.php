@@ -118,6 +118,16 @@ class TableDataGateway extends SQL
             }
         }
     }
+    
+    protected function getOnDuplicateKeys($keys)
+    {
+        $primaryKeys = !empty($this->indexes['PRIMARY KEY'])?$this->indexes['PRIMARY KEY']:array();
+        if (!is_array($primaryKeys)) {
+            $primaryKeys = array($primaryKeys);
+        }
+        
+        return array_diff($keys, $primaryKeys);
+    }
 
     public function insert($data = array(), $fields = false)
     {
