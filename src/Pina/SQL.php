@@ -745,6 +745,26 @@ class SQL
         $this->db->query($sql);
         return $this->db->affectedRows();
     }
+    
+    public function increment($field, $value)
+    {
+        return $this->updateOperation('`' . $field . '` = `' . $field . '` + ' . $this->db->escape($value));
+    }
+    
+    public function decrement($field, $value)
+    {
+        return $this->updateOperation('`' . $field . '` = `' . $field . '` - ' . $this->db->escape($value));
+    }
+    
+    private function updateOperation($operation)
+    {
+        $sql = "UPDATE " . $this->from . " ";
+        $sql .= $this->getJoins();
+        $sql .= ' SET ' . $operation;
+        $sql .= $this->getWhere();
+        $this->db->query($sql);
+        return $this->db->affectedRows();
+    }
 
     public function delete()
     {
