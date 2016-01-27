@@ -659,7 +659,6 @@ class SQL
         if (!empty($onDuplicate)) {
             $sql .= " ON DUPLICATE KEY UPDATE ".$onDuplicate;
         }
-        echo $sql;
         return $this->db->query($sql);
     }
 
