@@ -755,7 +755,7 @@ class SQL
         return $this->updateOperation('`' . $field . '` = `' . $field . '` - ' . $this->db->escape($value));
     }
     
-    private function updateOperation($operation)
+    protected function updateOperation($operation)
     {
         $sql = "UPDATE " . $this->from . " ";
         $sql .= $this->getJoins();
