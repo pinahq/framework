@@ -97,7 +97,7 @@ class FileManager
         
         if (!@move_uploaded_file($_FILES[$item]['tmp_name'], $filepath))
         {
-            Log::error('FileManager can not write file '.$filepath);
+            Log::error('image', 'FileManager can not write to file '.$filepath);
             return false;
         }
 
