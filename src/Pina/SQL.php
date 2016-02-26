@@ -182,9 +182,9 @@ class SQL
         return $this;
     }
 
-    public function paging(&$paging, $field = false)
+    public function paging(&$paging, $field = false, $useJoin = true)
     {
-        $paging->setTotal($this->pagingCount($field));
+        $paging->setTotal($this->pagingCount($field, $useJoin));
         
         $limitStart = intval($paging->getStart());
         $limitCount = intval($paging->getCount());
@@ -192,7 +192,7 @@ class SQL
 
         return $this;
     }
-
+    
     protected function extractTableLink($table)
     {
         if (strpos($table, 'AS') !== false) {
@@ -441,7 +441,7 @@ class SQL
         return $this->make();
     }
     
-    public function pagingCount($field = false)
+    public function pagingCount($field = false, $useJoin = true)
     {
         if ($this->from == '') {
             return '';
@@ -452,7 +452,9 @@ class SQL
 
         $sql .= ' FROM ' . $this->from;
 
-        $sql .= $this->getJoins();
+        if (!empty($useJoin)) {
+            $sql .= $this->getJoins();
+        }
         $sql .= $this->getWhere();
 
         return $this->db->one($sql);
