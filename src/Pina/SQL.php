@@ -267,19 +267,19 @@ class SQL
                     $val = $val[1];
                 }
 
-                $on = $this->extractTableLink($table) . ".$field $op ";
+                $on = $this->extractTableLink($table) . ".$field ";
 
                 if (is_array($val)) {
                     $keys = array_keys($val);
                     $vals = array_values($val);
                     if (empty($keys[0]) || empty($vals[0])) {
-                        Log::error('SQL', 'bad join field '.print_r($line, 1));
-                        continue;
+                        $op = ($op === '=') ? 'IN' : 'NOT IN';
+                        $on .= $op . " ('" . join("','", $val) . "')";
+                    } else {
+                        $on .= $op . ' ' . $keys[0] . '.' . $vals[0];
                     }
-
-                    $on .= $keys[0] . '.' . $vals[0];
                 } else {
-                    $on .= "'" . $val . "'";
+                    $on .= $op . "'" . $val . "'";
                 }
 
                 $ons[] = $on;
