@@ -59,8 +59,8 @@ class App
         }
 
         App::set(App::parse($resource));
-        Module::init();
         Core::resource($resource);
+        Module::init();
 
         $response = Response\Factory::get($resource, $method);
         if (empty($response)) {
