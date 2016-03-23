@@ -714,7 +714,7 @@ class SQL
                     $sql_line .= ",";
                 }
                 if (isset($line[$key])) {
-                    $sql_line .= "'" . $line[$key] . "'";
+                    $sql_line .= "'" . $this->db->escape($line[$key]) . "'";
                 } else {
                     $sql_line .= "''";
                 }
