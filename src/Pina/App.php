@@ -86,6 +86,11 @@ class App
     {
         return self::$config['charset'];
     }
+    
+    public static function tmp()
+    {
+        return self::$config['tmp'];
+    }
 
     public static function templaterCache()
     {
