@@ -12,10 +12,14 @@ namespace Pina;
 
 class SQL
 {
+    
+    const SQL_OPERAND_FIELD = 0;
+    const SQL_OPERAND_VALUE = 1;
 
     public $db = '';
     private $select = array();
     private $from = '';
+    private $alias = '';
     private $joins = array();
     private $where = array();
     private $groupBy = array();
@@ -24,10 +28,16 @@ class SQL
     private $limitStart = 0;
     private $limitCount = 0;
     private $unions = array();
+    private $ons = array();
 
     public static function table($table, $db = false)
     {
         return new SQL($table, $db);
+    }
+    
+    public static function subquery($query)
+    {
+        return new SQL('('.$query->make().')', DB::get());
     }
 
     public function init()
@@ -41,6 +51,7 @@ class SQL
         $this->limitStart = 0;
         $this->limitCount = 0;
         $this->unions = array();
+        $this->ons = array();
         return $this;
     }
 
@@ -48,6 +59,22 @@ class SQL
     {
         $this->db = $db ? $db : DB::get();
         $this->from = $table;
+    }
+    
+    public function alias($alias)
+    {
+        $this->alias = $alias;
+        return $this;
+    }
+    
+    public function getAlias()
+    {
+        return $this->alias?$this->alias:$this->from;
+    }
+    
+    public function makeFrom()
+    {
+        return $this->from.($this->alias?(' '.$this->alias):'');
     }
 
     public function select($field)
@@ -61,8 +88,12 @@ class SQL
         return count($this->select) > 0;
     }
 
-    public function join($type, $table, $field, $table2 = false, $field2 = false)
+    public function join($type, $table, $field = false, $table2 = false, $field2 = false)
     {
+        if (empty($field)) {
+            //join SQL builder class
+            $this->joins[] = array($type, $table);
+        }
         if (!empty($table2) && !empty($field2)) {
             $this->joins[] = array($type, $table, array($field => array($table2 => $field2)));
         } else if (is_array($field)) {
@@ -71,19 +102,49 @@ class SQL
         return $this;
     }
 
-    public function leftJoin($table, $field, $table2 = false, $field2 = false)
+    public function leftJoin($table, $field = false, $table2 = false, $field2 = false)
     {
-        return $this->join('left', $table, $field, $table2, $field2);
+        return $this->join('LEFT', $table, $field, $table2, $field2);
     }
 
-    public function innerJoin($table, $field, $table2 = false, $field2 = false)
+    public function innerJoin($table, $field = false, $table2 = false, $field2 = false)
     {
-        return $this->join('inner', $table, $field, $table2, $field2);
+        return $this->join('INNER', $table, $field, $table2, $field2);
     }
 
-    public function rightJoin($table, $field, $table2 = false, $field2 = false)
+    public function rightJoin($table, $field = false, $table2 = false, $field2 = false)
     {
-        return $this->join('right', $table, $field, $table2, $field2);
+        return $this->join('RIGHT', $table, $field, $table2, $field2);
+    }
+    
+    public function on($field1, $field2 = '')
+    {
+        $this->ons[] = array('=', self::SQL_OPERAND_FIELD, $field1, self::SQL_OPERAND_FIELD, $field2?$field2:$field1);
+        return $this;
+    }
+    
+    public function onBy($field, $needle, $op = '=')
+    {
+        $this->ons[] = array($op, self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
+        return $this;
+    }
+    
+    public function onNotBy($field, $needle)
+    {
+        $this->ons[] = array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
+        return $this;
+    }
+    
+    public function makeOns($parentAlias)
+    {
+        $q = '';
+        foreach ($this->ons as $on) {
+            if (!empty($q)) {
+                $q .= ' AND ';
+            }
+            $q .= $this->makeByCondition($on, $parentAlias);
+        }
+        return ' ON '.$q;
     }
 
     public function where($condition)
@@ -94,37 +155,42 @@ class SQL
 
     public function whereBy($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle, '='));
+        return $this->where($this->makeByCondition(array('=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
 
     public function whereNotBy($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle, '<>'));
+        return $this->where($this->makeByCondition(array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
     
     public function whereLike($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle, 'LIKE'));
+        return $this->where($this->makeByCondition(array('LIKE', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
     
     public function whereNotLike($field, $needle)
     {
-        return $this->where($this->getByCondition($field, $needle, 'NOT LIKE'));
+        return $this->where($this->makeByCondition(array('NOT LIKE', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
     
     public function whereBetween($field, $start, $end)
     {
-        return $this->where($this->db->escape($field).' BETWEEN '.$this->db->escape($start).' AND '.$this->db->escape($end));
+        return $this->where($this->makeByCondition(array('BETWEEN', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $start, self::SQL_OPERAND_VALUE, $end)));
+    }
+    
+    public function whereNotBetween($field, $start, $end)
+    {
+        return $this->where($this->makeByCondition(array('NOT BETWEEN', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $start, self::SQL_OPERAND_VALUE, $end)));
     }
     
     public function whereNull($field)
     {
-        return $this->where($field . ' IS NULL');
+        return $this->where($this->makeByCondition(array('IS NULL', self::SQL_OPERAND_FIELD, $field)));
     }
     
     public function whereNotNull($field)
     {
-        return $this->where($field . ' IS NOT NULL');
+        return $this->where($this->makeByCondition(array('IS NOT NULL', self::SQL_OPERAND_FIELD, $field)));
     }
     
     public function whereFields($ps)
@@ -208,11 +274,20 @@ class SQL
         return $table;
     }
 
-    public function getWhere()
+    public function makeWhere()
     {
-        // Условия WHERE
-        $wheres = array();
+        $sql = join(' AND ', $this->getWhereArray());
+        
+        if ($sql != '') {
+            $sql = ' WHERE ' . $sql;
+        }
 
+        return $sql;
+    }
+    
+    public function getWhereArray()
+    {
+        $wheres = array();
         foreach ($this->where as $where) {
             if (empty($where)) {
                 continue;
@@ -220,21 +295,41 @@ class SQL
 
             $wheres[] = '(' . $where . ')';
         }
-
-        $sql = join(' AND ', $wheres);
-
-        if ($sql != '') {
-            $sql = ' WHERE ' . $sql;
+        
+        return array_merge($wheres, $this->getJoinWhereArray());
+    }
+    
+    public function getJoinWhereArray()
+    {
+        $wheres = array();
+        foreach ($this->joins as $line) {
+            if (count($line) == 2) {
+                list($type, $table) = $line;
+                $wheres = array_merge($wheres, $table->getWhereArray());
+            }
         }
-
-        return $sql;
+        return $wheres;
     }
 
-    public function getJoins()
+    public function makeJoins()
     {
-        // JOIN'ы
         $sql = '';
         foreach ($this->joins as $line) {
+            
+            if (count($line) == 2) {
+                list($type, $table) = $line;
+
+                $joinSql = ' '.$type.' JOIN ';
+                $joinSql .= $table->makeFrom();
+                $joinSql .= $table->makeOns($this->getAlias());
+                
+                $joinSql .= $table->makeJoins();
+                
+                $sql .= $joinSql;
+                
+                continue;
+            }
+            
             list($type, $table, $fields) = $line;
             $type = strtoupper($type);
 
@@ -291,7 +386,7 @@ class SQL
         return $sql;
     }
 
-    public function getGroupBy()
+    public function makeGroupBy()
     {
         if (empty($this->groupBy)) {
             return '';
@@ -299,7 +394,7 @@ class SQL
         return ' GROUP BY ' . join(', ', $this->groupBy);
     }
 
-    public function getHaving()
+    public function makeHaving()
     {
         if (empty($this->having)) {
             return '';
@@ -308,7 +403,7 @@ class SQL
         return ' HAVING ' . join(', ', $this->having);
     }
 
-    public function getOrderBy()
+    public function makeOrderBy()
     {
         $sql = join(', ', $this->orderBy);
         if (!empty($sql)) {
@@ -318,7 +413,7 @@ class SQL
         return $sql;
     }
 
-    public function getLimit()
+    public function makeLimit()
     {
         $sql = '';
         if ($this->limitCount > 0 && $this->limitStart !== null) {
@@ -329,7 +424,7 @@ class SQL
         return $sql;
     }
 
-    public function getUnions()
+    public function makeUnions()
     {
         if (empty($this->unions)) {
             return '';
@@ -344,9 +439,10 @@ class SQL
         return $sql;
     }
 
-    public function getFields()
+    public function makeFields()
     {
-        $sql = join(', ', $this->select);
+        $fields = $this->getFieldArray();
+        $sql = join(', ', $fields);
 
         if ($sql == '') {
             $sql = '*';
@@ -354,8 +450,30 @@ class SQL
 
         return $sql;
     }
+    
+    public function getFieldArray()
+    {
+        $fields = array();
+        foreach ($this->select as $k => $v) {
+            $fields[] = $v;
+        }
+        $fields = array_merge($fields, $this->getJoinFieldArray());
+        return $fields;
+    }
+    
+    public function getJoinFieldArray()
+    {
+        $fields = array();
+        foreach ($this->joins as $line) {
+            if (count($line) == 2) {
+                list($type, $table) = $line;
+                $fields = array_merge($fields, $table->getFieldArray());
+            }
+        }
+        return $fields;
+    }
 
-    public function getCountFields($field)
+    public function makeCountFields($field)
     {        
         if (empty($field)) {
             $field = '*';
@@ -373,19 +491,19 @@ class SQL
     public function make()
     {
         $sql = 'SELECT ';
-        $sql .= $this->getFields();
+        $sql .= $this->makeFields();
 
-        $sql .= ' FROM ' . $this->from;
+        $sql .= ' FROM ' . $this->makeFrom();
 
-        $sql .= $this->getJoins();
-        $sql .= $this->getWhere();
-        $sql .= $this->getGroupBy();
+        $sql .= $this->makeJoins();
+        $sql .= $this->makeWhere();
+        $sql .= $this->makeGroupBy();
 
-        $sql .= $this->getHaving();
-        $sql .= $this->getOrderBy();
-        $sql .= $this->getLimit();
+        $sql .= $this->makeHaving();
+        $sql .= $this->makeOrderBy();
+        $sql .= $this->makeLimit();
 
-        $sql .= $this->getUnions();
+        $sql .= $this->makeUnions();
 
         return $sql;
     }
@@ -450,14 +568,14 @@ class SQL
         }
 
         $sql = 'SELECT ';
-        $sql .= $this->getCountFields($field);
+        $sql .= $this->makeCountFields($field);
 
         $sql .= ' FROM ' . $this->from;
 
         if (!empty($useJoin)) {
-            $sql .= $this->getJoins();
+            $sql .= $this->makeJoins();
         }
-        $sql .= $this->getWhere();
+        $sql .= $this->makeWhere();
 
         return $this->db->one($sql);
     }
@@ -469,14 +587,14 @@ class SQL
         }
 
         $sql = 'SELECT ';
-        $sql .= $this->getCountFields($field);
+        $sql .= $this->makeCountFields($field);
 
         $sql .= ' FROM ' . $this->from;
 
-        $sql .= $this->getJoins();
-        $sql .= $this->getWhere();
+        $sql .= $this->makeJoins();
+        $sql .= $this->makeWhere();
         
-        $sql .= $this->getGroupBy();
+        $sql .= $this->makeGroupBy();
 
         return $this->db->one($sql);
     }
@@ -490,9 +608,9 @@ class SQL
         $sql = 'SELECT ' . $func . '(' . $what . ')';
         $sql .= ' FROM ' . $this->from;
 
-        $sql .= $this->getJoins();
-        $sql .= $this->getWhere();
-        $sql .= $this->getGroupBy();
+        $sql .= $this->makeJoins();
+        $sql .= $this->makeWhere();
+        $sql .= $this->makeGroupBy();
 
         return $this->db->one($sql);
     }
@@ -521,8 +639,14 @@ class SQL
     {
         return $this->limit(1)->count();
     }
-
+    
+    /* deprecated */
     public function getSetCondition($data, $fields = false)
+    {
+        return $this->makeSetCondition($data, $fields);
+    }
+
+    public function makeSetCondition($data, $fields = false)
     {
         $first = true;
         $result = '';
@@ -546,24 +670,101 @@ class SQL
         return $result;
     }
     
-    public function getByCondition($fields, $needle, $operand = '=')
+    public function makeByCondition($condition, $parentAlias = '')//$fields, $needle, $operand = '='
     {
-        if (!is_array($fields)) {
-            return $this->getSimpleByCondition($fields, $needle, $operand);
-        }
         
-        $fields = array_filter($fields);
+        $operation = $condition[0];
         
-        $q = '';
-        foreach ($fields as $field) {
-            if (!empty($q)) {
-                $q .= ' OR ';
+        for ($i = 1; $i < count($condition); $i += 2) {
+            $type = $condition[$i];
+            $operand = $condition[$i + 1];
+            $isOrCondition = is_array($operand) 
+                && ($type === self::SQL_OPERAND_FIELD || !in_array($operation, array('=', '<>', 'IN', 'NOT IN')));
+            if ($isOrCondition) {
+                $q = '';
+                foreach ($operand as $item) {
+                    if (empty($item)) {
+                        continue;
+                    }
+                    if (!empty($q)) {
+                        $q .= ' OR ';
+                    }                    
+                    $simpleCondition = $condition;
+                    $simpleCondition[$i + 1] = $item;
+                    $q .= $this->makeByCondition($simpleCondition, $parentAlias);
+                }
+                return $q;
             }
-            $q .= $this->getSimpleByCondition($field, $needle, $operand);
         }
-        return '('.$q.')';
+        switch ($operation) {
+            case '=':
+            case '<>':
+            case '>':
+            case '>=':
+            case '<':
+            case '<=':
+            case 'IN':
+            case 'NOT IN':
+            case 'LIKE':
+            case 'NOT LIKE':    
+                return $this->getBinaryCondition($condition, $parentAlias);
+            case 'IS NULL':
+            case 'IS NOT NULL':
+                return $this->getUnaryPostfixCondition($condition, $parentAlias);
+            case 'NOT':
+                return $this->getUnaryPrefixCondition($condition, $parentAlias);
+            case 'BETWEEN':
+            case 'NOT BETWEEN':
+                return $this->getBetweenCondition($condition, $parentAlias);
+        }
+        return '';
     }
     
+    private function getBinaryCondition($condition, $parentAlias = '')
+    {
+        list($operation, $type1, $operand1, $type2, $operand2) = $condition;
+        
+        return $this->getOperand('', $type1, $operand1).' '.$this->getOperand($operation, $type2, $operand2, $parentAlias);
+    }
+    
+    private function getBetweenCondition($condition, $parentAlias)
+    {
+        list($operation, $type1, $operand1, $type2, $operand2, $type3, $operand3) = $condition;
+                
+        return $this->getOperand('', $type1, $operand1).' '.$this->getOperand($operation, $type2, $operand2, $parentAlias).' AND '.$this->getOperand('', $type3, $operand3, $parentAlias);
+    }
+    
+    private function getOperand($operation, $type, $operand, $alias = '')
+    {
+        if (is_array($operand) && $type === self::SQL_OPERAND_VALUE && empty($operation)) {
+            throw new \Exception('unsupported format');
+        }
+        
+        $prefix = $operation?$operation.' ':'';
+        if ($type === self::SQL_OPERAND_FIELD) {
+            if (strpos($operand, '.')) {
+                return $prefix.$operand;
+            }
+            return $prefix.($alias?$alias:$this->getAlias()).'.'.$operand;
+        }
+        
+        if (is_array($operand)) {
+            if ($operation === '=') {
+                return 'IN '.$this->getInCondition($operand);
+            } else if ($operation === '<>') {
+                return 'NOT IN '.$this->getInCondition($operand);
+            } else if ($operation === 'IN' || $operation === 'NOT IN') {
+                return $prefix.$this->getInCondition($needle);
+            }
+            
+            throw new \Exception('bad array operation');
+            return '';
+        }
+        
+        return $prefix."'".$this->db->escape($operand)."'";
+        
+    }
+    /*
     private function getSimpleByCondition($field, $needle, $operand = '=')
     {
         $field = $this->db->escape($field);
@@ -581,7 +782,7 @@ class SQL
                 if (!empty($condition)) {
                     $condition .= ' OR ';
                 }
-                $condition .= $this->getByCondition($field, $n, $operand);
+                $condition .= $this->makeByCondition($field, $n, $operand);
             }
             
             return $condition;
@@ -592,7 +793,7 @@ class SQL
         
         return '';
     }
-    
+    */
     public function getInCondition($needle)
     {
         $first = true;
@@ -621,7 +822,7 @@ class SQL
         }
 
         if (!is_array(reset($data))) {
-            $q = "INSERT INTO `" . $this->from . "` SET " . $this->getSetCondition($data, $fields);
+            $q = "INSERT INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
             return $this->db->query($q);
         }
 
@@ -644,7 +845,7 @@ class SQL
         }
         
         if (!is_array(reset($data))) {
-            $set = $this->getSetCondition($data, $fields);
+            $set = $this->makeSetCondition($data, $fields);
             if (empty($set)) {
                 return false;
             }
@@ -735,16 +936,16 @@ class SQL
             return false;
         }
 
-        $set = $this->getSetCondition($data, $fields);
+        $set = $this->makeSetCondition($data, $fields);
         if (empty($set)) {
             return false;
         }
 
 
         $sql = "UPDATE `" . $this->from . "` ";
-        $sql .= $this->getJoins();
+        $sql .= $this->makeJoins();
         $sql .= ' SET ' . $set;
-        $sql .= $this->getWhere();
+        $sql .= $this->makeWhere();
         $this->db->query($sql);
         return $this->db->affectedRows();
     }
@@ -762,9 +963,9 @@ class SQL
     protected function updateOperation($operation)
     {
         $sql = "UPDATE " . $this->from . " ";
-        $sql .= $this->getJoins();
+        $sql .= $this->makeJoins();
         $sql .= ' SET ' . $operation;
-        $sql .= $this->getWhere();
+        $sql .= $this->makeWhere();
         $this->db->query($sql);
         return $this->db->affectedRows();
     }
@@ -772,8 +973,8 @@ class SQL
     public function delete()
     {
         $sql = "DELETE " . $this->table . " FROM " . $this->from . ' ';
-        $sql .= $this->getJoins();
-        $sql .= $this->getWhere();
+        $sql .= $this->makeJoins();
+        $sql .= $this->makeWhere();
         return $this->db->query($sql);
     }
 
@@ -806,7 +1007,7 @@ class SQL
         ";
 
         $sql .= ' FROM ' . $this->from;
-        $sql .= $this->getWhere();
+        $sql .= $this->makeWhere();
 
         return $this->db->query($sql);
     }
