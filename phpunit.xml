@@ -13,6 +13,7 @@
             <file>tests/Access.php</file>
             <file>tests/Url.php</file>
             <file>tests/Route.php</file>
+            <file>tests/SQL.php</file>
         </testsuite>
     </testsuites>
     <php>
