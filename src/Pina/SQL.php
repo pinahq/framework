@@ -79,12 +79,7 @@ class SQL
 
     public function select($field)
     {
-        $fields = explode(',', $field);
-        foreach ($fields as $k => $v) {
-            $fields[$k] = trim($v);
-        }
-        
-        $this->select = array_merge($this->select, $fields);
+        $this->select[] = $field;
         return $this;
     }
     
@@ -460,11 +455,7 @@ class SQL
     {
         $fields = array();
         foreach ($this->select as $k => $v) {
-            if (strpos($v, '.') === false) {
-                $fields[] = $this->getAlias().'.'.$v;
-            } else {
-                $fields[] = $v;
-            }
+            $fields[] = $v;
         }
         $fields = array_merge($fields, $this->getJoinFieldArray());
         return $fields;
@@ -647,6 +638,12 @@ class SQL
     public function exists()
     {
         return $this->limit(1)->count();
+    }
+    
+    /* deprecated */
+    public function getSetCondition($data, $fields = false)
+    {
+        return $this->makeSetCondition($data, $fields);
     }
 
     public function makeSetCondition($data, $fields = false)
