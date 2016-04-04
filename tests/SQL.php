@@ -127,7 +127,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
             ->orderBy('t2.category_id, t2.category_parent_length DESC')
             ->make();
         
-        $this->assertEquals("SELECT cody_category.category_id, cody_category.category_title, t2.category_parent_id, t3.category_title AS category_parent_title"
+        $this->assertEquals("SELECT category_id, category_title, category_parent_id, category_title AS category_parent_title"
             . " FROM cody_category"
             . " LEFT JOIN cody_category_parent t2 ON t2.category_id = cody_category.category_id"
             . " LEFT JOIN cody_category t3 ON t3.category_id = t2.category_parent_id"
@@ -149,7 +149,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
             )
             ->innerJoin(
                 SQL::table('cody_pick_list_product')
-                    ->select('pick_list_product_id')
+                    ->select('cody_pick_list_product.pick_list_product_id')
                     ->on('product_variant_id')
                     ->onBy('pick_list_product_id', $pickListProductIds)
                     ->onNotBy('pick_list_product_amount_status', 'decreased')
@@ -259,7 +259,6 @@ class SQLTest extends PHPUnit_Framework_TestCase
 
             ->groupBy('cody_product_variant.product_variant_id')
             ->orderBy('brand_title asc, product_sku asc');
-        echo $gw->make();
         
         $this->assertTrue(strpos($gw->make(), ' - IFNULL(cody_product_reserv.product_reserv_amount,0)'
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'
