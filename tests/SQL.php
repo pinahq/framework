@@ -24,6 +24,11 @@ class SQLTest extends PHPUnit_Framework_TestCase
         #$q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_VALUE, array(1,2,3), SQL::SQL_OPERAND_FIELD, 'cody_product_feature.product_id'], 'cody_product_variand');
         #echo $q;
         
+        $q = SQL::table('cody_product')->makeByCondition(['IS NULL', SQL::SQL_OPERAND_FIELD, 'product_id']);
+        $this->assertEquals('cody_product.product_id IS NULL', $q);
+        
+        $q = SQL::table('cody_product')->makeByCondition(['NOT', SQL::SQL_OPERAND_FIELD, 'product_id']);
+        $this->assertEquals('NOT cody_product.product_id', $q);
         
     }
     
@@ -172,8 +177,23 @@ class SQLTest extends PHPUnit_Framework_TestCase
             . " LEFT JOIN cody_order_product ON cody_order_product.order_product_id = cody_pick_list_product.order_product_id", $q);
         
         
+        $q = SQL::table('cody_import_product')
+            ->leftJoin(
+                SQL::table('cody_import_product_check')
+                    ->on('import_task_id')
+                    ->on('import_product_row')
+            )
+            ->whereNull('cody_import_product_check.import_product_row')
+            ->make();
         
-
+        $this->assertEquals(
+            'SELECT * FROM cody_import_product'
+                . ' LEFT JOIN cody_import_product_check'
+                . ' ON cody_import_product_check.import_task_id = cody_import_product.import_task_id'
+                . ' AND cody_import_product_check.import_product_row = cody_import_product.import_product_row'
+            . ' WHERE (cody_import_product_check.import_product_row IS NULL)'
+        , $q);
+        
         /*
         $pickListProductIds = array(1,2,3);
         SQL::table('cody_product_variant')
@@ -264,5 +284,5 @@ class SQLTest extends PHPUnit_Framework_TestCase
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'
                 . ') as stock') !== false);
     }
-
+    
 }

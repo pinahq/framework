@@ -727,6 +727,20 @@ class SQL
         return $this->getOperand('', $type1, $operand1).' '.$this->getOperand($operation, $type2, $operand2, $parentAlias);
     }
     
+    private function getUnaryPostfixCondition($condition, $parentAlias = '')
+    {
+        list($operation, $type1, $operand1) = $condition;
+        
+        return $this->getOperand('', $type1, $operand1).' '.$operation;
+    }
+    
+    private function getUnaryPrefixCondition($condition, $parentAlias = '')
+    {
+        list($operation, $type1, $operand1) = $condition;
+        
+        return $this->getOperand($operation, $type1, $operand1);
+    }
+    
     private function getBetweenCondition($condition, $parentAlias)
     {
         list($operation, $type1, $operand1, $type2, $operand2, $type3, $operand3) = $condition;
