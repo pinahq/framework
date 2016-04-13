@@ -67,6 +67,11 @@ class TableDataGateway extends SQL
         $this->context[$field] = $value;
         return $this->whereBy($field, $value);
     }
+    
+    public function hasField($field)
+    {
+        return isset($this->fields[$field]);
+    }
 
     public function find($id)
     {
