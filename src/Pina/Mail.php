@@ -20,8 +20,7 @@ class Mail extends Request
         if (empty(static::$config)) {
             static::$config = Config::load('mail');
         }
-        Place::set('mail_subject', '');
-        Place::set('mail_alternative', '');
+        Place::init();
         
         static::$to = array();
         
