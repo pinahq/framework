@@ -19,6 +19,6 @@ class Place {
 	
 	static function get($type)
 	{
-		return self::$data[$type];
+		return isset(self::$data[$type])?self::$data[$type]:'';
 	}
 }
