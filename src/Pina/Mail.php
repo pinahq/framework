@@ -22,7 +22,7 @@ class Mail extends Request
         }
         Place::init();
         
-        static::init();
+        static::clear();
         
         $path = Module::path($module);
         if (empty($path)) {
@@ -36,7 +36,7 @@ class Mail extends Request
         return static::mail();
     }
     
-    private static function init()
+    private static function clear()
     {
         static::$to = array();
         static::$cc = array();
@@ -96,6 +96,10 @@ class Mail extends Request
     {
 
         if (empty(static::$config)) {
+            return;
+        }
+        
+        if (empty(static::$to)) {
             return;
         }
 
