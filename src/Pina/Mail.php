@@ -22,7 +22,7 @@ class Mail extends Request
         }
         Place::init();
         
-        static::$to = array();
+        static::init();
         
         $path = Module::path($module);
         if (empty($path)) {
@@ -34,6 +34,14 @@ class Mail extends Request
         static::run($path, $data);
 
         return static::mail();
+    }
+    
+    private static function init()
+    {
+        static::$to = array();
+        static::$cc = array();
+        static::$bcc = array();
+        static::$content = '';
     }
 
     public static function to($address, $name = '')
