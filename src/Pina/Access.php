@@ -8,12 +8,13 @@ class Access
     private static $data = array();
     private static $groups = array();
     private static $conditions = array();
+    private static $sorted = false;
 
-    const ACCESS_FIELD_PREG = 0;
-    const ACCESS_FIELD_MAP = 1;
-    const ACCESS_FIELD_ACTIONS = 2;
-    const ACCESS_FIELD_GROUPS = 3;
-
+    const ACCESS_FIELD_PRIORITY = 0;
+    const ACCESS_FIELD_PREG = 1;
+    const ACCESS_FIELD_MAP = 2;
+    const ACCESS_FIELD_ACTIONS = 3;
+    const ACCESS_FIELD_GROUPS = 4;
     const ACCESS_FIELD_CONDITION_GROUP = 0;
     const ACCESS_FIELD_CONDITION = 1;
 
@@ -38,21 +39,25 @@ class Access
         }
 
         list($preg, $map) = Url::preg($pattern);
+        $controller = Url::controller($pattern);
+        $priority = count(explode('/', $controller));
         $line = array(
+            $priority,
             $preg,
             $map,
             $actions == "*" ? $actions : explode(",", $actions),
-            $groups
+            $groups,
         );
         self::$data[] = $line;
+        self::$sorted = false;
     }
 
     public static function isPrivate($resource, $action)
     {
         $resource = Url::trim($resource);
         foreach (self::$data as $line) {
-            $preg = $line[self::ACCESS_FIELD_PREG]."\/";
-            if (preg_match("/^" . $preg . "/si", $resource."/", $matches)) {
+            $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
+            if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
                 if ($line[self::ACCESS_FIELD_ACTIONS] == "*") {
                     return true;
                 }
@@ -67,13 +72,18 @@ class Access
     public static function isPermitted($resource, $action)
     {
         $resource = Url::trim($resource);
+
+        if (!self::$sorted) {
+            self::sort();
+        }
+
         foreach (self::$data as $line) {
             if ($line[self::ACCESS_FIELD_ACTIONS] !== "*" && !in_array($action, $line[self::ACCESS_FIELD_ACTIONS])) {
                 continue;
             }
 
-            $preg = $line[self::ACCESS_FIELD_PREG]."\/";
-            if (preg_match("/^" . $preg. "/si", $resource."/", $matches)) {
+            $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
+            if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
                 foreach ($line[self::ACCESS_FIELD_GROUPS] as $permittedGroups) {
                     $leftGroups = array_diff($permittedGroups, self::$groups);
                     if (count($leftGroups) === 0) {
@@ -99,9 +109,18 @@ class Access
                         }
                     }
                 }
+                return false;
             }
         }
         return false;
+    }
+
+    private static function sort()
+    {
+        usort(self::$data, function($a, $b) {
+            return $b[self::ACCESS_FIELD_PRIORITY] - $a[self::ACCESS_FIELD_PRIORITY];
+        });
+        self::$sorted = true;
     }
 
     public static function isHandlerPermitted($resource, $action)
@@ -124,7 +143,7 @@ class Access
 
     public static function addCondition($group, $key, $value = null)
     {
-        $condition = empty($value)?$key:array($key => $value);
+        $condition = empty($value) ? $key : array($key => $value);
         self::$conditions[] = array($group, $condition);
     }
 

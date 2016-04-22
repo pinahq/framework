@@ -9,11 +9,8 @@
          stopOnFailure="false"
          syntaxCheck="false">
     <testsuites>
-        <testsuite name="Auth">
-            <file>tests/Access.php</file>
-            <file>tests/Url.php</file>
-            <file>tests/Route.php</file>
-            <file>tests/SQL.php</file>
+        <testsuite name="PinaTests">
+            <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
     <php>
