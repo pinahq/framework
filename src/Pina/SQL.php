@@ -986,7 +986,7 @@ class SQL
 
     public function delete()
     {
-        $sql = "DELETE " . $this->table . " FROM " . $this->from . ' ';
+        $sql = "DELETE " . $this->from . " FROM " . $this->from . ' ';
         $sql .= $this->makeJoins();
         $sql .= $this->makeWhere();
         return $this->db->query($sql);
@@ -1016,7 +1016,7 @@ class SQL
         }
 
         $sql = "
-            INSERT INTO $this->table (" . implode(",", $fields) . ")
+            INSERT INTO $this->from (" . implode(",", $fields) . ")
             SELECT " . implode(",", $select) . "
         ";
 
