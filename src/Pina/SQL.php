@@ -984,9 +984,9 @@ class SQL
         return $this->db->affectedRows();
     }
 
-    public function delete()
+    public function delete($what = false)
     {
-        $sql = "DELETE " . $this->from . " FROM " . $this->from . ' ';
+        $sql = "DELETE " . ($what ? $what : $this->from) . " FROM " . $this->from . ' ';
         $sql .= $this->makeJoins();
         $sql .= $this->makeWhere();
         return $this->db->query($sql);
