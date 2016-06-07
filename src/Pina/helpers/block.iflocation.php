@@ -13,8 +13,16 @@ function smarty_block_iflocation($params, $content, &$view, &$repeat)
 	if (empty($needed)) return '';
 	
 	$resource = Url::trim(\Pina\Core::resource());
-
-	if (strpos($resource, $needed) === 0) return $content;
-
-	return '';
+    
+    if (strpos($resource, $needed) !== 0) return '';
+    list($preg, $map) = Url::preg($params['get']);
+    
+    $data = \Pina\Core::getRequestData();
+    
+    unset($params['get']);
+    $params = array_diff_key($params, array_flip($map));
+    
+    if (array_diff_assoc($data, $params) || array_diff_assoc($params, $data)) return '';
+    
+	return $content;
 }
