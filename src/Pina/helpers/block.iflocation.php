@@ -21,7 +21,8 @@ function smarty_block_iflocation($params, $content, &$view, &$repeat)
     
     unset($params['get']);
     $params = array_diff_key($params, array_flip($map));
-    
+
+    unset($data['get']);
     if (array_diff_assoc($data, $params) || array_diff_assoc($params, $data)) return '';
     
 	return $content;
