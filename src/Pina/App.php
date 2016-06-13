@@ -32,23 +32,23 @@ class App
 
     public static function run()
     {
-        if (!Site::init(!empty($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : '')) {
+        if (!Site::init(Input::getHost())) {
             @header('HTTP/1.1 404 Not Found');
             exit;
         }
 
-        $method = Core::getRequestMethod();
+        $method = Input::getMethod();
         if (!in_array($method, array('get', 'put', 'delete', 'post'))) {
             @header("HTTP/1.1 501 Not Implemented");
             exit;
         }
 
-        $data = Core::getRequestData();
+        $data = Input::getData();
         if (empty($data[$method]) && !in_array($_SERVER['REQUEST_URI'], array($_SERVER['SCRIPT_NAME'], "", "/"))) {
             $data[$method] = $_SERVER['REQUEST_URI'];
         }
 
-        $resource = Core::getResource($data, $method);
+        $resource = Input::getResource();
 
         $staticFolders = array('/cache/', '/static/', '/uploads/', '/vendor/');
         foreach ($staticFolders as $folder) {
@@ -58,9 +58,11 @@ class App
             }
         }
 
-        App::set(App::parse($resource));
-        Core::resource($resource);
-        Module::init();
+        $app = App::parse($resource);
+        App::set($app);
+        App::resource($resource);
+        
+        ModuleRegistry::init();
 
         $response = Response\Factory::get($resource, $method);
         if (empty($response)) {
@@ -70,6 +72,17 @@ class App
 
         Request::init($response, $data);
         echo Request::run($resource, $method);
+    }
+    
+    public static function resource($resource = '')
+    {
+        static $item = false;
+
+        if (!empty($resource) && empty($item)) {
+            $item = $resource;
+        }
+
+        return $item;
     }
 
     public static function path()
@@ -137,21 +150,6 @@ class App
         return 'frontend';
     }
 
-    public static function canUseResources()
-    {
-        if (empty($_SERVER['REQUEST_URI'])) {
-            return false;
-        }
-
-        $useResources = false;
-        if (!empty($_SERVER['DOCUMENT_URI'])) {
-            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['DOCUMENT_URI']) !== 0;
-        } else {
-            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0;
-        }
-        return $useResources;
-    }
-
     public static function getParamsString($pattern, $params)
     {
         $systemParamKeys = array('get', 'app', 'anchor');
@@ -181,10 +179,9 @@ class App
 
     public static function link($pattern, $params = array())
     {
-        $useResources = self::canUseResources();
         $url = 'http://'.Site::domain();
-        if (!$useResources) {
-            $url .= '/pina.php?get=';
+        if (Input::isScript() && !empty(self::$config['allow_script_url'])) {
+            $url .= '/pina.php?action=';
         } else {
             $url .= '/';
         }
