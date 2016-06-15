@@ -27,7 +27,7 @@ class FileManager
 
     static public function newFileName($souce_filename, $ext)
     {
-        if (empty($ext)) return '';
+        if (empty($ext)) return $souce_filename;
         
         $postfix = "";
         do
@@ -133,8 +133,11 @@ class FileManager
         $sourcePathinfo = pathinfo($filepath);
         $targetPathinfo = pathinfo($filename);
 
-        if (empty($targetPathinfo['extension']) || $targetPathinfo['extension'] != $sourcePathinfo['extension']) {
-            $filename = $filename . "." . $sourcePathinfo['extension'];
+        $sourceExtension = isset($sourcePathinfo['extension']) ? $sourcePathinfo['extension'] : '';
+        $targetExtension = isset($targetPathinfo['extension']) ? $targetPathinfo['extension'] : '';
+
+        if (empty($targetExtension) && !empty($sourceExtension) || $targetExtension != $sourceExtension) {
+            $filename = $filename . "." . $sourceExtension;
         }
 
         static::prepareDir($filename);
