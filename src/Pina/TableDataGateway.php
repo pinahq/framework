@@ -51,6 +51,32 @@ class TableDataGateway extends SQL
             $this->whereBy('account_id', $this->accountId);
         }
     }
+    
+    public function getUpgrades()
+    {
+        if (empty($this->fields)) {
+            return array();
+        }
+        
+        $r = array();
+        
+        $upgrade = new TableDataGatewayUpgrade($this);
+        $tables = $this->db->col("SHOW TABLES");
+        if (!in_array($this->table, $tables)) {
+            $r [] = $upgrade->makeCreateTable();
+        } else {
+            $r [] = $upgrade->makeAlterTable();
+        }
+        return $r;
+    }
+    
+    public function doUpgrades()
+    {
+        $upgrades = $this->getUpgrades();
+        foreach ($upgrades as $q) {
+            $this->db->query($q);
+        }
+    }
 
     /*
      * Возвращает экземпляр конкретного класса

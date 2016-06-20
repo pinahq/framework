@@ -181,7 +181,7 @@ class App
     {
         $url = 'http://'.Site::domain();
         if (Input::isScript() && !empty(self::$config['allow_script_url'])) {
-            $url .= '/pina.php?action=';
+            $url .= '/index.php?action=';
         } else {
             $url .= '/';
         }

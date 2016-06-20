@@ -2,4 +2,4 @@
 
 namespace Pina;
 
-Route::own('system', __NAMESPACE__.'\Module');
+Route::own('system', __NAMESPACE__);

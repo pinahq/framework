@@ -13,9 +13,9 @@ class ModuleRegistry
     {        
         $config = Config::load('modules');
         self::$default_modules = array(
-            'Pina\Module'
+            'Pina'
         );
-        if (is_array($config['default'])) {
+        if (!empty($config['default']) && is_array($config['default'])) {
             self::$default_modules = array_merge(self::$default_modules, $config['default']);
         }
         
@@ -28,13 +28,13 @@ class ModuleRegistry
         
         Access::reset();
         self::$paths = array();
-        foreach (self::$enabled_modules as $className) {
-            
+        foreach (self::$enabled_modules as $ns) {
+            $className = $ns.'\\Module';
             if (!class_exists($className)) {
                 continue;
             }
             
-            self::$paths[$className] = call_user_func(array($className, 'getPath'));
+            self::$paths[$ns] = call_user_func(array($className, 'getPath'));
         }
         
         foreach (self::$paths as $base) {
