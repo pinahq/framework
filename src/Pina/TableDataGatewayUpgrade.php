@@ -49,8 +49,61 @@ class TableDataGatewayUpgrade
             $q .= $this->makeIndex($index) . ', ';
         }
         $q = rtrim($q, ', ') . ') ' . $this->gateway->engine . ';';
-        
+
         return $q;
+    }
+
+    public function getTriggerDiff()
+    {
+        $table = $this->gateway->table;
+        $triggers = is_array($this->gateway->triggers)?$this->gateway->triggers:array();
+
+        $existedTriggers = Arr::groupUnique($this->db->table("SHOW TRIGGERS LIKE '".$table."'"), 'Trigger');
+
+        $dropQueries = array();
+        $createQueries = array();
+        foreach ($triggers as $name => $trigger) {
+            $realName = $this->makeTriggerName($name);
+            if (!isset($existedTriggers[$realName])) {
+                $createQueries = array_merge($createQueries, $this->getCreateTriggerQueries($name, $trigger));
+                continue;
+            }
+
+            $needToChange = strtolower($existedTriggers[$realName]['Timing'] . ' ' . $existedTriggers[$realName]['Event']) != strtolower($trigger[0]) || strtolower($existedTriggers[$realName]['Statement']) != strtolower($trigger[1]);
+
+            if ($needToChange) {
+                $dropQueries [] = 'DROP TRIGGER ' . $realName;
+                $createQueries = array_merge($createQueries, $this->getCreateTriggerQueries($name, $trigger));
+            }
+
+            unset($existedTriggers[$realName]);
+        }
+
+        foreach ($existedTriggers as $realName => $existedTrigger) {
+            if ($existedTrigger['Table'] === $table) {
+                $dropQueries [] = 'DROP TRIGGER ' . $realName;
+            }
+        }
+        
+        return array_merge($dropQueries, $createQueries);
+    }
+
+    public function getCreateTriggerQueries($name, $trigger)
+    {
+        $r = [];
+
+        if (!is_array($trigger) || count($trigger) != 2) {
+            return $r;
+        }
+        list($action, $stmt) = $trigger;
+
+        $r[] = 'CREATE TRIGGER ' . $this->makeTriggerName($name) . ' ' . $action . ' ON ' . $this->gateway->table . ' FOR EACH ROW ' . $stmt;
+        return $r;
+    }
+
+    private function makeTriggerName($name)
+    {
+        return $this->gateway->table . '_' . $name;
     }
 
     public function parseFieldDescription($descr)
@@ -241,7 +294,7 @@ class TableDataGatewayUpgrade
             $q .= $this->constructChanges($type, $value);
         }
         $q = trim($q, ', ') . ';';
-        
+
         return $q;
     }
 

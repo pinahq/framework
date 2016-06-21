@@ -63,19 +63,27 @@ class TableDataGateway extends SQL
         $upgrade = new TableDataGatewayUpgrade($this);
         $tables = $this->db->col("SHOW TABLES");
         if (!in_array($this->table, $tables)) {
-            $r [] = $upgrade->makeCreateTable();
-        } else {
-            $r [] = $upgrade->makeAlterTable();
+            $r = $upgrade->makeCreateTable();
+        } else if ($q = $upgrade->makeAlterTable()) {
+            $r [] = $q;
         }
+        $r = array_merge($r, $upgrade->getTriggerDiff());
         return $r;
     }
     
     public function doUpgrades()
     {
         $upgrades = $this->getUpgrades();
+        if (empty($upgrades)) {
+            return array();
+        }
         foreach ($upgrades as $q) {
+            if (empty($q)) {
+                continue;
+            }
             $this->db->query($q);
         }
+        return $upgrades;
     }
 
     /*

@@ -64,4 +64,23 @@ class ModuleRegistry
     {
         return self::$paths;
     }
+    
+    public static function walkClasses($type, $callback)
+    {
+        $paths = self::getPaths();
+        $suffix = $type.'.php';
+        $suffixLength = strlen($suffix);
+        $r = array();
+        foreach ($paths as $ns => $path) {
+            $files = array_filter(scandir($path), function($s) use ($suffix, $suffixLength) {
+                return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
+            });
+
+            foreach ($files as $file) {
+                $className = $ns.'\\'.pathinfo($file, PATHINFO_FILENAME);
+                $c = new $className;
+                $callback($c);
+            }
+        }
+    }
 }
