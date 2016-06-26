@@ -47,7 +47,7 @@ class TableDataGateway extends SQL
         $upgrade = new TableDataGatewayUpgrade($this);
         $tables = $this->db->col("SHOW TABLES");
         if (!in_array($this->table, $tables)) {
-            $r = $upgrade->makeCreateTable();
+            $r [] = $upgrade->makeCreateTable();
         } else if ($q = $upgrade->makeAlterTable()) {
             $r [] = $q;
         }

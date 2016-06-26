@@ -56,7 +56,7 @@ class TableDataGatewayUpgrade
     public function getTriggerDiff()
     {
         $table = $this->gateway->table;
-        $triggers = is_array($this->gateway->triggers)?$this->gateway->triggers:array();
+        $triggers = (isset($this->gateway->triggers) && is_array($this->gateway->triggers))?$this->gateway->triggers:array();
 
         $existedTriggers = Arr::groupUnique($this->db->table("SHOW TRIGGERS LIKE '".$table."'"), 'Trigger');
 
