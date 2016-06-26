@@ -87,15 +87,6 @@ class SQLTest extends PHPUnit_Framework_TestCase
     public function testJoin()
     {
         Config::initPath(__DIR__.'/config');
-        $q = SQL::table('cody_product')->leftJoin('cody_product_variant', 'product_id', 'cody_product', 'product_id')->make();
-        $this->assertEquals("SELECT * FROM cody_product LEFT JOIN cody_product_variant ON cody_product_variant.product_id = cody_product.product_id", $q);
-        
-        $q = SQL::table('cody_pick_list_order')->leftJoin('cody_pick_list', array(
-                'pick_list_id' => array('cody_pick_list_order' => 'pick_list_id'),
-                'pick_list_type' => 'buyer'
-        ))->make();
-        $this->assertEquals("SELECT * FROM cody_pick_list_order LEFT JOIN cody_pick_list ON cody_pick_list.pick_list_id = cody_pick_list_order.pick_list_id AND cody_pick_list.pick_list_type ='buyer'", $q);
-        
         $q = SQL::table('cody_product')->leftJoin(
             SQL::table('cody_product_variant')->on('product_id')
         )->make();
@@ -132,7 +123,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
             ->orderBy('t2.category_id, t2.category_parent_length DESC')
             ->make();
         
-        $this->assertEquals("SELECT category_id, category_title, category_parent_id, category_title AS category_parent_title"
+        $this->assertEquals("SELECT cody_category.category_id, cody_category.category_title, t2.category_parent_id, t3.category_title AS category_parent_title"
             . " FROM cody_category"
             . " LEFT JOIN cody_category_parent t2 ON t2.category_id = cody_category.category_id"
             . " LEFT JOIN cody_category t3 ON t3.category_id = t2.category_parent_id"
@@ -154,7 +145,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
             )
             ->innerJoin(
                 SQL::table('cody_pick_list_product')
-                    ->select('cody_pick_list_product.pick_list_product_id')
+                    ->select('pick_list_product_id')
                     ->on('product_variant_id')
                     ->onBy('pick_list_product_id', $pickListProductIds)
                     ->onNotBy('pick_list_product_amount_status', 'decreased')
@@ -249,29 +240,30 @@ class SQLTest extends PHPUnit_Framework_TestCase
         $gw = SQL::table('cody_product');
 
         $useStock = true;
-        $gw->innerJoin('cody_brand', 'brand_id', 'cody_product', 'brand_id')
-            ->select('cody_brand.brand_title')
+        $gw->innerJoin(
+                SQL::table('cody_brand')
+                ->on('brand_id')
+                ->select('brand_title')
+            )
+            ->select('product_id, product_sku')
+            ->select('product_title, product_color')
 
-            ->select('cody_product.product_id, cody_product.product_sku')
-            ->select('cody_product.product_title, cody_product.product_color')
+            ->innerJoin(
+                SQL::table('cody_product_variant')->on('product_id')
+                ->select('product_variant_size')
+            )
+            
+            ->calculate('SUM(cody_product_variant.product_variant_amount) as product_variant_amount')
 
-            ->innerJoin('cody_product_variant', 'product_id', 'cody_product', 'product_id')
-            ->select('cody_product_variant.product_variant_size')
-            ->select('SUM(cody_product_variant.product_variant_amount) as product_variant_amount')
-
-            ->leftJoin('cody_product_reserv', 'product_variant_id', 'cody_product_variant', 'product_variant_id')
-            ->select('SUM(cody_product_reserv.product_reserv_amount) as product_reserv_amount')
-
-            ->leftJoin('cody_order_product', array(
-                'product_variant_id' => array('cody_product_variant' => 'product_variant_id'),
-                'order_product_amount_status' => 'reserved',
-                //'order_id' => array('cody_order' => 'order_id'),
-            ))
-            ->select($useStock?'SUM(cody_order_product.order_product_amount) + SUM(cody_order_product.order_product_stock_amount) as order_product_amount':'SUM(cody_order_product.order_product_amount) as order_product_amount')
-            //->whereBy('cody_order.order_buyer_status', array('confirmed'))
-            //->whereBy('cody_order.order_provider_status', array('new'))
-
-            ->select('SUM(cody_product_variant.product_variant_amount '
+            ->leftJoin(
+                SQL::table('cody_product_reserv')->on('product_variant_id')
+                ->calculate('SUM(cody_product_reserv.product_reserv_amount) as product_reserv_amount')
+             )
+            ->leftJoin(
+                SQL::table('cody_order_product')->on('product_variant_id')->onBy('order_product_amount_status', 'reserved')
+                ->calculate($useStock?'SUM(cody_order_product.order_product_amount) + SUM(cody_order_product.order_product_stock_amount) as order_product_amount':'SUM(cody_order_product.order_product_amount) as order_product_amount')
+            )
+            ->calculate('SUM(cody_product_variant.product_variant_amount '
                 .($useStock?(' + cody_product_variant.product_variant_stock_amount - cody_product_variant.product_variant_stock_reserv - IFNULL(cody_order_product.order_product_stock_amount,0)'):'')
                 . ' - IFNULL(cody_product_reserv.product_reserv_amount,0)'
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'

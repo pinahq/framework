@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use League\Csv\Reader;
+
 /*
  * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах 
  * и базовые методы, наследуется от конструктора запросов
@@ -13,19 +15,17 @@ namespace Pina;
 class TableDataGateway extends SQL
 {
 
+    const LOAD_BUFFER_LIMIT = 1024000;
+
     public $table = "";
     public $primaryKey = "";
     public $orderBy = "";
     public $fields = false;
     public $indexes = array();
-    public $siteId = 0;
-    public $accountId = 0;
     protected $context = array();
-    public $useSiteId = false;
-    public $useAccountId = false;
     public $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-    public function __construct($siteId = false)
+    public function __construct()
     {
         //TODO: make tables prefixes
         if (empty($this->primaryKey)) {
@@ -34,32 +34,16 @@ class TableDataGateway extends SQL
 
         $db = DB::get();
         parent::__construct($this->table, $db);
-
-        if ($siteId !== false) {
-            $this->siteId = intval($siteId);
-            $this->accountId = Site::accountId($siteId);
-        } else {
-            $this->siteId = Site::id();
-            $this->accountId = Site::accountId();
-        }
-
-        if ($this->useSiteId) {
-            $this->whereBy('site_id', $this->siteId);
-        }
-
-        if ($this->useAccountId) {
-            $this->whereBy('account_id', $this->accountId);
-        }
     }
-    
+
     public function getUpgrades()
     {
         if (empty($this->fields)) {
             return array();
         }
-        
+
         $r = array();
-        
+
         $upgrade = new TableDataGatewayUpgrade($this);
         $tables = $this->db->col("SHOW TABLES");
         if (!in_array($this->table, $tables)) {
@@ -70,7 +54,7 @@ class TableDataGateway extends SQL
         $r = array_merge($r, $upgrade->getTriggerDiff());
         return $r;
     }
-    
+
     public function doUpgrades()
     {
         $upgrades = $this->getUpgrades();
@@ -90,6 +74,7 @@ class TableDataGateway extends SQL
      * Возвращает экземпляр конкретного класса
      * @return TableDataGateway
      */
+
     static public function instance()
     {
         $cl = get_called_class();
@@ -101,7 +86,7 @@ class TableDataGateway extends SQL
         $this->context[$field] = $value;
         return $this->whereBy($field, $value);
     }
-    
+
     public function hasField($field)
     {
         return isset($this->fields[$field]);
@@ -124,7 +109,7 @@ class TableDataGateway extends SQL
         } else {
             $fields = array_keys($this->fields);
         }
-        
+
         foreach ($this->context as $field => $value) {
             if (!isset($data[0])) {
                 $data[$field] = $value;
@@ -134,63 +119,29 @@ class TableDataGateway extends SQL
                 }
             }
         }
-        
-        if ($this->useSiteId) {
-            $fields [] = 'site_id';
-            if (!isset($data[0])) {
-                $data['site_id'] = $this->siteId;
-            } else {
-                foreach ($data as $k => $v) {
-                    $data[$k]['site_id'] = $this->siteId;
-                }
-            }
-        }
-
-        if ($this->useAccountId) {
-            $fields [] = 'account_id';
-            if (!isset($data[0])) {
-                $data['account_id'] = $this->accountId;
-            } else {
-                foreach ($data as $k => $v) {
-                    $data[$k]['account_id'] = $this->accountId;
-                }
-            }
-        }
     }
-    
+
     protected function getOnDuplicateKeys($keys)
     {
-        $primaryKeys = !empty($this->indexes['PRIMARY KEY'])?$this->indexes['PRIMARY KEY']:array();
+        $primaryKeys = !empty($this->indexes['PRIMARY KEY']) ? $this->indexes['PRIMARY KEY'] : array();
         if (!is_array($primaryKeys)) {
             $primaryKeys = array($primaryKeys);
         }
-        
+
         return array_diff($keys, $primaryKeys);
     }
 
-    public function insert($data = array(), $fields = false)
+    public function makeInsert($data = array(), $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
 
-        return parent::insert($data, $fields);
+        return parent::makeInsert($data, $fields);
     }
 
-    public function insertGetId($data = array(), $fields = false)
+    public function makePut($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
-        return parent::insertGetId($data, $fields);
-    }
-
-    public function put($data, $fields = false)
-    {
-        $this->adjustDataAndFields($data, $fields);
-        return parent::put($data, $fields);
-    }
-
-    public function putGetId($data, $fields = false)
-    {
-        $this->adjustDataAndFields($data, $fields);
-        return parent::putGetId($data, $fields);
+        return parent::makePut($data, $fields);
     }
 
     public function update($data, $fields = false)
@@ -312,6 +263,42 @@ class TableDataGateway extends SQL
                 );
             }
         }
+    }
+
+    /*
+     * $schema = array("file_field" => "table_field");
+     */
+
+    public function load($schema, $reader)
+    {
+        $cnt = 0;
+        $buffer = '';
+        $data = $reader->fetch();
+        foreach ($data as $line) {
+            $prepared = [];
+            foreach ($schema as $sourceKey => $targetKey) {
+                if (isset($line[$sourceKey])) {
+                    $prepared[$targetKey] = $line[$sourceKey];
+                }
+            }
+            list($ks, $valueCondition) = $this->getKeyValuesCondition($prepared, $schema);
+            if (strlen($values) > self::LOAD_BUFFER_LIMIT) {
+                $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+                $cnt += $this->db->affectedRows();
+            }
+            $buffer .= $valueCondition;
+        }
+        if (!empty($buffer)) {
+            $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+            $cnt += $this->db->affectedRows();
+        }
+        return $cnt;
+    }
+
+    public function loadCSV($schema, $path)
+    {
+        $csv = \League\Csv\Reader::createFromPath($path);
+        return $this->load($schema, $csv);
     }
 
 }
