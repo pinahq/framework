@@ -267,7 +267,7 @@ class Request
         $module = Url::module($controller);
 
         return
-            Module::isActive($module) &&
+            ModuleRegistry::isActive($module) &&
             Access::isHandlerPermitted($resource, $action);
     }
 
@@ -306,7 +306,7 @@ class Request
         self::$stack[$top]["__resource"] = $resource;
 
         $isExternal = $top == 0;
-
+        
         if (!self::isAvailable($resource, $method)) {
             if ($isExternal) {
                 $resource = 'errors/access-denied';

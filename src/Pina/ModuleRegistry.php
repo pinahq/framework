@@ -10,7 +10,7 @@ class ModuleRegistry
     private static $paths = array();
 
     public static function init()
-    {        
+    {       
         $config = Config::load('modules');
         self::$default_modules = array(
             'Pina'
@@ -31,6 +31,7 @@ class ModuleRegistry
         foreach (self::$enabled_modules as $ns) {
             $className = $ns.'\\Module';
             if (!class_exists($className)) {
+                self::$paths[$ns] = str_replace('Pina\\Modules\\', App::path()."/default/Modules/", $ns);
                 continue;
             }
             

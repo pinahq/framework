@@ -16,10 +16,11 @@ class Templater extends \Smarty
                 $this->plugins_dir, __DIR__ . '/helpers'
         );
 
-        $paths = Module::paths('helpers');
+        $paths = ModuleRegistry::getPaths();
         foreach ($paths as $v) {
-            if (is_dir($v)) {
-                $this->plugins_dir [] = $v;
+            $helperDir = $v."/helpers";
+            if (is_dir($helperDir)) {
+                $this->plugins_dir [] = $helperDir;
             }
         }
 

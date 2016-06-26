@@ -16,6 +16,7 @@ class Route
 
     public static function owner($controller)
     {
+        print_r(self::$owners);
         $controller = trim($controller, "/");
         if (!empty(self::$owners[$controller])) {
             return self::$owners[$controller];

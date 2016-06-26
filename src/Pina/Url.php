@@ -135,7 +135,7 @@ class Url
         if (empty($owner)) {
             return false;
         }
-        $path = Module::path($owner);
+        $path = ModuleRegistry::getPath($owner);
         return $path . '/' . App::get() . '/' . $controller . '/' . $action;
     }
 

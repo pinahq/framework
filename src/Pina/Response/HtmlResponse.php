@@ -49,8 +49,12 @@ class HtmlResponse extends Response
 
     public function fetch($handler = '', $first = true)
     {
-        $this->header('Pina-Response: Json');
+        $this->header('Pina-Response: html');
         $this->contentType('text/html');
+        
+        if (empty($handler)) {
+            return '';
+        }
         
         $app = App::get();
 

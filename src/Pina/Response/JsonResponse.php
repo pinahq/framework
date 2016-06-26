@@ -34,7 +34,7 @@ class JsonResponse extends Response
     
     public function fetch($handler = '', $first = true)
     {
-        $this->header('Pina-Response: Json');
+        $this->header('Pina-Response: json');
         $this->ok();
         $this->contentType('application/json');
         $c = json_encode($this->makePacket('ok'), JSON_UNESCAPED_UNICODE);
