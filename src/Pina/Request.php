@@ -257,18 +257,15 @@ class Request
         self::$response->result($name, $value);
     }
 
-    static public function isAvailable($resource, $method)
+    static public function isAvailable($resource, $controller)
     {
         if (App::env() === "cli") {
             return true;
         }
         
-        list($controller, $action) = Url::route($resource, $method);
         $module = Url::module($controller);
 
-        return
-            ModuleRegistry::isActive($module) &&
-            Access::isHandlerPermitted($resource, $action);
+        return ModuleRegistry::isActive($module) && Access::isHandlerPermitted($resource);
     }
 
     static protected function runHandler($handler)
@@ -307,15 +304,16 @@ class Request
 
         $isExternal = $top == 0;
         
-        if (!self::isAvailable($resource, $method)) {
-            if ($isExternal) {
-                $resource = 'errors/access-denied';
+        list($controller, $action, $data) = Url::route($resource, $method);
+        
+        if (!self::isAvailable($resource, $action)) {
+            if ($isExternal && $resource != 'errors/access-denied') {
+                return self::run('errors/access-denied');
             } else {
                 return '';
             }
         }
 
-        list($controller, $action, $data) = Url::route($resource, $method);
         self::$stack[$top] = array_merge(self::$stack[$top], $data);
         $handler = Url::handler($controller, $action);
 
