@@ -47,6 +47,10 @@ class InputTest extends PHPUnit_Framework_TestCase
         
         $_SERVER['REQUEST_URI'] = 'books/6';
         $this->assertEquals('books/6', Input::getResource());
+        
+        $_SERVER['REQUEST_URI'] = 'delete!books/6';
+        $this->assertEquals('books/6', Input::getResource());
+        $this->assertEquals('delete', Input::getMethod());
     }
 
 

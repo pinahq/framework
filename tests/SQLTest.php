@@ -277,4 +277,13 @@ class SQLTest extends PHPUnit_Framework_TestCase
                 . ') as stock') !== false);
     }
     
+    public function testInsert()
+    {
+        $q = SQL::table('cody_product')->makeInsert(array(
+            'product_title' => 'Toy',
+            'brand_id' => 1,
+        ));
+        $this->assertEquals("INSERT INTO `cody_product` SET `product_title` = 'Toy', `brand_id` = '1'", $q);        
+    }
+    
 }

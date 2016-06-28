@@ -759,8 +759,7 @@ class SQL
         }
 
         if (!is_array(reset($data))) {
-            $q = "INSERT INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
-            return $this->db->query($q);
+            return "INSERT INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
         }
 
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);

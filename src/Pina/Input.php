@@ -7,6 +7,8 @@ class Input
     
     const ACTION_PARAM = 'action';
     const METHOD_DELIMITER = '!';
+    
+    static private $methods = array('get', 'post', 'put', 'delete');
 
     public static function getHost()
     {
@@ -26,7 +28,15 @@ class Input
             return '';
         }
 
-        return $parsed['path'];
+        $path = $parsed['path'];
+        
+        foreach (self::$methods as $method) {
+            if (strncasecmp($r, $method.self::METHOD_DELIMITER, strlen($method.self::METHOD_DELIMITER)) === 0) {
+                return substr($path, strlen($method) + 1);
+            }
+        }
+        
+        return $path;
     }
     
     private static function getFullResource()
@@ -35,7 +45,7 @@ class Input
             return $_REQUEST[self::ACTION_PARAM];
         }
         
-        return $_SERVER['REQUEST_URI'];        
+        return ltrim($_SERVER['REQUEST_URI'], '/');
     }
     
     public static function getMethod()
@@ -49,9 +59,7 @@ class Input
         
         $r = strtolower($r);
         
-        $methods = array('get', 'post', 'put', 'delete');
-        
-        foreach ($methods as $method) {
+        foreach (self::$methods as $method) {
             if (strncmp($r, $method.self::METHOD_DELIMITER, strlen($method.self::METHOD_DELIMITER)) === 0) {
                 return $method;
             }
