@@ -263,7 +263,7 @@ class Request
             return true;
         }
         
-        $module = Url::module($controller);
+        $module = Route::owner($controller);
 
         return ModuleRegistry::isActive($module) && Access::isHandlerPermitted($resource);
     }
