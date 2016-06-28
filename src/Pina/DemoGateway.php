@@ -4,7 +4,7 @@ namespace Pina;
 
 class DemoGateway extends TableDataGateway
 {
-    public $table = "cody_image";
+    public $table = "cody_demo";
     public $primaryKey = "image_id";
     public $fields = array(
         'image_id' => "INT(11) NOT NULL AUTO_INCREMENT",

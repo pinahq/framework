@@ -15,9 +15,4 @@ class Module implements ModuleInterface
         return 'Framework';
     }
 
-    static public function install()
-    {
-        
-    }
-
 }

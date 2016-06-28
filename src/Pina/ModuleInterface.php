@@ -9,6 +9,4 @@ interface ModuleInterface
 
     static public function getTitle();
 
-    static public function install();
-
 }
