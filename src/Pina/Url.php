@@ -139,12 +139,6 @@ class Url
         return $path . '/' . App::get() . '/' . $controller . '/' . $action;
     }
 
-    static public function module($controller)
-    {
-        $controller = trim($controller, "/");
-        return Route::owner($controller);
-    }
-
     static public function parse($resource, $pattern)
     {
         list($preg, $map) = self::preg($pattern);

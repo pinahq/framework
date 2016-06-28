@@ -72,8 +72,10 @@ class Templater extends \Smarty
         }
 
         $params['get'] = Route::resource($params['get'], $params);
+        
+        list($controller, $action, $data) = Url::route($params['get'], 'get');
 
-        if (!Request::isAvailable($params['get'], 'get')) {
+        if (!Request::isAvailable($params['get'], $controller)) {
             return;
         }
 
@@ -85,7 +87,6 @@ class Templater extends \Smarty
             }
         }
 
-        list($controller, $action, $data) = Url::route($params['get'], 'get');
         $params = array_merge($params, $data);
         $handler = Url::handler($controller, $action);
 
