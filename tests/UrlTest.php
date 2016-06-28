@@ -95,24 +95,6 @@ class UrlTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider moduleProvider
-     */
-    public function testModule($controller, $expected)
-    {
-        $module = Url::module($controller);
-        $this->assertEquals($expected, $module);
-    }
-
-    public function moduleProvider()
-    {
-        Route::own('/menus', 'Menus');
-        return array(
-            array('menus/items', 'Menus'),
-            array('menus/', 'Menus'),
-        );
-    }
-
-    /**
      * @dataProvider pregProvider
      */
     public function testPreg($pattern, $expected)

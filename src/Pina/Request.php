@@ -306,9 +306,9 @@ class Request
         
         list($controller, $action, $data) = Url::route($resource, $method);
         
-        if (!self::isAvailable($resource, $action)) {
+        if (!self::isAvailable($resource, $controller)) {
             if ($isExternal && $resource != 'errors/access-denied') {
-                return self::run('errors/access-denied');
+                return self::run('errors/access-denied', 'get');
             } else {
                 return '';
             }
