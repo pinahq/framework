@@ -794,7 +794,7 @@ class SQL
                 INSERT INTO `" . $this->from . "` SET " . $set . "
                 ON DUPLICATE KEY UPDATE " . $set . "
             ";
-            return $this->db->query($sql);
+            return $sql;
         }
 
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);

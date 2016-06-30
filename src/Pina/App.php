@@ -193,11 +193,7 @@ class App
         $ps = self::getParamsString($pattern, $params);
 
         $url .= $prefix . ltrim($resource, '/');
-        if (!$useResources) {
-            $url .=!empty($ps) ? ('&' . $ps) : '';
-        } else {
-            $url .=!empty($ps) ? ('?' . $ps) : '';
-        }
+        $url .=!empty($ps) ? ('?' . $ps) : '';
 
         if (!empty($params['anchor'])) {
             $url .= "#" . $params["anchor"];
