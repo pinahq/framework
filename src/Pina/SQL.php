@@ -749,33 +749,49 @@ class SQL
 
     public function insert($data, $fields = false)
     {
-        $this->db->query($this->makeInsert($data, $fields));
+        $q = $this->makeInsert($data, $fields);
+        if (empty($q)) {
+            return false;
+        }
+        return $this->db->query($q);
+    }
+    
+    public function insertIgnore($data, $fields = false)
+    {
+        $q = $this->makeInsert($data, $fields, $a = 'INSERT IGNORE');
+        if (empty($q)) {
+            return false;
+        }
+        return $this->db->query($q);
     }
 
-    public function makeInsert($data, $fields = false)
+    public function makeInsert($data, $fields = false, $cmd = 'INSERT')
     {
         if (empty($data) || !is_array($data) || count($data) == 0) {
             return false;
         }
 
         if (!is_array(reset($data))) {
-            return "INSERT INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
+            return $cmd." INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
         }
 
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
 
-        return "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
+        return $cmd." INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
     }
 
     public function insertGetId($data, $fields = false)
     {
-        $this->insert($data, $fields);
-        return $this->db->insertId();
+        return $this->insert($data, $fields)?$this->db->insertId():0;
     }
 
     public function put($data, $fields = false)
     {
-        $this->db->query($this->makePut($data, $fields));
+        $q = $this->makePut($data, $fields);
+        if (empty($q)) {
+            return false;
+        }
+        return $this->db->query($q);
     }
 
     public function makePut($data, $fields = false)
@@ -809,8 +825,7 @@ class SQL
 
     public function putGetId($data, $fields = false)
     {
-        $this->put($data, $fields);
-        return $this->db->insertId();
+        return $this->put($data, $fields)?$this->db->insertId():0;
     }
 
     private function getOnDuplicateKeyCondition($keys)
@@ -872,8 +887,11 @@ class SQL
 
     public function update($data, $fields = false)
     {
-        $this->db->query($this->makeUpdate($data, $fields));
-        return $this->db->affectedRows();
+        $q = $this->makeUpdate($data, $fields);
+        if (empty($q)) {
+            return false;
+        }
+        return $this->db->query($q)?$this->db->affectedRows():0;
     }
 
     public function makeUpdate($data, $fields = false)

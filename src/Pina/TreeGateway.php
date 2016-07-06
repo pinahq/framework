@@ -64,11 +64,11 @@ class TreeGateway extends TableDataGateway
             ->column($this->treeFields['id']);
     }
 
-    public function addNode($parent, $id)
+    public function addNode($parentId, $id)
     {
-        $parent = intval($parent);
+        $parentId = intval($parentId);
         $id = intval($id);
-        if ($id == 0 || $parent == 0) {
+        if ($id == 0 || $parentId == 0) {
             return false;
         }
 
@@ -77,17 +77,12 @@ class TreeGateway extends TableDataGateway
                 (`{$this->treeFields['parent']}`, 
                 `{$this->treeFields['id']}`, 
                 `{$this->treeFields['length']}`
-                ". (!empty($this->useSiteId) ? ", `site_id`) " : ")") ."
-            SELECT `{$this->treeFields['parent']}`, 
-                $id,
+            SELECT `{$this->treeFields['parent']}`, $id,
                 `{$this->treeFields['length']}` + 1
-                ". (!empty($this->useSiteId) ? ", `site_id` " : "") ."
             FROM `$this->table`
-            WHERE `{$this->treeFields['id']}` = $parent
-            ". (!empty($this->useSiteId) ? " AND `site_id` = $this->siteId " : "") ."
+            WHERE `{$this->treeFields['id']}` = $parentId
             UNION
-            SELECT $parent, $id, 1
-            ". (!empty($this->useSiteId) ? ", $this->siteId" : "") ."
+            SELECT $parentId, $id, 1
         ");
     }
     
@@ -101,21 +96,17 @@ class TreeGateway extends TableDataGateway
         $this->db->query("
             DELETE `t1`
             FROM `$this->table` `t1`
-            JOIN `$this->table` t2 
+            JOIN `$this->table` `t2` 
                 ON `t1`.`{$this->treeFields['id']}` = `t2`.`{$this->treeFields['id']}` 
                 AND `t2`.`{$this->treeFields['parent']}` = $id
-                ". (!empty($this->useSiteId) ? " AND `t2`.`site_id` = $this->siteId " : "") ."
             JOIN `$this->table` t3 
                 ON `t1`.`{$this->treeFields['parent']}` = `t3`.`{$this->treeFields['parent']}` 
                 AND `t3`.`{$this->treeFields['id']}` = $id
-                ". (!empty($this->useSiteId) ? " AND `t3`.`site_id` = $this->siteId " : "") ."
-            ". (!empty($this->useSiteId) ? " WHERE `t1`.`site_id` = $this->siteId " : "") ."
         ");
 
         $this->db->query("
             DELETE FROM `$this->table`
             WHERE `{$this->treeFields['id']}` = $id
-            ". (!empty($this->useSiteId) ? " AND `site_id` = $this->siteId " : "") ."
         ");
     }
 
@@ -131,37 +122,29 @@ class TreeGateway extends TableDataGateway
             INSERT INTO `$this->table`
                 (`{$this->treeFields['parent']}`,
                 `{$this->treeFields['id']}`,
-                `{$this->treeFields['length']}`
-                ". (!empty($this->useSiteId) ? ", `site_id`) " : ")") ."
+                `{$this->treeFields['length']}`)
             SELECT `{$this->treeFields['parent']}`,
                 $id,
                 `{$this->treeFields['length']}` + 1
-                ". (!empty($this->useSiteId) ? ", `site_id` " : "") ."
             FROM `$this->table`
             WHERE `{$this->treeFields['id']}` = $parent
             UNION
             SELECT $parent, $id, 1
-            ". (!empty($this->useSiteId) ? ", $this->siteId " : "") ."
         ");
 
         $this->db->query("
             INSERT INTO `$this->table`
                 (`{$this->treeFields['parent']}`,
                 `{$this->treeFields['id']}`,
-                `{$this->treeFields['length']}`
-                ". (!empty($this->useSiteId) ? ", `site_id`) " : ")") ."
+                `{$this->treeFields['length']}`)
             SELECT `t1`.`{$this->treeFields['parent']}`,
             `t2`.`{$this->treeFields['id']}`,
             `t1`.`{$this->treeFields['length']}`
                 + `t2`.`{$this->treeFields['length']}`
-            ". (!empty($this->useSiteId) ? ", $this->siteId " : "") ."
             FROM `$this->table` AS `t1`
                 CROSS JOIN `$this->table` AS `t2`
             WHERE `t1`.`{$this->treeFields['id']}` = $id
             AND `t2`.`{$this->treeFields['parent']}` = $id
-            ". (!empty($this->useSiteId) ? "
-                AND `t1`.`site_id` = $this->siteId
-                AND `t2`.`site_id` = $this->siteId " : "") ."
         ");
     }
     

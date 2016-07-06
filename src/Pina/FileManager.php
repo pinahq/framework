@@ -92,7 +92,7 @@ class FileManager
         $filename = static::newFileName($souce_filename, $ext);
 
         $filepath = static::getFilePath($filename, $ext);
-
+        
         static::prepareDir($filename, $ext);
         
         if (!@move_uploaded_file($_FILES[$item]['tmp_name'], $filepath))

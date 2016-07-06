@@ -131,11 +131,11 @@ class TableDataGateway extends SQL
         return array_diff($keys, $primaryKeys);
     }
 
-    public function makeInsert($data = array(), $fields = false)
+    public function makeInsert($data = array(), $fields = false, $cmd = 'INSERT')
     {
         $this->adjustDataAndFields($data, $fields);
 
-        return parent::makeInsert($data, $fields);
+        return parent::makeInsert($data, $fields, $cmd);
     }
 
     public function makePut($data, $fields = false)
