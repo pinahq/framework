@@ -12,7 +12,7 @@ function smarty_block_iflocation($params, $content, &$view, &$repeat)
 
 	if (empty($needed)) return '';
 	
-	$resource = Url::trim(\Pina\Core::resource());
+	$resource = Url::trim(\Pina\App::resource());
     
     if (strpos($resource, $needed) !== 0) return '';
     list($preg, $map) = Url::preg($params['get']);

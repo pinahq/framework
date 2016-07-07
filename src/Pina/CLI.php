@@ -20,6 +20,7 @@ class CLI
         App::set('cli');
 
         ModuleRegistry::init();
+        ModuleRegistry::initModules();
 
         $parts = explode(".", $cmd);
         if (count($parts) !== 2) {

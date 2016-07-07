@@ -69,10 +69,11 @@ class App
             @header('HTTP/1.1 406 Not Acceptable');
             exit;
         }
+        Request::init($response, $data);
+        
+        ModuleRegistry::initModules();
         
         $resource = DispatcherRegistry::dispatch($resource);
-
-        Request::init($response, $data);
         echo Request::run($resource, $method);
     }
     

@@ -8,9 +8,9 @@ class ModuleRegistry
     private static $enabled_modules = array();
     private static $default_modules = array();
     private static $paths = array();
-
+    
     public static function init()
-    {       
+    {
         $config = Config::load('modules');
         self::$default_modules = array(
             'Pina'
@@ -37,6 +37,11 @@ class ModuleRegistry
             
             self::$paths[$ns] = call_user_func(array($className, 'getPath'));
         }
+    }
+
+    public static function initModules()
+    {       
+        $app = App::get();
         
         foreach (self::$paths as $base) {
             $path = $base.'/'.$app.'/init.php';
@@ -44,7 +49,24 @@ class ModuleRegistry
                 include_once $path;
             }
         }
+    }
+    
+    public static function add($ns, $title)
+    {
+        if (empty($ns) || empty($title)) {
+            return false;
+        }
         
+        $moduleId = ModuleGateway::instance()->whereBy('module_namespace', $ns)->value('module_id');
+        if (!$moduleId) {
+            $moduleId = ModuleGateway::instance()->insertGetId(array(
+                'module_title' => $title,
+                'module_namespace' => $ns,
+                'module_enabled' => 'Y',
+            ));
+        }
+        
+        return $moduleId;
     }
 
     public static function isActive($module)

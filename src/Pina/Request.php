@@ -331,17 +331,12 @@ class Request
             $handler .= '.' . self::$stack[$top]['display'];
         }
         
-        if ($isExternal && self::$response->code == '404 Not Found') {
-            list($controller, $action, $data) = Url::route('errors/not-found', 'get');
-            $handler = Url::handler($controller, $action);
-            self::$response->result("error", self::$response->code);
+        if ($isExternal && self::$response->code == '404 Not Found' && $resource != 'errors/not-found') {
+            return self::run('errors/not-found', 'get');
         }
         
-        
-        if ($isExternal && self::$response->code == '403 Forbidden') {
-            list($controller, $action, $data) = Url::route('errors/not-found', 'get');
-            $handler = Url::handler($controller, $action);
-            self::$response->result("error", self::$response->code);
+        if ($isExternal && self::$response->code == '403 Forbidden' && $resource != 'errors/forbidden') {
+            return self::run('errors/forbidden', 'get');
         }
 
         $r = self::$response->fetch($handler, $isExternal);
