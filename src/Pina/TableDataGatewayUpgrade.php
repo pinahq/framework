@@ -141,6 +141,8 @@ class TableDataGatewayUpgrade
             $title = '';
             if ($item["Key_name"] == "PRIMARY") {
                 $title .= "PRIMARY KEY";
+            } elseif ($item["Index_type"] == "FULLTEXT") {
+                $title .= "FULLTEXT ". $item["Key_name"];
             } elseif ($item["Non_unique"] == 0) {
                 $title .= "UNIQUE KEY " . $item["Key_name"];
             } elseif ($item["Non_unique"] == 1) {
