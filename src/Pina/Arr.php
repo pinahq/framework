@@ -16,6 +16,26 @@ class Arr
 
         return $a2;
     }
+    
+    public static function diff($a1, $a2) {
+        $counts = [];
+        foreach ($a2 as $v2) {
+            if (isset($counts[$v2])) {
+                $counts[$v2] ++;
+            } else {
+                $counts[$v2] = 1;
+            }
+        }
+        
+        foreach ($a1 as $k1 => $v1) {
+            if (!empty($counts[$v1])) {
+                unset($a1[$k1]);
+                $counts[$v1]--;
+            }
+        }
+        
+        return array_values($a1);
+    }
 
     public static function column(&$data, $name, $key = false)
     {
