@@ -37,13 +37,13 @@ class Arr
         return array_values($a1);
     }
 
-    public static function column(&$data, $name, $key = false)
+    public static function column(&$data, $name, $key = null)
     {
         $result = array();
 
         if (is_array($data)) {
             foreach ($data as $d) {
-                if (empty($key)) {
+                if (!isset($key)) {
                     $result [] = $d[$name];
                 } else {
                     $result [$d[$key]] = $d[$name];
