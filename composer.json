@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "smarty/smarty":"2.6.*",
+        "smarty/smarty":"2.6.18",
         "monolog/monolog": "1.13.*",
         "phpmailer/phpmailer": "5.2.*"
     },
