@@ -78,6 +78,15 @@ class SQL
     {
         return $this->from . ($this->alias ? (' ' . $this->alias) : '');
     }
+    
+    public function resetSelect()
+    {
+        $this->select = [];
+        foreach ($this->joins as $k => $v) {
+            $this->joins[$k][1]->resetSelect();
+        }
+        return $this;
+    }
 
     public function select($field)
     {
