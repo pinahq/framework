@@ -48,10 +48,11 @@ class Log
             if (empty($l)) {
                 continue;
             }
-
+            
             foreach ($targets as $k => $t) {
                 switch ($k) {
-                    case 'file': $logger->pushHandler(new RotatingFileHandler($t[0], $t[1])); break;
+                    case 'file': $logger->pushHandler(new RotatingFileHandler($t[0], $t[1], $l)); break;
+                    case 'stdout': if ($t) {$logger->pushHandler(new StreamHandler('php://stdout', $l));} break;
                 }
             }
         }
