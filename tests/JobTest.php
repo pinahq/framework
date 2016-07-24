@@ -12,14 +12,21 @@ class JobTest extends PHPUnit_Framework_TestCase
 
     public function testPermit()
     {
-//        /App::env('test');
-        Config::initPath(__DIR__.'/config');
+        Config::initPath(__DIR__ . '/config');
         ModuleRegistry::init();
-        
+
         Route::own('catalog', 'Pina');
         Job::register('catalog.import');
-        
-        $this->assertEquals('/home/cody/www/framework/src/Pina/job/catalog/import.php', Job::getPath('catalog.import'));
+
+        $parts = explode('/', __DIR__);
+        array_pop($parts);
+        $appPath = implode('/', $parts);
+        $jobPath = Job::getPath('catalog.import');
+        if (strncmp($appPath, $jobPath, strlen($appPath)) === 0) {
+            $jobPath = substr($jobPath, strlen($appPath));
+        }
+
+        $this->assertEquals('/src/Pina/job/catalog/import.php', $jobPath);
     }
 
 }
