@@ -13,7 +13,7 @@ class ModuleRegistry
     {
         $config = Config::load('modules');
         self::$default_modules = array(
-            'Pina'
+            __NAMESPACE__
         );
         if (!empty($config['default']) && is_array($config['default'])) {
             self::$default_modules = array_merge(self::$default_modules, $config['default']);
