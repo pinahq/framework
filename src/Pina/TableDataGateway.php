@@ -25,6 +25,11 @@ class TableDataGateway extends SQL
     protected $context = array();
     public $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
+    public function getTriggers()
+    {
+        return array();
+    }
+
     public function __construct()
     {
         //TODO: make tables prefixes

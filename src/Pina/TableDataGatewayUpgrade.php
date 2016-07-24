@@ -56,7 +56,11 @@ class TableDataGatewayUpgrade
     public function getTriggerDiff()
     {
         $table = $this->gateway->table;
-        $triggers = (isset($this->gateway->triggers) && is_array($this->gateway->triggers))?$this->gateway->triggers:array();
+        $triggers = $this->gateway->getTriggers();
+        if (!is_array($triggers)) {
+            Log::error('tables', 'WRONG TRIGGER FORMAT FOR TABLE '.$table);
+            return array();
+        }
 
         $existedTriggers = Arr::groupUnique($this->db->table("SHOW TRIGGERS LIKE '".$table."'"), 'Trigger');
 
