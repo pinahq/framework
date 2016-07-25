@@ -31,7 +31,8 @@ class Job
     
     public static function handler($job)
     {
-        $path = self::getPath($job->functionName());
+        $cmd = $job->functionName();
+        $path = self::getPath($cmd);
         if (empty($path)) {
             Log::error("job", "Wrong command ".$cmd);
             return;
@@ -44,6 +45,12 @@ class Job
 
         Request::set('workload', $job->workload());
         include $path;
+    }
+    
+    public static function work()
+    {
+        self::getWorker()->work();
+        return self::getWorker()->returnCode() === GEARMAN_SUCCESS;
     }
     
     public static function getPath($cmd)
