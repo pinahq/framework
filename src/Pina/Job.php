@@ -8,6 +8,7 @@ class Job
     
     private static $client = null;
     private static $worker = null;
+    private static $workload = '';
     
     public static function queue($cmd, $workload)
     {
@@ -31,8 +32,7 @@ class Job
     
     public static function handler($job)
     {
-        $cmd = $job->functionName();
-        $path = self::getPath($cmd);
+        $path = self::getPath($job->functionName());
         if (empty($path)) {
             Log::error("job", "Wrong command ".$cmd);
             return;
@@ -43,8 +43,14 @@ class Job
             return null;
         }
 
-        Request::set('workload', $job->workload());
+        self::$workload = $job->workload();
+        
         include $path;
+    }
+    
+    public static function workload()
+    {
+        return self::$workload;
     }
     
     public static function work()
