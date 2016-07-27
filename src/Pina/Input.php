@@ -91,7 +91,7 @@ class Input
         }
 
         if (!empty($_SERVER['DOCUMENT_URI'])) {
-            return strncmp($_SERVER['REQUEST_URI'], $_SERVER['DOCUMENT_URI'], strlen($_SERVER['DOCUMENT_URI'])) === 0;
+            return strncmp($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'], strlen($_SERVER['DOCUMENT_URI'])) === 0;
         }
         
         return strncmp($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'], strlen($_SERVER['SCRIPT_NAME'])) === 0;
