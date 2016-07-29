@@ -73,7 +73,8 @@ class TableDataGatewayUpgrade
                 continue;
             }
 
-            $needToChange = strtolower($existedTriggers[$realName]['Timing'] . ' ' . $existedTriggers[$realName]['Event']) != strtolower($trigger[0]) || strtolower($existedTriggers[$realName]['Statement']) != strtolower($trigger[1]);
+            $needToChange = strtolower($existedTriggers[$realName]['Timing'] . ' ' . $existedTriggers[$realName]['Event']) != strtolower($trigger[0])
+                || strtolower($existedTriggers[$realName]['Statement']) != strtolower(rtrim($trigger[1], ';'));
 
             if ($needToChange) {
                 $dropQueries [] = 'DROP TRIGGER ' . $realName;
