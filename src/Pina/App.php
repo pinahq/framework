@@ -157,17 +157,13 @@ class App
     {
         $systemParamKeys = array('get', 'app', 'anchor');
 
-        $r = '';
         foreach ($params as $k => $v) {
-            if (strpos($pattern . '/', ':' . $k . '/') === false && !in_array($k, $systemParamKeys)) {
-                if (!empty($r)) {
-                    $r .= '&';
-                }
-                $r .= $k . '=' . $v;
+            if (strpos($pattern . '/', ':' . $k . '/') !== false || in_array($k, $systemParamKeys)) {
+                unset($params[$k]);
             }
         }
-
-        return $r;
+        
+        return http_build_query($params);
     }
 
     public static function getLinkPrefix($params)

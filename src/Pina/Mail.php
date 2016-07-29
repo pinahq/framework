@@ -15,7 +15,7 @@ class Mail extends Request
     
     private static $content = '';
 
-    public static function send($module, $handler, $data = array())
+    public static function send($ns, $handler, $data = array())
     {
         if (empty(static::$config)) {
             static::$config = Config::load('mail');
@@ -24,7 +24,7 @@ class Mail extends Request
         
         static::clear();
         
-        $path = Module::path($module);
+        $path = ModuleRegistry::getPath($module);
         if (empty($path)) {
             return;
         }
