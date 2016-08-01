@@ -355,7 +355,7 @@ class SQL
             return '';
         }
 
-        return ' HAVING ' . join(', ', $this->having);
+        return ' HAVING ' . join(' AND ', $this->having);
     }
 
     public function makeOrderBy()
