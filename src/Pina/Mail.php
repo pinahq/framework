@@ -24,7 +24,7 @@ class Mail extends Request
         
         static::clear();
         
-        $path = ModuleRegistry::getPath($module);
+        $path = ModuleRegistry::getPath($ns);
         if (empty($path)) {
             return;
         }
