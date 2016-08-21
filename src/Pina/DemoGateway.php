@@ -19,7 +19,6 @@ class DemoGateway extends TableDataGateway
         'image_type' => "VARCHAR(32) NOT NULL default ''",
         'image_size' => "INT(11) NOT NULL default '0'",
         'image_alt' => "varchar(120) NOT NULL DEFAULT ''",
-        'image_updated' => "TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'",
     );
     public $indexes = array(
         'PRIMARY KEY' => 'image_id',
