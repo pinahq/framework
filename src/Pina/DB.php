@@ -32,7 +32,13 @@ class DB
     {
         $configDB = Config::load('db');
 
-        $rc = mysqli_connect("p:".$configDB[$alias]['host'] . ':' . $configDB[$alias]['port'], $configDB[$alias]['user'], $configDB[$alias]['pass']);
+        $rc = mysqli_connect(
+            "p:".$configDB[$alias]['host'], 
+            $configDB[$alias]['user'], 
+            $configDB[$alias]['pass'],
+            $configDB[$alias]['base'],
+            $configDB[$alias]['port']
+        );
 
         if (empty($rc) || !in_array(mysqli_errno($rc), array(0, 1146))) {
             if (empty($configDB[$alias]['base'])) {
@@ -40,14 +46,6 @@ class DB
             }
             Log::error('mysql', mysqli_error());
             die();
-        }
-
-        mysqli_select_db($rc, $configDB[$alias]['base']);
-        if (empty($rc) || mysqli_errno($rc)) {
-            if (empty($configDB[$alias]['base'])) {
-                exit;
-            }
-            die('db access error');
         }
 
         if ($configDB[$alias]['charset']) {
