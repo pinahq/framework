@@ -73,7 +73,7 @@ class Request
         $pattern = Url::trim($pattern);
         $parsed = Url::parse($resource, $pattern);
         foreach ($parsed as $k => $v) {
-            self::set($k, $v);
+            self::set($k, urldecode($v));
         }
     }
 
