@@ -15,7 +15,14 @@ function smarty_function_link($params, &$view)
     global $__pinaLinkContext;
     
     if (is_array($__pinaLinkContext)) {
-        $params = array_merge($params, array_filter($__pinaLinkContext));
+        $tmp = [];
+        foreach ($__pinaLinkContext as $k => $v)
+        {
+            if (isset($v) && $v !== '') {
+                $tmp[$k] = $v;
+            }
+        }
+        $params = array_merge($params, $tmp);
     }
     
 	$link = \Pina\App::link($params['get'], $params);
