@@ -793,6 +793,11 @@ class SQL
     {
         return $this->insert($data, $fields)?$this->db->insertId():0;
     }
+    
+    public function insertIgnoreGetId($data, $fields = false)
+    {
+        return $this->insertIgnore($data, $fields)?$this->db->insertId():0;
+    }
 
     public function put($data, $fields = false)
     {
