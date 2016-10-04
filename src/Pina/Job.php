@@ -5,6 +5,7 @@ namespace Pina;
 class Job
 {
     const DIRECTORY = 'job';
+    const JOB_PREFIX = 'job:';
     
     private static $client = null;
     private static $worker = null;
@@ -12,27 +13,41 @@ class Job
     
     public static function queue($cmd, $workload)
     {
-        self::getClient()->doBackground($cmd, $workload);
+        self::getClient()->doBackground(self::JOB_PREFIX.$cmd, $workload);
     }
     
     public static function queueHigh($cmd, $workload)
     {
-        self::getClient()->doHighBackground($cmd, $workload);
+        self::getClient()->doHighBackground(self::JOB_PREFIX.$cmd, $workload);
     }
     
     public static function queueLow($cmd, $workload)
     {
-        self::getClient()->doLowBackground($cmd, $workload);
+        self::getClient()->doLowBackground(self::JOB_PREFIX.$cmd, $workload);
     }
     
     public static function register($cmd)
     {
-        self::getWorker()->addFunction($cmd, ['Pina\Job', 'handler']);
+        self::getWorker()->addFunction(self::JOB_PREFIX.$cmd, ['Pina\Job', 'handler']);
     }
     
     public static function handler($job)
     {
-        $path = self::getPath($job->functionName());
+        echo "JOB::HANDLER\n";
+        print_r($job);
+        
+        $cmd = $job->functionName();
+        if (strncmp($cmd, self::JOB_PREFIX, strlen(self::JOB_PREFIX)) !== 0) {
+            return;
+        }
+        $cmd = substr($cmd, strlen(self::JOB_PREFIX));
+        $workload = $job->workload();
+        self::run($cmd, $workload);
+    }
+
+    public static function run($cmd, $wordload)
+    {
+        $path = self::getPath($cmd);
         if (empty($path)) {
             Log::error("job", "Wrong command ".$cmd);
             return;
@@ -43,7 +58,7 @@ class Job
             return null;
         }
 
-        self::$workload = $job->workload();
+        self::$workload = $wordload;
         
         include $path;
     }
