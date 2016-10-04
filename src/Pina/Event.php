@@ -25,7 +25,6 @@ class Event extends Job
 
     public static function trigger($event, $workload)
     {
-        echo "trigger: ".self::EVENT_PREFIX.$event.":". $workload."\n";
         self::getClient()->doHighBackground(self::EVENT_PREFIX.$event, $workload);
     }
 
@@ -36,9 +35,6 @@ class Event extends Job
 
     public static function handler($job)
     {
-        echo "EVENT::HANDLER\n";
-        print_r($job);
-        
         $cmd = $job->functionName();
         if (strncmp($cmd, self::EVENT_PREFIX, strlen(self::EVENT_PREFIX)) !== 0) {
             return;

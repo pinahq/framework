@@ -33,9 +33,6 @@ class Job
     
     public static function handler($job)
     {
-        echo "JOB::HANDLER\n";
-        print_r($job);
-        
         $cmd = $job->functionName();
         if (strncmp($cmd, self::JOB_PREFIX, strlen(self::JOB_PREFIX)) !== 0) {
             return;
