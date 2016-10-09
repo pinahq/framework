@@ -17,10 +17,8 @@ class App
     {
         self::env($env);
 
-        Config::initPath($configPath);
+        Config::init($configPath);
         self::$config = Config::load('app');
-
-        Language::init();
 
         mb_internal_encoding(self::$config['charset']);
         mb_regex_encoding(self::$config['charset']);
@@ -32,7 +30,7 @@ class App
 
     public static function run()
     {
-        if (!Site::init(Input::getHost())) {
+        if (self::host() != Input::getHost()) {
             @header('HTTP/1.1 404 Not Found');
             exit;
         }
@@ -50,6 +48,7 @@ class App
 
         $resource = Input::getResource();
 
+        //TODO: get these paths based on config
         $staticFolders = array('/cache/', '/static/', '/uploads/', '/vendor/');
         foreach ($staticFolders as $folder) {
             if (strncasecmp($resource, $folder, strlen($folder)) === 0) {
@@ -86,6 +85,26 @@ class App
         }
 
         return $item;
+    }
+    
+    public static function baseUrl()
+    {
+        return self::scheme()."://".self::host()."/";
+    }
+    
+    public static function scheme()
+    {
+        return isset(self::$config['scheme'])?self::$config['scheme']:'http';
+    }
+    
+    public static function host()
+    {
+        return isset(self::$config['host']) ? self::$config['host'] : Input::getHost();
+    }
+    
+    public static function template()
+    {
+        return isset(self::$config['template']) ? self::$config['template'] : null;
     }
 
     public static function path()
@@ -178,11 +197,9 @@ class App
 
     public static function link($pattern, $params = array())
     {
-        $url = 'http://'.Site::domain();
+        $url = self::baseUrl();
         if (Input::isScript() && !empty(self::$config['allow_script_url'])) {
-            $url .= '/index.php?action=';
-        } else {
-            $url .= '/';
+            $url .= 'index.php?action=';
         }
 
         $resource = Route::resource($pattern, $params);
@@ -199,4 +216,9 @@ class App
         return $url;
     }
 
+}
+
+function __($string)
+{
+    return Language::translate($string);
 }

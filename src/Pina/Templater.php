@@ -13,7 +13,7 @@ class Templater extends \Smarty
 
         $this->strict_resources = array();
         array_unshift(
-                $this->plugins_dir, __DIR__ . '/helpers'
+            $this->plugins_dir, __DIR__ . '/helpers'
         );
 
         $paths = ModuleRegistry::getPaths();
@@ -26,16 +26,15 @@ class Templater extends \Smarty
 
         $this->use_sub_dirs = false;
         $this->template_dir = array();
-        $this->template_dir[] = App::path() . "/sites/" . Site::key() . '/';
 
         $template = 'default';
-        if (Site::template()) {
-            $template = Site::template();
+        if (App::template()) {
+            $template = App::template();
             $this->template_dir[] = App::path() . "/templates/" . $template . '/';
         }
         $this->template_dir[] = App::path() . "/default/";
 
-        $this->compile_dir = App::templaterCompiled() . '/' . md5(Site::key() . ":" . $template);
+        $this->compile_dir = App::templaterCompiled() . '/' . md5($template);
         @mkdir($this->compile_dir);
 
         $this->cache_dir = App::templaterCache();
@@ -74,8 +73,10 @@ class Templater extends \Smarty
         $params['get'] = Route::resource($params['get'], $params);
         
         list($controller, $action, $data) = Url::route($params['get'], 'get');
+        
+        $module = Route::owner($controller);
 
-        if (!Request::isAvailable($params['get'], $controller)) {
+        if (!Request::isAvailable($module, $params['get'])) {
             return;
         }
 

@@ -12,7 +12,7 @@ class JobTest extends PHPUnit_Framework_TestCase
 
     public function testPermit()
     {
-        Config::initPath(__DIR__ . '/config');
+        Config::init(__DIR__ . '/config');
         ModuleRegistry::init();
 
         Route::own('catalog', 'Pina');

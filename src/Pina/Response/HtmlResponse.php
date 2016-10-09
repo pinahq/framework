@@ -3,7 +3,6 @@
 namespace Pina\Response;
 
 use Pina\App;
-use Pina\Language;
 use Pina\Templater;
 use Pina\ResourceManager;
 

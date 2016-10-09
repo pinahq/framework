@@ -17,13 +17,14 @@ class TableDataGateway extends SQL
 
     const LOAD_BUFFER_LIMIT = 1024000;
 
-    public $table = "";
-    public $primaryKey = "";
-    public $orderBy = "";
-    public $fields = false;
-    public $indexes = array();
+    protected static $table = "";
+    
+    protected static $fields = false;
+    protected static $indexes = [];
+    protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    
+    protected $orderBy = "";
     protected $context = array();
-    public $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
     public function getTriggers()
     {
@@ -32,18 +33,28 @@ class TableDataGateway extends SQL
 
     public function __construct()
     {
-        //TODO: make tables prefixes
-        if (empty($this->primaryKey)) {
-            $this->primaryKey = str_replace("cody_", "", $this->table) . "_id";
-        }
-
         $db = DB::get();
-        parent::__construct($this->table, $db);
+        parent::__construct($this->getTable(), $db);
+    }
+    
+    public function getTable()
+    {
+        return static::$table;
+    }
+    
+    public function getFields()
+    {
+        return static::$fields;
+    }
+    
+    public function getIndexes()
+    {
+        return static::$indexes;
     }
 
     public function getUpgrades()
     {
-        if (empty($this->fields)) {
+        if (empty(static::$fields)) {
             return array();
         }
 
@@ -51,28 +62,12 @@ class TableDataGateway extends SQL
 
         $upgrade = new TableDataGatewayUpgrade($this);
         $tables = $this->db->col("SHOW TABLES");
-        if (!in_array($this->table, $tables)) {
+        if (!in_array(static::$table, $tables)) {
             $r [] = $upgrade->makeCreateTable();
         } else if ($q = $upgrade->makeAlterTable()) {
             $r [] = $q;
         }
-        $r = array_merge($r, $upgrade->getTriggerDiff());
         return $r;
-    }
-
-    public function doUpgrades()
-    {
-        $upgrades = $this->getUpgrades();
-        if (empty($upgrades)) {
-            return array();
-        }
-        foreach ($upgrades as $q) {
-            if (empty($q)) {
-                continue;
-            }
-            $this->db->query($q);
-        }
-        return $upgrades;
     }
 
     /*
@@ -94,7 +89,7 @@ class TableDataGateway extends SQL
 
     public function hasField($field)
     {
-        return isset($this->fields[$field]);
+        return isset(static::$fields[$field]);
     }
 
     public function find($id)
@@ -104,15 +99,15 @@ class TableDataGateway extends SQL
 
     public function id()
     {
-        return $this->value($this->primaryKey);
+        return $this->value($this->primaryKey());
     }
 
     protected function adjustDataAndFields(&$data, &$fields)
     {
         if (!empty($fields)) {
-            $fields = array_intersect($fields, array_keys($this->fields));
+            $fields = array_intersect($fields, array_keys(static::$fields));
         } else {
-            $fields = array_keys($this->fields);
+            $fields = array_keys(static::$fields);
         }
 
         foreach ($this->context as $field => $value) {
@@ -124,6 +119,19 @@ class TableDataGateway extends SQL
                 }
             }
         }
+    }
+    
+    protected function primaryKey()
+    {
+        if (empty(static::$indexes['PRIMARY KEY'])) {
+            return '';
+        }
+        
+        if (is_array(static::$indexes['PRIMARY KEY'])) {
+            return static::$indexes['PRIMARY KEY'][0];
+        }
+        
+        return static::$indexes['PRIMARY KEY'];
     }
 
     protected function getOnDuplicateKeys($keys)
@@ -161,7 +169,7 @@ class TableDataGateway extends SQL
 
     public function whereId($id)
     {
-        return $this->whereBy($this->primaryKey, $id);
+        return $this->whereBy($this->primaryKey(), $id);
     }
 
     public function enabled()
@@ -219,14 +227,14 @@ class TableDataGateway extends SQL
     public function reportFieldVariants($field)
     {
         $values = array();
-        if (!isset($this->fields) || empty($this->fields[$field])) {
+        if (!isset(static::$fields) || empty(static::$fields[$field])) {
             return $values;
         }
-        if (($firstPos = mb_strpos($this->fields[$field], '(')) === false || ($lastPos = mb_strpos($this->fields[$field], ')')) === false
+        if (($firstPos = mb_strpos(static::$fields[$field], '(')) === false || ($lastPos = mb_strpos(static::$fields[$field], ')')) === false
         ) {
             return false;
         }
-        $str = mb_substr($this->fields[$field], ++$firstPos, ($lastPos - $firstPos));
+        $str = mb_substr(static::$fields[$field], ++$firstPos, ($lastPos - $firstPos));
         return explode(',', str_replace(array("'", '"'), '', $str));
     }
 
@@ -239,7 +247,7 @@ class TableDataGateway extends SQL
     {
         foreach ($data as $k => $v) {
             $matches = array();
-            if (!preg_match("/(varchar|int|decimal)\((\d+)(,(\d+))?\)/i", $this->fields[$k], $matches)) {
+            if (!preg_match("/(varchar|int|decimal)\((\d+)(,(\d+))?\)/i", static::$fields[$k], $matches)) {
                 continue;
             }
             $sql_type = $matches[1];

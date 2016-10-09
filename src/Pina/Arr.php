@@ -71,26 +71,6 @@ class Arr
         }
         return $data;
     }
-
-    /* deprecated */
-    public static function rearrange($data, $key, $unique = false)
-    {
-        $result = array();
-
-        if (is_array($data)) {
-            foreach ($data as $d) {
-                $k = $d[$key];
-                unset($d[$key]);
-                if ($unique) {
-                    $result[$k] = $d;
-                } else {
-                    $result[$k][] = $d;
-                }
-            }
-        }
-
-        return $result;
-    }
     
     public static function group($data, $key)
     {

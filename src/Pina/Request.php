@@ -5,10 +5,10 @@ namespace Pina;
 class Request
 {
 
-    static protected $response = false;
-    static protected $stack = array();
+    protected static $response = false;
+    protected static $stack = array();
 
-    static public function init($response, $data)
+    public static function init($response, $data)
     {
         self::$response = $response;
         self::$stack = array();
@@ -20,7 +20,7 @@ class Request
         }
     }
 
-    static public function internal($resource, $method, $data = array())
+    public static function internal($resource, $method, $data = array())
     {
         if (!empty($data["mode"])) {
             self::result("mode", $data["mode"]);
@@ -35,7 +35,7 @@ class Request
         return $r;
     }
 
-    static public function middleware($resource, $method, $data = array())
+    public static function middleware($resource, $method, $data = array())
     {
         $oldResponse = self::$response;
         self::$response = new Response\MiddlewareResponse();
@@ -48,7 +48,7 @@ class Request
         return $r;
     }
 
-    static public function set($name, $value)
+    public static function set($name, $value)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -58,7 +58,7 @@ class Request
         self::$stack[$top][$name] = $value;
     }
     
-    static public function match($pattern)
+    public static function match($pattern)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -78,7 +78,7 @@ class Request
     }
 
     // выполнение контроллера сопровождается предупреждением
-    static public function warning($message, $subject = '')
+    public static function warning($message, $subject = '')
     {
         self::$response->warning($message, $subject);
     }
@@ -86,7 +86,7 @@ class Request
     // выполнение контроллера сопровождается ошибкой.
     // $message - текст ошибки
     // $subject - код ошибки
-    static public function error($message = "", $subject = '')
+    public static function error($message = "", $subject = '')
     {
         self::$response->error($message, $subject);
     }
@@ -94,7 +94,7 @@ class Request
     // проверяет встречались ли ошибки при выполнении
     // запроса и завершает выполнение в случае
     // найденных ошибок
-    static public function trust()
+    public static function trust()
     {
         self::$response->trust();
     }
@@ -102,13 +102,13 @@ class Request
     // выполнение контроллера прерывается ошибкой
     // $message - текст ошибки
     // $subject - код ошибки
-    static public function stop($message = "", $subject = '')
+    public static function stop($message = "", $subject = '')
     {
         self::$response->stop($message, $subject);
     }
 
     // получаем параметр запроса к контроллеру по его названию
-    static public function param($name)
+    public static function param($name)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -122,7 +122,7 @@ class Request
         return self::$stack[$top][$name];
     }
 
-    static public function params($ps = "")
+    public static function params($ps = "")
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -164,7 +164,7 @@ class Request
         return file_get_contents('php://input');
     }
 
-    static public function filterSub($fs, &$data)
+    public static function filterSub($fs, &$data)
     {
         foreach ($data as $k => $v) {
             if (is_array($data[$k])) {
@@ -181,7 +181,7 @@ class Request
         }
     }
 
-    static public function filter($fs, $ps)
+    public static function filter($fs, $ps)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -225,7 +225,7 @@ class Request
         }
     }
 
-    static public function filterAll($clean_functions)
+    public static function filterAll($clean_functions)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -252,23 +252,27 @@ class Request
     }
 
     // связываем результат выполнения контроллера
-    static public function result($name, $value)
+    public static function result($name, $value)
     {
         self::$response->result($name, $value);
     }
 
-    static public function isAvailable($resource, $controller)
+    public static function isAvailable($module, $resource)
     {
         if (App::env() === "cli") {
             return true;
         }
         
-        $module = Route::owner($controller);
-
         return ModuleRegistry::isActive($module) && Access::isHandlerPermitted($resource);
     }
+    
+    public static function module()
+    {
+        $top = count(self::$stack) - 1;
+        return self::$stack[$top]['__module'];
+    }
 
-    static protected function runHandler($handler)
+    protected static function runHandler($handler)
     {
         if (is_file($handler . ".php")) {
             include $handler . ".php";
@@ -277,7 +281,7 @@ class Request
         }
     }
 
-    static protected function runInternalHandler($handler)
+    protected static function runInternalHandler($handler)
     {
         $path = App::path();
         if (!is_file($handler . ".php")) {
@@ -293,7 +297,7 @@ class Request
         return true;
     }
 
-    static public function run($resource, $method)
+    public static function run($resource, $method)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
@@ -306,7 +310,11 @@ class Request
         
         list($controller, $action, $data) = Url::route($resource, $method);
         
-        if (!self::isAvailable($resource, $controller)) {
+        $module = Route::owner($controller);
+        
+        self::$stack[$top]["__module"] = $module;
+        
+        if (!self::isAvailable($module, $resource)) {
             if ($isExternal && $resource != 'errors/access-denied') {
                 return self::run('errors/access-denied', 'get');
             } else {
@@ -340,10 +348,6 @@ class Request
         }
 
         $r = self::$response->fetch($handler, $isExternal);
-        if ($isExternal)
-        {
-            Language::rewrite($r);
-        }
         return $r;
     }
 

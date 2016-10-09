@@ -9,7 +9,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
     
     public function testByCondition()
     {
-        Config::initPath(__DIR__.'/config');
+        Config::init(__DIR__.'/config');
         
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_VALUE, 5]);
         $this->assertEquals("cody_product.product_id = '5'", $q);
@@ -34,7 +34,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
     
     public function testWhere()
     {
-        Config::initPath(__DIR__.'/config');
+        Config::init(__DIR__.'/config');
         
         $q = SQL::table('cody_product')->whereBy('product_id', 5)->make();
         $this->assertEquals("SELECT * FROM cody_product WHERE (cody_product.product_id = '5')", $q);
@@ -86,7 +86,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
 
     public function testJoin()
     {
-        Config::initPath(__DIR__.'/config');
+        Config::init(__DIR__.'/config');
         $q = SQL::table('cody_product')->leftJoin(
             SQL::table('cody_product_variant')->on('product_id')
         )->make();

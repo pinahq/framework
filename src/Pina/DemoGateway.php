@@ -4,28 +4,32 @@ namespace Pina;
 
 class DemoGateway extends TableDataGateway
 {
-    public $table = "cody_demo";
-    public $primaryKey = "image_id";
-    public $fields = array(
+    protected static $table = "cody_demo";
+    protected static $fields = array(
         'image_id' => "INT(11) NOT NULL AUTO_INCREMENT",
-        'site_id' => "INT(11) NOT NULL default '0'",
         'original_image_id' => "INT(11) NOT NULL default '0'",
         'image_hash' => "VARCHAR(128) NOT NULL default ''",
         'image_filename' => "VARCHAR(255) NOT NULL default ''",
         'image_url' => "VARCHAR(255) NOT NULL default ''",
-		'image_original_url' => "VARCHAR(255) NOT NULL default ''",
+        'image_original_url' => "VARCHAR(32) NOT NULL default ''",
         'image_width' => "INT(1) NOT NULL default '0'",
         'image_height' => "INT(1) NOT NULL default '0'",
         'image_type' => "VARCHAR(32) NOT NULL default ''",
         'image_size' => "INT(11) NOT NULL default '0'",
         'image_alt' => "varchar(120) NOT NULL DEFAULT ''",
     );
-    public $indexes = array(
+    protected static $indexes = array(
         'PRIMARY KEY' => 'image_id',
-        'KEY site_id' =>  'site_id'
     );
     
-    public $triggers = array(
-        'update' => array('before update', 'SET NEW.image_updated = NOW()'),
-    );
+    public function getTriggers()
+    {
+        return [
+            [
+                $this->getTable(),
+                'before update',
+                'SET NEW.image_width = NEW.image_width + 2'
+            ],
+        ];
+    }
 }

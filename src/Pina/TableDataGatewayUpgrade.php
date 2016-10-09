@@ -13,23 +13,25 @@ class TableDataGatewayUpgrade
 
     public function makeFieldCondition($field)
     {
-        if (!is_array($this->gateway->fields[$field])) {
-            return $this->gateway->fields[$field];
+        $gatewayFields = $this->gateway->getFields();
+        
+        if (!is_array($gatewayFields[$field])) {
+            return $gatewayFields[$field];
         }
 
-        $constructField = $this->gateway->fields[$field]['Type'] .
-            ($this->gateway->fields[$field]['Null'] == 'NO' ? ' NOT NULL ' : ' NULL ');
+        $constructField = $gatewayFields[$field]['Type'] .
+            ($gatewayFields[$field]['Null'] == 'NO' ? ' NOT NULL ' : ' NULL ');
 
-        if (isset($this->gateway->fields[$field]['Default']) && $this->gateway->fields[$field]['Default'] !== '') {
-            if ($this->gateway->fields[$field]['Default'] === 'CURRENT_TIMESTAMP') {
+        if (isset($gatewayFields[$field]['Default']) && $gatewayFields[$field]['Default'] !== '') {
+            if ($gatewayFields[$field]['Default'] === 'CURRENT_TIMESTAMP') {
                 $constructField .= 'DEFAULT CURRENT_TIMESTAMP ';
             } else {
-                $constructField .= "DEFAULT '" . $this->gateway->fields[$field]['Default'] . "'";
+                $constructField .= "DEFAULT '" . $gatewayFields[$field]['Default'] . "'";
             }
         }
 
-        if (isset($this->gateway->fields[$field]['Extra']) && $this->gateway->fields[$field]['Extra'] !== '') {
-            $constructField .= $this->gateway->fields[$field]['Extra'];
+        if (isset($gatewayFields[$field]['Extra']) && $gatewayFields[$field]['Extra'] !== '') {
+            $constructField .= $gatewayFields[$field]['Extra'];
         }
 
         return $constructField;
@@ -37,78 +39,20 @@ class TableDataGatewayUpgrade
 
     public function makeCreateTable()
     {
-        if (isset($this->gateway->fields[0]) || !isset($this->gateway->engine)) {
+        if (isset($gatewayFields[0]) || !isset($this->gateway->engine)) {
             return false;
         }
 
-        $q = "CREATE TABLE IF NOT EXISTS `" . $this->gateway->table . "` (";
-        foreach ($this->gateway->fields as $field => $params) {
+        $q = "CREATE TABLE IF NOT EXISTS `" . $this->gateway->getTable() . "` (";
+        foreach ($gatewayFields as $field => $params) {
             $q .= '`' . $field . '` ' . $this->makeFieldCondition($field) . ', ';
         }
-        foreach ($this->gateway->indexes as $index => $params) {
+        foreach ($gatewayIndexes as $index => $params) {
             $q .= $this->makeIndex($index) . ', ';
         }
         $q = rtrim($q, ', ') . ') ' . $this->gateway->engine . ';';
 
         return $q;
-    }
-
-    public function getTriggerDiff()
-    {
-        $table = $this->gateway->table;
-        $triggers = $this->gateway->getTriggers();
-        if (!is_array($triggers)) {
-            Log::error('tables', 'WRONG TRIGGER FORMAT FOR TABLE '.$table);
-            return array();
-        }
-
-        $existedTriggers = Arr::groupUnique($this->db->table("SHOW TRIGGERS LIKE '".$table."'"), 'Trigger');
-
-        $dropQueries = array();
-        $createQueries = array();
-        foreach ($triggers as $name => $trigger) {
-            $realName = $this->makeTriggerName($name);
-            if (!isset($existedTriggers[$realName])) {
-                $createQueries = array_merge($createQueries, $this->getCreateTriggerQueries($name, $trigger));
-                continue;
-            }
-
-            $needToChange = strtolower($existedTriggers[$realName]['Timing'] . ' ' . $existedTriggers[$realName]['Event']) != strtolower($trigger[0])
-                || strtolower($existedTriggers[$realName]['Statement']) != strtolower(rtrim($trigger[1],';'));
-
-            if ($needToChange) {
-                $dropQueries [] = 'DROP TRIGGER ' . $realName;
-                $createQueries = array_merge($createQueries, $this->getCreateTriggerQueries($name, $trigger));
-            }
-
-            unset($existedTriggers[$realName]);
-        }
-
-        foreach ($existedTriggers as $realName => $existedTrigger) {
-            if ($existedTrigger['Table'] === $table) {
-                $dropQueries [] = 'DROP TRIGGER ' . $realName;
-            }
-        }
-        
-        return array_merge($dropQueries, $createQueries);
-    }
-
-    public function getCreateTriggerQueries($name, $trigger)
-    {
-        $r = [];
-
-        if (!is_array($trigger) || count($trigger) != 2) {
-            return $r;
-        }
-        list($action, $stmt) = $trigger;
-
-        $r[] = 'CREATE TRIGGER ' . $this->makeTriggerName($name) . ' ' . $action . ' ON ' . $this->gateway->table . ' FOR EACH ROW ' . $stmt;
-        return $r;
-    }
-
-    private function makeTriggerName($name)
-    {
-        return $this->gateway->table . '_' . $name;
     }
 
     public function parseFieldDescription($descr)
@@ -168,27 +112,28 @@ class TableDataGatewayUpgrade
 
     public function diff()
     {
-        if (empty($this->gateway->fields) || isset($this->gateway->fields[0])) {
+        $gatewayFields = $this->gateway->getFields();
+        if (empty($gatewayFields) || isset($gatewayFields[0])) {
             return false;
         }
-
+        
         $diff = array();
-        $fieldParams = $this->db->table("SHOW COLUMNS FROM `" . $this->gateway->table . "`");
+        $fieldParams = $this->db->table("SHOW COLUMNS FROM `" . $this->gateway->getTable() . "`");
         $fields = array();
         foreach ($fieldParams as $params) {
             $params['Type'] = strtolower($params['Type']);
 
             $fields[] = $params['Field'];
 
-            if (!isset($this->gateway->fields[$params['Field']])) {
+            if (!isset($gatewayFields[$params['Field']])) {
                 $diff['delete_fields'][] = $params['Field'];
                 continue;
             }
 
-            $structured = $this->gateway->fields[$params['Field']];
+            $structured = $gatewayFields[$params['Field']];
 
             if (!is_array($structured)) {
-                $structured = $this->parseFieldDescription($this->gateway->fields[$params['Field']]);
+                $structured = $this->parseFieldDescription($gatewayFields[$params['Field']]);
             }
 
             if (count(array_diff($structured, $params))) {
@@ -196,27 +141,26 @@ class TableDataGatewayUpgrade
             }
         }
 
-        if ($addFields = array_diff(array_keys($this->gateway->fields), $fields)) {
+        if ($addFields = array_diff(array_keys($gatewayFields), $fields)) {
             $diff['add_fields'] = $addFields;
         }
+        
+        $gatewayIndexes = $this->gateway->getIndexes();
 
-        if (!isset($this->gateway->indexes)) {
-            return $diff;
-        }
 
-        $indexesParams = $this->db->table("SHOW INDEXES FROM `" . $this->gateway->table . "`");
+        $indexesParams = $this->db->table("SHOW INDEXES FROM `" . $this->gateway->getTable() . "`");
 
         $indexesParams = $this->makeCreateIndexesDescription($indexesParams);
         $indexes = array();
         if (is_array($indexesParams)) {
             foreach ($indexesParams as $title => $columns) {
                 $indexes[] = $title;
-                if (!isset($this->gateway->indexes[$title])) {
+                if (!isset($gatewayIndexes[$title])) {
                     $diff['delete_indexes'][] = $title;
                     continue;
                 }
 
-                $index = $this->gateway->indexes[$title];
+                $index = $gatewayIndexes[$title];
                 if (!is_array($index)) {
                     $index = array($index);
                 }
@@ -230,7 +174,7 @@ class TableDataGatewayUpgrade
                 }
             }
         }
-        if ($addIndexes = array_unique(array_diff(array_keys($this->gateway->indexes), $indexes))) {
+        if ($addIndexes = array_unique(array_diff(array_keys($gatewayIndexes), $indexes))) {
             $diff['add_indexes'] = $addIndexes;
         }
 
@@ -244,15 +188,15 @@ class TableDataGatewayUpgrade
     public function makeIndex($indexName)
     {
         $index = '';
-        if (is_array($this->gateway->indexes[$indexName])) {
-            foreach ($this->gateway->indexes[$indexName] as $field) {
+        if (is_array($gatewayIndexes[$indexName])) {
+            foreach ($gatewayIndexes[$indexName] as $field) {
                 if (!empty($index)) {
                     $index .= ',';
                 }
                 $index .= "`" . $field . '`';
             }
         } else {
-            $index .= $this->gateway->indexes[$indexName];
+            $index .= $gatewayIndexes[$indexName];
         }
         return $indexName . '(' . $index . ')';
     }
@@ -295,8 +239,8 @@ class TableDataGatewayUpgrade
         if (!is_array(@$data) || !count(@$data)) {
             return false;
         }
-
-        $q = "ALTER TABLE `" . $this->gateway->table . "` ";
+        
+        $q = "ALTER TABLE `" . $this->gateway->getTable() . "` ";
         foreach ($data as $type => $value) {
             $q .= $this->constructChanges($type, $value);
         }

@@ -47,8 +47,7 @@ class FileManager
             $filename .= ".".$ext;
         }
 
-        $r = Site::baseUrl()."uploads/".static::$dir.'/';
-        $r .= Site::id()."/";
+        $r = App::baseUrl()."uploads/".static::$dir.'/';
         $hash = md5($filename);
         $r .= substr($hash, 0, 2)."/".substr($hash, 2, 2);
         $r .= "/".$filename;
@@ -64,7 +63,6 @@ class FileManager
         }
 
         $r = App::uploads().'/'.static::$dir.'/';
-        $r .= Site::id()."/";
         $hash = md5($filename);
         $r .= substr($hash, 0, 2)."/".substr($hash, 2, 2);
         $r .= "/".$filename;
@@ -112,9 +110,6 @@ class FileManager
         }
 
         $r = App::uploads().'/'.static::$dir.'/';
-        @mkdir($r, 0777);
-        @chmod($r, 0777);
-        $r .= Site::id();
         @mkdir($r, 0777);
         @chmod($r, 0777);
 
