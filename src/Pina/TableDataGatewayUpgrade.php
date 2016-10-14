@@ -39,7 +39,11 @@ class TableDataGatewayUpgrade
 
     public function makeCreateTable()
     {
-        if (isset($gatewayFields[0]) || !isset($this->gateway->engine)) {
+        $gatewayFields = $this->gateway->getFields();
+        $gatewayIndexes = $this->gateway->getIndexes();
+        $engine = $this->gateway->getEngine();
+        
+        if (isset($gatewayFields[0]) || empty($engine)) {
             return false;
         }
 
@@ -50,7 +54,7 @@ class TableDataGatewayUpgrade
         foreach ($gatewayIndexes as $index => $params) {
             $q .= $this->makeIndex($index) . ', ';
         }
-        $q = rtrim($q, ', ') . ') ' . $this->gateway->engine . ';';
+        $q = rtrim($q, ', ') . ') ' . $engine . ';';
 
         return $q;
     }
@@ -187,6 +191,8 @@ class TableDataGatewayUpgrade
 
     public function makeIndex($indexName)
     {
+        $gatewayIndexes = $this->gateway->getIndexes();
+        
         $index = '';
         if (is_array($gatewayIndexes[$indexName])) {
             foreach ($gatewayIndexes[$indexName] as $field) {

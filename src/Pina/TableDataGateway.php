@@ -51,6 +51,11 @@ class TableDataGateway extends SQL
     {
         return static::$indexes;
     }
+    
+    public function getEngine()
+    {
+        return static::$engine;
+    }
 
     public function getUpgrades()
     {
