@@ -157,7 +157,7 @@ class SQL
             }
             $q .= $this->makeByCondition($on, $parentAlias);
         }
-        return ' ON ' . $q;
+        return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
 
     public function where($condition)
