@@ -49,7 +49,7 @@ class App
         $resource = Input::getResource();
 
         //TODO: get these paths based on config
-        $staticFolders = array('/cache/', '/static/', '/uploads/', '/vendor/');
+        $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
         foreach ($staticFolders as $folder) {
             if (strncasecmp($resource, $folder, strlen($folder)) === 0) {
                 @header('HTTP/1.1 404 Not Found');
