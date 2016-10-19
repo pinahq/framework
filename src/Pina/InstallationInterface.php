@@ -5,8 +5,8 @@ namespace Pina;
 interface InstallationInterface
 {
 
-    static public function install();
+    public static function install();
 
-    static public function remove();
+    public static function remove();
 
 }

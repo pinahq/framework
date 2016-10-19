@@ -8,7 +8,7 @@ class Input
     const ACTION_PARAM = 'action';
     const METHOD_DELIMITER = '!';
     
-    static private $methods = array('get', 'post', 'put', 'delete');
+    private static $methods = array('get', 'post', 'put', 'delete');
 
     public static function getHost()
     {

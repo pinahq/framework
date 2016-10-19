@@ -13,7 +13,7 @@ class DB
         $this->init($conn, $alias);
     }
 
-    static public function get($alias = 'default')
+    public static function get($alias = 'default')
     {
         static $dbs = array();
 
@@ -28,7 +28,7 @@ class DB
         return $dbs[$alias];
     }
 
-    static private function getConnection($alias)
+    private static function getConnection($alias)
     {
         $configDB = Config::load('db');
 

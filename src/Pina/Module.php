@@ -5,12 +5,12 @@ namespace Pina;
 class Module implements ModuleInterface
 {
 
-    static public function getPath()
+    public static function getPath()
     {
         return __DIR__;
     }
 
-    static public function getTitle()
+    public static function getTitle()
     {
         return 'Framework';
     }

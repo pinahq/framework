@@ -5,8 +5,8 @@ namespace Pina;
 class FileManager
 {
 
-    static protected $dir = 'attachments';
-    static protected $approved = array(
+    protected static $dir = 'attachments';
+    protected static $approved = array(
         "jpg", "jpeg", "png", "gif", "ico",
         "xls", "xlsx", "doc", "docx", "pdf", "ppt", "pptx",
         "psd", "crl",
@@ -14,18 +14,18 @@ class FileManager
         "txt",
     );
 
-    static protected $table = '';
+    protected static $table = '';
 
     //Path App::uploads().'/'.static::$dir;
 
-    static public function tmpName($ext, $key = false)
+    public static function tmpName($ext, $key = false)
     {
         $uniqueId = md5($key?$key:(time().rand()));
         $filename = $uniqueId.'.'.strtolower($ext);
         return $filename;
     }
 
-    static public function newFileName($souce_filename, $ext)
+    public static function newFileName($souce_filename, $ext)
     {
         if (empty($ext)) return $souce_filename;
         
@@ -40,7 +40,7 @@ class FileManager
         return $filename;
     }
 
-    static public function getFileUrl($filename, $ext = false)
+    public static function getFileUrl($filename, $ext = false)
     {
         if (!empty($ext))
         {
@@ -55,7 +55,7 @@ class FileManager
         return $r;
     }
 
-    static public function getFilePath($filename, $ext = false)
+    public static function getFilePath($filename, $ext = false)
     {
         if (!empty($ext))
         {
@@ -70,7 +70,7 @@ class FileManager
         return $r;
     }
 
-    static public function upload($item = 'Filedata')
+    public static function upload($item = 'Filedata')
     {
         global $_FILES;
 
@@ -102,7 +102,7 @@ class FileManager
         return static::prepareData($filename, $ext);
     }
 
-    static public function prepareDir($filename, $ext = false)
+    public static function prepareDir($filename, $ext = false)
     {
         if (!empty($ext))
         {
@@ -123,7 +123,7 @@ class FileManager
     }
 
 
-    static public function prepareFilename($filepath, $filename)
+    public static function prepareFilename($filepath, $filename)
     {
         $sourcePathinfo = pathinfo($filepath);
         $targetPathinfo = pathinfo($filename);
@@ -140,7 +140,7 @@ class FileManager
         return $filename;
     }
 
-    static public function prepareData($filename, $ext = false, $type = '')
+    public static function prepareData($filename, $ext = false, $type = '')
     {
         if (empty(static::$table)) return 0;
 
@@ -160,7 +160,7 @@ class FileManager
         return $id;
     }
 
-    static public function getAlreadyExists($filepath)
+    public static function getAlreadyExists($filepath)
     {
         if (empty(static::$table))
         {
@@ -177,7 +177,7 @@ class FileManager
         return $gw->whereHash($md5)->exists();
     }
 
-    static public function saveCopy($filepath, $filename)
+    public static function saveCopy($filepath, $filename)
     {
         if (empty($filepath))
         {
@@ -200,7 +200,7 @@ class FileManager
         return static::prepareData($filename);
     }
 
-    static function saveUrl($source, $filename)
+    public static function saveUrl($source, $filename)
     {
         if (empty($source)) return;
 

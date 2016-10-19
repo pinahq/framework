@@ -7,9 +7,9 @@ use League\CLImate\CLImate;
 class CLI
 {
 
-    static private $driver = null;
+    private static $driver = null;
 
-    static public function handle($argv, $scriptName)
+    public static function handle($argv, $scriptName)
     {
         self::$driver = new CLImate;
         
@@ -48,7 +48,7 @@ class CLI
 
     }
 
-    static private function parseParams($argv, $scriptName)
+    private static function parseParams($argv, $scriptName)
     {
         $cmd = '';
         $data = array();

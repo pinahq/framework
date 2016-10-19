@@ -5,7 +5,7 @@ namespace Pina;
 class FileStorage
 {
 
-    static public function prepareDir($file)
+    public static function prepareDir($file)
     {
         $pos = 1;
         while ($pos = strpos($file, "/", $pos)) {
@@ -16,7 +16,7 @@ class FileStorage
         }
     }
 
-    static public function clearDir($dir)
+    public static function clearDir($dir)
     {
         $d = opendir($dir);
         while (false !== ($file = readdir($d))) {

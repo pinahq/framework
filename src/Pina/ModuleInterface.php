@@ -5,8 +5,8 @@ namespace Pina;
 interface ModuleInterface
 {
 
-    static public function getPath();
+    public static function getPath();
 
-    static public function getTitle();
+    public static function getTitle();
 
 }
