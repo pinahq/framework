@@ -27,7 +27,7 @@ class Language
         return $oldCode;
     }
 
-    public static function translate($string)
+    public static function translate($string, $ns = null)
     {
         if (!isset(self::$code)) {
             static::init();
@@ -42,7 +42,7 @@ class Language
             return '';
         }
         
-        $module = Request::module();
+        $module = $ns ? $ns : Request::module();
         
         if (!isset(static::$data[static::$code])) {
             static::$data[static::$code] = [];
