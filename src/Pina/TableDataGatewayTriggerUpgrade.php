@@ -76,7 +76,7 @@ class TableDataGatewayTriggerUpgrade {
         return $r;
     }
 
-    protected function makeTriggerName($table, $action)
+    protected static function makeTriggerName($table, $action)
     {
         return str_replace(' ', '_', strtolower($table . ' ' . $action));
     }
