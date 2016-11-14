@@ -301,7 +301,7 @@ class Request
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
-            return;
+            return '';
         }
         
         self::$stack[$top]["__resource"] = $resource;
@@ -311,6 +311,10 @@ class Request
         list($controller, $action, $data) = Url::route($resource, $method);
         
         $module = Route::owner($controller);
+        
+        if (empty($module)) {
+            return '';
+        }
         
         self::$stack[$top]["__module"] = $module;
         
@@ -324,21 +328,19 @@ class Request
 
         self::$stack[$top] = array_merge(self::$stack[$top], $data);
         $handler = Url::handler($controller, $action);
+        
+        $path = ModuleRegistry::getPath($module);
 
         if ($isExternal) {
             Middleware::processBefore($resource, $action, self::$stack[$top], $method);
-            self::runHandler($handler);
+            self::runHandler($path . '/' . $handler);
             Middleware::processAfter($resource, $action, self::$stack[$top], $method);
         } else {
-            if (!self::runInternalHandler($handler)) {
+            if (!self::runInternalHandler($path . '/' . $handler)) {
                 return '';
             }
         }
 
-        if (!empty(self::$stack[$top]['display'])) {
-            $handler .= '.' . self::$stack[$top]['display'];
-        }
-        
         if ($isExternal && self::$response->code == '404 Not Found' && $resource != 'errors/not-found') {
             return self::run('errors/not-found', 'get');
         }
@@ -347,8 +349,7 @@ class Request
             return self::run('errors/forbidden', 'get');
         }
 
-        $r = self::$response->fetch($handler, $isExternal);
-        return $r;
+        return self::$response->fetch($controller.'!'.$action.'!'.(isset(self::$stack[$top]['display'])?self::$stack[$top]['display']:''), $isExternal);
     }
 
     public static function __callStatic($name, $arguments)
@@ -361,5 +362,3 @@ class Request
     }
 
 }
-
-

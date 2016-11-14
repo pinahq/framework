@@ -13,12 +13,12 @@ class Templater extends \Smarty
 
         $this->strict_resources = array();
         array_unshift(
-            $this->plugins_dir, __DIR__ . '/helpers'
+                $this->plugins_dir, __DIR__ . '/helpers'
         );
 
         $paths = ModuleRegistry::getPaths();
         foreach ($paths as $v) {
-            $helperDir = $v."/helpers";
+            $helperDir = $v . "/helpers";
             if (is_dir($helperDir)) {
                 $this->plugins_dir [] = $helperDir;
             }
@@ -27,10 +27,9 @@ class Templater extends \Smarty
         $this->use_sub_dirs = false;
         $this->template_dir = array();
 
-        $template = 'default';
-        if (App::template()) {
-            $template = App::template();
-            $this->template_dir[] = App::path() . "/templates/" . $template . '/';
+        $template = App::template();
+        if ($template && $template != 'default') {
+            $this->template_dir[] = App::path() . "/" . $template . '/';
         }
         $this->template_dir[] = App::path() . "/default/";
 
@@ -38,6 +37,15 @@ class Templater extends \Smarty
         @mkdir($this->compile_dir);
 
         $this->cache_dir = App::templaterCache();
+        #$this->compile_check = false;
+
+        $this->register_resource('pina', [
+            "\Pina\Templater",
+            "getTemplate",
+            "getTemplateTimestamp",
+            "getTemplateSecure",
+            "getTemplateTrusted",
+        ]);
     }
 
     public function setLayout($layout = "page")
@@ -71,9 +79,9 @@ class Templater extends \Smarty
         }
 
         $params['get'] = Route::resource($params['get'], $params);
-        
+
         list($controller, $action, $data) = Url::route($params['get'], 'get');
-        
+
         $module = Route::owner($controller);
 
         if (!Request::isAvailable($module, $params['get'])) {
@@ -89,18 +97,9 @@ class Templater extends \Smarty
         }
 
         $params = array_merge($params, $data);
-        $handler = Url::handler($controller, $action);
-
-        if (empty($handler)) {
-            return '';
-        }
-
-        if (!empty($params['display'])) {
-            $handler .= '.' . $params['display'];
-        }
 
         $view->assign('params', $params);
-        $result = $view->fetch('file:' . $handler . '.tpl');
+        $result = $view->fetch('pina:' . $controller.'!'.$action.'!'.(isset($params['display'])?$params['display']:''));
 
         $view->_tpl_vars = $vars_backup;
 
@@ -177,6 +176,71 @@ class Templater extends \Smarty
         $start .= '>';
         $end = '</' . $tag . '>';
         return array($start, $end);
+    }
+
+    public static function getTemplatePaths($template, &$view)
+    {
+        list($controller, $action, $display) = explode('!', $template);
+        
+        $module = Route::owner($controller);
+        if (empty($module)) {
+            return true;
+        }
+        
+        $handler = Url::handler($controller, $action);
+        
+        if (!empty($display)) {
+            $handler .= '.' . $display;
+        }
+        
+        $handler .= ".tpl";
+        
+        $moduleFolder = substr(strrchr($module, "\\"), 1);
+        
+        $paths = $view->template_dir;
+        foreach ($paths as $k => $v) {
+            $paths[$k] .= 'Modules/' . $moduleFolder . '/' . $handler;
+        }
+        
+        $modulePath = ModuleRegistry::getPath($module);
+        if (!empty($modulePath)) {
+            $paths[] = $modulePath . '/' . $handler;
+        }
+        return array_unique($paths);
+    }
+    
+    public static function getTemplate($template, &$tpl_source, &$view)
+    {
+        $paths = static::getTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                $tpl_source = $view->_read_file($path);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getTemplateTimestamp($template, &$timestamp, &$view)
+    {
+        $paths = static::getTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                $timestamp = filemtime($path);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getTemplateSecure($template, &$view)
+    {
+        return true;
+    }
+
+    public static function getTemplateTrusted($template, &$view)
+    {
+        
     }
 
 }

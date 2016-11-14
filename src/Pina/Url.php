@@ -130,13 +130,7 @@ class Url
 
     public static function handler($controller, $action)
     {
-        $controller = trim($controller, "/");
-        $owner = Route::owner($controller);
-        if (empty($owner)) {
-            return false;
-        }
-        $path = ModuleRegistry::getPath($owner);
-        return $path . '/' . App::get() . '/' . $controller . '/' . $action;
+        return App::get() . '/' . trim($controller, "/") . '/' . $action;
     }
 
     public static function parse($resource, $pattern)

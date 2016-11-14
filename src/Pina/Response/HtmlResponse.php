@@ -55,14 +55,12 @@ class HtmlResponse extends Response
             return '';
         }
         
-        $app = App::get();
-
         $this->view->assign('params', \Pina\Request::params());
-        $t = $this->view->fetch('file:' . $handler . '.tpl');
+        $t = $this->view->fetch('pina:' . $handler);
         if ($first) {
             $this->view->assign("content", $t);
             ResourceManager::mode('layout');
-            $t = $this->view->fetch('Layout/'.$app.'/'. $this->view->getLayout(). '.tpl');
+            $t = $this->view->fetch('Layout/' . App::get() . '/' . $this->view->getLayout() . '.tpl');
         }
 
         return $t;
