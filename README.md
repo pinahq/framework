@@ -127,6 +127,7 @@ DELETE | Элемент | DELETE /users/alex | Удалить пользоват
 ------------------| ------------
 GET /users | /users/index.php
 GET /users/alex | /users/show.php
+**GET /users/create** | **/users/create.php**
 POST /users | /users/store.php
 POST /users/alex | /users/store.php
 PUT /users | /users/update.php
@@ -134,8 +135,13 @@ PUT /users/alex | /users/update.php
 DELETE /users | /users/destroy.php
 DELETE /users/alex | /users/destroy.php
 
-Обратите внимание, что в целом контроллер определяется HTTP-методом и только для GET-запросов система отличает коллекцию и элемент и выбирает разные обработчики.
+Обратите внимание, что в целом контроллер определяется HTTP-методом. 
 
+Но для GET-запросов есть исключение. Система отличает:
+
+- коллекцию (index.php), 
+- элемент (show.php),
+- и ресурс для ввода информации для создания нового элемента (create.php). 
 
 Как это будет работать для вложенных коллекций:
 
@@ -143,6 +149,7 @@ DELETE /users/alex | /users/destroy.php
 ------------------ | ------------
 GET /users/alex/books | /users/books/index.php
 GET /users/alex/books/5 | /users/books/show.php
+GET /users/alex/books/create | /users/books/create.php
 POST /users/alex/books | /users/books/store.php
 POST /users/alex/books/5 | /users/books/store.php
 PUT /users/alex/books | /users/books/update.php
@@ -163,7 +170,7 @@ Route::own(‘/users’, __NAMESPACE__); //первым параметром у�
 Route::own(‘/users/books’, __NAMESPACE__);
 ```
 
-Этот принципиально другой подход делает роутинг простым и быстрым.
+Такой подход делает роутинг простым и быстрым.
 
 
 
