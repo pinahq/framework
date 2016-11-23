@@ -16,8 +16,9 @@ class Arr
 
         return $a2;
     }
-    
-    public static function diff($a1, $a2) {
+
+    public static function diff($a1, $a2)
+    {
         $counts = [];
         foreach ($a2 as $v2) {
             if (isset($counts[$v2])) {
@@ -26,14 +27,14 @@ class Arr
                 $counts[$v2] = 1;
             }
         }
-        
+
         foreach ($a1 as $k1 => $v1) {
             if (!empty($counts[$v1])) {
                 unset($a1[$k1]);
-                $counts[$v1]--;
+                $counts[$v1] --;
             }
         }
-        
+
         return array_values($a1);
     }
 
@@ -71,7 +72,21 @@ class Arr
         }
         return $data;
     }
-    
+
+    public static function joinColumns($columns)
+    {
+        $table = [];
+        foreach ($columns as $key => $column) {
+            foreach ($column as $index => $item) {
+                if (!isset($table[$index])) {
+                    $table[$index] = [];
+                }
+                $table[$index][$key] = $item;
+            }
+        }
+        return $table;
+    }
+
     public static function group($data, $key)
     {
         $result = array();
@@ -85,7 +100,7 @@ class Arr
 
         return $result;
     }
-    
+
     public static function groupUnique($data, $key)
     {
         $result = array();
@@ -99,7 +114,7 @@ class Arr
 
         return $result;
     }
-    
+
     public static function groupColumn($data, $key, $column)
     {
         $result = array();
