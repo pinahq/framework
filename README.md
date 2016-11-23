@@ -192,7 +192,7 @@ $post = PostGateway::instance()->find($postId);
 Request::result(‘post’, $post); 
 ```
 
-Усложним задачу. Теперь если запись не найдена надо возвращать страницу 404:
+Усложним задачу. Теперь если запись не найдена, надо возвращать страницу 404:
 
 ```
 $postId = Request::param(‘post_id’);
@@ -203,7 +203,7 @@ if (empty($post)) {
 Request::result(‘post’, $post); 
 ```
 
-Если не передан обязательный параметр post_id возвращать код ошибки 400 bad request:
+Если не передан обязательный параметр post_id, возвращать код ошибки 400 bad request:
 
 ```
 $postId = Request::param(‘post_id’);
@@ -236,7 +236,7 @@ Request::result(‘post’, $post);
 Ресурс | Контроллер | Шаблон
 ------ | ---------- | ------
 books/5 | books/show.php | books/show.tpl
-books/5?display=edit | books/show.php | books.edit.tpl
+books/5?display=edit | books/show.php | books/show.edit.tpl
 
 Только обработчики GET-запросов могут иметь HTML-представление, это действия:
 
