@@ -144,6 +144,31 @@ class Response
     {
         $this->code('410 Gone');
     }
+    
+    public function internalError()
+    {
+        $this->code('500 Internal Server Error');
+    }
+    
+    public function notImplemented()
+    {
+        $this->code('501 Not Implemented');
+    }
+    
+    public function badGateway()
+    {
+        $this->code('502 Bad Gateway');
+    }
+    
+    public function serviceUnavailable()
+    {
+        $this->code('503 Service Unavailable');
+    }
+    
+    public function gatewayTimeout()
+    {
+        $this->code('504 Gateway Timeout');
+    }
 
     /* headers */
 
