@@ -12,7 +12,7 @@ function smarty_block_link_context($params, $content, &$view, &$repeat)
         return;
     }
     
-    unset($__pinaLinkContext);
+    $__pinaLinkContext = null;
 
     return $content;
 }
