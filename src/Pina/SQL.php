@@ -88,13 +88,15 @@ class SQL
         return $this;
     }
 
-    public function select($field)
+    public function select($field, $alias = null)
     {
-        $fields = explode(',', $field);
-        foreach ($fields as $k => $v) {
-            $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
-        }
-
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
+        return $this;
+    }
+    
+    public function selectWithPrefix($field, $prefix)
+    {
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($prefix).'_'.trim($field));
         return $this;
     }
 
@@ -410,10 +412,12 @@ class SQL
     {
         $fields = array();
         foreach ($this->select as $k => $v) {
-            list($type, $field) = $v;
+            $type = array_shift($v);
+            $field = array_shift($v);
+            $alias = array_shift($v);
             switch ($type) {
                 case self::SQL_SELECT_FIELD:
-                    $fields[] = $this->getAlias() . '.' . $field;
+                    $fields[] = $this->getAlias() . '.' . $field.($alias ? (' as '.$alias) : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
                     $fields[] = $field;
@@ -776,7 +780,7 @@ class SQL
 
     public function makeInsert($data, $fields = false, $cmd = 'INSERT')
     {
-        if (empty($data) || !is_array($data) || count($data) == 0) {
+        if (empty($data) || !is_array($data)) {
             return false;
         }
 
@@ -810,7 +814,7 @@ class SQL
 
     public function makePut($data, $fields = false)
     {
-        if (empty($data) || !is_array($data) || count($data) == 0) {
+        if (empty($data) || !is_array($data)) {
             return false;
         }
 
@@ -910,7 +914,7 @@ class SQL
 
     public function makeUpdate($data, $fields = false)
     {
-        if (empty($data) || !is_array($data) || count($data) == 0) {
+        if (empty($data) || !is_array($data)) {
             return false;
         }
 

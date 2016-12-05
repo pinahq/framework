@@ -113,17 +113,17 @@ class SQLTest extends PHPUnit_Framework_TestCase
 
         
         $q = SQL::table('cody_category')
-            ->select("category_id, category_title")
+            ->select("category_id")->select("category_title")
             ->leftJoin(
                 SQL::table('cody_category_parent')->alias('t2')->on('category_id')->select('category_parent_id')
                     ->leftJoin(
-                        SQL::table('cody_category')->alias('t3')->on('category_id', 'category_parent_id')->select('category_title AS category_parent_title')
+                        SQL::table('cody_category')->alias('t3')->on('category_id', 'category_parent_id')->select('category_title', 'category_parent_title')
                     )
             )
             ->orderBy('t2.category_id, t2.category_parent_length DESC')
             ->make();
         
-        $this->assertEquals("SELECT cody_category.category_id, cody_category.category_title, t2.category_parent_id, t3.category_title AS category_parent_title"
+        $this->assertEquals("SELECT cody_category.category_id, cody_category.category_title, t2.category_parent_id, t3.category_title as category_parent_title"
             . " FROM cody_category"
             . " LEFT JOIN cody_category_parent t2 ON t2.category_id = cody_category.category_id"
             . " LEFT JOIN cody_category t3 ON t3.category_id = t2.category_parent_id"
@@ -245,8 +245,8 @@ class SQLTest extends PHPUnit_Framework_TestCase
                 ->on('brand_id')
                 ->select('brand_title')
             )
-            ->select('product_id, product_sku')
-            ->select('product_title, product_color')
+            ->select('product_id')->select('product_sku')
+            ->select('product_title')->select('product_color')
 
             ->innerJoin(
                 SQL::table('cody_product_variant')->on('product_id')
@@ -275,6 +275,11 @@ class SQLTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(strpos($gw->make(), ' - IFNULL(cody_product_reserv.product_reserv_amount,0)'
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'
                 . ') as stock') !== false);
+        
+        $gw = SQL::table('cody_product');
+        $gw->selectWithPrefix('product_id', 'old');
+        $sql = $gw->make();
+        $this->assertEquals('SELECT cody_product.product_id as old_product_id FROM cody_product', $sql);
     }
     
     public function testInsert()
