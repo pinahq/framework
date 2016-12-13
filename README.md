@@ -442,3 +442,187 @@ $db = DB::get();
 $db->query("INSERT INTO products SET title='test'");
 $id = $db->insertId();
 ```
+
+###Конструктор запросов.
+
+####Получить все записи из таблицы:
+
+```
+$users = SQL::table('cody_user')->get();
+```
+
+####Получить одну запись из таблицы (первую в выборке)
+
+```
+$user = SQL::table('cody_user')->whereBy("user_login", "admin")->first();
+```
+
+####Получить значение конкретной ячейки
+
+```
+$isEnabled = SQL::table('cody_user')->whereBy("user_login", "admin")->value(‘user_enabled’);
+```
+
+####Получить колонку из таблицы
+
+```
+$ids = SQL::table('cody_user')->column(‘user_id’);
+```
+
+####Выборка с определенным полями
+
+```
+$users = SQL::table('cody_user')->select('user_login')->select('user_email')->get();
+```
+
+Метод select() в отличии от laravel добавляет указанные поля в выборку, а не заменяет их, то есть можно использовать несколько select с разными полями
+
+
+####Выборка по произвольному условию
+
+```
+SQL::table('cody_user')->where("user_expired > '2015-03-01'")->whereBy('user_enabled', 'Y')->get();
+```
+
+whereBy проверяет соответствует ли поле значению или одному из значений массива.
+
+
+####Order by, Group by, having
+
+```
+SQL::table('cody_user')->orderBy('user_created desc')->groupBy('user_id')->calculate('count(cody_account.*) as cnt')->having('cnt > 5')->get();
+```
+
+Методы orderBy, groupBy, having просто добавляют соответствующие выражения “как есть”.
+
+
+####Limit
+
+```
+SQL::table('cody_user')->limit(30, 10)->get();
+SQL::table('cody_user')->limit(10)->get();
+```
+
+####Соединения таблиц
+
+```
+SQL::table('cody_user')->innerJoin(SQL::table('cody_account')->on('user_id'))->whereBy('user_id', 5)->get();
+SQL::table('cody_user')->leftJoin(
+    SQL::table('cody_account')->on('user_id')->onBy('account_enabled', 'Y')
+)->whereBy('user_id', 5)->get();
+```
+
+####Агрегатные функции
+
+```
+SQL::table('cody_user')->whereBy('user_enabled')->count();
+SQL::table('cody_user')->max('user_id');
+SQL::table('cody_user')->min('user_id');
+SQL::table('cody_user')->avg('user_id');
+SQL::table('cody_user')->sum('user_id');
+```
+
+####Проверка существования
+
+```
+if (SQL::table('cody_user')->whereBy('user_login', 'test')->exists()) {
+    echo 'exists!';
+}
+```
+
+####Вставка данных
+
+```
+SQL::table('cody_user')->insert([‘user_login’ => ‘test’, ‘user_email’ => ‘test@test.com’]);
+```
+
+####Получение идентификатора после вставки
+
+```
+SQL::table('cody_user')->insertGetId(['user_login' => 'test', 'user_email' => 'test@test.com']);
+```
+
+####Вставка нескольких записей одним запросом
+
+```
+SQL::table('cody_user')->insert([['user_login' => 'test', 'user_email' => 'test@test.com'], ['user_login' => 'test2', 'user_email' => 'test2@test.com']]);
+```
+
+####Замена данных в таблице
+
+```
+SQL::table('cody_user')->put(['user_login' => 'test', 'user_email' => 'test@test.com']);
+```
+
+####Замена данных в таблице и получения идентификатора, если добавлен новый элемент
+
+```
+SQL::table('cody_user')->putGetId(['user_login' => 'test', 'user_email' => 'test@test.com']);
+```
+
+####Обновление данных
+
+```
+SQL::table('cody_user')->whereBy('user_login', 'test')->update(['user_email' => 'test@test.com']);
+```
+
+####Удаление данных
+
+```
+SQL::table('cody_user')->whereBy('user_login', 'test')->delete();
+```
+
+####Модели и шлюзы таблиц
+
+Модели, которые непосредственно связаны с одной таблицей в БД, обычно наследуются от класса TableDataGateway. Этот базовый класс дает модели инструментарий для описания и обработки мета-информации таблицы, а так же для гибкой выборки данных из неё. Так как TableDataGateway сам унаследован от класса контруктора запросов SQL, то модель получает все методы конструктора запросов, проинициализированного таблицей моделей. Что позволяет использовать всю мощь конструктора запросов, скрывая обращение к конкретным таблицам обращением к классам моделей. Пример для соединения таблиц на таких моделях можно было бы переписать следующим образом:
+
+```
+UserGateway::instance()->leftJoin(
+    AccountGateway::instance()->on('user_id')->enabled()
+)->whereId(5)->get();
+```
+
+Модель часто определяет методы, расширяющие конструктор запросов и ориентированные на структуру своей таблицы. Это позволяет записывать сложные запросы простым путем и не дублировать часто используемые конструкции.
+
+Как и в конструкторе запросов для простоты интерфейс многих методов определен с оглядкой на Laravel. Например, получить запись по первичному ключу.
+
+```
+UserGateway::instance()->find(5);
+```
+
+Получить все данные из таблицы
+
+```
+UserGateway::instance()->get();
+```
+
+Получить идентификатор (первичный ключ) записи
+
+```
+UserGateway::instance()->whereBy('user_login', 'test')->id();
+```
+
+Выборка по идентификатору (первичному ключу)
+
+```
+UserGateway::instance()->whereId(5)->first();
+```
+
+Получить активные записи (у которых поле enabled = ‘Y’)
+
+```
+UserGateway::instance()->enabled()->get();
+```
+
+Удалить пользователя по его идентификатору
+
+```
+UserGateway::instance()->whereId(5)->delete();
+```
+
+Обновить данные пользователя по его идентификатору
+
+```
+UserGateway::instance()->whereId(5)->update(['user_email' => 'test@test.com']);
+```
+
