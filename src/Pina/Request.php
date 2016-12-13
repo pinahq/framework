@@ -313,7 +313,8 @@ class Request
         $module = Route::owner($controller);
         
         if (empty($module)) {
-            return '';
+            header('HTTP/1.1 404 Not Found');
+            return self::run('errors/not-found', 'get');
         }
         
         self::$stack[$top]["__module"] = $module;
@@ -335,6 +336,11 @@ class Request
             Middleware::processBefore($resource, $action, self::$stack[$top], $method);
             self::runHandler($path . '/' . $handler);
             Middleware::processAfter($resource, $action, self::$stack[$top], $method);
+            
+            if (self::$response->code) {
+                header(self::$response->code);
+            }
+
         } else {
             if (!self::runInternalHandler($path . '/' . $handler)) {
                 return '';
