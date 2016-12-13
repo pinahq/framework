@@ -314,7 +314,7 @@ class Request
         
         if (empty($module)) {
             header('HTTP/1.1 404 Not Found');
-            return self::run('errors/not-found', 'get');
+            return $method=='get'?self::run('errors/not-found', 'get'):'';
         }
         
         self::$stack[$top]["__module"] = $module;
