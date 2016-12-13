@@ -65,5 +65,26 @@ class HtmlResponse extends Response
 
         return $t;
     }
+    
+    public function fetchTemplate($handler, $first = true)
+    {
+        $this->header('Pina-Response: html');
+        $this->contentType('text/html');
+        
+        if (empty($handler)) {
+            return '';
+        }
+        
+        $this->view->assign('params', \Pina\Request::params());
+        $t = $this->view->fetch($handler.'.tpl');
+        
+        if ($first) {
+            $this->view->assign("content", $t);
+            ResourceManager::mode('layout');
+            $t = $this->view->fetch('Layout/' . App::get() . '/' . $this->view->getLayout() . '.tpl');
+        }
+
+        return $t;
+    }
 
 }

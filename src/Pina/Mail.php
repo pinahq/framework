@@ -82,13 +82,13 @@ class Mail extends Request
             $handler .= '.' . self::$stack[$top]['display'];
         }
         
-        $r = self::$response->fetch($handler, true);
-        
+        $r = self::$response->fetchTemplate($handler, true);
+
         array_pop(self::$stack);
 
         self::$response = $oldResponse;
         self::$stack = $oldStack;
-
+        
         static::$content = $r;
     }
 
