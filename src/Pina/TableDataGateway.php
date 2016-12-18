@@ -176,6 +176,16 @@ class TableDataGateway extends SQL
     {
         return $this->whereBy($this->primaryKey(), $id);
     }
+    
+    public function selectAllExcept($field)
+    {
+        $excludedFields = array_walk(is_array($field)?$field:explode(",", $field), 'trim');
+        $selectedFields = array_diff(array_keys(static::$fields), $excludedFields);
+        foreach ($selectedFields as $selectedField) {
+            $this->select($selectedField);
+        }
+        return $this;
+    }
 
     public function enabled()
     {
