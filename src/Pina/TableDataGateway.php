@@ -179,7 +179,8 @@ class TableDataGateway extends SQL
     
     public function selectAllExcept($field)
     {
-        $excludedFields = array_walk(is_array($field)?$field:explode(",", $field), 'trim');
+        $excludedFields = is_array($field)?$field:explode(",", $field);
+        array_walk($excludedFields, 'trim');
         $selectedFields = array_diff(array_keys(static::$fields), $excludedFields);
         foreach ($selectedFields as $selectedField) {
             $this->select($selectedField);
