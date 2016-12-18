@@ -85,6 +85,11 @@ class Templater extends \Smarty
         $module = Route::owner($controller);
 
         if (!Request::isAvailable($module, $params['get'])) {
+            if (!empty($params['fallback'])) {
+                $params['get'] = $params['fallback'];
+                unset($params['fallback']);
+                return self::processView($params, $view);
+            }
             return;
         }
 
@@ -99,7 +104,15 @@ class Templater extends \Smarty
         $params = array_merge($params, $data);
 
         $view->assign('params', $params);
-        $result = $view->fetch('pina:' . $controller.'!'.$action.'!'.(isset($params['display'])?$params['display']:''));
+        $template = $controller.'!'.$action.'!'.(isset($params['display'])?$params['display']:'');
+        
+        if (!empty($params['fallback']) && !self::isTemplateExists($template, $view)) {
+            $params['get'] = $params['fallback'];
+            unset($params['fallback']);
+            return self::processView($params, $view);
+        }
+        
+        $result = $view->fetch('pina:' .$template);
 
         $view->_tpl_vars = $vars_backup;
 
@@ -227,6 +240,17 @@ class Templater extends \Smarty
         foreach ($paths as $path) {
             if (file_exists($path) && is_file($path)) {
                 $timestamp = filemtime($path);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static function isTemplateExists($template, &$view)
+    {
+        $paths = static::getTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
                 return true;
             }
         }
