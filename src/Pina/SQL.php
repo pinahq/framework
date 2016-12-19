@@ -90,7 +90,26 @@ class SQL
 
     public function select($field, $alias = null)
     {
-        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
+        if (!empty($alias)) {
+            $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
+            return $this;
+        }
+        
+        $fields = !is_array($field)?explode(',', $field):$field;
+        $as = ' as ';
+        $asLength = strlen($as);
+        foreach ($fields as $k => $v) {
+            $asPosition = stripos($v, $as);
+            
+            if ($asPosition !== false) {
+                $alias = substr($v, $asPosition + $asLength);
+                $v = substr($v, 0, $asPosition);
+                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v), trim($alias));
+            } else {
+                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
+            }
+        }
+        
         return $this;
     }
     

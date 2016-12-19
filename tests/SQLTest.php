@@ -280,6 +280,26 @@ class SQLTest extends PHPUnit_Framework_TestCase
         $gw->selectWithPrefix('product_id', 'old');
         $sql = $gw->make();
         $this->assertEquals('SELECT cody_product.product_id as old_product_id FROM cody_product', $sql);
+        
+        $this->assertEquals(
+            SQL::table('cody_product')->select('product_id')->select('product_title')->make(),
+            SQL::table('cody_product')->select('product_id, product_title')->make()
+        );
+        
+        $this->assertEquals(
+            SQL::table('cody_product')->select('product_id', 'id')->select('product_title', 'title')->make(),
+            SQL::table('cody_product')->select('product_id as id, product_title AS title')->make()
+        );
+        
+        $this->assertEquals(
+            SQL::table('cody_product')->select('product_id')->select('product_title')->make(),
+            SQL::table('cody_product')->select(['product_id', 'product_title'])->make()
+        );
+        
+        $this->assertEquals(
+            SQL::table('cody_product')->select('product_id', 'id')->select('product_title', 'title')->make(),
+            SQL::table('cody_product')->select(['product_id as id', 'product_title AS title'])->make()
+        );
     }
     
     public function testInsert()
