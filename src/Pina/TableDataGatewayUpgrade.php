@@ -65,7 +65,7 @@ class TableDataGatewayUpgrade
             "/" .
             "(\w+(\(.*\)(\s+UNSIGNED)?)?)" .
             "(\s+(NOT NULL|NULL))?" .
-            "(\s+DEFAULT\s+'(.*)')?" .
+            "(\s+DEFAULT\s+'?([^']*)'?)?" .
             "(\s+AUTO_INCREMENT)?" .
             "/i", $descr, $matches
         );
@@ -73,14 +73,17 @@ class TableDataGatewayUpgrade
         if (empty($matches[1])) {
             return false;
         }
+        
+        $type = strtolower($matches[1]);
+        $null = (!empty($matches[5]) && strcasecmp($matches[5], "NOT NULL") == 0) ? "NO" : "YES";
+        $default = isset($matches[7]) ? $matches[7] : '';
+        $extra = !empty($matches[8]) ? strtolower(trim($matches[8])) : '';
+        
+        if (strcasecmp($default, 'null') === 0) {
+            $default = null;
+        }
 
-        return array
-            (
-            "Type" => strtolower($matches[1]),
-            "Null" => (!empty($matches[5]) && strcasecmp($matches[5], "NOT NULL") == 0) ? "NO" : "YES",
-            "Default" => isset($matches[7]) ? $matches[7] : '',
-            "Extra" => !empty($matches[8]) ? strtolower(trim($matches[8])) : '',
-        );
+        return ["Type" => $type, "Null" => $null, "Default" => $default, "Extra" => $extra];
     }
 
     public function makeCreateIndexesDescription($data)
@@ -139,7 +142,7 @@ class TableDataGatewayUpgrade
             if (!is_array($structured)) {
                 $structured = $this->parseFieldDescription($gatewayFields[$params['Field']]);
             }
-
+            
             if (count(array_diff($structured, $params))) {
                 $diff['edit_fields'][] = $params['Field'];
             }
