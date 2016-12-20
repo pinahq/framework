@@ -39,7 +39,7 @@ class SQL
 
     public static function subquery($query)
     {
-        return new SQL('(' . $query->make() . ')', DB::get());
+        return new SQL('(' . $query . ')', DB::get());
     }
 
     public function init()
@@ -149,6 +149,11 @@ class SQL
     public function rightJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('RIGHT', $table, $field, $table2, $field2);
+    }
+    
+    public function crossJoin($table, $field = false, $table2 = false, $field2 = false)
+    {
+        return $this->join('CROSS', $table, $field, $table2, $field2);
     }
 
     public function on($field1, $field2 = '')
