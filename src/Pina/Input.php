@@ -42,7 +42,7 @@ class Input
     private static function getFullResource()
     {
         if (self::isScript()) {
-            return $_REQUEST[self::ACTION_PARAM];
+            return isset($_REQUEST[self::ACTION_PARAM])?$_REQUEST[self::ACTION_PARAM]:'';
         }
         
         return ltrim($_SERVER['REQUEST_URI'], '/');
