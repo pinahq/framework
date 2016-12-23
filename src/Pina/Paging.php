@@ -76,14 +76,15 @@ class Paging
 
     public function fetch()
     {
-        return array(
+        return [
             'paging' => $this->perPage,
             'start' => $this->getStart() + 1,
             'end' => min($this->getStart() + $this->perPage, $this->total),
             'current' => $this->getCurrent(),
             'total' => $this->getPagesCount(),
-            'items' => $this->total
-        );
+            'items' => $this->total,
+            'resource' => App::resource(),
+        ];
     }
 
 }
