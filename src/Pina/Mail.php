@@ -8,14 +8,15 @@ use \PHPMailer;
 class Mail extends Request
 {
 
-    private static $config = array();
-    private static $to = array();
-    private static $cc = array();
-    private static $bcc = array();
+    private static $config = [];
+    private static $to = [];
+    private static $cc = [];
+    private static $bcc = [];
+    private static $attachment = [];
     
     private static $content = '';
 
-    public static function send($handler, $data = array())
+    public static function send($handler, $data = [])
     {
         if (empty(static::$config)) {
             static::$config = Config::load('mail');
@@ -39,10 +40,11 @@ class Mail extends Request
     
     private static function clear()
     {
-        static::$to = array();
-        static::$cc = array();
-        static::$bcc = array();
+        static::$to = [];
+        static::$cc = [];
+        static::$bcc = [];
         static::$content = '';
+        static::$attachment = [];
     }
 
     public static function to($address, $name = '')
@@ -60,13 +62,24 @@ class Mail extends Request
         static::$bcc [] = array('address' => $address, 'name' => $name);
     }
 
+    public static function attachment($path, $name = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
+    {
+        static::$attachment [] = array(
+            'path' => $path,
+            'name' => $name,
+            'encoding' => $encoding,
+            'type' => $type,
+            'disposition' => $disposition
+        );
+    }
+
     public static function run($handler, $data)
     {
         $oldResponse = self::$response;
         $oldStack = self::$stack;
 
         self::$response = new Response\HtmlResponse();
-        self::$stack = array();
+        self::$stack = [];
         $method = 'get';
         
         array_push(self::$stack, $data);
@@ -135,7 +148,11 @@ class Mail extends Request
         foreach (static::$bcc as $u) {
             $mail->addBCC($u['address'], $u['name']);
         }
-        
+
+        foreach (static::$attachment as $a) {
+            $mail->addAttachment($a['path'], $a['name'], $a['encoding'], $a['type'], $a['disposition']);
+        }
+
         $mail->CharSet = App::charset();
 
         $mail->Subject = Place::get('mail_subject');
