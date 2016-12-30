@@ -564,7 +564,7 @@ class SQL
         $sql = 'SELECT ';
         $sql .= $this->makeCountFields($field);
 
-        $sql .= ' FROM ' . $this->from;
+        $sql .= ' FROM ' . $this->makeFrom();
 
         if (!empty($useJoin)) {
             $sql .= $this->makeJoins();
@@ -600,7 +600,7 @@ class SQL
         }
 
         $sql = 'SELECT ' . $func . '(' . $what . ')';
-        $sql .= ' FROM ' . $this->from;
+        $sql .= ' FROM ' . $this->makeFrom();
 
         $sql .= $this->makeJoins();
         $sql .= $this->makeWhere();
@@ -976,8 +976,14 @@ class SQL
 
     public function makeDelete($what = false)
     {
-        $field = ($what ? $what : $this->from);
-        return "DELETE " . $field . " FROM " . $this->from . $this->makeJoins() . $this->makeWhere()
+        $field = ($what ? $what : '');
+        if (empty($field) && count($this->joins)) {
+            $field = $this->getAlias();
+        }
+        if (!empty($field)) {
+            $field = ' '.$field;
+        }
+        return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
             . $this->makeOrderBy() . $this->makeLimit();
     }
 
@@ -988,7 +994,7 @@ class SQL
 
     public function makeTruncate()
     {
-        return "TRUNCATE $this->from";
+        return "TRUNCATE ".$this->makeFrom();
     }
 
     public function copyGetId($replaces = array())

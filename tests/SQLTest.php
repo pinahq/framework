@@ -316,7 +316,7 @@ class SQLTest extends PHPUnit_Framework_TestCase
         $q = SQL::table('cody_product')
             ->whereBy('product_id', '5')
             ->makeDelete();
-        $this->assertEquals("DELETE cody_product FROM cody_product WHERE (cody_product.product_id = '5')", $q);
+        $this->assertEquals("DELETE FROM cody_product WHERE (cody_product.product_id = '5')", $q);
         $q = SQL::table('cody_product')
             ->innerJoin(
                 SQL::table('cody_product_variant')->on('product_id')
@@ -328,12 +328,12 @@ class SQLTest extends PHPUnit_Framework_TestCase
                 SQL::table('cody_product')->alias('p2')->on('product_id')
             )
             ->makeDelete('p1');
-        $this->assertEquals("DELETE p1 FROM cody_product INNER JOIN cody_product p2 ON p2.product_id = p1.product_id", $q);
+        $this->assertEquals("DELETE p1 FROM cody_product p1 INNER JOIN cody_product p2 ON p2.product_id = p1.product_id", $q);
         $q = SQL::table('cody_product')
             ->orderBy('product_id')
             ->limit(10)
             ->makeDelete();
-        $this->assertEquals("DELETE cody_product FROM cody_product ORDER BY product_id LIMIT 10", $q);
+        $this->assertEquals("DELETE FROM cody_product ORDER BY product_id LIMIT 10", $q);
         //the query is warning, because order by and limit use with multiple-table syntax
         $q = SQL::table('cody_product')
             ->innerJoin(
