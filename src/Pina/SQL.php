@@ -977,7 +977,8 @@ class SQL
     public function makeDelete($what = false)
     {
         $field = ($what ? $what : $this->from);
-        return "DELETE " . $field . " FROM " . $this->from . ' ' . $this->makeJoins() . $this->makeWhere();
+        return "DELETE " . $field . " FROM " . $this->from . $this->makeJoins() . $this->makeWhere()
+            . $this->makeOrderBy() . $this->makeLimit();
     }
 
     public function truncate()
