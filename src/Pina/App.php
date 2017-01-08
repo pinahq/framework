@@ -62,18 +62,13 @@ class App
         App::resource($resource);
         
         ModuleRegistry::init();
-
-        $response = Response\Factory::get($resource, $method);
-        if (empty($response)) {
-            @header('HTTP/1.1 406 Not Acceptable');
-            exit;
-        }
-        Request::init($response, $data);
+        
+        Request::init($data);
         
         ModuleRegistry::initModules();
         
         $resource = DispatcherRegistry::dispatch($resource);
-        echo Request::run($resource, $method);
+        Request::run($resource, $method);
     }
     
     public static function resource($resource = '')

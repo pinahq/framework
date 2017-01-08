@@ -75,10 +75,8 @@ class Mail extends Request
 
     public static function run($handler, $data)
     {
-        $oldResponse = self::$response;
         $oldStack = self::$stack;
 
-        self::$response = new Response\HtmlResponse();
         self::$stack = [];
         $method = 'get';
         
@@ -95,11 +93,11 @@ class Mail extends Request
             $handler .= '.' . self::$stack[$top]['display'];
         }
         
-        $r = self::$response->fetchTemplate($handler, true);
+        $response = new HtmlResponse();
+        $r = $response->fetchTemplate($handler, true);
 
         array_pop(self::$stack);
 
-        self::$response = $oldResponse;
         self::$stack = $oldStack;
         
         static::$content = $r;

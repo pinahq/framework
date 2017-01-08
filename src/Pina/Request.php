@@ -5,14 +5,16 @@ namespace Pina;
 class Request
 {
 
-    protected static $response = false;
-    protected static $stack = array();
+    protected static $stack = [];
+    protected static $messages = [];
+    protected static $results = [];
+    protected static $layout = '';
+    protected static $done = false;
 
-    public static function init($response, $data)
+    public static function init($data)
     {
-        self::$response = $response;
         self::$stack = array();
-        
+
         if (is_array($data)) {
             array_push(self::$stack, $data);
         } else {
@@ -22,30 +24,13 @@ class Request
 
     public static function internal($resource, $method, $data = array())
     {
-        if (!empty($data["mode"])) {
-            self::result("mode", $data["mode"]);
-        }
-        if (!empty($data["title"])) {
-            self::result("title", $data["title"]);
-        }
+        ob_start();
 
         array_push(self::$stack, $data);
-        $r = self::run($resource, $method);
+        self::run($resource, $method);
         array_pop(self::$stack);
-        return $r;
-    }
-
-    public static function middleware($resource, $method, $data = array())
-    {
-        $oldResponse = self::$response;
-        self::$response = new Response\MiddlewareResponse();
-
-        array_push(self::$stack, $data);
-        $r = self::run($resource, $method);
-        array_pop(self::$stack);
-        self::$response = $oldResponse;
-
-        return $r;
+        
+        return ob_get_clean();
     }
 
     public static function set($name, $value)
@@ -57,54 +42,24 @@ class Request
 
         self::$stack[$top][$name] = $value;
     }
-    
+
     public static function match($pattern)
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
             return;
         }
-        
+
         if (empty(self::$stack[$top]['__resource'])) {
             return;
         }
-        
+
         $resource = Url::trim(self::$stack[$top]['__resource']);
         $pattern = Url::trim($pattern);
         $parsed = Url::parse($resource, $pattern);
         foreach ($parsed as $k => $v) {
             self::set($k, urldecode($v));
         }
-    }
-
-    // выполнение контроллера сопровождается предупреждением
-    public static function warning($message, $subject = '')
-    {
-        self::$response->warning($message, $subject);
-    }
-
-    // выполнение контроллера сопровождается ошибкой.
-    // $message - текст ошибки
-    // $subject - код ошибки
-    public static function error($message = "", $subject = '')
-    {
-        self::$response->error($message, $subject);
-    }
-
-    // проверяет встречались ли ошибки при выполнении
-    // запроса и завершает выполнение в случае
-    // найденных ошибок
-    public static function trust()
-    {
-        self::$response->trust();
-    }
-
-    // выполнение контроллера прерывается ошибкой
-    // $message - текст ошибки
-    // $subject - код ошибки
-    public static function stop($message = "", $subject = '')
-    {
-        self::$response->stop($message, $subject);
     }
 
     // получаем параметр запроса к контроллеру по его названию
@@ -150,17 +105,17 @@ class Request
         return $res;
     }
 
-    public static function raw() 
+    public static function raw()
     {
         $top = count(self::$stack) - 1;
         if ($top < 0) {
             return '';
         }
-        
+
         if (!empty(self::$stack[$top]['__raw'])) {
             return self::$stack[$top]['__raw'];
         }
-        
+
         return file_get_contents('php://input');
     }
 
@@ -251,50 +206,20 @@ class Request
         }
     }
 
-    // связываем результат выполнения контроллера
-    public static function result($name, $value)
-    {
-        self::$response->result($name, $value);
-    }
 
     public static function isAvailable($module, $resource)
     {
         if (App::env() === "cli") {
             return true;
         }
-        
+
         return ModuleRegistry::isActive($module) && Access::isHandlerPermitted($resource);
     }
-    
+
     public static function module()
     {
         $top = count(self::$stack) - 1;
         return self::$stack[$top]['__module'];
-    }
-
-    protected static function runHandler($handler)
-    {
-        if (is_file($handler . ".php")) {
-            include $handler . ".php";
-        } else {
-            self::notFound();
-        }
-    }
-
-    protected static function runInternalHandler($handler)
-    {
-        $path = App::path();
-        if (!is_file($handler . ".php")) {
-            return false;
-        }
-
-        try {
-            include $handler . ".php";
-        } catch (Exception $e) {
-            echo $e->getMessage();
-            return false;
-        }
-        return true;
     }
 
     public static function run($resource, $method)
@@ -304,67 +229,284 @@ class Request
             return '';
         }
         
+        self::$done = false;
+        self::$results = [];
+        self::$messages = [];
         self::$stack[$top]["__resource"] = $resource;
+        self::$stack[$top]["__method"] = $method;
 
-        $isExternal = $top == 0;
-        
         list($controller, $action, $data) = Url::route($resource, $method);
+        self::$stack[$top] = array_merge(self::$stack[$top], $data);
+
+        $display = isset(self::$stack[$top]['display'])?self::$stack[$top]['display']:'';
         
         $module = Route::owner($controller);
-        
-        if (empty($module)) {
-            header('HTTP/1.1 404 Not Found');
-            return $method=='get'?self::run('errors/not-found', 'get'):'';
-        }
-        
         self::$stack[$top]["__module"] = $module;
+        if (empty($module)) {
+            return self::notFound();
+        }
         
         if (!self::isAvailable($module, $resource)) {
-            if ($isExternal && $resource != 'errors/access-denied') {
-                return self::run('errors/access-denied', 'get');
-            } else {
-                return '';
-            }
+            return self::forbidden();
         }
 
-        self::$stack[$top] = array_merge(self::$stack[$top], $data);
-        $handler = Url::handler($controller, $action);
-        
-        $path = ModuleRegistry::getPath($module);
-
-        if ($isExternal) {
-            Middleware::processBefore($resource, $action, self::$stack[$top], $method);
-            self::runHandler($path . '/' . $handler);
-            Middleware::processAfter($resource, $action, self::$stack[$top], $method);
-            
-            if (self::$response->code) {
-                header(self::$response->code);
-            }
-
-        } else {
-            if (!self::runInternalHandler($path . '/' . $handler)) {
-                return '';
-            }
-        }
-
-        if ($isExternal && self::$response->code == '404 Not Found' && $resource != 'errors/not-found') {
-            return self::run('errors/not-found', 'get');
+        if (!self::runHandler(ModuleRegistry::getPath($module) . '/' . Url::handler($controller, $action))) {
+            return false;
         }
         
-        if ($isExternal && self::$response->code == '403 Forbidden' && $resource != 'errors/forbidden') {
-            return self::run('errors/forbidden', 'get');
+        if (self::$done) {
+            return false;
+        }
+        
+        $response = Response\Factory::get($resource, $method);
+        if (!empty(self::$messages)) {
+            self::$results['__messages'] = self::$messages;
         }
 
-        return self::$response->fetch($controller.'!'.$action.'!'.(isset(self::$stack[$top]['display'])?self::$stack[$top]['display']:''), $isExternal);
+        if ($top === 0) {
+            self::contentType($response->contentType());
+            if (self::$layout) {
+                $response->setLayout(self::$layout);
+            }
+        }
+
+        echo $response->fetch(self::$results, $controller, $action, $display, $top === 0);
+        
+        return true;
+        
+    }
+    
+    protected static function runHandler($handler)
+    {
+        if (is_file($handler . ".php")) {
+            return include $handler . ".php";
+        }
+        
+        return self::notFound();
     }
 
-    public static function __callStatic($name, $arguments)
+    public static function warning($message, $subject = '')
     {
-        if (method_exists(self::$response, $name)) {
-            call_user_func_array(array(self::$response, $name), $arguments);
-        } else {
-            die('method Request::'.$name.' not exists');
+        self::$messages[] = ['warning', $message, $subject];
+    }
+
+    public static function error($message, $subject = '')
+    {
+        self::$messages[] = ['error', $message, $subject];
+    }
+
+    public static function hasError()
+    {
+        foreach (self::$messages as $m) {
+            if ($m[0] === 'error') {
+                return true;
+            }
         }
+    }
+
+    public static function result($name, $value)
+    {
+        // закидываем результаты выполнения запроса
+        // во временный буфер,
+        // чтобы потом отдать через json или xml
+        self::$results[$name] = $value;
+    }
+
+    public static function header($h)
+    {
+        header($h);
+    }
+
+    public static function code($code)
+    {
+        static $lock = false;
+        if (!empty($lock)) return;
+
+        $lock = $code;
+        self::header('HTTP/1.1 '.$code);
+    }
+
+    /* HTTP Codes 2xx */
+
+    public static function ok()
+    {
+        self::code('200 OK');
+    }
+
+    public static function created($url)
+    {
+        self::code('201 Created');
+        self::location($url);
+        return Request::done();
+    }
+
+    public static function accepted($url)
+    {
+        self::code('202 Accepted');
+        self::contentLocation($url);
+        return Request::done();
+    }
+
+    public static function noContent()
+    {
+        self::code('204 No Content');
+        return Request::done();
+    }
+
+    public static function partialContent($range)
+    {
+        self::code('206 Partial Content');
+        self::contentRange($range);
+        return Request::done();
+    }
+
+    /* HTTP Codes 3xx */
+
+    public static function movedPermanently($url)
+    {
+        self::code('301 Moved Permanently');
+        self::location($url);
+        return Request::done();
+    }
+
+    public static function found($url)
+    {
+        self::code('302 Found');
+        self::location($url);
+        return Request::done();
+    }
+
+    public static function notModified()
+    {
+        self::code('304 Not Modified');
+        return Request::done();
+    }
+
+    /* HTTP Codes 4xx */
+
+    public static function badRequest($message = '', $subject = '')
+    {
+        if ($message) {
+            self::$messages[] = ['error', $message, $subject];
+        }
+        return self::stopWithCode('400 Bad Request');
+    }
+
+    public static function unauthorized()
+    {
+        return self::stopWithCode('401 Unauthorized');
+    }
+
+    public static function forbidden()
+    {
+        return self::stopWithCode('403 Forbidden');
+    }
+
+    public static function notFound()
+    {
+        return self::stopWithCode('404 Not Found');
+    }
+
+    public static function requestTimeout()
+    {
+        return self::stopWithCode('408 Request Timeout');
+    }
+
+    public static function conflict()
+    {
+        return self::stopWithCode('409 Conflict');
+    }
+
+    public static function gone()
+    {
+        return self::stopWithCode('410 Gone');
+    }
+
+    public static function internalError($message = '', $subject = '')
+    {
+        if ($message) {
+            self::$messages[] = ['error', $message, $subject];
+        }
+        return self::failWithCode('500 Internal Server Error');
+    }
+
+    public static function notImplemented()
+    {
+        return self::failWithCode('501 Not Implemented');
+    }
+
+    public static function badGateway()
+    {
+        return self::failWithCode('502 Bad Gateway');
+    }
+
+    public static function serviceUnavailable()
+    {
+        return self::failWithCode('503 Service Unavailable');
+    }
+
+    public static function gatewayTimeout()
+    {
+        return self::failWithCode('504 Gateway Timeout');
+    }
+    
+    private static function stopWithCode($code)
+    {
+        $top = count(self::$stack) - 1;
+        if ($top === 0) {
+            self::code($code);
+        }
+        $number = strstr($code, ' ', true);
+        if ($number) {            
+            $response = Response\Factory::get('errors/' . $number, self::$stack[$top]['__method']);
+            $results = ['error' => $code, '__messages' => self::$messages];
+            self::contentType($response->contentType());
+            echo $response->fetch($results, 'errors', 'show', '', true);
+        }
+        
+        return self::done();
+    }
+    
+    private static function failWithCode($code)
+    {
+        return stopWithCode($code);
+    }
+    
+    public static function done()
+    {
+        self::$done = true;
+        return false;
+    }
+
+    /* headers */
+
+    public static function location($url)
+    {
+        self::header('Location: ' . $url);
+    }
+
+    public static function contentLocation($url)
+    {
+        self::header('Content-Location: ' . $url);
+    }
+
+    public static function contentType($type, $charset = false)
+    {
+        if (empty($charset)) {
+            $charset = App::charset();
+        }
+        self::header('Content-Type: ' . $type . '; charset=' . $charset);
+    }
+
+    public static function contentRange($start, $end, $max)
+    {
+        self::header('Content-Range: bytes '.$start.'-'.$end.'/'.$max);
+    }
+    
+    
+    public static function setLayout($layout)
+    {
+        self::$layout = $layout;
     }
 
 }
