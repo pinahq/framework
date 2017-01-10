@@ -5,8 +5,6 @@ namespace Pina;
 class Templater extends \Smarty
 {
 
-    private $layout = 'main';
-
     public function __construct()
     {
         parent::__construct();
@@ -48,20 +46,6 @@ class Templater extends \Smarty
         ]);
     }
 
-    public function setLayout($layout = "page")
-    {
-        if (empty($layout)) {
-            return;
-        }
-
-        $this->layout = $layout;
-    }
-
-    public function getLayout()
-    {
-        return $this->layout;
-    }
-
     public function _smarty_include($params)
     {
         $info = pathinfo($params["smarty_include_tpl_file"]);
@@ -77,6 +61,8 @@ class Templater extends \Smarty
         if (!isset($params['get'])) {
             return '';
         }
+        
+        Request::lockLayout();
 
         $params['get'] = Route::resource($params['get'], $params);
 
@@ -132,6 +118,8 @@ class Templater extends \Smarty
         if (!isset($params['display'])) {
             $params['display'] = '';
         }
+        
+        Request::lockLayout();
 
         $vars_backup = $view->_tpl_vars;
 

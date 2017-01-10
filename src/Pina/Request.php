@@ -8,7 +8,8 @@ class Request
     protected static $stack = [];
     protected static $messages = [];
     protected static $results = [];
-    protected static $layout = '';
+    protected static $layout = 'main';
+    protected static $lockLayout = false;
     protected static $done = false;
 
     public static function init($data)
@@ -265,9 +266,6 @@ class Request
 
         if ($top === 0) {
             self::contentType($response->contentType());
-            if (self::$layout) {
-                $response->setLayout(self::$layout);
-            }
         }
 
         echo $response->fetch(self::$results, $controller, $action, $display, $top === 0);
@@ -506,7 +504,20 @@ class Request
     
     public static function setLayout($layout)
     {
+        if (self::$lockLayout) {
+            return;
+        }
         self::$layout = $layout;
+    }
+    
+    public static function getLayout()
+    {
+        return self::$layout;
+    }
+    
+    public static function lockLayout()
+    {
+        self::$lockLayout = true;
     }
 
 }

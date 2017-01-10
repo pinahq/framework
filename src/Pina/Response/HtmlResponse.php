@@ -3,6 +3,7 @@
 namespace Pina\Response;
 
 use Pina\App;
+use Pina\Request;
 use Pina\Templater;
 use Pina\ResourceManager;
 
@@ -19,14 +20,6 @@ class HtmlResponse extends Response
 
         $this->view = $view;
     }
-    
-    public function setLayout($layout)
-    {
-        if (empty($this->view)) {
-            return;
-        }
-        $this->view->setLayout($layout);
-    }
 
     public function fetch(&$results, $controller, $action, $display, $isExternal)
     {
@@ -36,7 +29,7 @@ class HtmlResponse extends Response
         if ($isExternal) {
             $this->view->assign("content", $t);
             ResourceManager::mode('layout');
-            $t = $this->view->fetch('Layout/' . App::get() . '/' . $this->view->getLayout() . '.tpl');
+            $t = $this->view->fetch('Layout/' . App::get() . '/' . Request::getLayout() . '.tpl');
         }
 
         return $t;
