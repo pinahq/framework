@@ -220,7 +220,7 @@ class Request
     public static function module()
     {
         $top = count(self::$stack) - 1;
-        return self::$stack[$top]['__module'];
+        return isset(self::$stack[$top]['__module'])?self::$stack[$top]['__module']:'';
     }
 
     public static function run($resource, $method)
@@ -451,9 +451,10 @@ class Request
     private static function stopWithCode($code)
     {
         $top = count(self::$stack) - 1;
-        if ($top === 0) {
-            self::code($code);
+        if ($top !== 0) {
+            return self::done();
         }
+        self::code($code);
         $number = strstr($code, ' ', true);
         if ($number) {            
             $response = Response\Factory::get('errors/' . $number, self::$stack[$top]['__method']);

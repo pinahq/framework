@@ -35,8 +35,9 @@ class HtmlResponse extends Response
         return $t;
     }
     
-    public function fetchTemplate($handler)
+    public function fetchTemplate(&$results, $handler)
     {
+        $this->view->assign($results);
         $this->view->assign('params', \Pina\Request::params());
         $t = $this->view->fetch($handler.'.tpl');
         return $t;

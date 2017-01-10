@@ -14,8 +14,6 @@ class Mail extends Request
     private static $bcc = [];
     private static $attachment = [];
     
-    private static $content = '';
-
     public static function send($handler, $data = [])
     {
         if (empty(static::$config)) {
@@ -33,9 +31,7 @@ class Mail extends Request
         
         $path .= '/emails/'.$handler;
         
-        static::run($path, $data);
-
-        return static::mail();
+        return static::run($path, $data);
     }
     
     private static function clear()
@@ -43,7 +39,6 @@ class Mail extends Request
         static::$to = [];
         static::$cc = [];
         static::$bcc = [];
-        static::$content = '';
         static::$attachment = [];
     }
 
@@ -75,10 +70,7 @@ class Mail extends Request
 
     public static function run($handler, $data)
     {
-        $oldStack = self::$stack;
-
-        self::$stack = [];
-        $method = 'get';
+        $data['__method'] = 'get';
         
         array_push(self::$stack, $data);
         
@@ -87,23 +79,25 @@ class Mail extends Request
             return;
         }
         
-        self::runHandler($handler);
-        
+        if (!self::runHandler($handler)) {
+            array_pop(self::$stack);
+            return false;
+        }
+
         if (!empty(self::$stack[$top]['display'])) {
             $handler .= '.' . self::$stack[$top]['display'];
         }
-        
+
         $response = new HtmlResponse();
-        $r = $response->fetchTemplate($handler, true);
+        $r = $response->fetchTemplate(self::$results, $handler);
 
         array_pop(self::$stack);
 
-        self::$stack = $oldStack;
+        return static::mail($r);
         
-        static::$content = $r;
     }
 
-    private static function mail()
+    private static function mail($content)
     {
 
         if (empty(static::$config)) {
@@ -154,7 +148,7 @@ class Mail extends Request
         $mail->CharSet = App::charset();
 
         $mail->Subject = Place::get('mail_subject');
-        $mail->Body = static::$content;
+        $mail->Body = $content;
         $mail->AltBody = Place::get('mail_alternative');
 
         if ($mail->AltBody) {
