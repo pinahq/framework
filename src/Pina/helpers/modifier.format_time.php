@@ -9,7 +9,7 @@ function smarty_modifier_format_time($date)
 		$date = strtotime($date);
 	}
 	
-	$f = Config::get("appearance", "time_format");
+	#$f = Config::get("appearance", "time_format");
 	if (empty($f)) $f = "H:i";
 
 	return date($f, $date);
