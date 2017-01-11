@@ -2,7 +2,7 @@
 
 namespace Pina;
 
-class Job
+class Job extends Request
 {
     const DIRECTORY = 'job';
     const JOB_PREFIX = 'job:';
@@ -44,35 +44,6 @@ class Job
 
     public static function run($cmd, $wordload)
     {
-        $path = self::getPath($cmd);
-        if (empty($path)) {
-            Log::error("job", "Wrong command ".$cmd);
-            return;
-        }
-        
-        if (!file_exists($path)) {
-            Log::error("job", "Command '".$cmd."' does not exist");
-            return null;
-        }
-
-        self::$workload = $wordload;
-        
-        include $path;
-    }
-    
-    public static function workload()
-    {
-        return self::$workload;
-    }
-    
-    public static function work()
-    {
-        self::getWorker()->work();
-        return self::getWorker()->returnCode() === GEARMAN_SUCCESS;
-    }
-    
-    public static function getPath($cmd)
-    {
         $parts = explode(".", $cmd);
         if (count($parts) !== 2) {
             return null;
@@ -87,7 +58,39 @@ class Job
             return null;
         }
         
-        return $path."/".self::DIRECTORY."/".$group."/".$action.".php";
+        $handler = $path."/".self::DIRECTORY."/".$group."/".$action.".php";
+        
+        if (empty($handler)) {
+            Log::error("job", "Wrong command ".$cmd);
+            return;
+        }
+        
+        if (!file_exists($handler)) {
+            Log::error("job", "Command '".$cmd."' does not exist");
+            return null;
+        }
+
+        self::$workload = $wordload;
+        
+        $data['__method'] = 'get';
+        $data['__module'] = $owner;
+        
+        array_push(self::$stack, $data);
+        
+        include $handler;
+        
+        array_pop(self::$stack);
+    }
+    
+    public static function workload()
+    {
+        return self::$workload;
+    }
+    
+    public static function work()
+    {
+        self::getWorker()->work();
+        return self::getWorker()->returnCode() === GEARMAN_SUCCESS;
     }
     
     protected static function getClient()
