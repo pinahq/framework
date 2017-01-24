@@ -468,7 +468,7 @@ class Request
     
     private static function failWithCode($code)
     {
-        return stopWithCode($code);
+        return self::stopWithCode($code);
     }
     
     public static function done()
