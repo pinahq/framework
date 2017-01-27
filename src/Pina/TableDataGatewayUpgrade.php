@@ -82,7 +82,12 @@ class TableDataGatewayUpgrade
         if (strcasecmp($default, 'null') === 0) {
             $default = null;
         }
-
+        
+        if (preg_match("/(\s+ON UPDATE\s+'?([^']*)'?)/i", $default, $matches)) {
+            $default = str_replace($matches[0], '', $default);
+            $extra = strtolower(trim($matches[0])).(!empty($extra)?(' '.$extra):'');
+        }
+        
         return ["Type" => $type, "Null" => $null, "Default" => $default, "Extra" => $extra];
     }
 
@@ -129,6 +134,7 @@ class TableDataGatewayUpgrade
         $fields = array();
         foreach ($fieldParams as $params) {
             $params['Type'] = strtolower($params['Type']);
+            $params['Extra'] = strtolower($params['Extra']);
 
             $fields[] = $params['Field'];
 
