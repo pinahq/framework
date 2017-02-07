@@ -24,6 +24,7 @@ class Mail extends Request
         static::clear();
         
         $module = Request::module();
+        $data['__module'] = $module;
         $path = ModuleRegistry::getPath($module);
         if (empty($path)) {
             return;
@@ -89,7 +90,7 @@ class Mail extends Request
         }
 
         $response = new HtmlResponse();
-        $r = $response->fetchTemplate(self::$results, $handler);
+        $r = $response->fetchEmail(self::$results, basename($handler));
 
         array_pop(self::$stack);
 

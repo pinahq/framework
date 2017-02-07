@@ -44,6 +44,14 @@ class Templater extends \Smarty
             "getTemplateSecure",
             "getTemplateTrusted",
         ]);
+        
+        $this->register_resource('email', [
+            "\Pina\Templater",
+            "getEmailTemplate",
+            "getEmailTemplateTimestamp",
+            "getEmailTemplateSecure",
+            "getEmailTemplateTrusted",
+        ]);
     }
 
     public function _smarty_include($params)
@@ -251,6 +259,75 @@ class Templater extends \Smarty
     }
 
     public static function getTemplateTrusted($template, &$view)
+    {
+        
+    }
+    
+    public static function getEmailTemplatePaths($template, &$view)
+    {
+        
+        $module = Request::module();
+        if (empty($module)) {
+            return true;
+        }
+        
+        $handler = $template . ".tpl";
+        
+        $moduleFolder = substr(strrchr($module, "\\"), 1);
+        
+        $paths = $view->template_dir;
+        foreach ($paths as $k => $v) {
+            $paths[$k] .= 'Modules/' . $moduleFolder . '/emails/' . $handler;
+        }
+        
+        $modulePath = ModuleRegistry::getPath($module);
+        if (!empty($modulePath)) {
+            $paths[] = $modulePath . '/emails/' . $handler;
+        }
+        return array_unique($paths);
+    }
+    
+    public static function getEmailTemplate($template, &$tpl_source, &$view)
+    {
+        $paths = static::getEmailTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                $tpl_source = $view->_read_file($path);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getEmailTemplateTimestamp($template, &$timestamp, &$view)
+    {
+        $paths = static::getEmailTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                $timestamp = filemtime($path);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static function isEmailTemplateExists($template, &$view)
+    {
+        $paths = static::getEmailTemplatePaths($template, $view);
+        foreach ($paths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getEmailTemplateSecure($template, &$view)
+    {
+        return true;
+    }
+
+    public static function getEmailTemplateTrusted($template, &$view)
     {
         
     }

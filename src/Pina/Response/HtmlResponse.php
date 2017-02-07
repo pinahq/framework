@@ -25,7 +25,7 @@ class HtmlResponse extends Response
     {
         $this->view->assign($results);
         $this->view->assign('params', \Pina\Request::params());
-        $t = $this->view->fetch('pina:' . $controller.'!'.$action.'!'.$display);
+        $t = $this->view->fetch('pina:' . $controller . '!' . $action . '!' . $display);
         if ($isExternal) {
             $this->view->assign("content", $t);
             ResourceManager::mode('layout');
@@ -34,12 +34,12 @@ class HtmlResponse extends Response
 
         return $t;
     }
-    
-    public function fetchTemplate(&$results, $handler)
+
+    public function fetchEmail(&$results, $template)
     {
         $this->view->assign($results);
         $this->view->assign('params', \Pina\Request::params());
-        $t = $this->view->fetch($handler.'.tpl');
+        $t = $this->view->fetch('email:' . $template);
         return $t;
     }
 
