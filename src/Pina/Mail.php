@@ -13,6 +13,7 @@ class Mail extends Request
     private static $cc = [];
     private static $bcc = [];
     private static $attachment = [];
+    private static $stringAttachment = [];
     
     public static function send($handler, $data = [])
     {
@@ -41,6 +42,7 @@ class Mail extends Request
         static::$cc = [];
         static::$bcc = [];
         static::$attachment = [];
+        static::$stringAttachment = [];
     }
 
     public static function to($address, $name = '')
@@ -69,10 +71,21 @@ class Mail extends Request
         );
     }
 
+    public static function stringAttachment($string, $filename = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
+    {
+        static::$stringAttachment [] = array(
+            'string' => $string,
+            'filename' => $filename,
+            'encoding' => $encoding,
+            'type' => $type,
+            'disposition' => $disposition
+        );
+    }
+
     public static function run($handler, $data)
     {
         $data['__method'] = 'get';
-        
+
         array_push(self::$stack, $data);
         
         $top = count(self::$stack) - 1;
@@ -84,11 +97,11 @@ class Mail extends Request
             array_pop(self::$stack);
             return false;
         }
-
+        
         if (!empty(self::$stack[$top]['display'])) {
             $handler .= '.' . self::$stack[$top]['display'];
         }
-
+        
         $response = new HtmlResponse();
         $r = $response->fetchEmail(self::$results, basename($handler));
 
@@ -144,6 +157,10 @@ class Mail extends Request
 
         foreach (static::$attachment as $a) {
             $mail->addAttachment($a['path'], $a['name'], $a['encoding'], $a['type'], $a['disposition']);
+        }
+
+        foreach (static::$stringAttachment as $sa) {
+            $mail->addStringAttachment($sa['string'], $sa['filename'], $sa['encoding'], $sa['type'], $sa['disposition']);
         }
 
         $mail->CharSet = App::charset();
