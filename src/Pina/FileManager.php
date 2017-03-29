@@ -46,8 +46,10 @@ class FileManager
         {
             $filename .= ".".$ext;
         }
+        
+        $static = \Pina\Config::get('app', 'static');
 
-        $r = App::baseUrl()."uploads/".static::$dir.'/';
+        $r = App::baseUrl().trim($static,'/').'/'."uploads/".static::$dir.'/';
         $hash = md5($filename);
         $r .= substr($hash, 0, 2)."/".substr($hash, 2, 2);
         $r .= "/".$filename;

@@ -22,7 +22,8 @@ function smarty_block_style($params, $content, &$view, &$repeat)
     }
 
     if (!empty($params['src'])) {
-        ResourceManager::append('css', '<link rel="stylesheet" href="' . $params['src'] . '" />');
+        $static = \Pina\Config::get('app', 'static');
+        ResourceManager::append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . '" />');
     } elseif (!empty($content)) {
         ResourceManager::append('css', $content);
     }
