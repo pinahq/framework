@@ -31,9 +31,9 @@ class CLI
         list($group, $action) = $parts;
         
         $owner = Route::owner($group);
-        CLI::info("Affected module: ".$owner);
+        CLI::info("Affected module: ".$owner->getTitle());
 
-        $path = ModuleRegistry::getPath($owner);
+        $path = $owner->getPath();
 
         if (!file_exists($path."/cli/".$group."/".$action.".php")) {
             CLI::error("Command '".$cmd."' does not exist");

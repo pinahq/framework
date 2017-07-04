@@ -70,15 +70,11 @@ class Templater extends \Smarty
             return '';
         }
         
-        Request::lockLayout();
-
         $params['get'] = Route::resource($params['get'], $params);
 
         list($controller, $action, $data) = Url::route($params['get'], 'get');
 
-        $module = Route::owner($controller);
-
-        if (!Request::isAvailable($module, $params['get'])) {
+        if (!Access::isPermitted($params['get'])) {
             if (!empty($params['fallback'])) {
                 $params['get'] = $params['fallback'];
                 unset($params['fallback']);
@@ -127,12 +123,10 @@ class Templater extends \Smarty
             $params['display'] = '';
         }
         
-        Request::lockLayout();
-
         $vars_backup = $view->_tpl_vars;
 
         $params['get'] = Route::resource($params['get'], $params);
-        $result = Request::internal($params['get'], 'get', $params);
+        $result = Request::internal(new RequestHandler($params['get'], 'get', $params));
 
         if (is_array($request->error_messages) && count($request->error_messages)) {
             echo '<p>' . join("<br />", $request->error_messages) . "</p>";
@@ -193,7 +187,7 @@ class Templater extends \Smarty
         
         $module = Route::owner($controller);
         if (empty($module)) {
-            return true;
+            return [];
         }
         
         $handler = Url::handler($controller, $action);
@@ -204,14 +198,14 @@ class Templater extends \Smarty
         
         $handler .= ".tpl";
         
-        $moduleFolder = substr(strrchr($module, "\\"), 1);
+        $moduleFolder = $module->getTitle();
         
         $paths = $view->template_dir;
         foreach ($paths as $k => $v) {
             $paths[$k] .= 'Modules/' . $moduleFolder . '/' . $handler;
         }
         
-        $modulePath = ModuleRegistry::getPath($module);
+        $modulePath = $module->getPath();
         if (!empty($modulePath)) {
             $paths[] = $modulePath . '/' . $handler;
         }
@@ -273,14 +267,14 @@ class Templater extends \Smarty
         
         $handler = $template . ".tpl";
         
-        $moduleFolder = substr(strrchr($module, "\\"), 1);
+        $moduleFolder = substr(strrchr($module->getNamespace(), "\\"), 1);
         
         $paths = $view->template_dir;
         foreach ($paths as $k => $v) {
             $paths[$k] .= 'Modules/' . $moduleFolder . '/emails/' . $handler;
         }
         
-        $modulePath = ModuleRegistry::getPath($module);
+        $modulePath = $module->getPath();
         if (!empty($modulePath)) {
             $paths[] = $modulePath . '/emails/' . $handler;
         }

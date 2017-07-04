@@ -7,16 +7,15 @@ class DispatcherRegistry
 
     private static $dispatchers = array();
 
-    public static function register($namespace)
+    public static function register($dispatcher)
     {
-        self::$dispatchers[] = $namespace;
+        self::$dispatchers[] = $dispatcher;
     }
 
     public static function dispatch($resource)
     {
-        foreach (self::$dispatchers as $namespace) {
-            $className = $namespace . '\\Dispatcher';
-            if ($r = call_user_func(array($className, 'dispatch'), $resource)) {
+        foreach (self::$dispatchers as $dispatcher) {
+            if ($r = $dispatcher->dispatch($resource)) {
                 return $r;
             }
         }

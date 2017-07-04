@@ -7,6 +7,7 @@ class App
 
     private static $app = false;
     private static $config = false;
+    private static $layout = null;
 
     public static function apps()
     {
@@ -62,13 +63,29 @@ class App
         App::resource($resource);
         
         ModuleRegistry::init();
-        
-        Request::init($data);
-        
         ModuleRegistry::initModules();
         
         $resource = DispatcherRegistry::dispatch($resource);
-        Request::run($resource, $method);
+        
+        $handler = new RequestHandler($resource, $method, $data);
+        
+        $defaultLayout = App::getDefaultLayout();
+        if ($defaultLayout) {
+            $handler->setLayout($defaultLayout);
+        }
+        
+        Request::push($handler);
+        Request::run();
+    }
+    
+    public static function setDefaultLayout($layout)
+    {
+        self::$layout = $layout;
+    }
+    
+    public static function getDefaultLayout()
+    {
+        return self::$layout;
     }
     
     public static function resource($resource = '')

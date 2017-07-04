@@ -5,37 +5,30 @@ namespace Pina;
 class ModuleRegistry
 {
 
-    private static $enabled_modules = array();
-    private static $default_modules = array();
-    private static $paths = array();
+    private static $registry = [];
+    private static $paths = [];
     
     public static function init()
     {
         $config = Config::load('modules');
-        self::$default_modules = array(
+        $default_modules = [
             __NAMESPACE__
-        );
+        ];
         if (!empty($config['default']) && is_array($config['default'])) {
-            self::$default_modules = array_merge(self::$default_modules, $config['default']);
+            $default_modules = array_merge($default_modules, $config['default']);
         }
         
         $modules = array();
 
-        $enabled_modules = array();
-        self::$enabled_modules = array_merge(self::$default_modules, $enabled_modules);
+        $enabled_modules = $default_modules;
         
         $app = App::get();
         
         Access::reset();
-        self::$paths = array();
-        foreach (self::$enabled_modules as $ns) {
+        self::$registry = [];
+        foreach ($enabled_modules as $ns) {
             $className = $ns.'\\Module';
-            if (!class_exists($className)) {
-                self::$paths[$ns] = str_replace('Pina\\Modules\\', App::path()."/default/Modules/", $ns);
-                continue;
-            }
-            
-            self::$paths[$ns] = call_user_func(array($className, 'getPath'));
+            self::$registry[$ns] = new $className;
         }
     }
 
@@ -43,11 +36,23 @@ class ModuleRegistry
     {       
         $app = App::get();
         
-        foreach (self::$paths as $base) {
-            $path = $base.'/'.$app.'/init.php';
-            if (is_file($path)) {
-                include_once $path;
+        foreach (self::$registry as $ns => $module) {
+            if (!method_exists($module, $app)) {
+                continue;
             }
+            $routes = $module->$app();
+            
+            if (!is_array($routes)) {
+                continue;
+            }
+            
+            foreach ($routes as $route) {
+                Route::own($route, $module);
+            }
+        }
+        
+        foreach (self::$registry as $module) {
+            $module->boot();
         }
     }
     
@@ -71,21 +76,25 @@ class ModuleRegistry
 
     public static function isActive($module)
     {
-        return in_array($module, self::$enabled_modules);
+        return isset(self::$registry[$module]);
     }
     
-    public static function getPath($module)
+    public static function get($ns)
     {
-        if (!isset(self::$paths[$module])) {
+        if (!isset(self::$registry[$ns])) {
             return false;
         }
         
-        return self::$paths[$module];
+        return self::$registry[$ns];
     }
     
     public static function getPaths()
     {
-        return self::$paths;
+        $paths = [];
+        foreach (self::$registry as $ns => $module) {
+            $paths[$ns] = $module->getPath();
+        }
+        return $paths;
     }
     
     public static function walkClasses($type, $callback)

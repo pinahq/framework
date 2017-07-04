@@ -42,23 +42,28 @@ class Language
             return '';
         }
         
-        $module = $ns ? $ns : Request::module();
+        $module = $ns ? ModuleRegistry::get($ns) : Request::module();
+        if (empty($module)) {
+            return '';
+        }
+        
+        $moduleKey = $module->getNamespace();
         
         if (!isset(static::$data[static::$code])) {
             static::$data[static::$code] = [];
         }
         
-        if (!isset(static::$data[static::$code][$module])) {
-            $path = ModuleRegistry::getPath($module);
+        if (!isset(static::$data[static::$code][$moduleKey])) {
+            $path = $module->getPath();
             $file = $path."/lang/".static::$code.'.php';
-            static::$data[static::$code][$module] = file_exists($file) ? include($file) : [];
+            static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
         }
         
-        if (!isset(static::$data[static::$code][$module][$string])) {
+        if (!isset(static::$data[static::$code][$moduleKey][$string])) {
             return $string;
         }
         
-        return static::$data[static::$code][$module][$string];
+        return static::$data[static::$code][$moduleKey][$string];
     }
 
     public static function val($key)

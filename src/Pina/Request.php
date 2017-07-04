@@ -6,56 +6,51 @@ class Request
 {
 
     protected static $stack = [];
-    protected static $messages = [];
-    protected static $results = [];
-    protected static $layout = 'main';
-    protected static $lockLayout = false;
-    protected static $done = false;
 
-    public static function init($data)
-    {
-        self::$stack = array();
-
-        if (is_array($data)) {
-            array_push(self::$stack, $data);
-        } else {
-            array_push(self::$stack, array('__raw' => $data));
-        }
-    }
-
-    public static function internal($resource, $method, $data = array())
+    public static function internal($call)
     {
         ob_start();
 
-        array_push(self::$stack, $data);
-        self::run($resource, $method);
-        array_pop(self::$stack);
+        self::push($call);
+        self::run();
+        self::pop();
         
         return ob_get_clean();
+    }
+    
+    public static function top()
+    {
+        $top = count(self::$stack) - 1;
+        if ($top < 0) {
+            return null;
+        }
+
+        return self::$stack[$top];
+    }
+    
+    public static function isInternalRequest()
+    {
+        return count(self::$stack) > 1;
+    }
+    
+    public static function isExternalRequest()
+    {
+        return count(self::$stack) === 1;
     }
 
     public static function set($name, $value)
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return;
-        }
-
-        self::$stack[$top][$name] = $value;
+        self::top()->set($name, $value);
     }
 
     public static function match($pattern)
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
+        $resource = Url::trim(self::top()->resource());
+
+        if (empty($resource)) {
             return;
         }
 
-        if (empty(self::$stack[$top]['__resource'])) {
-            return;
-        }
-
-        $resource = Url::trim(self::$stack[$top]['__resource']);
         $pattern = Url::trim($pattern);
         $parsed = Url::parse($resource, $pattern);
         foreach ($parsed as $k => $v) {
@@ -66,248 +61,67 @@ class Request
     // получаем параметр запроса к контроллеру по его названию
     public static function param($name)
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return null;
-        }
-
-        if (!isset(self::$stack[$top][$name])) {
-            return null;
-        }
-
-        return self::$stack[$top][$name];
+        return self::top()->param($name);
     }
 
     public static function params($ps = "")
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return array();
-        }
-
-        if (empty($ps)) {
-            return self::$stack[$top];
-        }
-
-        if (!is_array($ps)) {
-            $ps = explode(' ', $ps);
-        }
-
-        $res = array();
-        if (is_array($ps)) {
-            foreach ($ps as $p) {
-                if (!isset(self::$stack[$top][$p])) {
-                    continue;
-                }
-
-                $res[$p] = self::$stack[$top][$p];
-            }
-        }
-        return $res;
+        return self::top()->params($ps);
     }
 
     public static function raw()
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return '';
-        }
-
-        if (!empty(self::$stack[$top]['__raw'])) {
-            return self::$stack[$top]['__raw'];
-        }
-
-        return file_get_contents('php://input');
-    }
-
-    public static function filterSub($fs, &$data)
-    {
-        foreach ($data as $k => $v) {
-            if (is_array($data[$k])) {
-                self::filterSub($fs, $data[$k]);
-                continue;
-            }
-
-            foreach ($fs as $f) {
-                if (empty($f)) {
-                    continue;
-                }
-                $data[$k] = call_user_func($f, $data[$k]);
-            }
-        }
+        return self::top()->raw();
     }
 
     public static function filter($fs, $ps)
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return;
-        }
-
-        if (!is_array($ps)) {
-            $ps = explode(' ', $ps);
-        }
-
-        if (!is_array($fs)) {
-            $fs = explode(' ', $fs);
-        }
-
-        foreach ($ps as $p) {
-            if (empty($p)) {
-                continue;
-            }
-
-            if (!isset(self::$stack[$top][$p])) {
-                continue;
-            }
-
-            if (isset(self::$stack[$top][$p]) && is_array(self::$stack[$top][$p])) {
-                self::filterSub($fs, self::$stack[$top][$p]);
-                continue;
-            }
-
-            $data = '';
-            if (isset(self::$stack[$top][$p])) {
-                $data = self::$stack[$top][$p];
-            }
-
-            foreach ($fs as $f) {
-                if (empty($f)) {
-                    continue;
-                }
-
-                self::$stack[$top][$p] = $data = call_user_func($f, $data);
-            }
-        }
+        self::top()->filter($fs, $ps);
     }
 
     public static function filterAll($clean_functions)
     {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return;
-        }
-
-        if (empty(self::$stack[$top]) || !is_array(self::$stack[$top])) {
-            return;
-        }
-        $fs = explode(' ', $clean_functions);
-        foreach (self::$stack[$top] as $k => $v) {
-            if (is_array(self::$stack[$top][$k])) {
-                self::filterSub($fs, self::$stack[$top][$k]);
-                continue;
-            }
-
-            foreach ($fs as $f) {
-                if (empty($f)) {
-                    continue;
-                }
-                self::$stack[$top][$k] = call_user_func($f, self::$stack[$top][$k]);
-            }
-        }
-    }
-
-
-    public static function isAvailable($module, $resource)
-    {
-        if (App::env() === "cli") {
-            return true;
-        }
-
-        return ModuleRegistry::isActive($module) && Access::isHandlerPermitted($resource);
-    }
-
-    public static function module()
-    {
-        $top = count(self::$stack) - 1;
-        return isset(self::$stack[$top]['__module'])?self::$stack[$top]['__module']:'';
-    }
-
-    public static function run($resource, $method)
-    {
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return '';
-        }
-        
-        self::$done = false;
-        self::$results = [];
-        self::$messages = [];
-        self::$stack[$top]["__resource"] = $resource;
-        self::$stack[$top]["__method"] = $method;
-
-        list($controller, $action, $data) = Url::route($resource, $method);
-        self::$stack[$top] = array_merge(self::$stack[$top], $data);
-
-        $display = isset(self::$stack[$top]['display'])?self::$stack[$top]['display']:'';
-        
-        $module = Route::owner($controller);
-        self::$stack[$top]["__module"] = $module;
-        if (empty($module)) {
-            return self::notFound();
-        }
-        
-        if (!self::isAvailable($module, $resource)) {
-            return self::forbidden();
-        }
-
-        if (!self::runHandler(ModuleRegistry::getPath($module) . '/' . Url::handler($controller, $action))) {
-            return false;
-        }
-        
-        if (self::$done) {
-            return false;
-        }
-        
-        $response = Response\Factory::get($resource, $method);
-        if (!empty(self::$messages)) {
-            self::$results['__messages'] = self::$messages;
-        }
-
-        if ($top === 0) {
-            self::contentType($response->contentType());
-        }
-
-        echo $response->fetch(self::$results, $controller, $action, $display, $top === 0);
-        
-        return true;
-        
+        self::top()->filterAll($clean_functions);
     }
     
-    protected static function runHandler($handler)
+    public static function module()
     {
-        if (is_file($handler . ".php")) {
-            return include $handler . ".php";
-        }
-        
-        return self::notFound();
+        return self::top()->module();
+    }
+    
+    public static function push($call)
+    {
+        array_push(self::$stack, $call);
+    }
+    
+    public static function pop()
+    {
+        array_pop(self::$stack);
+    }
+
+    public static function run()
+    {
+        return self::top()->run();
     }
 
     public static function warning($message, $subject = '')
     {
-        self::$messages[] = ['warning', $message, $subject];
+        self::top()->message('warning', $message, $subject);
     }
 
     public static function error($message, $subject = '')
     {
-        self::$messages[] = ['error', $message, $subject];
+        self::top()->message('error', $message, $subject);
     }
 
     public static function hasError()
     {
-        foreach (self::$messages as $m) {
-            if ($m[0] === 'error') {
-                return true;
-            }
-        }
+        return self::top()->hasError();
     }
 
     public static function result($name, $value)
     {
-        // закидываем результаты выполнения запроса
-        // во временный буфер,
-        // чтобы потом отдать через json или xml
-        self::$results[$name] = $value;
+        self::top()->result($name, $value);
     }
 
     public static function header($h)
@@ -450,15 +264,14 @@ class Request
     
     private static function stopWithCode($code)
     {
-        $top = count(self::$stack) - 1;
-        if ($top !== 0) {
+        if (self::isInternalRequest()) {
             return self::done();
         }
         self::code($code);
         $number = strstr($code, ' ', true);
         if ($number) {            
-            $response = Response\Factory::get('errors/' . $number, self::$stack[$top]['__method']);
-            $results = ['error' => $code, '__messages' => self::$messages];
+            $response = Response\Factory::get('errors/' . $number, self::top()->method());
+            $results = ['error' => $code, '__messages' => self::top()->messages()];
             self::contentType($response->contentType());
             echo $response->fetch($results, 'errors', 'show', '', true);
         }
@@ -473,7 +286,7 @@ class Request
     
     public static function done()
     {
-        self::$done = true;
+        self::top()->done();
         return false;
     }
 
@@ -505,20 +318,12 @@ class Request
     
     public static function setLayout($layout)
     {
-        if (self::$lockLayout) {
-            return;
-        }
-        self::$layout = $layout;
+        self::top()->setLayout($layout);
     }
     
     public static function getLayout()
     {
-        return self::$layout;
-    }
-    
-    public static function lockLayout()
-    {
-        self::$lockLayout = true;
+        return self::top()->getLayout();
     }
 
 }
