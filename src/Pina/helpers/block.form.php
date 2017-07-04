@@ -29,11 +29,15 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
     if (!empty($ps['action']) && !empty($ps['method'])) {
         $ps['method'] = strtolower($ps['method']);
         
-        $add .= '<input type="hidden" name="'.$ps['method'].'" value="'.$ps['action'].'" />';
-        $ps['action'] = '/pina.php';
+        if ($ps['method'] != 'get' && $ps['method'] != 'post') {
+            $ps['action'] = $ps['method'].'!'.$ps['action'];
+        }
+        
         if ($ps['method'] != 'get') {
             $ps['method'] = 'post';
         }
+        
+        $ps['action'] = '/'.$ps['action'];
     }
     
     if (!empty($ps["action"])) {

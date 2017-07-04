@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use League\Csv\Reader;
+
 /*
  * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах 
  * и базовые методы, наследуется от конструктора запросов
@@ -13,49 +15,71 @@ namespace Pina;
 class TableDataGateway extends SQL
 {
 
-    public $table = "";
-    public $primaryKey = "";
-    public $orderBy = "";
-    public $fields = false;
-    public $indexes = array();
-    public $siteId = 0;
-    public $accountId = 0;
+    const LOAD_BUFFER_LIMIT = 1024000;
+
+    protected static $table = "";
+    
+    protected static $fields = false;
+    protected static $indexes = [];
+    protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    
+    protected $orderBy = "";
     protected $context = array();
-    public $useSiteId = false;
-    public $useAccountId = false;
-    public $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-    public function __construct($siteId = false)
+    public function getTriggers()
     {
-        //TODO: make tables prefixes
-        if (empty($this->primaryKey)) {
-            $this->primaryKey = str_replace("cody_", "", $this->table) . "_id";
-        }
+        return array();
+    }
 
+    public function __construct()
+    {
         $db = DB::get();
-        parent::__construct($this->table, $db);
+        parent::__construct($this->getTable(), $db);
+    }
+    
+    public function getTable()
+    {
+        return static::$table;
+    }
+    
+    public function getFields()
+    {
+        return static::$fields;
+    }
+    
+    public function getIndexes()
+    {
+        return static::$indexes;
+    }
+    
+    public function getEngine()
+    {
+        return static::$engine;
+    }
 
-        if ($siteId !== false) {
-            $this->siteId = intval($siteId);
-            $this->accountId = Site::accountId($siteId);
-        } else {
-            $this->siteId = Site::id();
-            $this->accountId = Site::accountId();
+    public function getUpgrades()
+    {
+        if (empty(static::$fields)) {
+            return array();
         }
 
-        if ($this->useSiteId) {
-            $this->whereBy('site_id', $this->siteId);
-        }
+        $r = array();
 
-        if ($this->useAccountId) {
-            $this->whereBy('account_id', $this->accountId);
+        $upgrade = new TableDataGatewayUpgrade($this);
+        $tables = $this->db->col("SHOW TABLES");
+        if (!in_array(static::$table, $tables)) {
+            $r [] = $upgrade->makeCreateTable();
+        } else if ($q = $upgrade->makeAlterTable()) {
+            $r [] = $q;
         }
+        return $r;
     }
 
     /*
      * Возвращает экземпляр конкретного класса
      * @return TableDataGateway
      */
+
     static public function instance()
     {
         $cl = get_called_class();
@@ -67,10 +91,10 @@ class TableDataGateway extends SQL
         $this->context[$field] = $value;
         return $this->whereBy($field, $value);
     }
-    
+
     public function hasField($field)
     {
-        return isset($this->fields[$field]);
+        return isset(static::$fields[$field]);
     }
 
     public function find($id)
@@ -80,17 +104,17 @@ class TableDataGateway extends SQL
 
     public function id()
     {
-        return $this->value($this->primaryKey);
+        return $this->value($this->primaryKey());
     }
 
     protected function adjustDataAndFields(&$data, &$fields)
     {
         if (!empty($fields)) {
-            $fields = array_intersect($fields, array_keys($this->fields));
+            $fields = array_intersect($fields, array_keys(static::$fields));
         } else {
-            $fields = array_keys($this->fields);
+            $fields = array_keys(static::$fields);
         }
-        
+
         foreach ($this->context as $field => $value) {
             if (!isset($data[0])) {
                 $data[$field] = $value;
@@ -100,63 +124,42 @@ class TableDataGateway extends SQL
                 }
             }
         }
-        
-        if ($this->useSiteId) {
-            $fields [] = 'site_id';
-            if (!isset($data[0])) {
-                $data['site_id'] = $this->siteId;
-            } else {
-                foreach ($data as $k => $v) {
-                    $data[$k]['site_id'] = $this->siteId;
-                }
-            }
-        }
-
-        if ($this->useAccountId) {
-            $fields [] = 'account_id';
-            if (!isset($data[0])) {
-                $data['account_id'] = $this->accountId;
-            } else {
-                foreach ($data as $k => $v) {
-                    $data[$k]['account_id'] = $this->accountId;
-                }
-            }
-        }
     }
     
+    protected function primaryKey()
+    {
+        if (empty(static::$indexes['PRIMARY KEY'])) {
+            return '';
+        }
+        
+        if (is_array(static::$indexes['PRIMARY KEY'])) {
+            return static::$indexes['PRIMARY KEY'][0];
+        }
+        
+        return static::$indexes['PRIMARY KEY'];
+    }
+
     protected function getOnDuplicateKeys($keys)
     {
-        $primaryKeys = !empty($this->indexes['PRIMARY KEY'])?$this->indexes['PRIMARY KEY']:array();
+        $primaryKeys = !empty($this->indexes['PRIMARY KEY']) ? $this->indexes['PRIMARY KEY'] : array();
         if (!is_array($primaryKeys)) {
             $primaryKeys = array($primaryKeys);
         }
-        
+
         return array_diff($keys, $primaryKeys);
     }
 
-    public function insert($data = array(), $fields = false)
+    public function makeInsert($data = array(), $fields = false, $cmd = 'INSERT')
     {
         $this->adjustDataAndFields($data, $fields);
 
-        return parent::insert($data, $fields);
+        return parent::makeInsert($data, $fields, $cmd);
     }
 
-    public function insertGetId($data = array(), $fields = false)
+    public function makePut($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
-        return parent::insertGetId($data, $fields);
-    }
-
-    public function put($data, $fields = false)
-    {
-        $this->adjustDataAndFields($data, $fields);
-        return parent::put($data, $fields);
-    }
-
-    public function putGetId($data, $fields = false)
-    {
-        $this->adjustDataAndFields($data, $fields);
-        return parent::putGetId($data, $fields);
+        return parent::makePut($data, $fields);
     }
 
     public function update($data, $fields = false)
@@ -171,7 +174,18 @@ class TableDataGateway extends SQL
 
     public function whereId($id)
     {
-        return $this->whereBy($this->primaryKey, $id);
+        return $this->whereBy($this->primaryKey(), $id);
+    }
+    
+    public function selectAllExcept($field)
+    {
+        $excludedFields = is_array($field)?$field:explode(",", $field);
+        array_walk($excludedFields, 'trim');
+        $selectedFields = array_diff(array_keys(static::$fields), $excludedFields);
+        foreach ($selectedFields as $selectedField) {
+            $this->select($selectedField);
+        }
+        return $this;
     }
 
     public function enabled()
@@ -229,14 +243,14 @@ class TableDataGateway extends SQL
     public function reportFieldVariants($field)
     {
         $values = array();
-        if (!isset($this->fields) || empty($this->fields[$field])) {
+        if (!isset(static::$fields) || empty(static::$fields[$field])) {
             return $values;
         }
-        if (($firstPos = mb_strpos($this->fields[$field], '(')) === false || ($lastPos = mb_strpos($this->fields[$field], ')')) === false
+        if (($firstPos = mb_strpos(static::$fields[$field], '(')) === false || ($lastPos = mb_strpos(static::$fields[$field], ')')) === false
         ) {
             return false;
         }
-        $str = mb_substr($this->fields[$field], ++$firstPos, ($lastPos - $firstPos));
+        $str = mb_substr(static::$fields[$field], ++$firstPos, ($lastPos - $firstPos));
         return explode(',', str_replace(array("'", '"'), '', $str));
     }
 
@@ -249,7 +263,7 @@ class TableDataGateway extends SQL
     {
         foreach ($data as $k => $v) {
             $matches = array();
-            if (!preg_match("/(varchar|int|decimal)\((\d+)(,(\d+))?\)/i", $this->fields[$k], $matches)) {
+            if (!preg_match("/(varchar|int|decimal)\((\d+)(,(\d+))?\)/i", static::$fields[$k], $matches)) {
                 continue;
             }
             $sql_type = $matches[1];
@@ -278,6 +292,42 @@ class TableDataGateway extends SQL
                 );
             }
         }
+    }
+
+    /*
+     * $schema = array("file_field" => "table_field");
+     */
+
+    public function load($schema, $reader)
+    {
+        $cnt = 0;
+        $buffer = '';
+        $data = $reader->fetch();
+        foreach ($data as $line) {
+            $prepared = [];
+            foreach ($schema as $sourceKey => $targetKey) {
+                if (isset($line[$sourceKey])) {
+                    $prepared[$targetKey] = $line[$sourceKey];
+                }
+            }
+            list($ks, $valueCondition) = $this->getKeyValuesCondition($prepared, $schema);
+            if (strlen($values) > self::LOAD_BUFFER_LIMIT) {
+                $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+                $cnt += $this->db->affectedRows();
+            }
+            $buffer .= $valueCondition;
+        }
+        if (!empty($buffer)) {
+            $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+            $cnt += $this->db->affectedRows();
+        }
+        return $cnt;
+    }
+
+    public function loadCSV($schema, $path)
+    {
+        $csv = \League\Csv\Reader::createFromPath($path);
+        return $this->load($schema, $csv);
     }
 
 }

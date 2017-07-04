@@ -17,13 +17,34 @@ class Arr
         return $a2;
     }
 
-    public static function column(&$data, $name, $key = false)
+    public static function diff($a1, $a2)
+    {
+        $counts = [];
+        foreach ($a2 as $v2) {
+            if (isset($counts[$v2])) {
+                $counts[$v2] ++;
+            } else {
+                $counts[$v2] = 1;
+            }
+        }
+
+        foreach ($a1 as $k1 => $v1) {
+            if (!empty($counts[$v1])) {
+                unset($a1[$k1]);
+                $counts[$v1] --;
+            }
+        }
+
+        return array_values($a1);
+    }
+
+    public static function column(&$data, $name, $key = null)
     {
         $result = array();
 
         if (is_array($data)) {
             foreach ($data as $d) {
-                if (empty($key)) {
+                if (!isset($key)) {
                     $result [] = $d[$name];
                 } else {
                     $result [$d[$key]] = $d[$name];
@@ -52,26 +73,20 @@ class Arr
         return $data;
     }
 
-    /* deprecated */
-    public static function rearrange($data, $key, $unique = false)
+    public static function joinColumns($columns)
     {
-        $result = array();
-
-        if (is_array($data)) {
-            foreach ($data as $d) {
-                $k = $d[$key];
-                unset($d[$key]);
-                if ($unique) {
-                    $result[$k] = $d;
-                } else {
-                    $result[$k][] = $d;
+        $table = [];
+        foreach ($columns as $key => $column) {
+            foreach ($column as $index => $item) {
+                if (!isset($table[$index])) {
+                    $table[$index] = [];
                 }
+                $table[$index][$key] = $item;
             }
         }
-
-        return $result;
+        return $table;
     }
-    
+
     public static function group($data, $key)
     {
         $result = array();
@@ -85,7 +100,7 @@ class Arr
 
         return $result;
     }
-    
+
     public static function groupUnique($data, $key)
     {
         $result = array();
@@ -99,7 +114,7 @@ class Arr
 
         return $result;
     }
-    
+
     public static function groupColumn($data, $key, $column)
     {
         $result = array();

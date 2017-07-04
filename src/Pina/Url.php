@@ -37,7 +37,7 @@ class Url
         return $resource;
     }
 
-    static public function controller($resource)
+    public static function controller($resource)
     {
         $resource = self::trim($resource);
         $parts = explode("/", $resource);
@@ -60,7 +60,7 @@ class Url
         return implode('/', $r);
     }
 
-    static public function method($action)
+    public static function method($action)
     {
         switch ($action) {
             case 'index': case 'show': return 'get';
@@ -71,7 +71,7 @@ class Url
         return false;
     }
 
-    static public function route($resource, $method)
+    public static function route($resource, $method)
     {
         $resource = self::trim($resource);
         
@@ -128,30 +128,18 @@ class Url
         return array(join("/", $r), $a, $data);
     }
 
-    static public function handler($controller, $action)
+    public static function handler($controller, $action)
     {
-        $controller = trim($controller, "/");
-        $owner = Route::owner($controller);
-        if (empty($owner)) {
-            return false;
-        }
-        $path = Module::path($owner);
-        return $path . '/' . App::get() . '/' . $controller . '/' . $action;
+        return App::get() . '/' . trim($controller, "/") . '/' . $action;
     }
 
-    static public function module($controller)
-    {
-        $controller = trim($controller, "/");
-        return Route::owner($controller);
-    }
-
-    static public function parse($resource, $pattern)
+    public static function parse($resource, $pattern)
     {
         list($preg, $map) = self::preg($pattern);
         return self::pregParse($resource, $preg, $map);
     }
 
-    static public function preg($pattern)
+    public static function preg($pattern)
     {
         $pattern = trim($pattern, "/");
         $pattern .= '/';
@@ -167,7 +155,7 @@ class Url
         return array($preg, $map);
     }
 
-    static public function pregParse($resource, $preg, $map)
+    public static function pregParse($resource, $preg, $map)
     {
         $parsed = array();
         if (preg_match("/^" . $preg . "$/si", $resource, $matches)) {
@@ -178,7 +166,7 @@ class Url
         return $parsed;
     }
 
-    static public function resource($pattern, $parsed)
+    public static function resource($pattern, $parsed)
     {
         $resource = $pattern;
         foreach ($parsed as $k => $v) {

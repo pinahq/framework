@@ -7,6 +7,7 @@ class App
 
     private static $app = false;
     private static $config = false;
+    private static $layout = null;
 
     public static function apps()
     {
@@ -17,10 +18,8 @@ class App
     {
         self::env($env);
 
-        Config::initPath($configPath);
+        Config::init($configPath);
         self::$config = Config::load('app');
-
-        Language::init();
 
         mb_internal_encoding(self::$config['charset']);
         mb_regex_encoding(self::$config['charset']);
@@ -32,25 +31,26 @@ class App
 
     public static function run()
     {
-        if (!Site::init(!empty($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : '')) {
+        if (self::host() != Input::getHost()) {
             @header('HTTP/1.1 404 Not Found');
             exit;
         }
 
-        $method = Core::getRequestMethod();
+        $method = Input::getMethod();
         if (!in_array($method, array('get', 'put', 'delete', 'post'))) {
             @header("HTTP/1.1 501 Not Implemented");
             exit;
         }
 
-        $data = Core::getRequestData();
+        $data = Input::getData();
         if (empty($data[$method]) && !in_array($_SERVER['REQUEST_URI'], array($_SERVER['SCRIPT_NAME'], "", "/"))) {
             $data[$method] = $_SERVER['REQUEST_URI'];
         }
 
-        $resource = Core::getResource($data, $method);
+        $resource = Input::getResource();
 
-        $staticFolders = array('/cache/', '/static/', '/uploads/', '/vendor/');
+        //TODO: get these paths based on config
+        $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
         foreach ($staticFolders as $folder) {
             if (strncasecmp($resource, $folder, strlen($folder)) === 0) {
                 @header('HTTP/1.1 404 Not Found');
@@ -58,18 +58,65 @@ class App
             }
         }
 
-        App::set(App::parse($resource));
-        Core::resource($resource);
-        Module::init();
+        $app = App::parse($resource);
+        App::set($app);
+        App::resource($resource);
+        
+        ModuleRegistry::init();
+        ModuleRegistry::initModules();
+        
+        $resource = DispatcherRegistry::dispatch($resource);
+        
+        $handler = new RequestHandler($resource, $method, $data);
+        
+        $defaultLayout = App::getDefaultLayout();
+        if ($defaultLayout) {
+            $handler->setLayout($defaultLayout);
+        }
+        
+        Request::push($handler);
+        Request::run();
+    }
+    
+    public static function setDefaultLayout($layout)
+    {
+        self::$layout = $layout;
+    }
+    
+    public static function getDefaultLayout()
+    {
+        return self::$layout;
+    }
+    
+    public static function resource($resource = '')
+    {
+        static $item = false;
 
-        $response = Response\Factory::get($resource, $method);
-        if (empty($response)) {
-            @header('HTTP/1.1 406 Not Acceptable');
-            exit;
+        if (!empty($resource) && empty($item)) {
+            $item = $resource;
         }
 
-        Request::init($response, $data);
-        echo Request::run($resource, $method);
+        return $item;
+    }
+    
+    public static function baseUrl()
+    {
+        return self::scheme()."://".self::host()."/";
+    }
+    
+    public static function scheme()
+    {
+        return isset(self::$config['scheme'])?self::$config['scheme']:'http';
+    }
+    
+    public static function host()
+    {
+        return isset(self::$config['host']) ? self::$config['host'] : Input::getHost();
+    }
+    
+    public static function template()
+    {
+        return isset(self::$config['template']) ? self::$config['template'] : null;
     }
 
     public static function path()
@@ -137,36 +184,17 @@ class App
         return 'frontend';
     }
 
-    public static function canUseResources()
-    {
-        if (empty($_SERVER['REQUEST_URI'])) {
-            return false;
-        }
-
-        $useResources = false;
-        if (!empty($_SERVER['DOCUMENT_URI'])) {
-            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['DOCUMENT_URI']) !== 0;
-        } else {
-            $useResources = strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0;
-        }
-        return $useResources;
-    }
-
     public static function getParamsString($pattern, $params)
     {
         $systemParamKeys = array('get', 'app', 'anchor');
 
-        $r = '';
         foreach ($params as $k => $v) {
-            if (strpos($pattern . '/', ':' . $k . '/') === false && !in_array($k, $systemParamKeys)) {
-                if (!empty($r)) {
-                    $r .= '&';
-                }
-                $r .= $k . '=' . $v;
+            if (strpos($pattern . '/', ':' . $k . '/') !== false || in_array($k, $systemParamKeys)) {
+                unset($params[$k]);
             }
         }
-
-        return $r;
+        
+        return http_build_query($params);
     }
 
     public static function getLinkPrefix($params)
@@ -181,12 +209,9 @@ class App
 
     public static function link($pattern, $params = array())
     {
-        $useResources = self::canUseResources();
-        $url = 'http://'.Site::domain();
-        if (!$useResources) {
-            $url .= '/pina.php?get=';
-        } else {
-            $url .= '/';
+        $url = self::baseUrl();
+        if (Input::isScript() && !empty(self::$config['allow_script_url'])) {
+            $url .= 'index.php?action=';
         }
 
         $resource = Route::resource($pattern, $params);
@@ -194,11 +219,7 @@ class App
         $ps = self::getParamsString($pattern, $params);
 
         $url .= $prefix . ltrim($resource, '/');
-        if (!$useResources) {
-            $url .=!empty($ps) ? ('&' . $ps) : '';
-        } else {
-            $url .=!empty($ps) ? ('?' . $ps) : '';
-        }
+        $url .=!empty($ps) ? ('?' . $ps) : '';
 
         if (!empty($params['anchor'])) {
             $url .= "#" . $params["anchor"];
@@ -207,4 +228,9 @@ class App
         return $url;
     }
 
+}
+
+function __($string)
+{
+    return Language::translate($string);
 }

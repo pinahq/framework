@@ -5,100 +5,70 @@ namespace Pina;
 class Language
 {
 
-    private static $code = 'en';
-    private static $config = array();
+    private static $code = null;
+    private static $data = [];
     
     public static function init()
     {
-        self::$config = Config::load('language');
-        if (self::$config['default']) {
-            self::$code = self::$config['default'];
-        }
+        $config = Config::load('language');
+        static::$code = isset($config['default']) ? $config['default'] : false;
     }
 
     public static function code($code = '')
     {
         if ($code == '') {
-            return self::$code;
+            return static::$code;
         }
 
-        $old_code = self::$code;
+        $oldCode = static::$code;
 
-        self::$code = $code;
+        static::$code = $code;
 
-        return $old_code;
+        return $oldCode;
     }
 
-    public static function getLanguage()
+    public static function translate($string, $ns = null)
     {
-        static $language = '';
-        if (!empty($language)) {
-            return $language;
-        }
-
-        $language = new Language;
-        return $language;
-    }
-
-    public static function rewrite(&$content)
-    {
-        preg_match_all('/#\$\!([^#^\$^\!]*)\!\$#/iUS', $content, $matches);
-        if (empty($matches[0])) {
-            return $content;
+        if (!isset(self::$code)) {
+            static::init();
         }
         
-        $from = array();
-        $to = array();
-        if (!empty(self::$config['table'])) {        
-            $table = new self::$config['table'];
-
-            $ss = $table
-                ->whereBy("string_key", $matches[1])
-                ->whereBy('language_code', self::code())
-                ->select('string_key, string_value')
-                ->get();
-
-            $from = array();
-            $to = array();
-            foreach ($ss as $s) {
-                $from [] = "#$!" . $s["string_key"] . "!$#";
-                $to [] = $s["string_value"];
-            }
-        } elseif (!empty(self::$config[self::code()])) {
-            foreach ($matches[1] as $m) {
-                if (!empty(self::$config[self::code()][$m])) {
-                    $from[] = "#$!" . $m . "!$#";
-                    $to[] = self::$config[self::code()][$m];
-                }
-            }
+        if (empty(self::$code)) {
+            return '';
         }
-
-        $content = str_replace($from, $to, $content);
-        //return $content;
-    }
-
-    public static function key($key)
-    {
-        return "#$!" . $key . "!$#";
+        
+        $string = trim($string);
+        if (empty($string)) {
+            return '';
+        }
+        
+        $module = $ns ? ModuleRegistry::get($ns) : Request::module();
+        if (empty($module)) {
+            return '';
+        }
+        
+        $moduleKey = $module->getNamespace();
+        
+        if (!isset(static::$data[static::$code])) {
+            static::$data[static::$code] = [];
+        }
+        
+        if (!isset(static::$data[static::$code][$moduleKey])) {
+            $path = $module->getPath();
+            $file = $path."/lang/".static::$code.'.php';
+            static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
+        }
+        
+        if (!isset(static::$data[static::$code][$moduleKey][$string])) {
+            return $string;
+        }
+        
+        return static::$data[static::$code][$moduleKey][$string];
     }
 
     public static function val($key)
     {
-        if (empty(self::$config['table'])) {
-            return;
-        }
-        
-        $table = new self::$config['table'];
-        $value = $table
-            ->whereBy('string_key', $key)
-            ->whereBy('language_code', self::code())
-            ->value('string_value');
-
-        if (empty($value)) {
-            return self::key($key);
-        }
-
-        return $value;
+        return self::translate($string);
     }
 
 }

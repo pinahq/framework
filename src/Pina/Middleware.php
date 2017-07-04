@@ -20,7 +20,7 @@ class Middleware
         $actions = $actions == "*" ? $actions : explode(",", $actions);
 
         if ($actions != '*') {
-            $method = Core::getRequestMethod();
+            $method = Input::getMethod();
             $found = false;
             foreach ($actions as $action) {
                 if (Url::method($action) == $method) {

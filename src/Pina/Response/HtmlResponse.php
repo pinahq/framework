@@ -3,14 +3,14 @@
 namespace Pina\Response;
 
 use Pina\App;
-use Pina\Language;
+use Pina\Request;
 use Pina\Templater;
 use Pina\ResourceManager;
 
 class HtmlResponse extends Response
 {
 
-    public $view;
+    protected $view;
 
     public function __construct($view = null)
     {
@@ -20,48 +20,26 @@ class HtmlResponse extends Response
 
         $this->view = $view;
     }
-    
-    public function setLayout($layout)
-    {
-        if (empty($this->view)) {
-            return;
-        }
-        $this->view->setLayout($layout);
-    }
 
-    public function fail()
+    public function fetch(&$results, $controller, $action, $display, $isExternal)
     {
-        $message = '';
-        foreach ($this->messages as $k => $v) {
-            $message .= $v[1]."\r\n";
-        }
-        
-        echo '<html><head><meta charset="'.App::charset().'" /></head><body>'.$message.'</body></html>';
-        $this->badRequest();
-        exit;
-    }
-
-    public function result($name, $value)
-    {
-        // привязываем к view соответствующие переменные
-        $this->view->assign($name, $value);
-    }
-
-    public function fetch($handler = '', $first = true)
-    {
-        $this->header('Pina-Response: Json');
-        $this->contentType('text/html');
-        
-        $app = App::get();
-
+        $this->view->assign($results);
         $this->view->assign('params', \Pina\Request::params());
-        $t = $this->view->fetch('file:' . $handler . '.tpl');
-        if ($first) {
+        $t = $this->view->fetch('pina:' . $controller . '!' . $action . '!' . $display);
+        if ($isExternal) {
             $this->view->assign("content", $t);
             ResourceManager::mode('layout');
-            $t = $this->view->fetch('Layout/'.$app.'/'. $this->view->getLayout(). '.tpl');
+            $t = $this->view->fetch('Layout/' . App::get() . '/' . Request::getLayout() . '.tpl');
         }
 
+        return $t;
+    }
+
+    public function fetchEmail(&$results, $template)
+    {
+        $this->view->assign($results);
+        $this->view->assign('params', \Pina\Request::params());
+        $t = $this->view->fetch('email:' . $template);
         return $t;
     }
 

@@ -13,7 +13,7 @@ class DB
         $this->init($conn, $alias);
     }
 
-    static public function get($alias = 'default')
+    public static function get($alias = 'default')
     {
         static $dbs = array();
 
@@ -28,30 +28,28 @@ class DB
         return $dbs[$alias];
     }
 
-    static private function getConnection($alias)
+    private static function getConnection($alias)
     {
         $configDB = Config::load('db');
 
-        $rc = @mysql_pconnect($configDB[$alias]['host'] . ':' . $configDB[$alias]['port'], $configDB[$alias]['user'], $configDB[$alias]['pass']);
+        $rc = mysqli_connect(
+            "p:".$configDB[$alias]['host'], 
+            $configDB[$alias]['user'], 
+            $configDB[$alias]['pass'],
+            $configDB[$alias]['base'],
+            $configDB[$alias]['port']
+        );
 
-        if (empty($rc) || !in_array(mysql_errno($rc), array(0, 1146))) {
+        if (empty($rc) || !in_array(mysqli_errno($rc), array(0, 1146))) {
             if (empty($configDB[$alias]['base'])) {
                 exit;
             }
-            Log::error('mysql', mysql_error());
+            Log::error('mysql', mysqli_error());
             die();
         }
 
-        mysql_select_db($configDB[$alias]['base'], $rc);
-        if (empty($rc) || mysql_errno($rc)) {
-            if (empty($configDB[$alias]['base'])) {
-                exit;
-            }
-            die('db access error');
-        }
-
         if ($configDB[$alias]['charset']) {
-            mysql_query('SET NAMES ' . $configDB[$alias]['charset'], $rc);
+            mysqli_query($rc, 'SET NAMES ' . $configDB[$alias]['charset']);
         }
 
         return $rc;
@@ -65,7 +63,7 @@ class DB
 
     private function reconnect()
     {
-        mysql_close($this->conn);
+        mysqli_close($this->conn);
         $this->conn = self::getConnection($this->alias);
     }
 
@@ -78,8 +76,8 @@ class DB
         list($msec, $sec) = explode(' ', microtime());
         $s_time = (float) $msec + (float) $sec;
 
-        $rc = mysql_query($sql, $this->conn);
-        if (!$rc && !$recursive && preg_match('/Lost connection|server has gone away/i', mysql_error($this->conn))) {
+        $rc = mysqli_query($this->conn, $sql);
+        if (!$rc && !$recursive && preg_match('/Lost connection|server has gone away/i', mysqli_error($this->conn))) {
             Log::error('mysql', 'TRY TO RECONNECT AFTER SERVER HAS GONE AWAY');
             $this->reconnect();
             return $this->query($sql, $ignore, true);
@@ -88,7 +86,7 @@ class DB
         list($msec, $sec) = explode(' ', microtime());
         $time_total = ((float) $msec + (float) $sec - $s_time);
 
-        if (mysql_errno($this->conn) && !$ignore) {
+        if (mysqli_errno($this->conn) && !$ignore) {
             $this->outError($sql);
         }
 
@@ -106,7 +104,7 @@ class DB
         $result = array();
 
         if (!empty($key)) {
-            while ($row = mysql_fetch_assoc($rc)) {
+            while ($row = mysqli_fetch_assoc($rc)) {
                 $id = $row[$key];
                 if ($removeKey) {
                     unset($row[$key]);
@@ -118,12 +116,12 @@ class DB
                 }
             }
         } else {
-            while ($row = mysql_fetch_assoc($rc)) {
+            while ($row = mysqli_fetch_assoc($rc)) {
                 $result [] = $row;
             }
         }
 
-        mysql_free_result($rc);
+        mysqli_free_result($rc);
 
         return $result;
     }
@@ -136,9 +134,9 @@ class DB
             return false;
         }
 
-        $r = mysql_fetch_assoc($rc);
+        $r = mysqli_fetch_assoc($rc);
 
-        mysql_free_result($rc);
+        mysqli_free_result($rc);
 
         return $r;
     }
@@ -153,7 +151,7 @@ class DB
 
         $result = array();
 
-        while ($row = mysql_fetch_row($rc)) {
+        while ($row = mysqli_fetch_row($rc)) {
             if (!isset($row[0])) {
                 return false;
             }
@@ -161,7 +159,7 @@ class DB
             $result [] = $row[0];
         }
 
-        mysql_free_result($rc);
+        mysqli_free_result($rc);
 
         return $result;
     }
@@ -174,9 +172,9 @@ class DB
             return false;
         }
 
-        $row = mysql_fetch_row($rc);
+        $row = mysqli_fetch_row($rc);
 
-        mysql_free_result($rc);
+        mysqli_free_result($rc);
 
         if (!isset($row[0])) {
             return false;
@@ -188,19 +186,19 @@ class DB
     public function num($sql)
     {
         $rc = $this->query($sql);
-        $r = mysql_num_rows($rc);
-        mysql_free_result($rc);
+        $r = mysqli_num_rows($rc);
+        mysqli_free_result($rc);
         return $r;
     }
 
     public function insertId()
     {
-        return mysql_insert_id($this->conn);
+        return mysqli_insert_id($this->conn);
     }
 
     public function affectedRows()
     {
-        return mysql_affected_rows($this->conn);
+        return mysqli_affected_rows($this->conn);
     }
 
     public function loop($sql)
@@ -215,7 +213,7 @@ class DB
                 $str[$k] = $this->escape($str[$k]);
             }
         } else {
-            $str = mysql_real_escape_string($str, $this->conn);
+            $str = mysqli_real_escape_string($this->conn, $str);
         }
 
         return $str;
@@ -237,12 +235,12 @@ class DB
 
     public function errno()
     {
-        return mysql_errno($this->conn);
+        return mysqli_errno($this->conn);
     }
 
     public function error()
     {
-        return mysql_error($this->conn);
+        return mysqli_error($this->conn);
     }
 
 }

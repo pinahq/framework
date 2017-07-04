@@ -2,152 +2,86 @@
 
 namespace Pina;
 
-use Pina\Response\HtmlResponse;
-use \PHPMailer;
-
 class Mail extends Request
 {
 
-    private static $config = array();
-    private static $to = array();
-    private static $cc = array();
-    private static $bcc = array();
+    private static $config = [];
     
-    private static $content = '';
-
-    public static function send($module, $handler, $data = array())
+    public static function send($handler, $data = [])
     {
         if (empty(static::$config)) {
             static::$config = Config::load('mail');
         }
-        Place::init();
+        #Place::init();
         
-        static::clear();
-        
-        $path = Module::path($module);
-        if (empty($path)) {
-            return;
-        }
-        
-        $path .= '/emails/'.$handler;
-        
-        static::run($path, $data);
-
-        return static::mail();
-    }
-    
-    private static function clear()
-    {
-        static::$to = array();
-        static::$cc = array();
-        static::$bcc = array();
-        static::$content = '';
+        self::push(new MailHandler($handler, Request::module(), $data));
+        self::run();
+        self::pop();
     }
 
     public static function to($address, $name = '')
     {
-        static::$to [] = array('address' => $address, 'name' => $name);
+        self::top()->to($address, $name);
     }
 
     public static function cc($address, $name = '')
     {
-        static::$cc [] = array('address' => $address, 'name' => $name);
+        self::top()->cc($address, $name);
     }
 
     public static function bcc($address, $name = '')
     {
-        static::$bcc [] = array('address' => $address, 'name' => $name);
+        self::top()->bcc($address, $name);
     }
 
-    public static function run($handler, $data)
+    public static function attachment($path, $name = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
     {
-        $oldResponse = self::$response;
-        $oldStack = self::$stack;
-
-        self::$response = new Response\HtmlResponse();
-        self::$stack = array();
-        $method = 'get';
-        
-        array_push(self::$stack, $data);
-        
-        $top = count(self::$stack) - 1;
-        if ($top < 0) {
-            return;
-        }
-        
-        self::runHandler($handler);
-        
-        if (!empty(self::$stack[$top]['display'])) {
-            $handler .= '.' . self::$stack[$top]['display'];
-        }
-        
-        $r = self::$response->fetch($handler, true);
-        Language::rewrite($r);
-        
-        array_pop(self::$stack);
-
-        self::$response = $oldResponse;
-        self::$stack = $oldStack;
-
-        static::$content = $r;
+        self::top()->attachment($path, $name, $encoding, $type, $disposition);
     }
 
-    private static function mail()
+    public static function stringAttachment($string, $filename = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
+    {
+        self::top()->stringAttachment($path, $filename, $encoding, $type, $disposition);
+    }
+
+    public static function mail($mailer)
     {
 
         if (empty(static::$config)) {
             return;
         }
         
-        if (empty(static::$to)) {
+        if (empty($mailer)) {
             return;
         }
 
-        $mail = new PHPMailer;
-
         if (static::$config['mode'] == 'smtp') {
-            $mail->isSMTP();
-            $mail->Host = static::$config['smtp']['host'];
+            $mailer->isSMTP();
+            $mailer->Host = static::$config['smtp']['host'];
             if (static::$config['smtp']['user']) {
-                $mail->SMTPAuth = true;
-                $mail->Username = static::$config['smtp']['user'];
-                $mail->Password = static::$config['smtp']['pass'];
+                $mailer->SMTPAuth = true;
+                $mailer->Username = static::$config['smtp']['user'];
+                $mailer->Password = static::$config['smtp']['pass'];
             }
-            $mail->SMTPSecure = static::$config['smtp']['secure'];
-            $mail->Port = static::$config['smtp']['port'];
+            $mailer->SMTPSecure = static::$config['smtp']['secure'];
+            $mailer->Port = static::$config['smtp']['port'];
         } else {
-            $mail->isMail();
+            $mailer->isMail();
         }
 
-        $mail->setFrom(static::$config['from']['address'], !empty(static::$config['from']['name'])?static::$config['from']['name']:'');
-        foreach (static::$to as $u) {
-            $mail->addAddress($u['address'], $u['name']);
-        }
-        
+        $mailer->setFrom(static::$config['from']['address'], !empty(static::$config['from']['name'])?static::$config['from']['name']:'');
         if (!empty(static::$config['reply']['address'])) {
-            $mail->addReplyTo(static::$config['reply']['address'], !empty(static::$config['reply']['name'])?static::$config['reply']['name']:'');
+            $mailer->addReplyTo(static::$config['reply']['address'], !empty(static::$config['reply']['name'])?static::$config['reply']['name']:'');
         }
         
-        foreach (static::$cc as $u) {
-            $mail->addCC($u['address'], $u['name']);
-        }
-        
-        foreach (static::$bcc as $u) {
-            $mail->addBCC($u['address'], $u['name']);
-        }
-        
-        $mail->CharSet = App::charset();
+        $mailer->CharSet = App::charset();
 
-        $mail->Subject = Place::get('mail_subject');
-        $mail->Body = static::$content;
-        $mail->AltBody = Place::get('mail_alternative');
-
-        if ($mail->AltBody) {
-            $mail->isHTML(true);
+        if ($mailer->AltBody) {
+            $mailer->isHTML(true);
         }
         
-        if(!$mail->send()) {
-            Log::error("mail", "error send email to ".json_encode($mail, JSON_UNESCAPED_UNICODE));
+        if(!$mailer->send()) {
+            Log::error("mail", "error send email to ".json_encode($mailer, JSON_UNESCAPED_UNICODE));
             return false;
         }
         
