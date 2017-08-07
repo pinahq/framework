@@ -74,7 +74,7 @@ class Templater extends \Smarty
 
         list($controller, $action, $data) = Url::route($params['get'], 'get');
 
-        if (!Access::isPermitted($params['get'])) {
+        if (!Access::isHandlerPermitted($params['get'])) {
             if (!empty($params['fallback'])) {
                 $params['get'] = $params['fallback'];
                 unset($params['fallback']);
