@@ -70,40 +70,13 @@ class Templater extends \Smarty
             return '';
         }
         
-        $params['get'] = Route::resource($params['get'], $params);
-
-        list($controller, $action, $data) = Url::route($params['get'], 'get');
-
-        if (!Access::isHandlerPermitted($params['get'])) {
-            if (!empty($params['fallback'])) {
-                $params['get'] = $params['fallback'];
-                unset($params['fallback']);
-                return self::processView($params, $view);
-            }
-            return;
-        }
-
         $vars_backup = $view->_tpl_vars;
-
-        if (is_array($params)) {
-            foreach ($params as $name => $value) {
-                $view->assign($name, $value);
-            }
-        }
-
-        $params = array_merge($params, $data);
-
-        $view->assign('params', $params);
-        $template = $controller.'!'.$action.'!'.(isset($params['display'])?$params['display']:'');
+        $params['get'] = Route::resource($params['get'], $params);
+        $handler = new TemplaterHandler($params['get'], 'get', $params);
+        $handler->setTemplater($view);
         
-        if (!empty($params['fallback']) && !self::isTemplateExists($template, $view)) {
-            $params['get'] = $params['fallback'];
-            unset($params['fallback']);
-            return self::processView($params, $view);
-        }
+        $result = Request::internal($handler);
         
-        $result = $view->fetch('pina:' .$template);
-
         $view->_tpl_vars = $vars_backup;
 
         if (!empty($params['wrapper']) && !empty($result)) {
