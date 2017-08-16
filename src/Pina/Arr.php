@@ -190,5 +190,155 @@ class Arr
         $a[trim($subject, "_")] = $r;
         return $a;
     }
+    
+    public static function get($array, $path, $default = null)
+    {
+        if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
+            return;
+        }
 
+        $path = is_array($path) ? $path : explode('.', $path);
+
+        while (!is_null($segment = array_shift($path))) {
+            if ($segment === '*') {
+                if (! is_array($array)) {
+                    return value($default);
+                }
+
+                $result = static::getFromNextLevel($array, $path);
+                
+                return in_array('*', $path) ? static::collapse($result) : $result;
+            }
+
+            if (is_array($array) && array_key_exists($segment, $array)) {
+                $array = $array[$segment];
+            } else {
+                return $default;
+            }
+        }
+
+        return $array;
+    }
+    
+    protected static function getFromNextLevel($array, $key)
+    {
+        $r = [];
+
+        $key = is_string($key) ? explode('.', $key) : $key;
+
+        foreach ($array as $item) {
+            $r[] = static::get($item, $key);
+        }
+
+        return $r;
+    }
+    
+    public static function collapse($a)
+    {
+        $r = [];
+
+        foreach ($a as $v) {
+            if (!is_array($v)) {
+                continue;
+            }
+
+            $r = array_merge($r, $v);
+        }
+
+        return $r;
+    }
+    
+    public static function set(&$array, $path, $value)
+    {
+        if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
+            return;
+        }
+
+        $keys = is_array($path)? $path : explode('.', $path);
+
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+
+            if (!isset($array[$key]) || !is_array($array[$key])) {
+                $array[$key] = [];
+            }
+
+            $array = &$array[$key];
+        }
+
+        $array[array_shift($keys)] = $value;
+    }
+    
+    public static function forget(&$array, $keys)
+    {
+        $original = &$array;
+
+        $keys = (array) $keys;
+
+        if (count($keys) === 0) {
+            return;
+        }
+
+        foreach ($keys as $key) {
+            // if the exact key exists in the top-level, remove it
+            if (array_key_exists($key, $array)) {
+                unset($array[$key]);
+
+                continue;
+            }
+
+            $parts = explode('.', $key);
+
+            // clean up before each pass
+            $array = &$original;
+
+            while (count($parts) > 1) {
+                $part = array_shift($parts);
+
+                if (isset($array[$part]) && is_array($array[$part])) {
+                    $array = &$array[$part];
+                } else {
+                    continue 2;
+                }
+            }
+
+            unset($array[array_shift($parts)]);
+        }
+    }
+    
+    public static function has($array, $keys)
+    {
+        if (is_null($keys)) {
+            return false;
+        }
+
+        $keys = (array) $keys;
+
+        if (!$array) {
+            return false;
+        }
+
+        if ($keys === []) {
+            return false;
+        }
+
+        foreach ($keys as $key) {
+            $subKeyArray = $array;
+
+            if (array_key_exists($key, $array)) {
+                continue;
+            }
+
+            foreach (explode('.', $key) as $segment) {
+                if (is_array($subKeyArray) && array_key_exists($segment, $subKeyArray)) {
+                    $subKeyArray = $subKeyArray[$segment];
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    
 }

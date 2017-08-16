@@ -108,6 +108,79 @@ class RequestHandler
         return file_get_contents('php://input');
     }
     
+    public function exists($key)
+    {
+        $keys = is_array($key) ? $key : func_get_args();
+
+        $input = $this->all();
+
+        foreach ($keys as $value) {
+            if (! Arr::has($input, $value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    public function has($key)
+    {
+        $keys = is_array($key) ? $key : func_get_args();
+
+        foreach ($keys as $k) {
+            
+            $value = $this->input($k);
+
+            $boolOrArray = is_bool($value) || is_array($value);
+            if (!$boolOrArray && trim($value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    public function all()
+    {
+        return $this->data;
+    }
+    
+    public function input($name, $default = null)
+    {
+        return Arr::get($this->data, $name, $default);
+    }
+    
+    public function only($keys)
+    {
+        $keys = is_array($keys) ? $keys : func_get_args();
+
+        $r = [];
+
+        $input = $this->all();
+
+        foreach ($keys as $key) {
+            Arr::set($r, $key, Arr::get($input, $key));
+        }
+
+        return $r;
+    }
+    
+    public function except($keys)
+    {
+        $keys = is_array($keys) ? $keys : func_get_args();
+
+        $r = $this->all();
+
+        Arr::forget($r, $keys);
+
+        return $r;
+    }
+    
+    public function intersect($keys)
+    {
+        return array_filter($this->only(is_array($keys) ? $keys : func_get_args()));
+    }
+    
     public function method()
     {
         return $this->method;

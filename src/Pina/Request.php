@@ -68,6 +68,41 @@ class Request
     {
         return self::top()->params($ps);
     }
+    
+    public static function exists($key)
+    {
+        return self::top()->exists($key);
+    }
+    
+    public static function has($key)
+    {
+        return self::top()->has($key);
+    }
+    
+    public static function all()
+    {
+        return self::top()->all();
+    }
+    
+    public static function input($name, $default)
+    {
+        return self::top()->input($name, $default);
+    }
+    
+    public static function only($keys)
+    {
+        return self::top()->only($keys);
+    }
+    
+    public static function except($keys)
+    {
+        return self::top()->except($keys);
+    }
+
+    public static function intersect($keys)
+    {
+        return self::top()->intersect($keys);
+    }
 
     public static function raw()
     {
