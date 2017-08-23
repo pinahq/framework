@@ -24,10 +24,9 @@ function smarty_function_action_attributes($params, &$view)
     unset($params[$method]);
     
     $resource = Route::resource($pattern, $params);
-    $prefix = App::getLinkPrefix($params);
     
     $result  = ' data-method="'.$method.'"';
-    $result .= ' data-resource="'. $prefix . ltrim($resource, '/') . '"';
+    $result .= ' data-resource="' . ltrim($resource, '/') . '"';
     list($preg, $map) = Url::preg($pattern);
     $result .= ' data-params="'.http_build_query(array_diff_key($params, array_flip($map))).'"';
     

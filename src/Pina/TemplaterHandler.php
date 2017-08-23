@@ -4,14 +4,13 @@ namespace Pina;
 
 class TemplaterHandler extends RequestHandler
 {
-    
+
     private $resource = null;
     private $method = null;
-    
     private $controller = '';
     private $action = '';
-    
     private $view = null;
+
     public function __construct($resource, $method, $data)
     {
         if (is_array($data)) {
@@ -31,39 +30,47 @@ class TemplaterHandler extends RequestHandler
         $this->module = Route::owner($this->controller);
         $this->layout = 'main';
     }
-    
+
     public function setTemplater($view)
     {
         $this->view = $view;
     }
-    
+
+    public function fallback($params)
+    {
+        $params['get'] = $params['fallback'];
+        unset($params['fallback']);
+        
+        $params['get'] = Route::resource($params['get'], $params);
+        list($controller, $action, $parsed) = Url::route($params['get'], 'get');
+        $params = array_merge($params, $parsed);
+        
+        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
+        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        
+        return Response::ok()->setContent($content);
+    }
+
     public function run()
     {
         if (empty($this->module)) {
-            return;
+            return Response::notFound();
         }
-        $params = $this->params();
+        $params = $this->all();
 
         if (!Access::isHandlerPermitted($this->resource)) {
             if (!empty($params['fallback'])) {
-                $params['get'] = $params['fallback'];
-                unset($params['fallback']);
-                return Templater::processView($params, $this->view);
+                return $this->fallback($params);
             }
-            return;
-        }
-        
-        $this->view->assign($params);
-        $this->view->assign('params', $params);
-        $template = $this->controller.'!'.$this->action.'!'.$this->param('display');
-        
-        if (!empty($params['fallback']) && !Templater::isTemplateExists($template, $this->view)) {
-            $params['get'] = $params['fallback'];
-            unset($params['fallback']);
-            return Templater::processView($params, $this->view);
+            return Response::forbidden();
         }
 
-        echo $this->view->fetch('pina:' .$template);
+        if (!empty($params['fallback']) && !Templater::isTemplateExists($template, $this->view)) {
+            return $this->fallback($params);
+        }
+        $template = 'pina:' . $this->controller . '!' . $this->action . '!' . Request::input('display');
+        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        return Response::ok()->setContent($content);
     }
 
 }

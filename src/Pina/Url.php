@@ -130,7 +130,7 @@ class Url
 
     public static function handler($controller, $action)
     {
-        return App::get() . '/' . trim($controller, "/") . '/' . $action;
+        return 'http/' . trim($controller, "/") . '/' . $action;
     }
 
     public static function parse($resource, $pattern)

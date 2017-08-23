@@ -5,14 +5,10 @@ namespace Pina;
 class App
 {
 
-    private static $app = false;
     private static $config = false;
     private static $layout = null;
-
-    public static function apps()
-    {
-        return self::$config['apps'];
-    }
+    
+    private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
 
     public static function init($env, $configPath)
     {
@@ -57,9 +53,13 @@ class App
                 exit;
             }
         }
+        
+        $mime = App::negotiateMimeType();
+        if (empty($mime)) {
+            @header('HTTP/1.1 406 Not Acceptable');
+            exit;
+        }
 
-        $app = App::parse($resource);
-        App::set($app);
         App::resource($resource);
         
         ModuleRegistry::init();
@@ -75,7 +75,8 @@ class App
         }
         
         Request::push($handler);
-        Request::run();
+        $response = Request::run();
+        $response->send();
     }
     
     public static function setDefaultLayout($layout)
@@ -160,30 +161,6 @@ class App
         return $item;
     }
 
-    public static function set($app = '')
-    {
-        if (!empty($app) && (empty(self::$app) || self::env() == 'test')) {
-            self::$app = $app;
-        }
-    }
-
-    public static function get()
-    {
-        return self::$app;
-    }
-
-    public static function parse(&$resource)
-    {
-        $resource = ltrim($resource, '/');
-        foreach (self::$config['apps'] as $app => $prefix) {
-            if (strpos($resource, $prefix . '/') === 0) {
-                $resource = substr($resource, strlen($prefix . '/'));
-                return $app;
-            }
-        }
-        return 'frontend';
-    }
-
     public static function getParamsString($pattern, $params)
     {
         $systemParamKeys = array('get', 'app', 'anchor');
@@ -197,16 +174,6 @@ class App
         return http_build_query($params);
     }
 
-    public static function getLinkPrefix($params)
-    {
-        $prefix = '';
-        $app = !empty($params['app']) ? $params['app'] : self::get();
-        if (!empty(self::$config['apps'][$app])) {
-            $prefix = self::$config['apps'][$app] . "/";
-        }
-        return $prefix;
-    }
-
     public static function link($pattern, $params = array())
     {
         $url = self::baseUrl();
@@ -215,10 +182,9 @@ class App
         }
 
         $resource = Route::resource($pattern, $params);
-        $prefix = self::getLinkPrefix($params);
         $ps = self::getParamsString($pattern, $params);
 
-        $url .= $prefix . ltrim($resource, '/');
+        $url .= ltrim($resource, '/');
         $url .=!empty($ps) ? ('?' . $ps) : '';
 
         if (!empty($params['anchor'])) {
@@ -227,7 +193,51 @@ class App
 
         return $url;
     }
+    
+    
+    public static function negotiateMimeType()
+    {
+        $acceptTypes = [];
 
+        $accept = strtolower(str_replace(' ', '', $_SERVER['HTTP_ACCEPT']));
+        $accept = explode(',', $accept);
+        foreach ($accept as $a) {
+            $q = 1;
+            if (strpos($a, ';q=')) {
+                list($a, $q) = explode(';q=', $a);
+            }
+            $acceptTypes[$a] = $q;
+        }
+        arsort($acceptTypes);
+
+        if (!static::$supportedMimeTypes) {
+            return $acceptTypes;
+        }
+
+        $supported = array_map('strtolower', static::$supportedMimeTypes);
+
+        foreach ($acceptTypes as $mime => $q) {
+            if ($q && in_array($mime, $supported)) {
+                return $mime;
+            }
+        }
+        return null;
+    }
+    
+    public static function createResponseContent($results, $controller, $action)
+    {
+        $mime = static::negotiateMimeType();
+        switch ($mime) {
+            case 'application/json':
+            case 'text/json':
+                return new JsonContent($results);
+        }
+        
+        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
+        return new TemplaterContent($results, $template, Request::isExternalRequest());
+
+    }
+        
 }
 
 function __($string)

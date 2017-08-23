@@ -12,7 +12,6 @@ class Mail extends Request
         if (empty(static::$config)) {
             static::$config = Config::load('mail');
         }
-        Place::init();
         
         self::push(new MailHandler($handler, Request::module(), $data));
         self::run();

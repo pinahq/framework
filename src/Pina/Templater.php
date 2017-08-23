@@ -75,7 +75,7 @@ class Templater extends \Smarty
         $handler = new TemplaterHandler($params['get'], 'get', $params);
         $handler->setTemplater($view);
         
-        $result = Request::internal($handler);
+        $result = Request::internal($handler)->fetchContent();
         
         $view->_tpl_vars = $vars_backup;
 
@@ -99,7 +99,7 @@ class Templater extends \Smarty
         $vars_backup = $view->_tpl_vars;
 
         $params['get'] = Route::resource($params['get'], $params);
-        $result = Request::internal(new RequestHandler($params['get'], 'get', $params));
+        $result = Request::internal(new RequestHandler($params['get'], 'get', $params))->fetchContent();
 
         if (is_array($request->error_messages) && count($request->error_messages)) {
             echo '<p>' . join("<br />", $request->error_messages) . "</p>";

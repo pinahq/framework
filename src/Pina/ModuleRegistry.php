@@ -22,8 +22,6 @@ class ModuleRegistry
 
         $enabled_modules = $default_modules;
         
-        $app = App::get();
-        
         Access::reset();
         self::$registry = [];
         foreach ($enabled_modules as $ns) {
@@ -34,13 +32,11 @@ class ModuleRegistry
 
     public static function initModules()
     {       
-        $app = App::get();
-        
         foreach (self::$registry as $ns => $module) {
-            if (!method_exists($module, $app)) {
+            if (!method_exists($module, 'http')) {
                 continue;
             }
-            $routes = $module->$app();
+            $routes = $module->http();
             
             if (!is_array($routes)) {
                 continue;

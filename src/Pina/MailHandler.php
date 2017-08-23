@@ -70,23 +70,25 @@ class MailHandler extends RequestHandler
         
         $path .= '/emails/'.$this->handler;
         
-        if (!self::runHandler($path)) {
-            return false;
+        $r = $this->runHandler($path);
+        
+        if (empty($r)) {
+            return Response::ok();
+        }
+
+        if ($r instanceof \Pina\ResponseInterface) {
+            return $r;
         }
         
-        if ($this->done) {
-            return false;
-        }
-        
-        $display = $this->param('display');
+        $display = $this->input('display');
         if (!empty($display)) {
             $path .= '.' . $display;
         }
         
-        $response = new HtmlResponse();
-        $r = $response->fetchEmail($this->results, basename($path));
-        
-        return Mail::mail($this->mailer($r));
+        $template = 'email:' . basename($path);
+        $content = new TemplaterContent($r, $template, true);
+
+        return Mail::mail($this->mailer($content->fetch()));
         
     }
     
@@ -117,9 +119,9 @@ class MailHandler extends RequestHandler
             $mailer->addStringAttachment($sa['string'], $sa['filename'], $sa['encoding'], $sa['type'], $sa['disposition']);
         }
 
-        $mailer->Subject = Place::get('mail_subject');
+        $mailer->Subject = Request::getPlace('mail_subject');
         $mailer->Body = $content;
-        $mailer->AltBody = Place::get('mail_alternative');
+        $mailer->AltBody = Request::getPlace('mail_alternative');
 
         if ($mailer->AltBody) {
             $mailer->isHTML(true);

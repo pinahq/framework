@@ -7,21 +7,14 @@ class RequestHandler
 
     protected $data = [];
     protected $module = '';
-    
-    protected $messages = [];
-    protected $results = [];
-    
-    protected $done = false;
-    
     protected $layout = '';
-    
+    protected $places = [];
     private $raw = '';
     private $resource = null;
     private $method = null;
-    
     private $controller = '';
     private $action = '';
-    
+
     public function __construct($resource, $method, $data)
     {
         if (is_array($data)) {
@@ -46,57 +39,38 @@ class RequestHandler
     {
         $this->data[$name] = $value;
     }
-    
+
     public function setLayout($layout)
     {
         $this->layout = $layout;
     }
-    
+
     public function getLayout()
     {
         return $this->layout;
+    }
+    
+    public function setPlace($place, $content)
+    {
+        $this->places[$place] = $content;
+    }
+    
+    public function getPlace($place)
+    {
+        if (!isset($this->places[$place])) {
+            return '';
+        }
+        return $this->places[$place];
+    }
+    
+    public function mergePlaces(RequestHandler $handler)
+    {
+        $this->places = array_merge($handler->places, $this->places);
     }
 
     public function resource()
     {
         return $this->resource;
-    }
-
-    public function param($name)
-    {
-        if (!isset($this->data[$name])) {
-            return null;
-        }
-
-        return $this->data[$name];
-    }
-    
-    public function data()
-    {
-        return $this->data;
-    }
-
-    public function params($ps = "")
-    {
-        if (empty($ps)) {
-            return $this->data;
-        }
-
-        if (!is_array($ps)) {
-            $ps = explode(' ', $ps);
-        }
-
-        $res = array();
-        if (is_array($ps)) {
-            foreach ($ps as $p) {
-                if (!isset($this->data[$p])) {
-                    continue;
-                }
-
-                $res[$p] = $this->data[$p];
-            }
-        }
-        return $res;
     }
 
     public function raw()
@@ -107,28 +81,28 @@ class RequestHandler
 
         return file_get_contents('php://input');
     }
-    
-    public function exists($key)
+
+    public function exists($keys)
     {
-        $keys = is_array($key) ? $key : func_get_args();
+        $keys = is_array($keys) ? $keys : func_get_args();
 
         $input = $this->all();
 
         foreach ($keys as $value) {
-            if (! Arr::has($input, $value)) {
+            if (!Arr::has($input, $value)) {
                 return false;
             }
         }
 
         return true;
     }
-    
-    public function has($key)
+
+    public function has($keys)
     {
-        $keys = is_array($key) ? $key : func_get_args();
+        $keys = is_array($keys) ? $keys : func_get_args();
 
         foreach ($keys as $k) {
-            
+
             $value = $this->input($k);
 
             $boolOrArray = is_bool($value) || is_array($value);
@@ -139,17 +113,17 @@ class RequestHandler
 
         return true;
     }
-    
+
     public function all()
     {
         return $this->data;
     }
-    
+
     public function input($name, $default = null)
     {
         return Arr::get($this->data, $name, $default);
     }
-    
+
     public function only($keys)
     {
         $keys = is_array($keys) ? $keys : func_get_args();
@@ -157,14 +131,14 @@ class RequestHandler
         $r = [];
 
         $input = $this->all();
-
+        
         foreach ($keys as $key) {
             Arr::set($r, $key, Arr::get($input, $key));
         }
 
         return $r;
     }
-    
+
     public function except($keys)
     {
         $keys = is_array($keys) ? $keys : func_get_args();
@@ -175,12 +149,12 @@ class RequestHandler
 
         return $r;
     }
-    
+
     public function intersect($keys)
     {
         return array_filter($this->only(is_array($keys) ? $keys : func_get_args()));
     }
-    
+
     public function method()
     {
         return $this->method;
@@ -268,74 +242,37 @@ class RequestHandler
         }
     }
 
-    public function message($type, $message, $subject = '')
-    {
-        $this->messages[] = [$type, $message, $subject];
-    }
-    
-    public function messages()
-    {
-        return $this->messages;
-    }
-
-    public function hasError()
-    {
-        foreach ($this->messages as $m) {
-            if ($m[0] === 'error') {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public function result($name, $value)
-    {
-        $this->results[$name] = $value;
-    }
-    
-    public function done()
-    {
-        $this->done = true;
-        return false;
-    }
-
     public function run()
     {
         if (empty($this->module)) {
-            return Request::notFound();
+            return Response::notFound();
         }
 
         if (!Access::isHandlerPermitted($this->resource)) {
-            return Request::forbidden();
+            return Response::forbidden();
         }
 
-        if (!$this->runHandler($this->module->getPath() . '/' . Url::handler($this->controller, $this->action))) {
-            return false;
+        $r = $this->runHandler($this->module->getPath() . '/' . Url::handler($this->controller, $this->action));
+
+        if (empty($r)) {
+            return Response::ok();
         }
 
-        if ($this->done) {
-            return false;
+        if ($r instanceof \Pina\ResponseInterface) {
+            return $r;
         }
-
-        $response = Response\Factory::get($this->resource, $this->method);
-        if (!empty(self::$messages)) {
-            $this->result('__messages', self::$messages);
-        }
-
-        if (Request::isExternalRequest()) {
-            Request::contentType($response->contentType());
-        }
-
-        echo $response->fetch($this->results, $this->controller, $this->action, $this->param('display'), Request::isExternalRequest());
+        
+        $content = \Pina\App::createResponseContent($r, $this->controller, $this->action);
+        return Response::ok()->setContent($content);
     }
-    
+
     protected function runHandler($handler)
     {
         if (is_file($handler . ".php")) {
             return include $handler . ".php";
         }
 
-        return Request::notFound();
+        return Response::notFound();
     }
 
 }

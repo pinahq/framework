@@ -5,7 +5,7 @@ function smarty_function_place($params, &$view) {
         return '';
     }
 
-    $r = \Pina\Place::get($params['name']);
+    $r = \Pina\Request::getPlace($params['name']);
 
     if (isset($params['assign'])) {
         $view->assign($params['assign'], $r);

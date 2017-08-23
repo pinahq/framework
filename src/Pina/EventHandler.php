@@ -12,6 +12,11 @@ class EventHandler extends RequestHandler
         $this->script = $script;
         $this->data = $data;
     }
+    
+    public function data()
+    {
+        return $this->data;
+    }
 
     public function run()
     {
@@ -22,15 +27,7 @@ class EventHandler extends RequestHandler
 
         $path .= '/events/' . $this->script;
 
-        if (!self::runHandler($path)) {
-            return false;
-        }
-
-        if ($this->done) {
-            return false;
-        }
-
-        return true;
+        return self::runHandler($path);
     }
 
 }

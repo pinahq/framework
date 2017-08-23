@@ -11,16 +11,6 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
     }
     
     $r = '<form';
-    
-    $prefix = '';
-    $app = !empty($ps['app'])?$ps['app']:App::get();
-    $apps = App::apps();
-    if (!empty($apps[$app])) {
-        $prefix = $apps[$app]."/";
-    }
-    
-    $ps['action'] = $prefix.$ps['action'];
-    
 
     $add = '';
     $ps['action'] = Route::resource($ps['action'], $ps);
