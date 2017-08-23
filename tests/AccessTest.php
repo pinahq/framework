@@ -1,9 +1,10 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Pina\Access;
 use Pina\App;
 
-class AccessTest extends PHPUnit_Framework_TestCase
+class AccessTest extends TestCase
 {
 
     public function testPermit()

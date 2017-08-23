@@ -1,11 +1,12 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Pina\Config;
 use Pina\DB;
 use Pina\SQL;
 use Pina\ModuleGateway;
 
-class TableDataGatewayTest extends PHPUnit_Framework_TestCase
+class TableDataGatewayTest extends TestCase
 {
     
     public function testSelect()

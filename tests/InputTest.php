@@ -1,8 +1,9 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Pina\Input;
 
-class InputTest extends PHPUnit_Framework_TestCase
+class InputTest extends TestCase
 {
 
     public function testGetHost()

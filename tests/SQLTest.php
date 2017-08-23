@@ -1,10 +1,11 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Pina\Config;
 use Pina\DB;
 use Pina\SQL;
 
-class SQLTest extends PHPUnit_Framework_TestCase
+class SQLTest extends TestCase
 {
     
     public function testByCondition()

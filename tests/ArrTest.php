@@ -1,8 +1,9 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Pina\Arr;
 
-class ArrTest extends PHPUnit_Framework_TestCase
+class ArrTest extends TestCase
 {
 
     public function testDiff()

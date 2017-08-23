@@ -2,11 +2,14 @@
 
 namespace Pina;
 
+use Pina\Container\Container;
+
 class App
 {
 
     private static $config = false;
     private static $layout = null;
+    private static $container = null;
     
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
 
@@ -23,6 +26,13 @@ class App
         if (function_exists('date_default_timezone_set')) {
             date_default_timezone_set(self::$config['timezone']);
         }
+        
+        self::$container = new Container;
+    }
+    
+    public static function container()
+    {
+        return self::$container;
     }
 
     public static function run()
