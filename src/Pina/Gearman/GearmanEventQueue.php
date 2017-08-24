@@ -3,6 +3,7 @@
 namespace Pina\Gearman;
 
 use Pina\Config;
+use Pina\EventQueueInterface;
 
 class GearmanEventQueue implements EventQueueInterface
 {
