@@ -5,22 +5,17 @@ namespace Pina;
 class Event extends Request
 {
 
-    private static $config = null;
     private static $syncHandlers = [];
     private static $asyncHandlers = [];
     
     public static function data()
     {
-        return self::top()->data($ps); 
+        return self::top()->data(); 
     }
     
     public static function subscribe($module, $event, $script = '')
     {
-        if (!self::$config) {
-            self::$config = Config::load('events');
-        }
-
-        if (!empty(self::$config['queue'])) {
+        if (!empty(App::container()->has(EventQueueInterface::class))) {
             self::subscribeAsync($module, $event, $script);
         } else {
             self::subscribeSync($module, $event, $script);
@@ -42,7 +37,7 @@ class Event extends Request
         self::$syncHandlers[$event][] = $handler;
     }
 
-    public static function subscribeAsync($module, $event, $script = '')
+    protected static function subscribeAsync($module, $event, $script = '')
     {
         if (!isset(self::$asyncHandlers[$event]) || !is_array(self::$asyncHandlers[$event])) {
             self::$asyncHandlers[$event] = [];
@@ -70,14 +65,19 @@ class Event extends Request
             }
         }
 
-        if (isset(self::$asyncHandlers[$event]) && is_array(self::$asyncHandlers[$event]) && !empty(self::$config['queue'])) {
+        if (isset(self::$asyncHandlers[$event]) && is_array(self::$asyncHandlers[$event]) && App::container()->has(EventQueueInterface::class)) {
             
-            $classname = self::$config['queue'];
+            $queue = App::container()->get(EventQueueInterface::class);
             foreach (self::$asyncHandlers[$event] as $handler) {
-                call_user_func_array([$classname, 'push'], [$handler, $data]);
+                $queue->push($handler, $data);
             }
         }
 
+    }
+
+    public static function getAsyncHandlers()
+    {
+        return self::$asyncHandlers;
     }
 
 }

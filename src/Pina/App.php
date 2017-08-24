@@ -28,6 +28,16 @@ class App
         }
         
         self::$container = new Container;
+        if (isset(self::$config['depencies']) && is_array(self::$config['depencies'])) {
+            foreach (self::$config['depencies'] as $key => $value) {
+                self::$container->set($key, $value);
+            }
+        }
+        if (isset(self::$config['sharedDepencies']) && is_array(self::$config['sharedDepencies'])) {
+            foreach (self::$config['sharedDepencies'] as $key => $value) {
+                self::$container->share($key, $value);
+            }
+        }
     }
     
     public static function container()

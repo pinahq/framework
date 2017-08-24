@@ -50,7 +50,7 @@ class Input
     
     public static function getMethod()
     {
-        $realMethod = strtolower($_SERVER["REQUEST_METHOD"]);
+        $realMethod = strtolower(isset($_SERVER["REQUEST_METHOD"])?$_SERVER["REQUEST_METHOD"]:'GET');
         if ($realMethod === 'get') {
             return $realMethod;
         }

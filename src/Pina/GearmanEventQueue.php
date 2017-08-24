@@ -2,26 +2,26 @@
 
 namespace Pina;
 
-class GearmanEventQueue
+class GearmanEventQueue implements EventQueueInterface
 {
-    private static $client = null;
+    private $client = null;
     
-    public static function push($handler, $data)
+    public function push($handler, $data)
     {
-        self::getClient()->doBackground($handler, $data);
+        $this->getClient()->doBackground($handler, $data);
     }
     
-    protected static function getClient()
+    protected function getClient()
     {
-        if(!is_null(self::$client)) {
-            return self::$client;
+        if(!is_null($this->client)) {
+            return $this->client;
         }
         
         $config = Config::load('gearman');
-        self::$client = new \GearmanClient();
-        self::$client->addServer($config['host'], $config['port']);
+        $this->client = new \GearmanClient();
+        $this->client->addServer($config['host'], $config['port']);
         
-        return self::$client;
+        return $this->client;
     }
     
     

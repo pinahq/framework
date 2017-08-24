@@ -4,9 +4,9 @@ namespace Pina;
 
 class GearmanEventWorker
 {
-    private static $worker = null;
+    private $worker = null;
     
-    public static function init()
+    public function __construct()
     {
         $eventHandlers = Event::getAsyncHandlers();
 
@@ -19,15 +19,18 @@ class GearmanEventWorker
             return;
         }
         
-        $worker = self::getWorker();
+        $config = Config::load('gearman');
+        $this->worker = new \GearmanWorker();
+        $this->worker->addServer($config['host'], $config['port']);
+        
         foreach ($summary as $handler) {
             echo 'listen '.$handler."\n";
-            $worker->addFunction($handler, ['Pina\GearmanEventWorker', 'handler']);
+            $this->worker->addFunction($handler, [$this, 'handler']);
         }
         
     }
     
-    public static function handler($job)
+    public function handler($job)
     {
         $cmd = $job->functionName();
         $data = $job->workload();
@@ -40,23 +43,10 @@ class GearmanEventWorker
         Event::pop();
     }
     
-    public static function work()
+    public function work()
     {
-        self::getWorker()->work();
-        return self::getWorker()->returnCode() === GEARMAN_SUCCESS;
+        $this->worker->work();
+        return $this->worker->returnCode() === GEARMAN_SUCCESS;
     }
 
-    protected static function getWorker()
-    {
-        if(!is_null(self::$worker)) {
-            return self::$worker;
-        }
-        
-        $config = Config::load('gearman');
-        self::$worker = new \GearmanWorker();
-        self::$worker->addServer($config['host'], $config['port']);
-        
-        return self::$worker;
-    }
-    
 }
