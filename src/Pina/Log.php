@@ -9,8 +9,8 @@ use Monolog\Handler\RotatingFileHandler;
 class Log
 {
 
-    private static $config = false;
-    private static $loggers = array();
+    private static $config = null;
+    private static $loggers = [];
 
     public static function config()
     {
@@ -28,48 +28,57 @@ class Log
         }
         
         $config = self::config();
-        $c = isset($config[$name])?$config[$name]:$config['default'];
-
-        $logger = new Logger($name);
-        foreach ($c as $level => $targets)
-        {
-            $l = false;
-            switch ($level) {
-                case 'debug': $l = Logger::DEBUG; break;
-                case 'info': $l = Logger::INFO; break;
-                case 'notice': $l = Logger::NOTICE; break;
-                case 'warning': $l = Logger::WARNING; break;
-                case 'error': $l = Logger::ERROR; break;
-                case 'critical': $l = Logger::CRITICAL; break;
-                case 'alert': $l = Logger::ALERT; break;
-                case 'emergency': $l = Logger::EMERGENCY; break;
-            }
-            
-            if (empty($l)) {
-                continue;
-            }
-            
-            foreach ($targets as $k => $t) {
-                switch ($k) {
-                    case 'file': $logger->pushHandler(new RotatingFileHandler($t[0], $t[1], $l)); break;
-                    case 'stdout': if ($t) {$logger->pushHandler(new StreamHandler('php://stdout', $l));} break;
-                }
-            }
+        if (!is_callable($config)) {
+            return;
         }
+        
+        $logger = new Logger($name);
+        $config($logger);
+        
         self::$loggers[$name] = $logger;
         return self::$loggers[$name];
     }
 
-    public static function warning($name, $message)
+    public static function debug($name, $message, $context = [])
     {
         $logger = self::get($name);
-        $logger->addWarning($message);
+        $logger->debug($message, $context);
+    }
+    
+    public static function info($name, $message, $context = [])
+    {
+        $logger = self::get($name);
+        $logger->info($message, $context);
+    }
+    
+    public static function notice($name, $message, $context = [])
+    {
+        $logger = self::get($name);
+        $logger->notice($message, $context);
+    }
+    
+    public static function warning($name, $message, $context = [])
+    {
+        $logger = self::get($name);
+        $logger->warning($message, $context);
     }
 
-    public static function error($name, $message)
+    public static function error($name, $message, $context = [])
     {
         $logger = self::get($name);
-        $logger->addError($message);
+        $logger->error($message, $context);
+    }
+
+    public static function critical($name, $message, $context = [])
+    {
+        $logger = self::get($name);
+        $logger->critical($message, $context);
+    }
+
+    public static function emergency($name, $message, $context = [])
+    {
+        $logger = self::get($name);
+        $logger->emergency($message, $context);
     }
 
 }
