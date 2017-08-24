@@ -79,43 +79,5 @@ class Event extends Request
         }
 
     }
-    
-    public static function getAsyncHandlers()
-    {
-        return self::$asyncHandlers;
-    }
-
-    public static function register($event)
-    {
-        self::getWorker()->addFunction(self::EVENT_PREFIX . $event, ['Pina\Event', 'handler']);
-    }
-
-    public static function handler($job)
-    {
-        $cmd = $job->functionName();
-        if (strncmp($cmd, self::EVENT_PREFIX, strlen(self::EVENT_PREFIX)) !== 0) {
-            return;
-        }
-
-        $cmd = substr($cmd, strlen(self::EVENT_PREFIX));
-        $handlers = Event::getHandlers($cmd);
-        if (empty($handlers) || !is_array($handlers)) {
-            return;
-        }
-
-        $workload = $job->workload();
-        foreach ($handlers as $handler) {
-            Job::queueHigh($handler, $workload);
-        }
-    }
-
-    public static function getHandlers($event)
-    {
-        if (empty(self::$handlers[$event])) {
-            return [];
-        }
-
-        return self::$handlers[$event];
-    }
 
 }
