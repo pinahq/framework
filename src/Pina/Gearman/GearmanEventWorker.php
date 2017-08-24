@@ -2,6 +2,9 @@
 
 namespace Pina\Gearman;
 
+use Pina\Event;
+use Pina\EventHandler;
+
 class GearmanEventWorker
 {
     private $worker = null;
