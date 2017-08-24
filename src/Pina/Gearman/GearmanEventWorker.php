@@ -2,6 +2,7 @@
 
 namespace Pina\Gearman;
 
+use Pina\Config;
 use Pina\Event;
 use Pina\EventHandler;
 

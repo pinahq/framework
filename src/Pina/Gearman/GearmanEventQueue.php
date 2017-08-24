@@ -2,6 +2,8 @@
 
 namespace Pina\Gearman;
 
+use Pina\Config;
+
 class GearmanEventQueue implements EventQueueInterface
 {
     private $client = null;
