@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina;
+namespace Pina\Gearman;
 
 class GearmanEventQueue implements EventQueueInterface
 {
