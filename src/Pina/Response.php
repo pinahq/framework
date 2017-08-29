@@ -182,8 +182,22 @@ class Response implements ResponseInterface
 
     public function error($message, $subject = '')
     {
+        if (empty($message)) {
+            return $this;
+        }
         $this->errors[] = [$message, $subject];
         return $this;
+    }
+    
+    public function setErrors($errors)
+    {
+        $this->errors = $errors;
+        return $this;
+    }
+    
+    public function hasContent()
+    {
+        return $this->content !== null;
     }
 
     public function setContent($content)
@@ -206,9 +220,10 @@ class Response implements ResponseInterface
         foreach ($this->headers as $header) {
             header($header[0] . ':' . $header[1]);
         }
-
+        
         if (!empty($this->content)) {
             header('Content-Type: ' . $this->content->getType());
+            $this->content->setErrors($this->errors);
             echo $this->content->fetch();
         }
     }
@@ -218,6 +233,7 @@ class Response implements ResponseInterface
         if (empty($this->content)) {
             return '';
         }
+        $this->content->setErrors($this->errors);
         return $this->content->fetch();
     }
 

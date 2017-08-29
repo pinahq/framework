@@ -259,6 +259,10 @@ class RequestHandler
         }
 
         if ($r instanceof \Pina\ResponseInterface) {
+            if (!$r->hasContent()) {
+                $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+                $r->setContent($content);
+            }
             return $r;
         }
         

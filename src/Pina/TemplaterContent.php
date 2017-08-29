@@ -28,6 +28,11 @@ class TemplaterContent implements ContentInterface
         }
     }
     
+    public function setErrors($errors)
+    {
+        $this->view->assign('errors', $errors);
+    }
+    
     public function getType()
     {
         return 'text/html; charset=' . App::charset();

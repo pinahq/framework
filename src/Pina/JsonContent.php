@@ -11,7 +11,11 @@ class JsonContent implements ContentInterface
     {
         $this->results = $results;
     }
-
+    
+    public function setErrors($errors)
+    {
+        $this->results['errors'] = $errors;
+    }
 
     public function getType()
     {
