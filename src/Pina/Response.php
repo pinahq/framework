@@ -130,18 +130,13 @@ class Response implements ResponseInterface
 
     private static function stopWithCode($code)
     {
-        if (Request::isInternalRequest()) {
-            return static::code($code);
-        }
         $response = self::code($code);
-        $number = strstr($code, ' ', true);
-        if ($number) {
+        if (Request::isExternalRequest()) {
             $content = \Pina\App::createResponseContent(['error' => $code, 'id' => $code], 'errors', 'show');
             $response->setContent($content);
             return $response;
         }
-
-        return $response;
+        return $response->setContent(new EmptyContent);
     }
 
     private static function failWithCode($code)
