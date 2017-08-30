@@ -65,19 +65,22 @@ class MailHandler extends RequestHandler
     {
         $path = $this->module->getPath();
         if (empty($path)) {
-            return false;
+            return;
         }
         
         $path .= '/emails/'.$this->handler;
         
-        $r = $this->runHandler($path);
+        if (!is_file($path . ".php")) {
+            return;
+        }
+        $r = include $path . ".php";
         
         if (empty($r)) {
-            return Response::ok();
+            return;
         }
 
         if ($r instanceof \Pina\ResponseInterface) {
-            return $r;
+            return;
         }
         
         $display = $this->input('display');
@@ -88,7 +91,7 @@ class MailHandler extends RequestHandler
         $template = 'email:' . basename($path);
         $content = new TemplaterContent($r, $template, true);
 
-        return Mail::mail($this->mailer($content->fetch()));
+        Mail::mail($this->mailer($content->fetch()));
         
     }
     

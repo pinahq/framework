@@ -22,12 +22,15 @@ class EventHandler extends RequestHandler
     {
         $path = $this->module->getPath();
         if (empty($path)) {
-            return false;
+            return;
         }
 
         $path .= '/events/' . $this->script;
-
-        return self::runHandler($path);
+        
+        if (!is_file($path . ".php")) {
+            return;
+        }
+        include $path . ".php";
     }
 
 }

@@ -36,21 +36,6 @@ class TemplaterHandler extends RequestHandler
         $this->view = $view;
     }
 
-    public function fallback($params)
-    {
-        $params['get'] = $params['fallback'];
-        unset($params['fallback']);
-        
-        $params['get'] = Route::resource($params['get'], $params);
-        list($controller, $action, $parsed) = Url::route($params['get'], 'get');
-        $params = array_merge($params, $parsed);
-        
-        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
-        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
-        
-        return Response::ok()->setContent($content);
-    }
-
     public function run()
     {
         if (empty($this->module)) {
@@ -70,6 +55,21 @@ class TemplaterHandler extends RequestHandler
         }
         $template = 'pina:' . $this->controller . '!' . $this->action . '!' . Request::input('display');
         $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        return Response::ok()->setContent($content);
+    }
+
+    private function fallback($params)
+    {
+        $params['get'] = $params['fallback'];
+        unset($params['fallback']);
+        
+        $params['get'] = Route::resource($params['get'], $params);
+        list($controller, $action, $parsed) = Url::route($params['get'], 'get');
+        $params = array_merge($params, $parsed);
+        
+        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
+        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        
         return Response::ok()->setContent($content);
     }
 

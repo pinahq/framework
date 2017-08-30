@@ -49,12 +49,12 @@ class RequestHandler
     {
         return $this->layout;
     }
-    
+
     public function setPlace($place, $content)
     {
         $this->places[$place] = $content;
     }
-    
+
     public function getPlace($place)
     {
         if (!isset($this->places[$place])) {
@@ -62,7 +62,7 @@ class RequestHandler
         }
         return $this->places[$place];
     }
-    
+
     public function mergePlaces(RequestHandler $handler)
     {
         $this->places = array_merge($handler->places, $this->places);
@@ -131,7 +131,7 @@ class RequestHandler
         $r = [];
 
         $input = $this->all();
-        
+
         foreach ($keys as $key) {
             Arr::set($r, $key, Arr::get($input, $key));
         }
@@ -244,15 +244,15 @@ class RequestHandler
 
     public function run()
     {
-        if (empty($this->module)) {
-            return Response::notFound();
+        if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
+            return $this->notFound();
         }
 
-        if (!Access::isHandlerPermitted($this->resource)) {
-            return Response::forbidden();
+        $handler = $this->module->getPath() . '/' . Url::handler($this->controller, $this->action);
+        if (!is_file($handler . ".php")) {
+            return $this->notFound();
         }
-
-        $r = $this->runHandler($this->module->getPath() . '/' . Url::handler($this->controller, $this->action));
+        $r = include $handler . ".php";
 
         if (empty($r)) {
             return Response::ok();
@@ -265,18 +265,25 @@ class RequestHandler
             }
             return $r;
         }
-        
+
         $content = \Pina\App::createResponseContent($r, $this->controller, $this->action);
         return Response::ok()->setContent($content);
     }
 
-    protected function runHandler($handler)
+    private function notFound()
     {
-        if (is_file($handler . ".php")) {
-            return include $handler . ".php";
+        if (!empty($this->data['fallback']) && $this->data['fallback'] != $this->resource) {
+            return $this->fallback();
         }
-
         return Response::notFound();
+    }
+
+    private function fallback()
+    {
+        $data = $this->data;
+        unset($data['fallback']);
+        $data['get'] = Route::resource($this->data['fallback'], $data);
+        return Request::internal(new RequestHandler($data['get'], $this->method, $data));
     }
 
 }
