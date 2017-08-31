@@ -169,6 +169,11 @@ class App
     {
         return self::$config['templater']['compiled'];
     }
+    
+    public static function version()
+    {
+        return isset(self::$config['version'])?self::$config['version']:'';
+    }
 
     public static function env($env = '')
     {

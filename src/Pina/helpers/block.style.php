@@ -22,8 +22,17 @@ function smarty_block_style($params, $content, &$view, &$repeat)
     }
 
     if (!empty($params['src'])) {
-        $static = \Pina\Config::get('app', 'static');
-        ResourceManager::append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . '" />');
+        
+        $parsed = parse_url($params['src']);
+        if (!empty($parsed['host'])) {
+            ResourceManager::append('css', '<link rel="stylesheet" href="' . $params['src'] . '" />');
+        } else {
+            $static = \Pina\Config::get('app', 'static');
+            $version = \Pina\App::version();
+            $v = $version ? ('?'. $version) : '';
+            ResourceManager::append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . $v. '" />');
+        }
+        
     } elseif (!empty($content)) {
         ResourceManager::append('css', $content);
     }

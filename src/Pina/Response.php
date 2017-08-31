@@ -218,7 +218,9 @@ class Response implements ResponseInterface
         
         if (!empty($this->content)) {
             header('Content-Type: ' . $this->content->getType());
-            $this->content->setErrors($this->errors);
+            if ($this->errors) {
+                $this->content->setErrors($this->errors);
+            }
             echo $this->content->fetch();
         }
     }
@@ -228,7 +230,9 @@ class Response implements ResponseInterface
         if (empty($this->content)) {
             return '';
         }
-        $this->content->setErrors($this->errors);
+        if ($this->errors) {
+            $this->content->setErrors($this->errors);
+        }
         return $this->content->fetch();
     }
 
