@@ -83,7 +83,7 @@ class App
         App::resource($resource);
         
         ModuleRegistry::init();
-        ModuleRegistry::initModules();
+        ModuleRegistry::initModules('http');
         
         $resource = DispatcherRegistry::dispatch($resource);
         

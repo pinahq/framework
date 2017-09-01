@@ -30,13 +30,13 @@ class ModuleRegistry
         }
     }
 
-    public static function initModules()
+    public static function initModules($method = null)
     {       
         foreach (self::$registry as $ns => $module) {
-            if (!method_exists($module, 'http')) {
+            if ($method && !method_exists($module, $method)) {
                 continue;
             }
-            $routes = $module->http();
+            $routes = $module->$method();
             
             if (!is_array($routes)) {
                 continue;
