@@ -257,17 +257,12 @@ return $post;
 
 Для доступа к параметрам запроса в классе \Pina\Request есть набор методов:
 
-Получить все параметры в виде массива: ```Request::all();```
-
-Получить конкретный параметр: ```Request::input('name');```
-
-Получить конкретный параметр и в случае его отсутствия использовать значение по умолчанию: ```Request::input('name', 'default');```
-
-Получить некоторые параметры: ```Request::only('key1', 'key2', 'key3');``` или ```Request::only(['key1', 'key2', 'key3']);```
-
-Получить все параметры кроме некоторых:  ```Request::except('key1', 'key2', 'key3');``` или ```Request::except(['key1', 'key2', 'key3']);```
-
-Получить некоторые параметры, если они присутсвиуют: ```Request::intersect('key1', 'key2', 'key3');``` или ```Request::intersect(['key1', 'key2', 'key3']);```
+- Получить все параметры в виде массива: ```Request::all();```
+- Получить конкретный параметр: ```Request::input('name');```
+- Получить конкретный параметр и в случае его отсутствия использовать значение по умолчанию: ```Request::input('name', 'default');```
+- Получить некоторые параметры: ```Request::only('key1', 'key2', 'key3');``` или ```Request::only(['key1', 'key2', 'key3']);```
+- Получить все параметры кроме некоторых:  ```Request::except('key1', 'key2', 'key3');``` или ```Request::except(['key1', 'key2', 'key3']);```
+- Получить некоторые параметры, если они присутсвиуют: ```Request::intersect('key1', 'key2', 'key3');``` или ```Request::intersect(['key1', 'key2', 'key3']);```
 
 Вы могли обратить внимание, что интерфейс этих методов очень похож на то, что используется в Laravel. И это так и есть.
 
@@ -289,7 +284,7 @@ return $post;
 Например:
 
 Метод | Ресурс | Контроллер | Шаблон
------- | ---------- | ------
+------|------- | ---------- | ------
 GET | books/5 | books/show.php | books/show.tpl
 GET | books/5?display=edit | books/show.php | books/show.edit.tpl
 GET | books/create | books/create.php | books/create.tpl
