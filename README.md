@@ -1,4 +1,4 @@
-# Pina2 Framework
+# Pina Framework
 
 ## Введение
 
