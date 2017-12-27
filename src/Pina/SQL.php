@@ -266,8 +266,33 @@ class SQL
         return $this;
     }
 
-    public function orderBy($orderBy)
+    public function orderBy($orderBy, $direction = null)
     {
+        if (!empty($direction)) {
+            $direction = strtolower($direction);
+            if (!in_array($direction, ['asc', 'desc'])) {
+                $direction = 'asc';
+            }
+            
+            if (!preg_match('/^[\w_\.]+$/', $orderBy)) {
+                return $this;
+            }
+            
+            $cond = '';
+            if (strpos($orderBy, '.') !== false) {
+                $cond = $this->db->escape($orderBy).' '.$direction;
+            } else {
+                $cond = $this->getAlias().'.'.$this->db->escape($orderBy).' '.$direction;
+            }
+            
+            if (in_array($cond, $this->orderBy)) {
+                return $this;
+            }
+            
+            $this->orderBy[] = $cond;
+            return $this;
+        }
+        
         if (empty($orderBy) || in_array($orderBy, $this->orderBy)) {
             return $this;
         }
@@ -540,6 +565,7 @@ class SQL
 
         return $this->db->one($this->select($name)->make());
     }
+    
     public function column($name, $key = null)
     {
         $oldSelect = $this->select;

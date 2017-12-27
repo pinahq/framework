@@ -344,6 +344,17 @@ class SQLTest extends TestCase
             ->limit(10)
             ->makeDelete();
         $this->assertEquals("DELETE cody_product FROM cody_product INNER JOIN cody_product_variant ON cody_product_variant.product_id = cody_product.product_id ORDER BY product_id LIMIT 10", $q);
+        
+        $q = SQL::table('cody_product')
+            ->innerJoin(
+                SQL::table('cody_product_variant')->on('product_id')
+            )
+            ->orderBy('product_id', 'asc')
+            ->limit(10)
+            ->makeDelete();
+        
+        $this->assertEquals("DELETE cody_product FROM cody_product INNER JOIN cody_product_variant ON cody_product_variant.product_id = cody_product.product_id ORDER BY cody_product.product_id asc LIMIT 10", $q);
+
     }
     
 }
