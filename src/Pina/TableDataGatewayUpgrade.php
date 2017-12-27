@@ -211,7 +211,7 @@ class TableDataGatewayUpgrade
                 $index .= "`" . $field . '`';
             }
         } else {
-            $index .= $gatewayIndexes[$indexName];
+            $index .= "`" . $gatewayIndexes[$indexName] . '`';
         }
         return $indexName . '(' . $index . ')';
     }
