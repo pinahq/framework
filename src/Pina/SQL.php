@@ -912,7 +912,7 @@ class SQL
             if (!empty($q)) {
                 $q .= ',';
             }
-            $q .= $key . ' = VALUES(' . $key . ')';
+            $q .= '`' . $key . '`' . ' = VALUES(' . '`' . $key . '`' . ')';
         }
         return $q;
     }
