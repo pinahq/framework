@@ -540,14 +540,18 @@ class SQL
 
         return $this->db->one($this->select($name)->make());
     }
-
-    public function column($name)
+    public function column($name, $key = null)
     {
         $oldSelect = $this->select;
         $this->select = array();
-        $sql = $this->select($name)->make();
+        $this->select($name);
+        if ($key) {
+            $this->select($key);
+        }
+        $sql = $this->make();
+        $r = $key ? array_column($this->db->table($sql), $name, $key) : $this->db->col($sql);
         $this->select = $oldSelect;
-        return $this->db->col($sql);
+        return $r;
     }
 
     public function __toString()
