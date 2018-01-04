@@ -234,7 +234,7 @@ class TableDataGatewayUpgrade
                     $q .= ' ADD ' . $this->makeIndex($v) . ', ';
                     break;
                 case 'delete_indexes':
-                    $q .= ' DROP ' . str_replace("UNIQUE", "", $v) . ', ';
+                    $q .= ' DROP ' . str_replace(["UNIQUE", "FULLTEXT"], ["", "KEY"], $v) . ', ';
                     break;
                 case 'edit_indexes':
                     $q .= ' DROP ' . str_replace("UNIQUE", "", $v) . ', ADD ' . $this->makeIndex($v) . ', ';
