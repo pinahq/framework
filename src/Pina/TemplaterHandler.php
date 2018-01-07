@@ -50,11 +50,11 @@ class TemplaterHandler extends RequestHandler
             return Response::forbidden();
         }
 
+        $template = $this->controller . '!' . $this->action . '!' . Request::input('display');
         if (!empty($params['fallback']) && !Templater::isTemplateExists($template, $this->view)) {
             return $this->fallback($params);
         }
-        $template = 'pina:' . $this->controller . '!' . $this->action . '!' . Request::input('display');
-        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        $content = new TemplaterContent($params, 'pina:' . $template, Request::isExternalRequest());
         return Response::ok()->setContent($content);
     }
 

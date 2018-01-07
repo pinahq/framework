@@ -39,7 +39,7 @@ class SQL
 
     public static function subquery($query)
     {
-        return new SQL('(' . $query . ')', DB::get());
+        return new SQL($query, DB::get());
     }
 
     public function init()
@@ -71,12 +71,21 @@ class SQL
 
     public function getAlias()
     {
-        return $this->alias ? $this->alias : $this->from;
+        return $this->alias ? ('`' . $this->alias . '`') : $this->getFrom();
+    }
+    
+    public function getFrom()
+    {
+        if (is_string($this->from)) {
+            return '`'.$this->from.'`';
+        }
+        
+        return '('.$this->from.')';
     }
 
     public function makeFrom()
     {
-        return $this->from . ($this->alias ? (' ' . $this->alias) : '');
+        return $this->getFrom() . ($this->alias ? (' `' . $this->alias . '`') : '');
     }
     
     public function resetSelect()
@@ -88,7 +97,7 @@ class SQL
         return $this;
     }
 
-    public function select($field, $alias = null)
+    public function select($field, $alias = null /*@alias is deprecated*/)
     {
         if (!empty($alias)) {
             $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
@@ -110,6 +119,12 @@ class SQL
             }
         }
         
+        return $this;
+    }
+    
+    public function selectAs($field, $alias)
+    {
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
         return $this;
     }
     
@@ -282,7 +297,7 @@ class SQL
             if (strpos($orderBy, '.') !== false) {
                 $cond = $this->db->escape($orderBy).' '.$direction;
             } else {
-                $cond = $this->getAlias().'.'.$this->db->escape($orderBy).' '.$direction;
+                $cond = $this->getAlias().'.`'.$this->db->escape($orderBy).'` '.$direction;
             }
             
             if (in_array($cond, $this->orderBy)) {
@@ -466,7 +481,7 @@ class SQL
             $alias = array_shift($v);
             switch ($type) {
                 case self::SQL_SELECT_FIELD:
-                    $fields[] = $this->getAlias() . '.' . $field.($alias ? (' as '.$alias) : '');
+                    $fields[] = $this->getAlias() . '.`' . $field . '`' . ($alias ? (' as `'.$alias.'`') : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
                     $fields[] = $field;
@@ -613,7 +628,7 @@ class SQL
         $sql = 'SELECT ';
         $sql .= $this->makeCountFields($field);
 
-        $sql .= ' FROM ' . $this->from;
+        $sql .= ' FROM ' . $this->getFrom();
 
         $sql .= $this->makeJoins();
         $sql .= $this->makeWhere();
@@ -776,7 +791,7 @@ class SQL
             if (strpos($operand, '.')) {
                 return $prefix . $operand;
             }
-            return $prefix . ($alias ? $alias : $this->getAlias()) . '.' . $operand;
+            return $prefix . ($alias ? '`' . trim($alias, '`') . '`' : $this->getAlias()) . '.`' . $operand . '`';
         }
 
         if (is_array($operand)) {
@@ -839,12 +854,12 @@ class SQL
         }
 
         if (!is_array(reset($data))) {
-            return $cmd." INTO `" . $this->from . "` SET " . $this->makeSetCondition($data, $fields);
+            return $cmd." INTO " . $this->getFrom() . " SET " . $this->makeSetCondition($data, $fields);
         }
 
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
 
-        return $cmd." INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
+        return $cmd." INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
     }
 
     public function insertGetId($data, $fields = false)
@@ -879,7 +894,7 @@ class SQL
             }
 
             $sql = "
-                INSERT INTO `" . $this->from . "` SET " . $set . "
+                INSERT INTO " . $this->getFrom() . " SET " . $set . "
                 ON DUPLICATE KEY UPDATE " . $set . "
             ";
             return $sql;
@@ -888,7 +903,7 @@ class SQL
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
         $onDuplicate = $this->getOnDuplicateKeyCondition($keys);
 
-        $sql = "INSERT INTO " . $this->from . "(`" . join("`,`", $keys) . "`) VALUES " . $values;
+        $sql = "INSERT INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES " . $values;
         if (!empty($onDuplicate)) {
             $sql .= " ON DUPLICATE KEY UPDATE " . $onDuplicate;
         }
@@ -996,7 +1011,7 @@ class SQL
         if (empty($operation)) {
             return '';
         }
-        return "UPDATE " . $this->from . " " . $this->makeJoins() . ' SET ' . $operation . $this->makeWhere();
+        return "UPDATE " . $this->getFrom() . " " . $this->makeJoins() . ' SET ' . $operation . $this->makeWhere();
     }
 
     public function delete($what = false)
@@ -1006,7 +1021,7 @@ class SQL
 
     public function makeDelete($what = false)
     {
-        $field = ($what ? $what : '');
+        $field = ($what ? ('`' . $what . '`') : '');
         if (empty($field) && count($this->joins)) {
             $field = $this->getAlias();
         }
@@ -1049,9 +1064,9 @@ class SQL
             }
         }
 
-        return "INSERT INTO $this->from (" . implode(",", $fields) . ")"
+        return "INSERT INTO ".$this->getFrom()." (" . implode(",", $fields) . ")"
             . " SELECT " . implode(",", $select)
-            . ' FROM ' . $this->from
+            . ' FROM ' . $this->getFrom()
             . $this->makeWhere();
     }
 

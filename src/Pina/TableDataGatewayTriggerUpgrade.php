@@ -72,7 +72,7 @@ class TableDataGatewayTriggerUpgrade {
     protected static function getCreateTriggerQueries($table, $action, $statement)
     {
         $r = [];
-        $r[] = 'CREATE TRIGGER ' . static::makeTriggerName($table, $action) . ' ' . $action . ' ON ' . $table . ' FOR EACH ROW ' . $statement;
+        $r[] = 'CREATE TRIGGER ' . static::makeTriggerName($table, $action) . ' ' . $action . ' ON `' . $table . '` FOR EACH ROW ' . $statement;
         return $r;
     }
 
