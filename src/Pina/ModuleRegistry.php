@@ -52,8 +52,11 @@ class ModuleRegistry
         }
     }
     
-    public static function add($ns, $title)
+    public static function add(ModuleInterface $module)
     {
+        $ns = $module->getNamespace();
+        $title = $module->getTitle();
+        
         if (empty($ns) || empty($title)) {
             return false;
         }
