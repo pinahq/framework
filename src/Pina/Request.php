@@ -154,6 +154,9 @@ class Request
     
     public static function getPlace($place)
     {
-        return self::top()->getPlace($place);
+        if (!isset(self::$stack[0])) {
+            return '';
+        }
+        return self::$stack[0]->getPlace($place);
     }
 }
