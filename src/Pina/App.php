@@ -64,7 +64,7 @@ class App
         }
 
         $resource = Input::getResource();
-
+        
         //TODO: get these paths based on config
         $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
         foreach ($staticFolders as $folder) {
@@ -224,7 +224,7 @@ class App
     {
         $acceptTypes = [];
 
-        $accept = strtolower(str_replace(' ', '', $_SERVER['HTTP_ACCEPT']));
+        $accept = strtolower(str_replace(' ', '', isset($_SERVER['HTTP_ACCEPT'])?$_SERVER['HTTP_ACCEPT']:''));
         $accept = explode(',', $accept);
         foreach ($accept as $a) {
             $q = 1;
@@ -246,7 +246,7 @@ class App
                 return $mime;
             }
         }
-        return null;
+        return 'text/html';
     }
     
     public static function createResponseContent($results, $controller, $action)

@@ -74,12 +74,10 @@ class Input
         if ($_SERVER["REQUEST_METHOD"] == 'GET') {
             $data = $_GET;
         } elseif ($_SERVER["REQUEST_METHOD"] == 'POST') {
-            $data['__raw'] = file_get_contents('php://input');
             $data = $_POST;
         } else {
             $putdata = file_get_contents('php://input');
             parse_str($putdata, $data);
-            $data['__raw'] = $putdata;
         }
         return $data;
     }

@@ -28,7 +28,7 @@ class SQL
     private $having = array();
     private $orderBy = array();
     private $limitStart = 0;
-    private $limitCount = 0;
+    private $limitCount = -1;
     private $unions = array();
     private $ons = array();
 
@@ -51,7 +51,7 @@ class SQL
         $this->having = array();
         $this->orderBy = array();
         $this->limitStart = 0;
-        $this->limitCount = 0;
+        $this->limitCount = -1;
         $this->unions = array();
         $this->ons = array();
         return $this;
@@ -437,9 +437,9 @@ class SQL
     public function makeLimit()
     {
         $sql = '';
-        if ($this->limitCount > 0 && $this->limitStart !== null) {
+        if ($this->limitCount >= 0 && $this->limitStart !== null) {
             $sql .= ' LIMIT ' . $this->limitStart . ', ' . $this->limitCount;
-        } elseif ($this->limitCount > 0) {
+        } elseif ($this->limitCount >= 0) {
             $sql .= ' LIMIT ' . $this->limitCount;
         }
         return $sql;
