@@ -67,6 +67,11 @@ class RequestHandler
     {
         $this->places = array_merge($handler->places, $this->places);
     }
+    
+    public function isolation()
+    {
+        return false;
+    }
 
     public function resource()
     {

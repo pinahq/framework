@@ -12,7 +12,9 @@ class Request
         self::push($call);
         $response = self::run();
         self::pop();
-        self::top()->mergePlaces($call);
+        if ($call->isolation() === false) {
+            self::top()->mergePlaces($call);
+        }
         
         return $response;
     }
@@ -154,9 +156,19 @@ class Request
     
     public static function getPlace($place)
     {
-        if (!isset(self::$stack[0])) {
+        $isolationLevel = 0;
+        
+        for ($i = count(self::$stack) - 1; $i > 0; $i --) {
+            if (self::$stack[$i]->isolation()) {
+                $isolationLevel = $i;
+                break;
+            }
+        }
+        
+        if (!isset(self::$stack[$isolationLevel])) {
             return '';
         }
-        return self::$stack[0]->getPlace($place);
+        
+        return self::$stack[$isolationLevel]->getPlace($place);
     }
 }

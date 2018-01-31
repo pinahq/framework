@@ -24,6 +24,11 @@ class MailHandler extends RequestHandler
         $this->layout = 'email';
     }
     
+    public function isolation()
+    {
+        return true;
+    }
+    
     public function to($address, $name = '')
     {
         $this->to [] = array('address' => $address, 'name' => $name);
