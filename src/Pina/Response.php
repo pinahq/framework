@@ -205,6 +205,11 @@ class Response implements ResponseInterface
     {
         return $this->setContent(new JsonContent($data));
     }
+    
+    public function emptyContent()
+    {
+        return $this->setContent(new EmptyContent);
+    }
 
     public function send()
     {

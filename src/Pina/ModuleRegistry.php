@@ -61,12 +61,12 @@ class ModuleRegistry
             return false;
         }
         
-        $moduleId = ModuleGateway::instance()->whereBy('module_namespace', $ns)->value('module_id');
+        $moduleId = ModuleGateway::instance()->whereBy('namespace', $ns)->value('id');
         if (!$moduleId) {
             $moduleId = ModuleGateway::instance()->insertGetId(array(
-                'module_title' => $title,
-                'module_namespace' => $ns,
-                'module_enabled' => 'Y',
+                'title' => $title,
+                'namespace' => $ns,
+                'enabled' => 'Y',
             ));
         }
         
