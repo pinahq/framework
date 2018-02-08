@@ -89,6 +89,11 @@ class App
         
         $handler = new RequestHandler($resource, $method, $data);
         
+        if (!CSRF::verify($handler->controller(), $data)) {
+            @header('HTTP/1.1 403 Forbidden');
+            exit;
+        }
+        
         $defaultLayout = App::getDefaultLayout();
         if ($defaultLayout) {
             $handler->setLayout($defaultLayout);

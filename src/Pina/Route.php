@@ -16,19 +16,28 @@ class Route
 
     public static function owner($controller)
     {
+        $c = self::base($controller);
+        if ($c === null) {
+            return false;
+        }
+        return self::$owners[$c];
+    }
+    
+    public static function base($controller)
+    {
         $controller = trim($controller, "/");
         if (!empty(self::$owners[$controller])) {
-            return self::$owners[$controller];
+            return $controller;
         }
         
         $parts = explode("/", $controller);
         for ($i = count($parts) - 2; $i >= 0; $i--) {
             $c = implode("/", array_slice($parts, 0, $i+1));
             if (isset(self::$owners[$c])) {
-                return self::$owners[$c];
+                return $c;
             }
         }
-        return false;
+        return null;
     }
     
     public static function context($key = null, $value = null)

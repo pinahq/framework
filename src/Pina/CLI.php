@@ -29,6 +29,11 @@ class CLI
         list($group, $action) = $parts;
         
         $owner = Route::owner($group);
+        if (empty($owner)) {
+            CLI::error("Such command has not been found");
+            exit;
+        }
+        
         CLI::info("Affected module: ".$owner->getTitle());
 
         $path = $owner->getPath();

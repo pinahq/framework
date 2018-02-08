@@ -77,6 +77,11 @@ class RequestHandler
     {
         return $this->resource;
     }
+    
+    public function controller()
+    {
+        return $this->controller;
+    }
 
     public function raw()
     {

@@ -201,7 +201,7 @@ class Response implements ResponseInterface
         return $this;
     }
     
-    public function json($data)
+    public function json($data = [])
     {
         return $this->setContent(new JsonContent($data));
     }

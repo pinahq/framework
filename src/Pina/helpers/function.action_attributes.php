@@ -3,6 +3,7 @@
 use Pina\Route;
 use Pina\Url;
 use Pina\App;
+use Pina\CSRF;
 
 function smarty_function_action_attributes($params, &$view)
 {
@@ -29,6 +30,8 @@ function smarty_function_action_attributes($params, &$view)
     $result .= ' data-resource="' . ltrim($resource, '/') . '"';
     list($preg, $map) = Url::preg($pattern);
     $result .= ' data-params="'.http_build_query(array_diff_key($params, array_flip($map))).'"';
+    
+    $result .= CSRF::tagAttribute($method);
     
     $result .= ' ';
     

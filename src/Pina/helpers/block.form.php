@@ -3,6 +3,7 @@
 use Pina\App;
 use Pina\Composer;
 use Pina\Route;
+use Pina\CSRF;
 
 function smarty_block_form($ps, $content, &$view, &$repeat)
 {
@@ -58,6 +59,7 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         $r .= ' target="' . $ps["target"] . '"';
     }
     $r .= '>';
+    $r .= CSRF::formField($method);
     $r .= $add;
     
     $ps['resource'] = $resource;
@@ -66,7 +68,6 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         $ps,
         $view
     );
-    //$r .= CSRFToken::formField($resource, $ps["method"]);
 
     return $r.$content.'</form>';
 }
