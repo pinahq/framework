@@ -37,6 +37,9 @@ class CSRF
 
     public static function init()
     {
+        if (self::$token) {
+            return;
+        }
         self::$token = filter_input(INPUT_COOKIE, 'csrf_token');
         if (!self::$token) {
             self::$token = self::generate();
@@ -60,6 +63,12 @@ class CSRF
         }
         self::init();
         return ' data-csrf-token="'.self::$token.'"';
+    }
+    
+    public static function token()
+    {
+        self::init();
+        return self::$token;
     }
 
     public static function verify($controller, $data)
