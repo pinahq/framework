@@ -18,11 +18,9 @@ class TableDataGateway extends SQL
     const LOAD_BUFFER_LIMIT = 1024000;
 
     protected static $table = "";
-    
     protected static $fields = false;
     protected static $indexes = [];
     protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    
     protected $orderBy = "";
     protected $context = array();
 
@@ -36,22 +34,22 @@ class TableDataGateway extends SQL
         $db = DB::get();
         parent::__construct($this->getTable(), $db);
     }
-    
+
     public function getTable()
     {
         return static::$table;
     }
-    
+
     public function getFields()
     {
         return static::$fields;
     }
-    
+
     public function getIndexes()
     {
         return static::$indexes;
     }
-    
+
     public function getEngine()
     {
         return static::$engine;
@@ -125,17 +123,17 @@ class TableDataGateway extends SQL
             }
         }
     }
-    
+
     protected function primaryKey()
     {
         if (empty(static::$indexes['PRIMARY KEY'])) {
             return '';
         }
-        
+
         if (is_array(static::$indexes['PRIMARY KEY'])) {
             return static::$indexes['PRIMARY KEY'][0];
         }
-        
+
         return static::$indexes['PRIMARY KEY'];
     }
 
@@ -176,10 +174,10 @@ class TableDataGateway extends SQL
     {
         return $this->whereBy($this->primaryKey(), $id);
     }
-    
+
     public function selectAllExcept($field)
     {
-        $excludedFields = is_array($field)?$field:explode(",", $field);
+        $excludedFields = is_array($field) ? $field : explode(",", $field);
         array_walk($excludedFields, 'trim');
         $selectedFields = array_diff(array_keys(static::$fields), $excludedFields);
         foreach ($selectedFields as $selectedField) {
@@ -233,6 +231,41 @@ class TableDataGateway extends SQL
     public function sort($s)
     {
         return $this->orderBy($this->getSorting($s));
+    }
+
+    public function reorder($ids, $field = 'order')
+    {
+        if (!isset(static::$fields[$field])) {
+            return;
+        }
+        
+        $gw = clone($this);
+        
+        $orders = $gw->whereId($ids)->orderBy($field, 'asc')->column($field);
+
+        $max = max($orders);
+
+        $last = null;
+        $diff = 0;
+        foreach ($orders as $k => $v) {
+            $orders[$k] = intval($v + $diff);
+            if ($last !== null && $orders[$k] == $last) {
+                $diff ++;
+                $orders[$k] ++;
+            }
+            $last = $orders[$k];
+        }
+
+        if ($diff > 0) {
+            $gw = clone($this);
+            $gw->whereBetween($field, $max, 2147483647 - $diff - 1)->increment($field, $diff + 1);
+        }
+        $i = 0;
+        foreach ($ids as $id) {
+            $order = $orders[$i++];
+            $gw = clone($this);
+            $gw->whereId($id)->update([$field => intval($order)]);
+        }
     }
 
     /**
