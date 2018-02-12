@@ -43,8 +43,8 @@ class CSRF
         self::$token = filter_input(INPUT_COOKIE, 'csrf_token');
         if (!self::$token) {
             self::$token = self::generate();
-            setcookie('csrf_token', self::$token, time() + self::$expired, '/');
         }
+        setcookie('csrf_token', self::$token, time() + self::$expired, '/');
     }
     
     public static function formField($method)
