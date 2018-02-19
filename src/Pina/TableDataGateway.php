@@ -174,6 +174,11 @@ class TableDataGateway extends SQL
     {
         return $this->whereBy($this->primaryKey(), $id);
     }
+    
+    public function whereNotId($id)
+    {
+        return $this->whereNotBy($this->primaryKey(), $id);
+    }
 
     public function selectAllExcept($field)
     {
