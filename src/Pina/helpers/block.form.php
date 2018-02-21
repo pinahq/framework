@@ -4,6 +4,7 @@ use Pina\App;
 use Pina\Composer;
 use Pina\Route;
 use Pina\CSRF;
+use Pina\Url;
 
 function smarty_block_form($ps, $content, &$view, &$repeat)
 {
@@ -14,8 +15,12 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
     $r = '<form';
 
     $add = '';
+    list($preg, $map) = Url::preg($ps['action']);
     $ps['action'] = Route::resource($ps['action'], $ps);
     $resource = $ps['action'];
+    foreach ($map as $key) {
+        unset($ps[$key]);
+    }
     
     if (!empty($ps['action']) && !empty($ps['method'])) {
         $ps['method'] = strtolower($ps['method']);
@@ -59,7 +64,7 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         $r .= ' target="' . $ps["target"] . '"';
     }
     $r .= '>';
-    $r .= CSRF::formField($method);
+    $r .= CSRF::formField($ps['method']);
     $r .= $add;
     
     $ps['resource'] = $resource;
