@@ -11,8 +11,8 @@ class Paging
 
     public function __construct($current, $perPage)
     {
-        $this->current = $current;
-        $this->perPage = $perPage;
+        $this->current = intval($current);
+        $this->perPage = intval($perPage);
     }
 
     public static function create($current, $perPage)
@@ -23,7 +23,7 @@ class Paging
 
     public function setTotal($total)
     {
-        $this->total = $total;
+        $this->total = intval($total);
     }
 
     public function getTotal()
