@@ -22,7 +22,11 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         unset($ps[$key]);
     }
     
-    if (!empty($ps['action']) && !empty($ps['method'])) {
+    if (empty($ps['method'])) {
+        $ps['method'] = 'get';
+    }
+    
+    if (!empty($ps['action'])) {
         $ps['method'] = strtolower($ps['method']);
         
         if ($ps['method'] != 'get' && $ps['method'] != 'post') {
