@@ -70,7 +70,7 @@ class Response implements ResponseInterface
 
     public static function badRequest($message = '', $subject = '')
     {
-        return static::code('400 Bad Request')->error($message, $subject);
+        return static::stopWithCode('400 Bad Request')->error($message, $subject);
     }
 
     public static function unauthorized()
@@ -132,7 +132,7 @@ class Response implements ResponseInterface
     {
         $response = self::code($code);
         if (Request::isExternalRequest()) {
-            $content = \Pina\App::createResponseContent(['error' => $code, 'id' => $code], 'errors', 'show');
+            $content = \Pina\App::createResponseContent(['code' => $code], 'errors', 'show');
             $response->setContent($content);
             return $response;
         }

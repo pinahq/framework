@@ -53,10 +53,14 @@ class Request
         }
 
         $pattern = Url::trim($pattern);
-        $parsed = Url::parse($resource, $pattern);
+        $parsed = [];
+        if (!Url::parse($resource, $pattern, $parsed)) {
+            return false;
+        }
         foreach ($parsed as $k => $v) {
             self::set($k, urldecode($v));
         }
+        return true;
     }
 
     public static function exists($keys)

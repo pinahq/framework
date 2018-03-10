@@ -118,7 +118,9 @@ class UrlTest extends TestCase
      */
     public function testParse($resource, $pattern, $expected)
     {
-        $this->assertEquals($expected, Url::parse($resource, $pattern));
+        $parsed = [];
+        Url::parse($resource, $pattern, $parsed);
+        $this->assertEquals($expected, $parsed);
     }
 
     public function parseProvider()

@@ -14,8 +14,8 @@ class TableDataGatewayTest extends TestCase
         Config::init(__DIR__.'/config');
         
         $this->assertEquals(
-            "`cody_module`.`module_title`, `cody_module`.`module_namespace`, `cody_module`.`module_enabled`, `cody_module`.`module_created`",
-            ModuleGateway::instance()->selectAllExcept('module_id')->makeFields()
+            "`module`.`title`, `module`.`namespace`, `module`.`enabled`, `module`.`created`",
+            ModuleGateway::instance()->selectAllExcept('id')->makeFields()
         );
     }
         

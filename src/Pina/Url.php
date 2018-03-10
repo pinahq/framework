@@ -133,10 +133,10 @@ class Url
         return 'http/' . trim($controller, "/") . '/' . $action;
     }
 
-    public static function parse($resource, $pattern)
+    public static function parse($resource, $pattern, &$parsed)
     {
         list($preg, $map) = self::preg($pattern);
-        return self::pregParse($resource, $preg, $map);
+        return self::pregParse($resource, $preg, $map, $parsed);
     }
 
     public static function preg($pattern)
@@ -155,15 +155,16 @@ class Url
         return array($preg, $map);
     }
 
-    public static function pregParse($resource, $preg, $map)
+    public static function pregParse($resource, $preg, $map, &$parsed)
     {
-        $parsed = array();
+        $parsed = [];
         if (preg_match("/^" . $preg . "$/si", $resource, $matches)) {
             unset($matches[0]);
             $matches = array_values($matches);
             $parsed = array_combine($map, $matches);
+            return true;
         }
-        return $parsed;
+        return false;
     }
 
     public static function resource($pattern, $parsed)
