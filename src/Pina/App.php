@@ -48,7 +48,8 @@ class App
     public static function run()
     {
         if (self::host() != Input::getHost()) {
-            @header('HTTP/1.1 404 Not Found');
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . App::link($_SERVER['REQUEST_URI']));
             exit;
         }
 
