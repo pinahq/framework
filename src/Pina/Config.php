@@ -16,13 +16,17 @@ class Config
         static::$path = $path;
     }
     
-    public static function get($s, $key)
+    public static function get($s, $key = null)
     {
         if (empty(static::$path)) {
             return null;
         }
         
         $data = static::load($s);
+        
+        if (empty($key)) {
+            return $data;
+        }
 
         return isset($data[$key]) ? $data[$key] : null;
     }
