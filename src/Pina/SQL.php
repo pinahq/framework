@@ -188,6 +188,12 @@ class SQL
         $this->ons[] = array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
         return $this;
     }
+    
+    public function onRaw($condition)
+    {
+        $this->ons[] = $condition;
+        return $this;
+    }
 
     public function makeOns($parentAlias)
     {
@@ -196,7 +202,11 @@ class SQL
             if (!empty($q)) {
                 $q .= ' AND ';
             }
-            $q .= $this->makeByCondition($on, $parentAlias);
+            if (is_array($on)) {
+                $q .= $this->makeByCondition($on, $parentAlias);
+            } else {
+                $q .= '(' . $on . ')';
+            }
         }
         return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
