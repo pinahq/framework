@@ -153,7 +153,7 @@ class DB
 
         while ($row = mysqli_fetch_row($rc)) {
             if (!isset($row[0])) {
-                return false;
+                continue;
             }
 
             $result [] = $row[0];
