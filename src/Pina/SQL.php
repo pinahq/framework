@@ -56,6 +56,11 @@ class SQL
         $this->ons = array();
         return $this;
     }
+    
+    public function cloneObject()
+    {
+        return clone $this;
+    }
 
     protected function __construct($table, $db = false)
     {
@@ -188,7 +193,7 @@ class SQL
         $this->ons[] = array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
         return $this;
     }
-    
+
     public function onRaw($condition)
     {
         $this->ons[] = $condition;
@@ -203,10 +208,10 @@ class SQL
                 $q .= ' AND ';
             }
             if (is_array($on)) {
-                $q .= $this->makeByCondition($on, $parentAlias);
+            $q .= $this->makeByCondition($on, $parentAlias);
             } else {
                 $q .= '(' . $on . ')';
-            }
+        }
         }
         return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
