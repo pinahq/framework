@@ -10,7 +10,6 @@ class App
     private static $config = false;
     private static $layout = null;
     private static $container = null;
-    
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
 
     public static function init($env, $configPath)
@@ -26,7 +25,7 @@ class App
         if (function_exists('date_default_timezone_set')) {
             date_default_timezone_set(self::$config['timezone']);
         }
-        
+
         self::$container = new Container;
         if (isset(self::$config['depencies']) && is_array(self::$config['depencies'])) {
             foreach (self::$config['depencies'] as $key => $value) {
@@ -39,7 +38,7 @@ class App
             }
         }
     }
-    
+
     public static function container()
     {
         return self::$container;
@@ -65,7 +64,7 @@ class App
         }
 
         $resource = Input::getResource();
-        
+
         //TODO: get these paths based on config
         $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
         foreach ($staticFolders as $folder) {
@@ -74,7 +73,7 @@ class App
                 exit;
             }
         }
-        
+
         $mime = App::negotiateMimeType();
         if (empty($mime)) {
             @header('HTTP/1.1 406 Not Acceptable');
@@ -82,39 +81,39 @@ class App
         }
 
         App::resource($resource);
-        
+
         ModuleRegistry::init();
         ModuleRegistry::initModules('http');
-        
+
         $resource = DispatcherRegistry::dispatch($resource);
-        
+
         $handler = new RequestHandler($resource, $method, $data);
-        
+
         if (!CSRF::verify($handler->controller(), $data)) {
             @header('HTTP/1.1 403 Forbidden');
             exit;
         }
-        
+
         $defaultLayout = App::getDefaultLayout();
         if ($defaultLayout) {
             $handler->setLayout($defaultLayout);
         }
-        
+
         Request::push($handler);
         $response = Request::run();
         $response->send();
     }
-    
+
     public static function setDefaultLayout($layout)
     {
         self::$layout = $layout;
     }
-    
+
     public static function getDefaultLayout()
     {
         return self::$layout;
     }
-    
+
     public static function resource($resource = '')
     {
         static $item = false;
@@ -125,22 +124,22 @@ class App
 
         return $item;
     }
-    
+
     public static function baseUrl()
     {
-        return self::scheme()."://".self::host()."/";
+        return self::scheme() . "://" . self::host() . "/";
     }
-    
+
     public static function scheme()
     {
-        return isset(self::$config['scheme'])?self::$config['scheme']:'http';
+        return isset(self::$config['scheme']) ? self::$config['scheme'] : Input::getScheme();
     }
-    
+
     public static function host()
     {
         return isset(self::$config['host']) ? self::$config['host'] : Input::getHost();
     }
-    
+
     public static function template()
     {
         return isset(self::$config['template']) ? self::$config['template'] : null;
@@ -160,7 +159,7 @@ class App
     {
         return self::$config['charset'];
     }
-    
+
     public static function tmp()
     {
         return self::$config['tmp'];
@@ -175,10 +174,10 @@ class App
     {
         return self::$config['templater']['compiled'];
     }
-    
+
     public static function version()
     {
-        return isset(self::$config['version'])?self::$config['version']:'';
+        return isset(self::$config['version']) ? self::$config['version'] : '';
     }
 
     public static function env($env = '')
@@ -201,7 +200,7 @@ class App
                 unset($params[$k]);
             }
         }
-        
+
         return http_build_query($params);
     }
 
@@ -216,7 +215,7 @@ class App
         $ps = self::getParamsString($pattern, $params);
 
         $url .= ltrim($resource, '/');
-        $url .=!empty($ps) ? ('?' . $ps) : '';
+        $url .= !empty($ps) ? ('?' . $ps) : '';
 
         if (!empty($params['anchor'])) {
             $url .= "#" . $params["anchor"];
@@ -224,13 +223,12 @@ class App
 
         return $url;
     }
-    
-    
+
     public static function negotiateMimeType()
     {
         $acceptTypes = [];
 
-        $accept = strtolower(str_replace(' ', '', isset($_SERVER['HTTP_ACCEPT'])?$_SERVER['HTTP_ACCEPT']:''));
+        $accept = strtolower(str_replace(' ', '', isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : ''));
         $accept = explode(',', $accept);
         foreach ($accept as $a) {
             $q = 1;
@@ -254,7 +252,7 @@ class App
         }
         return 'text/html';
     }
-    
+
     public static function createResponseContent($results, $controller, $action)
     {
         $mime = static::negotiateMimeType();
@@ -263,12 +261,11 @@ class App
             case 'text/json':
                 return new JsonContent($results);
         }
-        
+
         $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
         return new TemplaterContent($results, $template, Request::isExternalRequest());
-
     }
-        
+
 }
 
 function __($string)

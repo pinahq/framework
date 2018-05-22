@@ -15,6 +15,11 @@ class Input
         return !empty($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : '';
     }
 
+    public static function getScheme()
+    {
+        return !empty($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] : 'http';
+    }
+
     public static function getResource()
     {
         $r = self::getFullResource();
