@@ -255,7 +255,7 @@ class RequestHandler
     public function run()
     {
         if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
-            return $this->notFound();
+            return $this->forbidden();
         }
 
         $handler = $this->module->getPath() . '/' . Url::handler($this->controller, $this->action);
@@ -278,6 +278,14 @@ class RequestHandler
 
         $content = \Pina\App::createResponseContent($r, $this->controller, $this->action);
         return Response::ok()->setContent($content);
+    }
+    
+    private function forbidden()
+    {
+        if (!empty($this->data['fallback']) && $this->data['fallback'] != $this->resource) {
+            return $this->fallback();
+        }
+        return Response::forbidden();        
     }
 
     private function notFound()
