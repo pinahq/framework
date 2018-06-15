@@ -32,6 +32,10 @@ class ModuleRegistry
 
     public static function initModules($method = null)
     {       
+        foreach (self::$registry as $module) {
+            $module->boot();
+        }
+        
         foreach (self::$registry as $ns => $module) {
             if (!$method || !method_exists($module, $method)) {
                 continue;
@@ -45,10 +49,6 @@ class ModuleRegistry
             foreach ($routes as $route) {
                 Route::own($route, $module);
             }
-        }
-        
-        foreach (self::$registry as $module) {
-            $module->boot();
         }
     }
     
