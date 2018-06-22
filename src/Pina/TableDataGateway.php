@@ -73,12 +73,30 @@ class TableDataGateway extends SQL
         return $r;
     }
 
+    public function getEnumVariants($field)
+    {
+        if (empty(static::$fields[$field])) {
+            return [];
+        }
+
+        $meta = static::$fields[$field];
+        if (!preg_match('/enum\((.*)\)/si', $meta, $matches)) {
+            return [];
+        }
+
+        $fields = explode(',', $matches[1]);
+        array_walk($fields, function(&$s) {
+            $s = trim(trim($s, "'\""));
+        });
+        return $fields;
+    }
+
     /*
      * Возвращает экземпляр конкретного класса
      * @return TableDataGateway
      */
 
-    static public function instance()
+    public static function instance()
     {
         $cl = get_called_class();
         return new $cl();
@@ -174,7 +192,7 @@ class TableDataGateway extends SQL
     {
         return $this->whereBy($this->primaryKey(), $id);
     }
-    
+
     public function whereNotId($id)
     {
         return $this->whereNotBy($this->primaryKey(), $id);
@@ -243,9 +261,9 @@ class TableDataGateway extends SQL
         if (!isset(static::$fields[$field])) {
             return;
         }
-        
+
         $gw = clone($this);
-        
+
         $orders = $gw->whereId($ids)->orderBy($field, 'asc')->column($field);
 
         $max = max($orders);
