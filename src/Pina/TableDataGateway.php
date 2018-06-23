@@ -291,63 +291,49 @@ class TableDataGateway extends SQL
         }
     }
 
-    /**
-     * Возвращает массив из возможных значений поля типа enum
-     * @param string $field название поля
-     * @return array массив возможных значений
-     */
-    public function reportFieldVariants($field)
-    {
-        $values = array();
-        if (!isset(static::$fields) || empty(static::$fields[$field])) {
-            return $values;
-        }
-        if (($firstPos = mb_strpos(static::$fields[$field], '(')) === false || ($lastPos = mb_strpos(static::$fields[$field], ')')) === false
-        ) {
-            return false;
-        }
-        $str = mb_substr(static::$fields[$field], ++$firstPos, ($lastPos - $firstPos));
-        return explode(',', str_replace(array("'", '"'), '', $str));
-    }
-
     /* Проверяет поля массива $data
      * на соответствие размерности полей БД mysql.
      * При несоответствии помещает сообщения в Request::error
-     * $relations - массив вида ('поле в БД' => 'поле в HTML-форме' */
+     */
 
-    public function validate($data, $relations)
+    public function validate($data)
     {
+        $errors = [];
         foreach ($data as $k => $v) {
             $matches = array();
-            if (!preg_match("/(varchar|int|decimal)\((\d+)(,(\d+))?\)/i", static::$fields[$k], $matches)) {
-                continue;
-            }
-            $sql_type = $matches[1];
-            $sql_size = $matches[2];
-            switch ($sql_type) {
-                case 'varchar':
-                    $data_length = strlen($v);
-                    break;
-                case 'int':
-                case 'decimal':
-                    $data_length = strlen(floor(abs($v)));
-                    break;
-            }
-            if ($sql_size >= $data_length) {
-                continue;
-            }
-            if (empty($relations[$k])) {
-                Request::error(
-                    'Максимальная длина параметра превышена на '
-                    . ($data_length - $sql_size), $k
-                );
-            } else {
-                Request::error(
-                    'Максимальная длина параметра превышена на '
-                    . ($data_length - $sql_size), $relations[$k]
-                );
+            if (preg_match("/(varchar|decimal)\((\d+)(,(\d+))?\)/i", static::$fields[$k], $matches)) {
+                $length = 0;
+                $type = strtolower($matches[1]);
+                $maxLength = strtolower($matches[2]);
+                switch ($type) {
+                    case 'varchar':
+                        $length = strlen($v);
+                        break;
+                    case 'decimal':
+                        $length = strlen(floor(abs($v)));
+                        break;
+                }
+                if ($maxLength >= $length) {
+                    continue;
+                }
+                $errors[] = [
+                    'length',
+                    $k,
+                    $maxLength,
+                    $length,
+                ];
+            } else if ($variants = $this->getEnumVariants($k)) {
+                if (!in_array($v, $variants)) {
+                    $errors[] = [
+                        'enum',
+                        $k,
+                        $variants,
+                        $v,
+                    ];
+                }
             }
         }
+        return $errors;
     }
 
     /*
