@@ -52,7 +52,7 @@ class Event extends Request
         self::$asyncHandlers[$event][] = $handler;
     }
 
-    public static function trigger($event, $data)
+    public static function trigger($event, $data = '')
     {
         if (isset(self::$syncHandlers[$event]) && is_array(self::$syncHandlers[$event])) {
 
