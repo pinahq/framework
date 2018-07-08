@@ -113,16 +113,6 @@ class Request
         return self::top()->raw();
     }
 
-    public static function filter($fs, $ps)
-    {
-        self::top()->filter($fs, $ps);
-    }
-
-    public static function filterAll($clean_functions)
-    {
-        self::top()->filterAll($clean_functions);
-    }
-    
     public static function module()
     {
         return self::top()->module();
