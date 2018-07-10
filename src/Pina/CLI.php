@@ -17,8 +17,8 @@ class CLI
 
         list($cmd, $data) = self::parseParams($argv, $scriptName);
         
-        ModuleRegistry::init();
-        ModuleRegistry::initModules('cli');
+        $modules = App::container()->get(ModuleRegistryInterface::class);
+        $modules->boot('cli');
 
         $parts = explode(".", $cmd);
         if (count($parts) !== 2) {

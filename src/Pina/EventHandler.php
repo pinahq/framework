@@ -8,7 +8,7 @@ class EventHandler extends RequestHandler
 
     public function __construct($namespace, $script, $data)
     {
-        $this->module = ModuleRegistry::get($namespace);
+        $this->module = App::container()->get(ModuleRegistryInterface::class)->get($namespace);
         $this->script = $script;
         $this->data = $data;
     }

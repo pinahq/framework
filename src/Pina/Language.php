@@ -42,7 +42,8 @@ class Language
             return '';
         }
         
-        $module = $ns ? ModuleRegistry::get($ns) : Request::module();
+        $modules = App::container()->get(ModuleRegistryInterface::class);
+        $module = $ns ? $modules->get($ns) : Request::module();
         if (empty($module)) {
             return '';
         }

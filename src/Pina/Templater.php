@@ -14,7 +14,7 @@ class Templater extends \Smarty
                 $this->plugins_dir, __DIR__ . '/helpers'
         );
 
-        $paths = ModuleRegistry::getPaths();
+        $paths = App::container()->get(ModuleRegistryInterface::class)->getPaths();
         foreach ($paths as $v) {
             $helperDir = $v . "/helpers";
             if (is_dir($helperDir)) {

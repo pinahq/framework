@@ -11,6 +11,7 @@ class App
     private static $layout = null;
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
+    private static $forcedMimeType = null;
 
     public static function init($env, $configPath)
     {
@@ -36,6 +37,9 @@ class App
             foreach (self::$config['sharedDepencies'] as $key => $value) {
                 self::$container->share($key, $value);
             }
+        }
+        if (!self::$container->has(ModuleRegistryInterface::class)) {
+            self::$container->share(ModuleRegistryInterface::class, ModuleRegistry::class);
         }
     }
 
@@ -82,8 +86,8 @@ class App
 
         App::resource($resource);
 
-        ModuleRegistry::init();
-        ModuleRegistry::initModules('http');
+        $modules = self::$container->get(ModuleRegistryInterface::class);
+        $modules->boot('http');
 
         $resource = DispatcherRegistry::dispatch($resource);
 
@@ -223,9 +227,18 @@ class App
 
         return $url;
     }
+    
+    public static function forceMimeType($mime)
+    {
+        static::$forcedMimeType = $mime;
+    }
 
     public static function negotiateMimeType()
     {
+        if (!empty(static::$forcedMimeType)) {
+            return static::$forcedMimeType;
+        }
+        
         $acceptTypes = [];
 
         $accept = strtolower(str_replace(' ', '', isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : ''));
@@ -264,6 +277,25 @@ class App
 
         $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
         return new TemplaterContent($results, $template, Request::isExternalRequest());
+    }
+    
+    public static function walkClasses($type, $callback)
+    {
+        $paths = self::$container->get(ModuleRegistryInterface::class)->getPaths();
+        $suffix = $type.'.php';
+        $suffixLength = strlen($suffix);
+        $r = [];
+        foreach ($paths as $ns => $path) {
+            $files = array_filter(scandir($path), function($s) use ($suffix, $suffixLength) {
+                return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
+            });
+
+            foreach ($files as $file) {
+                $className = $ns.'\\'.pathinfo($file, PATHINFO_FILENAME);
+                $c = new $className;
+                $callback($c);
+            }
+        }
     }
 
 }
