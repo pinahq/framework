@@ -33,11 +33,7 @@ class DB
         $configDB = Config::load('db');
 
         $rc = mysqli_connect(
-            "p:".$configDB[$alias]['host'], 
-            $configDB[$alias]['user'], 
-            $configDB[$alias]['pass'],
-            $configDB[$alias]['base'],
-            $configDB[$alias]['port']
+            "p:" . $configDB[$alias]['host'], $configDB[$alias]['user'], $configDB[$alias]['pass'], $configDB[$alias]['base'], $configDB[$alias]['port']
         );
 
         if (empty($rc) || !in_array(mysqli_errno($rc), array(0, 1146))) {
@@ -181,6 +177,20 @@ class DB
         }
 
         return $row[0];
+    }
+
+    public function batch($queries)
+    {
+        if (!is_array($queries)) {
+            return;
+        }
+        
+        foreach ($queries as $q) {
+            if (empty($q)) {
+                continue;
+            }
+            $this->query($q);
+        }
     }
 
     public function num($sql)

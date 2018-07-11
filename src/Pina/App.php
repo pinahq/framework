@@ -227,7 +227,7 @@ class App
 
         return $url;
     }
-    
+
     public static function forceMimeType($mime)
     {
         static::$forcedMimeType = $mime;
@@ -238,7 +238,7 @@ class App
         if (!empty(static::$forcedMimeType)) {
             return static::$forcedMimeType;
         }
-        
+
         $acceptTypes = [];
 
         $accept = strtolower(str_replace(' ', '', isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : ''));
@@ -278,11 +278,25 @@ class App
         $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
         return new TemplaterContent($results, $template, Request::isExternalRequest());
     }
-    
+
+    public static function getUpgrades()
+    {
+        $upgrades = [];
+        $triggers = [];
+        App::walkClasses('Gateway', function($gw) use (&$upgrades, &$triggers) {
+            $upgrades = array_merge($upgrades, $gw->getUpgrades());
+            $triggers = array_merge($triggers, $gw->getTriggers());
+        });
+
+        $upgrades = array_merge($upgrades, TableDataGatewayTriggerUpgrade::getUpgrades($triggers));
+
+        return $upgrades;
+    }
+
     public static function walkClasses($type, $callback)
     {
         $paths = self::$container->get(ModuleRegistryInterface::class)->getPaths();
-        $suffix = $type.'.php';
+        $suffix = $type . '.php';
         $suffixLength = strlen($suffix);
         $r = [];
         foreach ($paths as $ns => $path) {
@@ -291,7 +305,7 @@ class App
             });
 
             foreach ($files as $file) {
-                $className = $ns.'\\'.pathinfo($file, PATHINFO_FILENAME);
+                $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
                 $c = new $className;
                 $callback($c);
             }
