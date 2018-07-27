@@ -25,7 +25,7 @@ class ModuleRegistry implements ModuleRegistryInterface
         }
     }
 
-    public static function boot($method = null)
+    public function boot($method = null)
     {       
         foreach ($this->registry as $module) {
             $module->boot();
@@ -46,27 +46,6 @@ class ModuleRegistry implements ModuleRegistryInterface
             }
         }
     }
-//    
-//    public static function add(ModuleInterface $module)
-//    {
-//        $ns = $module->getNamespace();
-//        $title = $module->getTitle();
-//        
-//        if (empty($ns) || empty($title)) {
-//            return false;
-//        }
-//        
-//        $moduleId = ModuleGateway::instance()->whereBy('namespace', $ns)->value('id');
-//        if (!$moduleId) {
-//            $moduleId = ModuleGateway::instance()->insertGetId(array(
-//                'title' => $title,
-//                'namespace' => $ns,
-//                'enabled' => 'Y',
-//            ));
-//        }
-//        
-//        return $moduleId;
-//    }
 
     public function get($ns)
     {
