@@ -37,7 +37,7 @@ class Event extends Request
         self::$syncHandlers[$event][] = $handler;
     }
 
-    public static function subscribeAsync($module, $event, $script = '')
+    protected static function subscribeAsync($module, $event, $script = '')
     {
         if (!isset(self::$asyncHandlers[$event]) || !is_array(self::$asyncHandlers[$event])) {
             self::$asyncHandlers[$event] = [];
