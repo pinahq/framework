@@ -12,6 +12,9 @@ class CSRF
 
     public static function whitelist($list)
     {
+        foreach ($list as $k => $v) {
+            $list[$k] = ltrim($v, '/');
+        }
         self::$whitelist = array_unique(array_merge(self::$whitelist, $list));
         return $list;
     }
