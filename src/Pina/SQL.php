@@ -139,9 +139,9 @@ class SQL
         return $this;
     }
 
-    public function calculate($field)
+    public function calculate($field, $alias = null)
     {
-        $this->select[] = array(self::SQL_SELECT_CONDITION, $field);
+        $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias);
         return $this;
     }
 
@@ -499,7 +499,7 @@ class SQL
                     $fields[] = $this->getAlias() . '.`' . $field . '`' . ($alias ? (' as `'.$alias.'`') : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
-                    $fields[] = $field;
+                    $fields[] = $field . ($alias ? (' as `'.$alias.'`') : '');
                     break;
                 default:
                     throw new Exception('unkown field type');
@@ -599,15 +599,44 @@ class SQL
     public function column($name, $key = null)
     {
         $oldSelect = $this->select;
-        $this->select = array();
-        $this->select($name);
+        
+        $nameAliasLine = $this->getSelectItemByAlias($name);
+        $keyAliasLine = null;
         if ($key) {
-            $this->select($key);
+            $keyAliasLine = $this->getSelectItemByAlias($key);
+        }
+        
+        $this->select = array();
+        if ($nameAliasLine) {
+            $this->select[] = $nameAliasLine;
+        } else {
+            $this->select($name);
+        }
+        if ($key) {
+            if ($keyAliasLine) {
+                $this->select[] = $keyAliasLine;
+            } else {
+                $this->select($key);
+            }
         }
         $sql = $this->make();
         $r = $key ? array_column($this->db->table($sql), $name, $key) : $this->db->col($sql);
         $this->select = $oldSelect;
         return $r;
+    }
+    
+    protected function getSelectItemByAlias($needle)
+    {
+        foreach ($this->select as $k => $v) {
+            $type = array_shift($v);
+            $field = array_shift($v);
+            $alias = array_shift($v);
+            if ($alias && $alias == $needle) {
+                return $this->select[$k];
+            }
+        }
+        
+        return null;
     }
 
     public function __toString()

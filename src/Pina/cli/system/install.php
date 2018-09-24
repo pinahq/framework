@@ -2,6 +2,6 @@
 
 namespace Pina;
 
-ModuleRegistry::walkClasses('Installation', function($cl) {
+App::walkClasses('Installation', function($cl) {
     $cl->install();
 });

@@ -401,5 +401,5 @@ class SQLTest extends TestCase
         $sql = SQL::table('config')->makePut($update);
         $this->assertEquals("INSERT INTO `config`(`namespace`,`key`,`value`) VALUES ('Pina\\\\Modules\\\\CMS','phone','123') ON DUPLICATE KEY UPDATE `namespace` = VALUES(`namespace`),`key` = VALUES(`key`),`value` = VALUES(`value`)", $sql);
     }
-
+    
 }
