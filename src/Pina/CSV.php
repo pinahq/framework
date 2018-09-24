@@ -29,7 +29,9 @@ class CSV
 
         $this->handle = fopen("php://output", "r+");
         $this->write($data, $dataCharset);
-        fclose($this->handle);
+        if (is_resource($this->handle)) {
+            fclose($this->handle);
+        }
     }
 
     protected function write(&$data, $dataCharset)
