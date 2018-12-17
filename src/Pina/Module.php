@@ -20,7 +20,7 @@ class Module implements ModuleInterface
         return 'Framework';
     }
     
-    public function frontend()
+    public function http()
     {
         return [];
     }
