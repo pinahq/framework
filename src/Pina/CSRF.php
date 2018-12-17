@@ -47,7 +47,13 @@ class CSRF
         if (!self::$token) {
             self::$token = self::generate();
         }
-        setcookie('csrf_token', self::$token, time() + self::$expired, '/');
+        
+        $expired = Config::get('app', 'csrf_token_expired');
+        if (is_null($expired)) {
+             $expired = self::$expired;
+        }
+        
+        setcookie('csrf_token', self::$token, time() + $expired, '/');
     }
     
     public static function formField($method)
@@ -55,8 +61,7 @@ class CSRF
         if (in_array(strtolower($method), self::$saveMethods)) {
             return '';
         }
-        self::init();
-        return '<input type="hidden" name="csrf_token" value="'.self::$token.'" />';
+        return '<input type="hidden" name="csrf_token" value="'.self::token().'" />';
     }
     
     public static function tagAttribute($method)
@@ -64,8 +69,7 @@ class CSRF
         if (in_array(strtolower($method), self::$saveMethods)) {
             return '';
         }
-        self::init();
-        return ' data-csrf-token="'.self::$token.'"';
+        return ' data-csrf-token="'.self::token().'"';
     }
     
     public static function token()
