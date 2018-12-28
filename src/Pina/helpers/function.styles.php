@@ -3,5 +3,5 @@
 
 function smarty_function_styles($params, &$view)
 {
-	return \Pina\ResourceManager::fetch('css');
+	return \Pina\App::container()->get(\Pina\ResourceManagerInterface::class)->fetch('css');
 }

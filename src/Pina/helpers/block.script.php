@@ -20,19 +20,21 @@ function smarty_block_script($params, $content, &$view, &$repeat)
         }
         $params['src'] = "/cache/js/" . $params['module'] . "." . str_replace("/", ".", $params['src']);
     }
+    
+    $resourceManager = App::container()->get(ResourceManagerInterface::class);
 
     if (!empty($params['src'])) {
         $parsed = parse_url($params['src']);
         if (!empty($parsed['host'])) {
-            ResourceManager::append('js', '<script src="' . $params['src'] . '" type="text/javascript"></script>');
+            $resourceManager->append('js', '<script src="' . $params['src'] . '" type="text/javascript"></script>');
         } else {
             $static = \Pina\Config::get('app', 'static');
             $version = \Pina\App::version();
             $v = $version ? ('?'. $version) : '';
-            ResourceManager::append('js', '<script src="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . $v . '" type="text/javascript"></script>');
+            $resourceManager->append('js', '<script src="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . $v . '" type="text/javascript"></script>');
         }
     } elseif (!empty($content)) {
-        ResourceManager::append('js', $content);
+        $resourceManager->append('js', $content);
     }
     return '';
 }

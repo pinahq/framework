@@ -5,34 +5,37 @@ namespace Pina;
 class ResourceManager
 {
 
-    static $data = array('layout' => array(), 'content' => array());
-    static $mode = 'content';
+    protected $data = array('layout' => array(), 'content' => array());
+    protected $mode = 'content';
 
-    static function append($type, $s)
+    public function append($type, $s)
     {
-        if (empty(self::$data[self::$mode][$type]) 
-            || !is_array(self::$data[self::$mode][$type])
+        if (empty($this->data[$this->mode][$type]) 
+            || !is_array($this->data[$this->mode][$type])
         ) {
-            self::$data[self::$mode][$type] = array();
+            $this->data[$this->mode][$type] = array();
         }
-        self::$data[self::$mode][$type][] = $s;
+        $this->data[$this->mode][$type][] = $s;
     }
 
-    static function fetch($type)
+    public function fetch($type)
     {
         $data = array();
-        foreach (self::$data as $values)
+        foreach ($this->data as $values)
         {
+            if (!isset($values[$type])) {
+                continue;
+            }
             $data = Arr::merge($data, $values[$type]);
         }
         return implode("\r\n", array_unique($data));
     }
 
-    static function mode($mode = '')
+    public function mode($mode = '')
     {
-        if ($mode) self::$mode = $mode;
+        if ($mode) $this->mode = $mode;
         
-        return self::$mode;
+        return $this->mode;
     }
 
 }
