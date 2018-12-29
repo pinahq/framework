@@ -19,7 +19,7 @@ class App
 
         Config::init($configPath);
         self::$config = Config::load('app');
-
+        
         mb_internal_encoding(self::$config['charset']);
         mb_regex_encoding(self::$config['charset']);
 

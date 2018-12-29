@@ -2,6 +2,7 @@
 
 use Pina\App;
 use Pina\ResourceManager;
+use Pina\StaticResource\Javascript;
 
 function smarty_block_script($params, $content, &$view, &$repeat)
 {
@@ -22,19 +23,13 @@ function smarty_block_script($params, $content, &$view, &$repeat)
     }
     
     $resourceManager = App::container()->get(ResourceManagerInterface::class);
-
+    
+    $resource = new Javascript();
     if (!empty($params['src'])) {
-        $parsed = parse_url($params['src']);
-        if (!empty($parsed['host'])) {
-            $resourceManager->append('js', '<script src="' . $params['src'] . '" type="text/javascript"></script>');
-        } else {
-            $static = \Pina\Config::get('app', 'static');
-            $version = \Pina\App::version();
-            $v = $version ? ('?'. $version) : '';
-            $resourceManager->append('js', '<script src="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . $v . '" type="text/javascript"></script>');
-        }
+        $resource->setSrc($params['src']);
     } elseif (!empty($content)) {
-        $resourceManager->append('js', $content);
+        $resource->setContent($content);
     }
+    $resourceManager->append('js', $resource);
     return '';
 }

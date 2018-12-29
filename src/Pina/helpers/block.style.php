@@ -14,27 +14,34 @@ function smarty_block_style($params, $content, &$view, &$repeat)
 
     if (!empty($params['src']) && !empty($params['module'])) {
         $from = App::path() . "/default/Modules/" . $params['module'] . '/static/' . ltrim($params['src'], '/');
-        $to = App::path().'/public/cache/css/' . $params['module'] . '.' . str_replace("/", ".", $params['src']);
+        $to = App::path() . '/public/cache/css/' . $params['module'] . '.' . str_replace("/", ".", $params['src']);
         if (!file_exists($to) && file_exists($from)) {
             copy($from, $to);
         }
         $params['src'] = "/cache/css/" . $params['module'] . "." . str_replace("/", ".", $params['src']);
     }
-    
+
     $resourceManager = App::container()->get(ResourceManagerInterface::class);
 
+    $resource = new Css();
+
     if (!empty($params['src'])) {
-        
+        $resource->setSrc($params['src']);
+    } elseif (!empty($content)) {
+        $resource->setContent($content);
+    }
+    $resourceManager->append('js', $resource);
+
+    if (!empty($params['src'])) {
         $parsed = parse_url($params['src']);
         if (!empty($parsed['host'])) {
             $resourceManager->append('css', '<link rel="stylesheet" href="' . $params['src'] . '" />');
         } else {
             $static = \Pina\Config::get('app', 'static');
             $version = \Pina\App::version();
-            $v = $version ? ('?'. $version) : '';
-            $resourceManager->append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/'. ltrim($params['src'], '/') . $v. '" />');
+            $v = $version ? ('?' . $version) : '';
+            $resourceManager->append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/' . ltrim($params['src'], '/') . $v . '" />');
         }
-        
     } elseif (!empty($content)) {
         $resourceManager->append('css', $content);
     }

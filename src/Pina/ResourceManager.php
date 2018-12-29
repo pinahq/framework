@@ -8,34 +8,61 @@ class ResourceManager
     protected $data = array('layout' => array(), 'content' => array());
     protected $mode = 'content';
 
-    public function append($type, $s)
+    public function append(\Pina\StaticResource\StaticResource $resource)
     {
-        if (empty($this->data[$this->mode][$type]) 
-            || !is_array($this->data[$this->mode][$type])
+        $type = $resource->getType();
+        if (empty($this->data[$this->mode][$type]) || !is_array($this->data[$this->mode][$type])
         ) {
             $this->data[$this->mode][$type] = array();
         }
-        $this->data[$this->mode][$type][] = $s;
+        $this->data[$this->mode][$type][] = $resource;
     }
 
-    public function fetch($type)
+    public function fetch($type, $isConcatEnabled = false)
     {
-        $data = array();
-        foreach ($this->data as $values)
-        {
+        $links = array();
+        $content = array();
+
+        foreach ($this->data as $values) {
             if (!isset($values[$type])) {
                 continue;
             }
-            $data = Arr::merge($data, $values[$type]);
+
+            foreach ($values[$type] as $resource) {
+                if ($isConcatEnabled && !$resource->isExternalUrl()) {
+                    $content[] = $resource->getContent();
+                } else {
+                    $links[] = $resource->getTag();
+                }
+            }
         }
-        return implode("\r\n", array_unique($data));
+
+        if (!empty($content)) {
+            $src = $this->save($type, implode("\r\n", $content));
+            switch ($type) {
+                case 'js': $resource = new StaticResource\Javascript(); break;
+                case 'css': $resource = new StaticResource\Css(); break;
+                default: throw new \Exception('');
+            }
+            $resource->setSrc($src);
+            $links[] = $resource->getTag();
+        }
+
+        return implode("\r\n", array_unique($links));
     }
 
-    public function mode($mode = '')
+    public function save($type, $content)
     {
-        if ($mode) $this->mode = $mode;
-        
-        return $this->mode;
+        $hash = md5($content);
+        $path = 'cache/' . $hash . '.' . $type;
+        $file = App::path() . '/../public/' . $path;
+        file_put_contents($file, $content);
+        return $path;
+    }
+
+    public function startLayout()
+    {
+        $this->mode = 'layout';
     }
 
 }
