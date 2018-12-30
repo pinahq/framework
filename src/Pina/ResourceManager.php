@@ -2,7 +2,7 @@
 
 namespace Pina;
 
-class ResourceManager
+class ResourceManager implements ResourceManagerInterface
 {
 
     protected $data = array('layout' => array(), 'content' => array());
