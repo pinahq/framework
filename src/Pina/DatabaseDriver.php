@@ -23,12 +23,12 @@ class DatabaseDriver implements \Pina\DatabaseDriverInterface
             "p:" . $config['host'], $config['user'], $config['pass'], $config['base'], $config['port']
         );
 
-        if (empty($this->conn) || !in_array($this->errno(), array(0, 1146))) {
-            throw new \RuntimeException(mysqli_errno(), mysqli_error());
+        if (empty($this->conn)) {
+            throw new \RuntimeException('Can`t connect to database');
         }
 
         if ($config['charset']) {
-            $this->query('SET NAMES ' . $config['charset']);
+            $this->query('SET NAMES ' . $this->escape($config['charset']));
         }
     }
 
