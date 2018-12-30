@@ -12,6 +12,11 @@ class App
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
+    
+    private static $defaultSharedDepencies = array(
+        \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
+        \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
+    );
 
     public static function init($env, $configPath)
     {
@@ -33,13 +38,12 @@ class App
                 self::$container->set($key, $value);
             }
         }
+        
+        self::$config['sharedDepencies'] = Arr::merge(self::$defaultSharedDepencies, self::$config['sharedDepencies']);
         if (isset(self::$config['sharedDepencies']) && is_array(self::$config['sharedDepencies'])) {
             foreach (self::$config['sharedDepencies'] as $key => $value) {
                 self::$container->share($key, $value);
             }
-        }
-        if (!self::$container->has(ModuleRegistryInterface::class)) {
-            self::$container->share(ModuleRegistryInterface::class, ModuleRegistry::class);
         }
     }
 

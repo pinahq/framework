@@ -1,49 +1,22 @@
 <?php
 
 use Pina\App;
-use Pina\ResourceManager;
+use Pina\StaticResource\Style;
 
 function smarty_block_style($params, $content, &$view, &$repeat)
 {
     if ($repeat) {
-        return;
-    }
-    if (empty($content) && empty($params['src'])) {
         return '';
     }
 
-    if (!empty($params['src']) && !empty($params['module'])) {
-        $from = App::path() . "/default/Modules/" . $params['module'] . '/static/' . ltrim($params['src'], '/');
-        $to = App::path() . '/public/cache/css/' . $params['module'] . '.' . str_replace("/", ".", $params['src']);
-        if (!file_exists($to) && file_exists($from)) {
-            copy($from, $to);
-        }
-        $params['src'] = "/cache/css/" . $params['module'] . "." . str_replace("/", ".", $params['src']);
-    }
-
-    $resourceManager = App::container()->get(ResourceManagerInterface::class);
-
-    $resource = new Css();
-
+    $resource = new Style();
     if (!empty($params['src'])) {
         $resource->setSrc($params['src']);
     } elseif (!empty($content)) {
         $resource->setContent($content);
+    } else {
+        return '';
     }
-    $resourceManager->append('js', $resource);
-
-    if (!empty($params['src'])) {
-        $parsed = parse_url($params['src']);
-        if (!empty($parsed['host'])) {
-            $resourceManager->append('css', '<link rel="stylesheet" href="' . $params['src'] . '" />');
-        } else {
-            $static = \Pina\Config::get('app', 'static');
-            $version = \Pina\App::version();
-            $v = $version ? ('?' . $version) : '';
-            $resourceManager->append('css', '<link rel="stylesheet" href="' . rtrim($static, '/') . '/' . ltrim($params['src'], '/') . $v . '" />');
-        }
-    } elseif (!empty($content)) {
-        $resourceManager->append('css', $content);
-    }
+    App::container()->get(\Pina\ResourceManagerInterface::class)->append($resource);
     return '';
 }

@@ -14,8 +14,6 @@ abstract class StaticResource
 
     abstract public function getTag();
 
-    abstract public function getUnwrappedContent();
-
     public function setSrc($src)
     {
         $this->src = $src;
@@ -25,24 +23,10 @@ abstract class StaticResource
     {
         $this->content = $content;
     }
-
+    
     public function getContent()
     {
-        if (!empty($this->content)) {
-            return $this->getUnwrappedContent();
-        }
-
-        if (!empty($this->src)) {
-            if (strpos('/../', $this->src) !== false) {
-                throw new \Exception('access denied');
-            }
-            $file = App::path() . '/../public/' . ltrim($this->src, '/');
-            if (file_exists($file)) {
-                return file_get_contents($file);
-            }
-        }
-        
-        return '';
+        return $this->content;
     }
 
     public function isExternalUrl()
