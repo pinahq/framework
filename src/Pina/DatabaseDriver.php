@@ -58,7 +58,7 @@ class DatabaseDriver implements \Pina\DatabaseDriverInterface
         list($msec, $sec) = explode(' ', microtime());
         $totalTime = (float) $msec + (float) $sec - $startTime;
 
-        Log::debug('mysql', $totalTime . ' ' . $sql);
+        Log::debug('mysql', round($totalTime, 4) . ' ' . $sql);
 
         if ($this->errno()) {
             throw new \RuntimeException($this->error() . '; Failed query: ' . $sql, $this->errno());
