@@ -1,11 +1,11 @@
 <?php
 
-namespace Pina\Database;
+namespace Pina;
 
 use Pina\Config;
 use Pina\Log;
 
-class Driver implements \Pina\DatabaseDriverInterface
+class DatabaseDriver implements \Pina\DatabaseDriverInterface
 {
 
     private $conn = null;
@@ -24,7 +24,7 @@ class Driver implements \Pina\DatabaseDriverInterface
         );
 
         if (empty($this->conn) || !in_array($this->errno(), array(0, 1146))) {
-            throw new \Pina\Database\ConnectionException(mysqli_errno(), mysqli_error());
+            throw new \RuntimeException(mysqli_errno(), mysqli_error());
         }
 
         if ($config['charset']) {
@@ -58,12 +58,10 @@ class Driver implements \Pina\DatabaseDriverInterface
         list($msec, $sec) = explode(' ', microtime());
         $totalTime = (float) $msec + (float) $sec - $startTime;
 
-//        Log::debug('mysql', $totalTime . ' ' . $sql);
+        Log::debug('mysql', $totalTime . ' ' . $sql);
 
         if ($this->errno()) {
-            throw new \Pina\Database\QueryException(
-                $this->error(), $this->errno()
-            );
+            throw new \RuntimeException($this->error() . '; Failed query: ' . $sql, $this->errno());
         }
 
         return $rc;

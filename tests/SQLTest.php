@@ -11,6 +11,8 @@ class SQLTest extends TestCase
     public function testByCondition()
     {
         Config::init(__DIR__.'/config');
+        
+        \Pina\App::container()->share(\Pina\DatabaseDriverInterface::class, \Pina\DatabaseDriverStub::class);
 
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_VALUE, 5]);
         $this->assertEquals("`cody_product`.`product_id` = '5'", $q);
@@ -23,10 +25,6 @@ class SQLTest extends TestCase
 
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_FIELD, 'cody_product_feature.product_id'], 'cody_product_variand');
         $this->assertEquals("`cody_product`.`product_id` = cody_product_feature.product_id", $q);
-
-        #exception unsupported format
-        #$q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_VALUE, array(1,2,3), SQL::SQL_OPERAND_FIELD, 'cody_product_feature.product_id'], 'cody_product_variand');
-        #echo $q;
 
         $q = SQL::table('cody_product')->makeByCondition(['IS NULL', SQL::SQL_OPERAND_FIELD, 'product_id']);
         $this->assertEquals('`cody_product`.`product_id` IS NULL', $q);
@@ -206,54 +204,6 @@ class SQLTest extends TestCase
             . ' WHERE (`cody_import_product_check`.`import_product_row` IS NULL)'
             , $q);
 
-        /*
-          $pickListProductIds = array(1,2,3);
-          SQL::table('cody_product_variant')
-          ->innerJoin(
-          SQL::subquery(
-          SQL::table('cody_pick_list_product')
-          ->whereBy('pick_list_product_id', $pickListProductIds)
-          ->whereNotBy('pick_list_product_amount_status', 'decreased')
-          ->groupBy('product_variant_id')
-          )
-          ->alias('plp')
-          ->on('product_variant_id')
-
-          )
-          ->innerJoin(
-          SQL::table('cody_pick_list_product')
-          ->on('product_variant_id')
-          ->onBy('pick_list_product_id', $pickListProductIds)
-          ->onNotBy('pick_list_product_amount_status', 'decreased')
-          ->leftJoin(
-          SQL::table('cody_order_product')->on('order_product_id')
-          )
-          )
-          ->updateOperation("cody_product_variant.".$amountField." = cody_product_variant.".$amountField."
-          - IF(cody_product_variant.product_variant_stock = 'backorder', 0, plp.pick_list_product_amount),
-          cody_pick_list_product.pick_list_product_amount_status = 'decreased',
-          cody_order_product.$statusField = 'none'");
-
-          $q = "UPDATE cody_product_variant
-          INNER JOIN (
-          SELECT product_variant_id, SUM(pick_list_product_amount) as pick_list_product_amount
-          FROM cody_pick_list_product
-          WHERE cody_pick_list_product.pick_list_product_id IN ('".join("','", $pickListProductIds)."')
-          AND cody_pick_list_product.pick_list_product_amount_status <> 'decreased'
-          GROUP BY cody_pick_list_product.product_variant_id
-          ) as plp ON cody_product_variant.product_variant_id = plp.product_variant_id
-          INNER JOIN cody_pick_list_product ON
-          cody_pick_list_product.product_variant_id = cody_product_variant.product_variant_id
-          AND cody_pick_list_product.pick_list_product_id IN ('".join("','", $pickListProductIds)."')
-          AND cody_pick_list_product.pick_list_product_amount_status <> 'decreased'
-          LEFT JOIN cody_order_product ON
-          cody_order_product.order_product_id = cody_pick_list_product.order_product_id
-          SET
-          cody_product_variant.".$amountField." = cody_product_variant.".$amountField."
-          - IF(cody_product_variant.product_variant_stock = 'backorder', 0, plp.pick_list_product_amount),
-          cody_pick_list_product.pick_list_product_amount_status = 'decreased',
-          cody_order_product.$statusField = 'none'";
-         */
     }
 
     public function testSelect()
@@ -360,7 +310,7 @@ class SQLTest extends TestCase
             ->limit(10)
             ->makeDelete();
         $this->assertEquals("DELETE FROM `cody_product` ORDER BY `cody_product`.`product_id` asc LIMIT 10", $q);
-        //the query is warning, because order by and limit use with multiple-table syntax
+
         $q = SQL::table('cody_product')
             ->innerJoin(
                 SQL::table('cody_product_variant')->on('product_id')

@@ -12,9 +12,8 @@ class App
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
-    
     private static $defaultSharedDepencies = array(
-        \Pina\DatabaseDriverInterface::class => \Pina\Database\Driver::class,
+        \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
     );
@@ -25,7 +24,7 @@ class App
 
         Config::init($configPath);
         self::$config = Config::load('app');
-        
+
         mb_internal_encoding(self::$config['charset']);
         mb_regex_encoding(self::$config['charset']);
 
@@ -39,7 +38,7 @@ class App
                 self::$container->set($key, $value);
             }
         }
-        
+
         self::$config['sharedDepencies'] = Arr::merge(self::$defaultSharedDepencies, self::$config['sharedDepencies']);
         if (isset(self::$config['sharedDepencies']) && is_array(self::$config['sharedDepencies'])) {
             foreach (self::$config['sharedDepencies'] as $key => $value) {
