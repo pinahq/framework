@@ -4,7 +4,7 @@ namespace Pina;
 
 $upgrades = App::getUpgrades();
 
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $db->batch($upgrades);
 
 if (!empty($upgrades) && is_array($upgrades)) {

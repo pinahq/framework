@@ -39,7 +39,7 @@ class SQL
 
     public static function subquery($query)
     {
-        return new SQL($query, DB::get());
+        return new SQL($query);
     }
 
     public function init()
@@ -62,9 +62,9 @@ class SQL
         return clone $this;
     }
 
-    protected function __construct($table, $db = false)
+    protected function __construct($table, $db = null)
     {
-        $this->db = $db ? $db : DB::get();
+        $this->db = $db ? $db : App::container()->get(\Pina\DatabaseDriverInterface::class);
         $this->from = $table;
     }
 

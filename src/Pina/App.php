@@ -14,6 +14,7 @@ class App
     private static $forcedMimeType = null;
     
     private static $defaultSharedDepencies = array(
+        \Pina\DatabaseDriverInterface::class => \Pina\Database\Driver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
     );

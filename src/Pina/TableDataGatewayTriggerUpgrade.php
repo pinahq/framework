@@ -15,7 +15,7 @@ class TableDataGatewayTriggerUpgrade {
             return array();
         }
         
-        $db = DB::get();
+        $db = App::container()->get(\Pina\DatabaseDriverInterface::class);
         
         $existedTriggers = $db->table("SHOW TRIGGERS");
         foreach ($existedTriggers as $k => $v) {

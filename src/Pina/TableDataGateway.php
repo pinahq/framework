@@ -31,8 +31,7 @@ class TableDataGateway extends SQL
 
     public function __construct()
     {
-        $db = DB::get();
-        parent::__construct($this->getTable(), $db);
+        parent::__construct($this->getTable());
     }
 
     public function getTable()
