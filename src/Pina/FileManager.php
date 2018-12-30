@@ -91,7 +91,7 @@ class FileManager
             return false;
         }
 
-        $souce_filename = strtolower(Token::translit($pathinfo["filename"]));
+        $souce_filename = strtolower($pathinfo["filename"]);
 
         $filename = static::newFileName($souce_filename, $ext);
 
