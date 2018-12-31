@@ -341,4 +341,16 @@ class Arr
         return true;
     }
     
+    public static function only($array, $keys)
+    {
+        return array_intersect_key($array, array_flip((array) $keys));
+    }
+    
+    public static function pull(&$array, $key, $default = null)
+    {
+        $value = static::get($array, $key, $default);
+        static::forget($array, $key);
+        return $value;
+    }
+
 }
