@@ -28,6 +28,11 @@ class TableDataGateway extends SQL
     {
         return array();
     }
+    
+    public function getReferences()
+    {
+        return array();
+    }
 
     public function __construct()
     {
@@ -52,6 +57,11 @@ class TableDataGateway extends SQL
     public function getEngine()
     {
         return static::$engine;
+    }
+    
+    public function makeForeignKey($field)
+    {
+        return (new ForeignKey())->references($this->getTable(), $field);
     }
 
     public function getUpgrades()
