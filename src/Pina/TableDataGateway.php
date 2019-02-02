@@ -59,11 +59,6 @@ class TableDataGateway extends SQL
         return static::$engine;
     }
     
-    public function makeForeignKey($field)
-    {
-        return (new ForeignKey())->references($this->getTable(), $field);
-    }
-
     public function getUpgrades()
     {
         if (empty(static::$fields)) {
