@@ -5,21 +5,21 @@ namespace Pina;
 class ForeignKey
 {
 
-    protected $column = null;
+    protected $columns = null;
     protected $table = null;
-    protected $key = null;
+    protected $keys = null;
     protected $onDelete = '';
     protected $onUpdate = '';
 
-    public function __construct($column)
+    public function __construct($columns)
     {
-        $this->column = $column;
+        $this->columns = $columns;
     }
 
-    public function references($table, $key)
+    public function references($table, $keys)
     {
         $this->table = $table;
-        $this->key = $key;
+        $this->keys = $keys;
         return $this;
     }
 
@@ -45,13 +45,33 @@ class ForeignKey
     {
         return implode(' ', array_filter(array(
             'CONSTRAINT `' . $name . '`',
-            'FOREIGN KEY (`' . $this->column . '`)',
-            'REFERENCES `' . $this->table . '` (`' . $this->key . '`)',
+            'FOREIGN KEY (' . $this->getColumns() . ')',
+            'REFERENCES `' . $this->table . '` (' . $this->getKeys() . ')',
             $this->makeOnDelete(),
             $this->makeOnUpdate()
         )));
     }
+    
+    protected function getColumns()
+    {
+        if (is_array($this->columns)) {
+            return implode(',', array_map(function($item) {
+                return '`'.$item.'`';
+            }, $this->columns));
+        }
+        return '`'.$this->columns.'`';
+    }
 
+    protected function getKeys()
+    {
+        if (is_array($this->keys)) {
+            return implode(',', array_map(function($item) {
+                return '`'.$item.'`';
+            }, $this->keys));
+        }
+        return '`'.$this->keys.'`';
+    }
+    
     protected function makeOnDelete()
     {
         if (empty($this->onDelete)) {
@@ -73,7 +93,6 @@ class ForeignKey
         $matches = array();
         $actions = implode('|', static::getAvailableActions());
         if (preg_match('/CONSTRAINT\s+(.*)\s+FOREIGN KEY\s*\((.*)\)\s*REFERENCES\s+(.*)\s*\((.*)\)(?:\s*ON DELETE\s+(' . $actions . '))?(?:\s*ON UPDATE\s+(' . $actions . '))?/i', $str, $matches)) {
-            print_r($matches);
             $fk = new ForeignKey(trim($matches[2], ' `'));
             $fk->references(trim($matches[3], ' `'), trim($matches[4], ' `'));
             if (!empty($matches[5])) {

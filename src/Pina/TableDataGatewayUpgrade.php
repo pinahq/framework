@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use Pina\TableStructureParser;
+
 class TableDataGatewayUpgrade
 {
 
@@ -14,7 +16,7 @@ class TableDataGatewayUpgrade
     public function makeFieldCondition($field)
     {
         $gatewayFields = $this->gateway->getFields();
-        
+
         if (!is_array($gatewayFields[$field])) {
             return $gatewayFields[$field];
         }
@@ -42,7 +44,7 @@ class TableDataGatewayUpgrade
         $gatewayFields = $this->gateway->getFields();
         $gatewayIndexes = $this->gateway->getIndexes();
         $engine = $this->gateway->getEngine();
-        
+
         if (isset($gatewayFields[0]) || empty($engine)) {
             return false;
         }
@@ -73,21 +75,21 @@ class TableDataGatewayUpgrade
         if (empty($matches[1])) {
             return false;
         }
-        
+
         $type = strtolower($matches[1]);
         $null = (!empty($matches[5]) && strcasecmp($matches[5], "NOT NULL") == 0) ? "NO" : "YES";
         $default = isset($matches[7]) ? $matches[7] : '';
         $extra = !empty($matches[8]) ? strtolower(trim($matches[8])) : '';
-        
+
         if (strcasecmp($default, 'null') === 0) {
             $default = null;
         }
-        
+
         if (preg_match("/(\s+ON UPDATE\s+'?([^']*)'?)/i", $default, $matches)) {
             $default = str_replace($matches[0], '', $default);
-            $extra = strtolower(trim($matches[0])).(!empty($extra)?(' '.$extra):'');
+            $extra = strtolower(trim($matches[0])) . (!empty($extra) ? (' ' . $extra) : '');
         }
-        
+
         return ["Type" => $type, "Null" => $null, "Default" => $default, "Extra" => $extra];
     }
 
@@ -103,7 +105,7 @@ class TableDataGatewayUpgrade
             if ($item["Key_name"] == "PRIMARY") {
                 $title .= "PRIMARY KEY";
             } elseif ($item["Index_type"] == "FULLTEXT") {
-                $title .= "FULLTEXT ". $item["Key_name"];
+                $title .= "FULLTEXT " . $item["Key_name"];
             } elseif ($item["Non_unique"] == 0) {
                 $title .= "UNIQUE KEY " . $item["Key_name"];
             } elseif ($item["Non_unique"] == 1) {
@@ -128,7 +130,7 @@ class TableDataGatewayUpgrade
         if (empty($gatewayFields) || isset($gatewayFields[0])) {
             return false;
         }
-        
+
         $diff = array();
         $fieldParams = $this->db->table("SHOW COLUMNS FROM `" . $this->gateway->getTable() . "`");
         $fields = array();
@@ -148,7 +150,7 @@ class TableDataGatewayUpgrade
             if (!is_array($structured)) {
                 $structured = $this->parseFieldDescription($gatewayFields[$params['Field']]);
             }
-            
+
             if (count(array_diff($structured, $params))) {
                 $diff['edit_fields'][] = $params['Field'];
             }
@@ -157,12 +159,9 @@ class TableDataGatewayUpgrade
         if ($addFields = array_diff(array_keys($gatewayFields), $fields)) {
             $diff['add_fields'] = $addFields;
         }
-        
+
         $gatewayIndexes = $this->gateway->getIndexes();
-
-
         $indexesParams = $this->db->table("SHOW INDEXES FROM `" . $this->gateway->getTable() . "`");
-
         $indexesParams = $this->makeCreateIndexesDescription($indexesParams);
         $indexes = array();
         if (is_array($indexesParams)) {
@@ -191,6 +190,28 @@ class TableDataGatewayUpgrade
             $diff['add_indexes'] = $addIndexes;
         }
 
+        $tableCondition = $this->db->one("SHOW CREATE TABLE `" . $this->gateway->getTable() . "`");
+        $databaseConstraints = (new Parser($tableCondition))->getConstraints();
+        $gatewayContraints = $this->gw->getConstraints();
+        $names = array();
+        if (!empty($databaseConstraints)) {
+            foreach ($databaseConstraints as $name => $constraint) {
+                $names[] = $name;
+                if (!isset($gatewayContraints[$name])) {
+                    $diff['delete_constraints'][] = $name;
+                }
+
+                $foreignKey = $gatewayContraints[$name];
+                if ($foreignKey->make($name) != $constraint->make($name)) {
+                    $diff['edit_constraints'][] = $name;
+                }
+            }
+        }
+
+        if ($addConstraints = array_unique(array_diff(array_keys($gatewayContraints), $names))) {
+            $diff['add_constraints'] = $addConstraints;
+        }
+
         foreach ($diff as $key => $value) {
             $diff[$key] = array_unique($value);
         }
@@ -201,7 +222,7 @@ class TableDataGatewayUpgrade
     public function makeIndex($indexName)
     {
         $gatewayIndexes = $this->gateway->getIndexes();
-        
+
         $index = '';
         if (is_array($gatewayIndexes[$indexName])) {
             foreach ($gatewayIndexes[$indexName] as $field) {
@@ -214,6 +235,16 @@ class TableDataGatewayUpgrade
             $index .= "`" . $gatewayIndexes[$indexName] . '`';
         }
         return $indexName . '(' . $index . ')';
+    }
+
+    public function makeConstraint($indexName)
+    {
+        $gatewayConstraints = $this->gateway->getConstraints();
+
+        if (!isset($gatewayConstraints[$indexName])) {
+            throw new Exception('Can`t find constraint');
+        }
+        return $gatewayConstraints[$indexName]->make($indexName);
     }
 
     public function constructChanges($type, $data)
@@ -239,6 +270,15 @@ class TableDataGatewayUpgrade
                 case 'edit_indexes':
                     $q .= ' DROP ' . str_replace("UNIQUE", "", $v) . ', ADD ' . $this->makeIndex($v) . ', ';
                     break;
+                case 'add_constraints':
+                    $q .= ' ADD ' . $this->makeConstaint($v) . ', ';
+                    break;
+                case 'delete_indexes':
+                    $q .= ' DROP FOREIGN KEY `' . $v . '`, ';
+                    break;
+                case 'edit_constraints':
+                    $q .= ' DROP FOREIGN KEY `' . $v . '`, ADD ' . $this->makeConstraint($v) . ', ';
+                    break;
                 default:
                     return false;
                     break;
@@ -254,7 +294,7 @@ class TableDataGatewayUpgrade
         if (!is_array(@$data) || !count(@$data)) {
             return false;
         }
-        
+
         $q = "ALTER TABLE `" . $this->gateway->getTable() . "` ";
         foreach ($data as $type => $value) {
             $q .= $this->constructChanges($type, $value);
