@@ -273,7 +273,7 @@ class TableDataGatewayUpgrade
                 case 'add_constraints':
                     $q .= ' ADD ' . $this->makeConstaint($v) . ', ';
                     break;
-                case 'delete_indexes':
+                case 'delete_constraints':
                     $q .= ' DROP FOREIGN KEY `' . $v . '`, ';
                     break;
                 case 'edit_constraints':

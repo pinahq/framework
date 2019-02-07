@@ -14,10 +14,6 @@ class ForeignKeyTest extends TestCase
         $this->assertEquals('CONSTRAINT `fk` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`id`) ON DELETE CASCADE', $foreignKey->make('fk'));
         $foreignKey = (new ForeignKey(['parent_id', 'parent_id2']))->references('parent2', ['id', 'id2'])->onDelete('CASCADE');
         $this->assertEquals('CONSTRAINT `fk` FOREIGN KEY (`parent_id`,`parent_id2`) REFERENCES `parent2` (`id`,`id2`) ON DELETE CASCADE', $foreignKey->make('fk'));
-        $foreignKey = ForeignKey::parse('CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`id`) ON DELETE CASCADE ON UPDATE SET DEFAULT');
-        $this->assertEquals('CONSTRAINT `fk` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`id`) ON DELETE CASCADE ON UPDATE SET DEFAULT', $foreignKey->make('fk'));
-        $foreignKey = ForeignKey::parse('CONSTRAINT `child_ibfk_2` FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)');
-        $this->assertEquals('CONSTRAINT `fk` FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)', $foreignKey->make('fk'));
 
         $tableCondition = 'CREATE TABLE `child` (
   `id` int(11) DEFAULT NULL,

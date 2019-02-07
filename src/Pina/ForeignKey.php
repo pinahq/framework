@@ -52,6 +52,21 @@ class ForeignKey
         )));
     }
     
+    public function makeAdd($v)
+    {
+        return ' ADD ' . $this->make($v);
+    }
+    
+    public function makeModify($v)
+    {
+        return ' DROP FOREIGN KEY `' . $v . '`, ADD ' . $this->make($v);
+    }
+    
+    public function makeDrop($v)
+    {
+        return ' DROP FOREIGN KEY `' . $v . '`, ';
+    }
+    
     protected function getColumns()
     {
         if (is_array($this->columns)) {
@@ -86,24 +101,6 @@ class ForeignKey
             return '';
         }
         return 'ON UPDATE ' . $this->onUpdate;
-    }
-
-    public static function parse($str)
-    {
-        $matches = array();
-        $actions = implode('|', static::getAvailableActions());
-        if (preg_match('/CONSTRAINT\s+(.*)\s+FOREIGN KEY\s*\((.*)\)\s*REFERENCES\s+(.*)\s*\((.*)\)(?:\s*ON DELETE\s+(' . $actions . '))?(?:\s*ON UPDATE\s+(' . $actions . '))?/i', $str, $matches)) {
-            $fk = new ForeignKey(trim($matches[2], ' `'));
-            $fk->references(trim($matches[3], ' `'), trim($matches[4], ' `'));
-            if (!empty($matches[5])) {
-                $fk->onDelete($matches[5]);
-            }
-            if (!empty($matches[6])) {
-                $fk->onUpdate($matches[6]);
-            }
-            return $fk;
-        }
-        return null;
     }
 
     protected static function getAvailableActions()
