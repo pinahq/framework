@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\DB\ForeignKey;
+use Pina\DB\Index;
 use Pina\DB\StructureParser;
 use Pina\TableDataGatewayUpgrade;
 
@@ -17,9 +18,12 @@ class DBUpgradeTest extends TestCase
 
         $tableCondition = <<<SQL
 CREATE TABLE `child` (
-  `id` int(11) DEFAULT NULL,
+  `id` int(11) DEFAULT NULL AUTOINCREMENT PRIMARY KEY COLLATE 'cp1251',
   `parent_id` int(11) DEFAULT NULL,
   `parent_id2` int(11) DEFAULT NULL,
+  `status` enum('Y','N') DEFAULT 'N',
+  `text` TEXT,
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY `par_ind` (`parent_id`),
   FULLTEXT `text` (`parent_id2`),
@@ -29,26 +33,40 @@ CREATE TABLE `child` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 SQL;
         $parser = new StructureParser($tableCondition);
-        $existed = $parser->getConstraints();
-        $this->assertEquals('CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`,`ddd`) REFERENCES `parent` (`id`,`eee`) ON DELETE CASCADE', $existed['child_ibfk_1']->make('child_ibfk_1'));
-        $this->assertEquals('CONSTRAINT `child_ibfk_2` FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)', $existed['child_ibfk_2']->make('child_ibfk_2'));
+        $existedConstraints = $parser->getConstraints();
+        $this->assertEquals('CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`,`ddd`) REFERENCES `parent` (`id`,`eee`) ON DELETE CASCADE', $existedConstraints['child_ibfk_1']->make('child_ibfk_1'));
+        $this->assertEquals('CONSTRAINT `child_ibfk_2` FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)', $existedConstraints['child_ibfk_2']->make('child_ibfk_2'));
+        
+        $existedIndexes = $parser->getIndexes();
+        
+        $existedFields = $parser->getFields();
+        foreach ($existedFields as $f) {
+            echo $f->make()."\n";
+        }
+        
+        $existedStructure = new \Pina\DB\Structure();
+        $existedStructure->setFields($existedFields);
+        $existedStructure->setIndexes($existedIndexes);
+        $existedStructure->setConstraints($existedConstraints);
         
         $gatewayContraints = array();
         $gatewayContraints[] = (new ForeignKey('parent_id2'))->references('parent', 'id');
         $gatewayContraints[] = (new ForeignKey('parent_id2'))->references('parent2', 'id');
         
+        $gatewayIndexes = array();
+        $gatewayIndexes[] = (new Index('id2'))->type('PRIMARY');
+        $gatewayIndexes[] = (new Index('parent_id2'))->type('FULLTEXT');
+        
         $structure = new \Pina\DB\Structure;
         $structure->setConstraints($gatewayContraints);
-        $conditions = $structure->makePathTo($existed);
+        $structure->setIndexes($gatewayIndexes);
+        $conditions = $structure->makePathTo($existedStructure);
         
         $this->assertContains('DROP FOREIGN KEY `child_ibfk_1`', $conditions);
         $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $conditions);
+        $this->assertContains('DROP PRIMARY KEY', $conditions);
+        $this->assertContains('ADD PRIMARY KEY (`id2`)', $conditions);
         
-        $indexes = $parser->getIndexes();
-        foreach ($indexes as $index) {
-//            echo $index->make('123')."\n";
-        }
-//        print_r($indexes);
         
         
 $tableCondition = <<<SQL
