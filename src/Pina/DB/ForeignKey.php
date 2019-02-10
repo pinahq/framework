@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina;
+namespace Pina\DB;
 
 class ForeignKey
 {
@@ -41,52 +41,52 @@ class ForeignKey
         return $this;
     }
 
-    public function make($name)
+    public function make($name = '')
     {
         return implode(' ', array_filter(array(
-            'CONSTRAINT `' . $name . '`',
+            'CONSTRAINT' . ($name ? ' `' . $name . '`' : ''),
             'FOREIGN KEY (' . $this->getColumns() . ')',
             'REFERENCES `' . $this->table . '` (' . $this->getKeys() . ')',
             $this->makeOnDelete(),
             $this->makeOnUpdate()
         )));
     }
-    
-    public function makeAdd($v)
+
+    public function makeAdd($v = '')
     {
-        return ' ADD ' . $this->make($v);
+        return 'ADD ' . $this->make($v);
     }
-    
+
     public function makeModify($v)
     {
-        return ' DROP FOREIGN KEY `' . $v . '`, ADD ' . $this->make($v);
+        return $this->makeDrop($v) . ',' . $this->makeAdd($v);
     }
-    
+
     public function makeDrop($v)
     {
-        return ' DROP FOREIGN KEY `' . $v . '`, ';
+        return 'DROP FOREIGN KEY `' . $v . '`';
     }
-    
+
     protected function getColumns()
     {
         if (is_array($this->columns)) {
             return implode(',', array_map(function($item) {
-                return '`'.$item.'`';
-            }, $this->columns));
+                        return '`' . $item . '`';
+                    }, $this->columns));
         }
-        return '`'.$this->columns.'`';
+        return '`' . $this->columns . '`';
     }
 
     protected function getKeys()
     {
         if (is_array($this->keys)) {
             return implode(',', array_map(function($item) {
-                return '`'.$item.'`';
-            }, $this->keys));
+                        return '`' . $item . '`';
+                    }, $this->keys));
         }
-        return '`'.$this->keys.'`';
+        return '`' . $this->keys . '`';
     }
-    
+
     protected function makeOnDelete()
     {
         if (empty($this->onDelete)) {

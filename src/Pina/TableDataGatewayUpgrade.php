@@ -2,7 +2,7 @@
 
 namespace Pina;
 
-use Pina\TableStructureParser;
+use Pina\DB\StructureParser;
 
 class TableDataGatewayUpgrade
 {
@@ -191,7 +191,7 @@ class TableDataGatewayUpgrade
         }
 
         $tableCondition = $this->db->one("SHOW CREATE TABLE `" . $this->gateway->getTable() . "`");
-        $databaseConstraints = (new Parser($tableCondition))->getConstraints();
+        $databaseConstraints = (new StructureParser($tableCondition))->getConstraints();
         $gatewayContraints = $this->gw->getConstraints();
         $names = array();
         if (!empty($databaseConstraints)) {
