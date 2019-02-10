@@ -10,17 +10,18 @@ class StructureParser
     public function __construct($tableCondition)
     {
         $parser = new \iamcal\SQLParser();
-        $this->meta = $parser->parse($tableCondition);
+        $parsed = $parser->parse($tableCondition);
+        $this->meta = array_pop($parsed);
     }
 
     public function getIndexes()
     {
-        if (empty($this->meta['child']['indexes'])) {
+        if (empty($this->meta['indexes'])) {
             return array();
         }
 
         $indexes = array();
-        foreach ($this->meta['child']['indexes'] as $index) {
+        foreach ($this->meta['indexes'] as $index) {
             if (
                     $index['type'] != 'FOREIGN'
             ) {
@@ -31,7 +32,7 @@ class StructureParser
                     continue;
                 }
                 $indexObj = new Index(array_column($index['cols'], 'name'));
-                $indexObj->setType($index['type']);
+                $indexObj->type($index['type']);
                 $indexes[$index['name']] = $indexObj;
             }
         }
@@ -40,12 +41,12 @@ class StructureParser
 
     public function getConstraints()
     {
-        if (empty($this->meta['child']['indexes'])) {
+        if (empty($this->meta['indexes'])) {
             return array();
         }
 
         $contraints = array();
-        foreach ($this->meta['child']['indexes'] as $index) {
+        foreach ($this->meta['indexes'] as $index) {
             if (
                     $index['type'] == 'FOREIGN' && !empty($index['name']) && !empty($index['cols']) && !empty($index['ref_table']) && !empty($index['ref_cols'])
             ) {
@@ -61,6 +62,32 @@ class StructureParser
             }
         }
         return $contraints;
+    }
+
+    public function getFields()
+    {
+        $fields = array();
+        foreach ($this->meta['fields'] as $f) {
+            if (empty($f['name']) || empty($f['type'])) {
+                continue;
+            }
+            $field = new Field();
+            $field->name($f['name'])->type($f['type'])->isNull(!empty($f['null']));
+            if (isset($f['length'])) {
+                $field->length($f['length']);
+            }
+            if (isset($f['default'])) {
+                $field->def($f['default']);
+            }
+            if (isset($f['values']) && is_array($f['values'])) {
+                $field->values($f['values']);
+            }
+            if (isset($f['more']) && is_array($f['more'])) {
+                $field->extra(implode(' ', $f['more']));
+            }
+            $fields[] = $field;
+        }
+        return $fields;
     }
 
 }

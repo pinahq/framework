@@ -13,21 +13,22 @@ class Index
         $this->columns = $columns;
     }
 
-    public function setType($type)
+    public function type($type)
     {
         $this->type = $type;
+        return $this;
     }
 
-    public function make($v)
+    public function make($v = '')
     {
         return $this->type . ' KEY '
                 . ($this->type != 'PRIMARY' && !empty($v) ? '`' . $v . '`' : '')
                 . '(' . $this->getColumns() . ')';
     }
 
-    public function makeAdd($v)
+    public function makeAdd($v = '')
     {
-        return ' ADD ' . $this->make($v);
+        return 'ADD ' . $this->make($v);
     }
 
     public function makeModify($v)
