@@ -517,13 +517,13 @@ return array(
 
 Получить несколько записей из таблицы с помощью метода **table**:
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $data =$db->table("SELECT * FROM products");
 ```
 
 Получить одну строку с помощью метода **row**:
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $item = $db->row("SELECT * FROM products");
 ```
 
@@ -531,7 +531,7 @@ $item = $db->row("SELECT * FROM products");
 
 Получить колонку:
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $ids = $db->column("SELECT id FROM products WHERE title LIKE 'test%'");
 ```
 
@@ -539,19 +539,19 @@ $ids = $db->column("SELECT id FROM products WHERE title LIKE 'test%'");
 
 Получить значение определенной ячейки
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $id = $db->value("SELECT id FROM products WHERE title LIKE 'test%'");
 ```
 
 Выполнить запрос, который не возвращает результата:
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $db->query("DELETE FROM products WHERE id=5");
 ```
 
 Получить ID записи после её вставки в таблицу
 ```
-$db = DB::get();
+$db = App::container()->get(\Pina\DatabaseDriverInterface::class);
 $db->query("INSERT INTO products SET title='test'");
 $id = $db->insertId();
 ```
