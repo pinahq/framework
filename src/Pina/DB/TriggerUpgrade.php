@@ -1,8 +1,8 @@
 <?php
 
-namespace Pina;
+namespace Pina\DB;
 
-class TableDataGatewayTriggerUpgrade {
+class TriggerUpgrade {
     
     const FIELD_TABLE = 0;
     const FIELD_ACTION = 1;

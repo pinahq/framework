@@ -43,8 +43,16 @@ class Structure
     {
         $schema = array_merge($this->getFields(), $this->getIndexes(), $this->getConstraints());
         $strings = array_map(array($this, 'callMake'), $schema);
-        print_r($strings);
         return 'CREATE TABLE IF NOT EXISTS `'.$name.'` ('."\n  ".implode(",\n  ", $strings)."\n".') '.$extra;
+    }
+    
+    public function makeAlterTable($table, $existedStructure)
+    {
+        $conditions = $this->makePathTo($existedStructure);
+        if (empty($conditions)) {
+            return '';
+        }
+        return 'ALTER TABLE `'.$table.'` '.implode(', ', $conditions);
     }
 
     public function makePathTo($existedStructure)

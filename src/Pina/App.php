@@ -3,6 +3,7 @@
 namespace Pina;
 
 use Pina\Container\Container;
+use Pina\DB\TriggerUpgrade;
 
 class App
 {
@@ -287,12 +288,12 @@ class App
     {
         $upgrades = [];
         $triggers = [];
-        App::walkClasses('Gateway', function($gw) use (&$upgrades, &$triggers) {
+        App::walkClasses('Gateway', function(TableDataGateway $gw) use (&$upgrades, &$triggers) {
             $upgrades = array_merge($upgrades, $gw->getUpgrades());
             $triggers = array_merge($triggers, $gw->getTriggers());
         });
 
-        $upgrades = array_merge($upgrades, TableDataGatewayTriggerUpgrade::getUpgrades($triggers));
+        $upgrades = array_merge($upgrades, TriggerUpgrade::getUpgrades($triggers));
 
         return $upgrades;
     }

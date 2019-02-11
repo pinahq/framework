@@ -2,7 +2,8 @@
 
 namespace Pina;
 
-use League\Csv\Reader;
+use Pina\DB\StructureParser;
+use Pina\DB\Structure;
 
 /*
  * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах 
@@ -28,8 +29,8 @@ class TableDataGateway extends SQL
     {
         return array();
     }
-    
-    public function getReferences()
+
+    public function getConstraints()
     {
         return array();
     }
@@ -58,7 +59,7 @@ class TableDataGateway extends SQL
     {
         return static::$engine;
     }
-    
+
     public function getUpgrades()
     {
         if (empty(static::$fields)) {
@@ -66,15 +67,34 @@ class TableDataGateway extends SQL
         }
 
         $r = array();
-
-        $upgrade = new TableDataGatewayUpgrade($this);
-        $tables = $this->db->col("SHOW TABLES");
-        if (!in_array(static::$table, $tables)) {
-            $r [] = $upgrade->makeCreateTable();
-        } else if ($q = $upgrade->makeAlterTable()) {
-            $r [] = $q;
+        if (!in_array(static::$table, $this->db->col("SHOW TABLES"))) {
+            $r[] = $this->getStructure()->makeCreateTable();
+        } else {
+            $path = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
+            if (!empty($path)) {
+                $r[] = $path;
+            }
         }
         return $r;
+    }
+
+    public function getStructure()
+    {
+        $parser = new StructureParser;
+        $structure = new Structure;
+        $structure->setFields($parser->parseGatewayFields($this->getFields()));
+        $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
+        $structure->setConstraints($this->getConstraints());
+        return $structure;
+    }
+
+    public function getExistedStructure()
+    {
+        $parser = new StructureParser;
+        $parser->parse(
+                $this->db->one("SHOW CREATE TABLE `" . $this->getTable() . "`")
+        );
+        return $parser->getStructure();
     }
 
     public function getEnumVariants($field)
