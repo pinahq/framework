@@ -2,7 +2,7 @@
 
 namespace Pina\DB;
 
-class Index
+class Index implements StructureItemInterface
 {
 
     protected $columns = null;
@@ -19,21 +19,22 @@ class Index
         return $this;
     }
 
-    public function make($v = '')
+    public function make()
     {
+        $v = '';
         return $this->type . ' KEY '
                 . ($this->type != 'PRIMARY' && !empty($v) ? '`' . $v . '`' : '')
                 . '(' . $this->getColumns() . ')';
     }
 
-    public function makeAdd($v = '')
+    public function makeAdd()
     {
-        return 'ADD ' . $this->make($v);
+        return 'ADD ' . $this->make();
     }
 
     public function makeModify($v)
     {
-        return $this->makeDrop($v) . ',' . $this->makeAdd($v);
+        return $this->makeDrop($v) . ',' . $this->makeAdd();
     }
 
     public function makeDrop($v)

@@ -2,17 +2,17 @@
 
 namespace Pina\DB;
 
-class Field
+class Field implements StructureItemInterface
 {
 
     protected $name = '';
     protected $type = '';
     protected $length = '';
-    protected $default = '';
-    protected $null = '';
+    protected $default = null;
+    protected $null = true;
     protected $values = '';
     protected $extra = '';
-
+    
     public function name($name)
     {
         $this->name = $name;
@@ -54,26 +54,44 @@ class Field
         $this->extra = $extra;
         return $this;
     }
+    
+    public function getName()
+    {
+        return $this->name;
+    }
 
     public function make()
     {
-        return '`' . $this->name . '`'
-                . ' ' . $this->type
-                . (!empty($this->length) ? '('.$this->length.')' : '')
-                . $this->makeValues()
-                . ' ' . (!empty($this->null) ? 'NULL' : 'NOT NULL')
-                . (!empty($this->default) ? ' DEFAULT ' . $this->default : '')
-                . (!empty($this->extra) ? ' ' . $this->extra: '');
+        return implode(' ', array_filter(array(
+            '`' . $this->name . '`',
+            strtoupper($this->type).(!empty($this->length) ? '(' . $this->length . ')' : '').$this->makeValues(),
+            (!empty($this->null) ? 'NULL' : 'NOT NULL'),
+            $this->makeDefault(),
+            $this->extra,
+        )));
     }
-    
+
     protected function makeValues()
     {
         if (empty($this->values) || !is_array($this->values) || count($this->values) == 0) {
             return '';
         }
-        return '('.implode(',', array_map(function($v) {
-            return "'".$v."'";
-        }, $this->values)).')';
+        return '(' . implode(',', array_map(function($v) {
+                    return "'" . $v . "'";
+                }, $this->values)) . ')';
+    }
+
+    protected function makeDefault()
+    {
+        if (!isset($this->default)) {
+            return;
+        }
+
+        if ($this->default == 'NULL') {
+            return 'DEFAULT NULL';
+        }
+
+        return "DEFAULT '" . $this->default . "'";
     }
 
 }

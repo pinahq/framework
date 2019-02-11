@@ -38,12 +38,48 @@ class Structure
     {
         return $this->constraints;
     }
+    
+    public function makeCreateTable($name, $extra = 'ENGINE=InnoDB DEFAULT CHARSET=utf8')
+    {
+        $schema = array_merge($this->getFields(), $this->getIndexes(), $this->getConstraints());
+        $strings = array_map(array($this, 'callMake'), $schema);
+        print_r($strings);
+        return 'CREATE TABLE IF NOT EXISTS `'.$name.'` ('."\n  ".implode(",\n  ", $strings)."\n".') '.$extra;
+    }
 
     public function makePathTo($existedStructure)
     {
+        $fields = $this->makeFieldPath($existedStructure->getFields(), $this->fields);
         $indexes = $this->makeIndexPath($existedStructure->getIndexes(), $this->indexes);
         $constraints = $this->makeIndexPath($existedStructure->getConstraints(), $this->constraints);
-        return array_merge($indexes, $constraints);
+        return array_merge($fields, $indexes, $constraints);
+    }
+
+    public function makeFieldPath($from, $to)
+    {
+        $conditions = array();
+
+        $gatewayStrings = array_reduce($to, array($this, 'reduceFields'), array());
+        $existedStrings = array_reduce($from, array($this, 'reduceFields'), array());
+
+        $toDelete = array_diff_key($existedStrings, $gatewayStrings);
+        $toCreate = array_diff_key($gatewayStrings, $existedStrings);
+        $toModify = array_intersect_key($gatewayStrings, $existedStrings);
+
+        foreach ($toDelete as $name => $t) {
+            $conditions[] = 'DROP COLUMN `' . $name . '`';
+        }
+        foreach ($toModify as $name => $cond) {
+            if ($cond == $existedStrings[$name]) {
+                continue;
+            }
+            $conditions[] = 'MODIFY ' . $cond;
+        }
+        foreach ($toCreate as $name => $cond) {
+            $conditions[] = 'ADD COLUMN ' . $cond;
+        }
+
+        return $conditions;
     }
 
     public function makeIndexPath($from, $to)
@@ -63,9 +99,15 @@ class Structure
         return $conditions;
     }
 
-    public function callMake($key)
+    public function callMake(StructureItemInterface $key)
     {
         return $key->make();
+    }
+
+    public function reduceFields($carry, Field $field)
+    {
+        $carry[$field->getName()] = $field->make();
+        return $carry;
     }
 
 }

@@ -2,7 +2,7 @@
 
 namespace Pina\DB;
 
-class ForeignKey
+class ForeignKey implements StructureItemInterface
 {
 
     protected $columns = null;
@@ -41,8 +41,9 @@ class ForeignKey
         return $this;
     }
 
-    public function make($name = '')
+    public function make()
     {
+        $name = '';
         return implode(' ', array_filter(array(
             'CONSTRAINT' . ($name ? ' `' . $name . '`' : ''),
             'FOREIGN KEY (' . $this->getColumns() . ')',
@@ -52,14 +53,14 @@ class ForeignKey
         )));
     }
 
-    public function makeAdd($v = '')
+    public function makeAdd()
     {
-        return 'ADD ' . $this->make($v);
+        return 'ADD ' . $this->make();
     }
 
     public function makeModify($v)
     {
-        return $this->makeDrop($v) . ',' . $this->makeAdd($v);
+        return $this->makeDrop($v) . ',' . $this->makeAdd();
     }
 
     public function makeDrop($v)
