@@ -5,7 +5,6 @@ use Pina\DB\ForeignKey;
 use Pina\DB\Index;
 use Pina\DB\Field;
 use Pina\DB\StructureParser;
-use Pina\TableDataGatewayUpgrade;
 
 class DBUpgradeTest extends TestCase
 {
@@ -130,9 +129,12 @@ SQL;
         
         $conditions = $structure->makePathTo($existedStructure);
         
-        $this->assertContains('DROP COLUMN `image_id`', $conditions);
-        $this->assertContains("ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $conditions);
-        $this->assertContains("ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
+        $this->assertContains($c1 = 'DROP COLUMN `image_id`', $conditions);
+        $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $conditions);
+        $this->assertContains($c3 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
+        
+        $path = $structure->makeAlterTable('resource', $existedStructure);
+        $this->assertEquals('ALTER TABLE `resource` '.$c1.', '.$c2.', '.$c3, $path);
         
 $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (
