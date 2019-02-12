@@ -2,6 +2,9 @@
 
 namespace Pina\DB;
 
+use Pina\App;
+use Pina\Arr;
+
 class TriggerUpgrade {
     
     const FIELD_TABLE = 0;

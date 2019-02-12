@@ -113,6 +113,9 @@ class StructureParser
     public function getFields()
     {
         $fields = array();
+        if (!isset($this->meta['fields']) || !is_array($this->meta['fields'])) {
+            return $fields;
+        }
         foreach ($this->meta['fields'] as $f) {
             $field = $this->makeField($f);
             if (empty($field)) {

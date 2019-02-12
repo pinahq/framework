@@ -50,6 +50,8 @@ SQL;
         $gatewayIndexes = array();
         $gatewayIndexes[] = (new Index('id2'))->type('PRIMARY');
         $gatewayIndexes[] = (new Index('parent_id2'))->type('FULLTEXT');
+        $gatewayIndexes[] = (new Index('parent_id3'));
+        $gatewayIndexes[] = (new Index('parent_id4'))->type('INDEX');
 
         $gatewayFields = array();
         $gatewayFields[] = (new Field())->name('parent_id')->type('int')->length(11)->def('NULL');
@@ -65,6 +67,8 @@ SQL;
         $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $conditions);
         $this->assertContains('DROP PRIMARY KEY', $conditions);
         $this->assertContains('ADD PRIMARY KEY (`id2`)', $conditions);
+        $this->assertContains('ADD KEY (`parent_id3`)', $conditions);
+        $this->assertContains('ADD KEY (`parent_id4`)', $conditions);
     }
 
     public function testResourceUpgrade()
@@ -150,10 +154,10 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `order` INT(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`resource`),
-  INDEX KEY (`parent_id`),
-  INDEX KEY (`enabled`),
-  INDEX KEY (`order`),
-  INDEX KEY (`resource_type_id`,`enabled`),
+  KEY (`parent_id`),
+  KEY (`enabled`),
+  KEY (`order`),
+  KEY (`resource_type_id`,`enabled`),
   FULLTEXT KEY (`title`),
   CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8

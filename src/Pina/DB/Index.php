@@ -15,16 +15,22 @@ class Index implements StructureItemInterface
 
     public function type($type)
     {
-        $this->type = $type;
+        $upperType = \strtoupper($type);
+        if (!in_array($upperType, array('PRIMARY', 'UNIQUE', 'FULLTEXT', 'SPATIAL'))) {
+            return $this;
+        }
+        $this->type = $upperType;
         return $this;
     }
 
     public function make()
     {
         $v = '';
-        return $this->type . ' KEY '
-                . ($this->type != 'PRIMARY' && !empty($v) ? '`' . $v . '`' : '')
-                . '(' . $this->getColumns() . ')';
+        return implode(' ', array_filter(array(
+            $this->type,
+            'KEY',
+            ($this->type != 'PRIMARY' && !empty($v) ? '`' . $v . '`' : ''),
+            '(' . $this->getColumns() . ')')));
     }
 
     public function makeAdd()
@@ -49,8 +55,8 @@ class Index implements StructureItemInterface
     {
         if (is_array($this->columns)) {
             return implode(',', array_map(function($item) {
-                        return '`' . $item . '`';
-                    }, $this->columns));
+                    return '`' . $item . '`';
+                }, $this->columns));
         }
         return '`' . $this->columns . '`';
     }
