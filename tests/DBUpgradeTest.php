@@ -8,6 +8,14 @@ use Pina\DB\StructureParser;
 
 class DBUpgradeTest extends TestCase
 {
+    
+    public function testStructureParser()
+    {
+        $parser = new StructureParser();
+        $field1 = $parser->parseField('`data` longblob');
+        $field2 = $parser->parseField('`data` longblob default NULL');
+        $this->assertEquals($field1->make(), $field2->make());
+    }
 
     public function testParse()
     {
@@ -70,7 +78,7 @@ SQL;
         $this->assertContains('ADD KEY (`parent_id3`)', $conditions);
         $this->assertContains('ADD KEY (`parent_id4`)', $conditions);
     }
-
+    
     public function testResourceUpgrade()
     {
         $tableCondition = <<<SQL
@@ -167,4 +175,97 @@ SQL;
 
     }
 
+    public function testCronEventUpgrade()
+    {
+        $tableCondition = <<<SQL
+CREATE TABLE `cron_event` (
+  `id` varchar(64) NOT NULL DEFAULT '',
+  `event` varchar(128) NOT NULL DEFAULT '',
+  `data` longblob,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `created` (`created`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+SQL;
+        
+        $parser = new StructureParser();
+        $parser->parse($tableCondition);
+        $existedStructure = $parser->getStructure();
+
+        $fields = array(
+            'id' => "varchar(64) NOT NULL DEFAULT ''",
+            'event' => "VARCHAR(128) NOT NULL default ''",
+            'data' => "longblob default NULL",
+            'created' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+        );
+        $indexes = array(
+            'PRIMARY KEY' => 'id',
+            'KEY created' => 'created',
+        );
+        
+        $parser = new StructureParser();
+        
+        $structure = new \Pina\DB\Structure;
+        $structure->setFields($parser->parseGatewayFields($fields));
+        $structure->setIndexes($parser->parseGatewayIndexes($indexes));
+        
+        $conditions = $structure->makePathTo($existedStructure);
+        
+        $this->assertEmpty($conditions);
+        
+        
+    }
+    
+    public function testConfigUpgrade()
+    {
+        $tableCondition = <<<SQL
+CREATE TABLE `config` (
+  `namespace` varchar(255) NOT NULL DEFAULT '',
+  `group` varchar(32) NOT NULL DEFAULT '',
+  `key` varchar(32) NOT NULL DEFAULT '',
+  `value` text,
+  `type` enum('text','textarea','select','checkbox','image') NOT NULL DEFAULT 'text',
+  `variants` varchar(1000) NOT NULL DEFAULT '',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `resource` varchar(255) NOT NULL DEFAULT '',
+  `order` int(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`namespace`,`key`),
+  UNIQUE KEY `namespace` (`namespace`,`group`,`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+SQL;
+        
+        $parser = new StructureParser();
+        $parser->parse($tableCondition);
+        $existedStructure = $parser->getStructure();
+
+        $fields = array(
+            'namespace' => "varchar(255) NOT NULL DEFAULT ''",
+            'group' => "varchar(32) NOT NULL DEFAULT ''",
+            'key' => "varchar(32) NOT NULL DEFAULT ''",
+            'value' => "text DEFAULT NULL",
+            'type' => "enum('text','textarea','select','checkbox','image') NOT NULL DEFAULT 'text'",
+            'variants' => "varchar(1000) NOT NULL DEFAULT ''",
+            'title' => "varchar(255) NOT NULL DEFAULT ''",
+            'resource' => "varchar(255) NOT NULL DEFAULT ''",
+            'order' => "int(1) NOT NULL DEFAULT '0'"
+        );
+        $indexes = array(
+            'PRIMARY KEY' => ['namespace', 'key'],
+            'UNIQUE KEY group_key' => ['namespace', 'group', 'key']
+        );
+        
+        $parser = new StructureParser();
+        
+        $structure = new \Pina\DB\Structure;
+        $structure->setFields($parser->parseGatewayFields($fields));
+        $structure->setIndexes($parser->parseGatewayIndexes($indexes));
+        
+        $path = $structure->makeAlterTable('config', $existedStructure);
+        
+        $this->assertEquals('', $path);
+        
+        
+    }
+    
+    
 }

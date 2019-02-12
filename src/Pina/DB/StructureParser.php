@@ -32,7 +32,15 @@ class StructureParser
     {
         $r = array();
         foreach ($indexes as $k => $v) {
-            $r[] = $this->parseIndex($k . '(' . (is_array($v) ? implode(',', $v) : $v).')');
+            if (!is_array($v)) {
+                $v = array($v);
+            }
+
+            foreach ($v as $kk => $vv) {
+                $v[$kk] = '`' . $vv . '`';
+            }
+
+            $r[] = $this->parseIndex($k . '(' . implode(',', $v) . ')');
         }
         return $r;
     }
@@ -132,12 +140,15 @@ class StructureParser
             return null;
         }
         $field = new Field();
-        $field->name($f['name'])->type($f['type'])->isNull(!empty($f['null']));
+        $isNull = !empty($f['null']) || !isset($f['null']);
+        $field->name($f['name'])->type($f['type'])->isNull($isNull);
         if (isset($f['length'])) {
             $field->length($f['length']);
         }
         if (isset($f['default'])) {
             $field->def($f['default']);
+        } else if ($isNull) {
+            $field->def('NULL');
         }
         if (isset($f['values']) && is_array($f['values'])) {
             $field->values($f['values']);

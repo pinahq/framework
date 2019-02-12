@@ -69,7 +69,7 @@ class Structure
 
         $gatewayStrings = array_reduce($to, array($this, 'reduceFields'), array());
         $existedStrings = array_reduce($from, array($this, 'reduceFields'), array());
-
+        
         $toDelete = array_diff_key($existedStrings, $gatewayStrings);
         $toCreate = array_diff_key($gatewayStrings, $existedStrings);
         $toModify = array_intersect_key($gatewayStrings, $existedStrings);

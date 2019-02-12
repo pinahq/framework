@@ -91,9 +91,8 @@ class TableDataGateway extends SQL
     public function getExistedStructure()
     {
         $parser = new StructureParser;
-        $parser->parse(
-                $this->db->one("SHOW CREATE TABLE `" . $this->getTable() . "`")
-        );
+        $data = $this->db->row("SHOW CREATE TABLE `" . $this->getTable() . "`");
+        $parser->parse($data['Create Table']);
         return $parser->getStructure();
     }
 
