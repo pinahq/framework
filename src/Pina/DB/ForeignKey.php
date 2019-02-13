@@ -15,6 +15,11 @@ class ForeignKey implements StructureItemInterface
     {
         $this->columns = $columns;
     }
+    
+    public function getColumns()
+    {
+        return $this->columns;
+    }
 
     public function references($table, $keys)
     {
@@ -46,7 +51,7 @@ class ForeignKey implements StructureItemInterface
         $name = '';
         return implode(' ', array_filter(array(
             'CONSTRAINT' . ($name ? ' `' . $name . '`' : ''),
-            'FOREIGN KEY (' . $this->getColumns() . ')',
+            'FOREIGN KEY (' . $this->makeColumns() . ')',
             'REFERENCES `' . $this->table . '` (' . $this->getKeys() . ')',
             $this->makeOnDelete(),
             $this->makeOnUpdate()
@@ -68,7 +73,7 @@ class ForeignKey implements StructureItemInterface
         return 'DROP FOREIGN KEY `' . $v . '`';
     }
 
-    protected function getColumns()
+    protected function makeColumns()
     {
         if (is_array($this->columns)) {
             return implode(',', array_map(function($item) {

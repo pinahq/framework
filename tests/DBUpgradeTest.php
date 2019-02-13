@@ -143,10 +143,11 @@ SQL;
         
         $this->assertContains($c1 = 'DROP COLUMN `image_id`', $conditions);
         $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $conditions);
-        $this->assertContains($c3 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
+        $this->assertContains($c3 = "ADD KEY (`media_id`)", $conditions);
+        $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
         
         $path = $structure->makeAlterTable('resource', $existedStructure);
-        $this->assertEquals('ALTER TABLE `resource` '.$c1.', '.$c2.', '.$c3, $path);
+        $this->assertEquals('ALTER TABLE `resource` '.$c1.', '.$c2.', '.$c3.', '.$c4, $path);
         
 $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (
@@ -267,5 +268,48 @@ SQL;
         
     }
     
+    public function testUserConstraintUpgrade()
+    {
+        $tableCondition = <<<SQL
+CREATE TABLE `cons` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) NOT NULL DEFAULT '0',
+  `description` varchar(256) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `cons_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8
+SQL;
+
+        $parser = new StructureParser();
+        $parser->parse($tableCondition);
+        $existedStructure = $parser->getStructure();
+
+        $fields = array(
+            'id' => "int(10) NOT NULL AUTO_INCREMENT",
+            'user_id' => "int(10) NOT NULL DEFAULT '0'",
+            'description' => "varchar(256) NOT NULL DEFAULT ''",
+            'created_at' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+        );
+        $indexes = array(
+            'PRIMARY KEY' => 'id',
+        );
+        $constraints = array(
+            (new \Pina\DB\ForeignKey('user_id'))
+                ->references('user', 'id')
+        );
+
+        $parser = new StructureParser();
+
+        $structure = new \Pina\DB\Structure;
+        $structure->setFields($parser->parseGatewayFields($fields));
+        $structure->setIndexes($parser->parseGatewayIndexes($indexes));
+        $structure->setConstraints($constraints);
+
+        $path = $structure->makeAlterTable('cons', $existedStructure);
+
+        $this->assertEquals('', $path);
+    }
     
 }

@@ -58,9 +58,18 @@ class Structure
     public function makePathTo($existedStructure)
     {
         $fields = $this->makeFieldPath($existedStructure->getFields(), $this->fields);
-        $indexes = $this->makeIndexPath($existedStructure->getIndexes(), $this->indexes);
+        $indexes = $this->makeIndexPath($existedStructure->getIndexes(), array_merge($this->indexes, $this->getConstraintIndexes()));
         $constraints = $this->makeIndexPath($existedStructure->getConstraints(), $this->constraints);
         return array_merge($fields, $indexes, $constraints);
+    }
+    
+    protected function getConstraintIndexes()
+    {
+        $indexes = array();
+        foreach ($this->constraints as $foreignKey) {
+            $indexes[] = new Index($foreignKey->getColumns());
+        }
+        return $indexes;
     }
 
     public function makeFieldPath($from, $to)

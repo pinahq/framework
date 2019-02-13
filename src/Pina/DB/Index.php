@@ -30,7 +30,7 @@ class Index implements StructureItemInterface
             $this->type,
             'KEY',
             ($this->type != 'PRIMARY' && !empty($v) ? '`' . $v . '`' : ''),
-            '(' . $this->getColumns() . ')')));
+            '(' . $this->makeColumns() . ')')));
     }
 
     public function makeAdd()
@@ -51,7 +51,7 @@ class Index implements StructureItemInterface
         return 'DROP KEY `' . $v . '`';
     }
 
-    protected function getColumns()
+    protected function makeColumns()
     {
         if (is_array($this->columns)) {
             return implode(',', array_map(function($item) {
