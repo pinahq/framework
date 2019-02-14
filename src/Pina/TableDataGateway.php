@@ -68,7 +68,7 @@ class TableDataGateway extends SQL
 
         $r = array();
         if (!in_array(static::$table, $this->db->col("SHOW TABLES"))) {
-            $r[] = $this->getStructure()->makeCreateTable();
+            $r[] = $this->getStructure()->makeCreateTable($this->getTable());
         } else {
             $path = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
             if (!empty($path)) {

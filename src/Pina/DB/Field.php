@@ -12,7 +12,7 @@ class Field implements StructureItemInterface
     protected $null = true;
     protected $values = '';
     protected $extra = '';
-    
+
     public function name($name)
     {
         $this->name = $name;
@@ -54,7 +54,7 @@ class Field implements StructureItemInterface
         $this->extra = $extra;
         return $this;
     }
-    
+
     public function getName()
     {
         return $this->name;
@@ -64,7 +64,7 @@ class Field implements StructureItemInterface
     {
         return implode(' ', array_filter(array(
             '`' . $this->name . '`',
-            strtoupper($this->type).(!empty($this->length) ? '(' . $this->length . ')' : '').$this->makeValues(),
+            strtoupper($this->type) . (!empty($this->length) ? '(' . $this->length . ')' : '') . $this->makeValues(),
             (!empty($this->null) ? 'NULL' : 'NOT NULL'),
             $this->makeDefault(),
             $this->extra,
@@ -77,8 +77,8 @@ class Field implements StructureItemInterface
             return '';
         }
         return '(' . implode(',', array_map(function($v) {
-                    return "'" . $v . "'";
-                }, $this->values)) . ')';
+                            return "'" . $v . "'";
+                        }, $this->values)) . ')';
     }
 
     protected function makeDefault()
@@ -87,8 +87,8 @@ class Field implements StructureItemInterface
             return;
         }
 
-        if ($this->default == 'NULL') {
-            return 'DEFAULT NULL';
+        if (in_array($this->default, array('NULL', 'CURRENT_TIMESTAMP', 'NOW()'))) {
+            return 'DEFAULT ' . $this->default;
         }
 
         return "DEFAULT '" . $this->default . "'";
