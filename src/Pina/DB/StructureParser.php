@@ -157,8 +157,15 @@ class StructureParser
         if (isset($f['values']) && is_array($f['values'])) {
             $field->values($f['values']);
         }
+        $extra = array();
         if (isset($f['more']) && is_array($f['more'])) {
-            $field->extra(implode(' ', $f['more']));
+            $extra = array_merge($extra, $f['more']);
+        }
+        if (!empty($f['auto_increment'])) {
+            $extra[] = 'AUTO_INCREMENT';
+        }
+        if (!empty($extra)) {
+            $field->extra(implode(' ', array_filter($extra)));
         }
         return $field;
     }

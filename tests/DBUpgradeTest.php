@@ -17,6 +17,8 @@ class DBUpgradeTest extends TestCase
         $this->assertEquals($field1->make(), $field2->make());
         $field = $parser->parseField("`balance` DECIMAL(12,4) NOT NULL DEFAULT '0.0000'");
         $this->assertEquals("`balance` DECIMAL(12,4) NOT NULL DEFAULT '0.0000'", $field->make());
+        $field = $parser->parseField("`id` int(10) NOT NULL AUTO_INCREMENT");
+        $this->assertEquals("`id` INT(10) NOT NULL AUTO_INCREMENT", $field->make());
     }
 
     public function testParse()
@@ -153,7 +155,7 @@ SQL;
 
         $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (
-  `id` INT(10) NOT NULL,
+  `id` INT(10) NOT NULL AUTO_INCREMENT,
   `parent_id` INT(10) NOT NULL DEFAULT '0',
   `resource` VARCHAR(255) NOT NULL DEFAULT '',
   `title` VARCHAR(255) NOT NULL DEFAULT '',
