@@ -143,7 +143,11 @@ class StructureParser
         $isNull = !empty($f['null']) || !isset($f['null']);
         $field->name($f['name'])->type($f['type'])->isNull($isNull);
         if (isset($f['length'])) {
-            $field->length($f['length']);
+            $length = $f['length'];
+            if (!empty($f['decimals'])) {
+                $length .= ','.$f['decimals'];
+            }
+            $field->length($length);
         }
         if (isset($f['default'])) {
             $field->def($f['default']);

@@ -41,9 +41,14 @@ class Structure
     
     public function makeCreateTable($name, $extra = 'ENGINE=InnoDB DEFAULT CHARSET=utf8')
     {
-        $schema = array_merge($this->getFields(), $this->getIndexes(), $this->getConstraints());
+        $schema = array_merge($this->getFields(), $this->getIndexes());
         $strings = array_map(array($this, 'callMake'), $schema);
         return 'CREATE TABLE IF NOT EXISTS `'.$name.'` ('."\n  ".implode(",\n  ", $strings)."\n".') '.$extra;
+    }
+    
+    public function makeCreateForeignKeys($table)
+    {
+        return 'ALTER TABLE `'.$table.'` '.implode(', ', $this->makeIndexPath(array(), $this->constraints));
     }
     
     public function makeAlterTable($table, $existedStructure)

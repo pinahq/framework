@@ -8,13 +8,15 @@ use Pina\DB\StructureParser;
 
 class DBUpgradeTest extends TestCase
 {
-    
+
     public function testStructureParser()
     {
         $parser = new StructureParser();
         $field1 = $parser->parseField('`data` longblob');
         $field2 = $parser->parseField('`data` longblob default NULL');
         $this->assertEquals($field1->make(), $field2->make());
+        $field = $parser->parseField("`balance` DECIMAL(12,4) NOT NULL DEFAULT '0.0000'");
+        $this->assertEquals("`balance` DECIMAL(12,4) NOT NULL DEFAULT '0.0000'", $field->make());
     }
 
     public function testParse()
@@ -78,7 +80,7 @@ SQL;
         $this->assertContains('ADD KEY (`parent_id3`)', $conditions);
         $this->assertContains('ADD KEY (`parent_id4`)', $conditions);
     }
-    
+
     public function testResourceUpgrade()
     {
         $tableCondition = <<<SQL
@@ -102,7 +104,7 @@ CREATE TABLE `resource` (
   FULLTEXT KEY `title` (`title`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8
 SQL;
-        
+
         $parser = new StructureParser();
         $parser->parse($tableCondition);
         $existedStructure = $parser->getStructure();
@@ -131,25 +133,25 @@ SQL;
         $constraints = array(
             (new ForeignKey('media_id'))->references('media', 'id'),
         );
-        
+
         $parser = new StructureParser();
-        
+
         $structure = new \Pina\DB\Structure;
         $structure->setFields($parser->parseGatewayFields($fields));
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
         $structure->setConstraints($constraints);
-        
+
         $conditions = $structure->makePathTo($existedStructure);
-        
+
         $this->assertContains($c1 = 'DROP COLUMN `image_id`', $conditions);
         $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $conditions);
         $this->assertContains($c3 = "ADD KEY (`media_id`)", $conditions);
         $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
-        
+
         $path = $structure->makeAlterTable('resource', $existedStructure);
-        $this->assertEquals('ALTER TABLE `resource` '.$c1.', '.$c2.', '.$c3.', '.$c4, $path);
-        
-$newTableCondition = <<<SQL
+        $this->assertEquals('ALTER TABLE `resource` ' . $c1 . ', ' . $c2 . ', ' . $c3 . ', ' . $c4, $path);
+
+        $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (
   `id` INT(10) NOT NULL,
   `parent_id` INT(10) NOT NULL DEFAULT '0',
@@ -167,13 +169,13 @@ CREATE TABLE IF NOT EXISTS `resource` (
   KEY (`enabled`),
   KEY (`order`),
   KEY (`resource_type_id`,`enabled`),
-  FULLTEXT KEY (`title`),
-  CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)
+  FULLTEXT KEY (`title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 SQL;
         $this->assertEquals($newTableCondition, $structure->makeCreateTable('resource'));
-        
-
+        $this->assertEquals(
+            'ALTER TABLE `resource` ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)', $structure->makeCreateForeignKeys('resource')
+        );
     }
 
     public function testCronEventUpgrade()
@@ -188,7 +190,7 @@ CREATE TABLE `cron_event` (
   KEY `created` (`created`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 SQL;
-        
+
         $parser = new StructureParser();
         $parser->parse($tableCondition);
         $existedStructure = $parser->getStructure();
@@ -203,20 +205,18 @@ SQL;
             'PRIMARY KEY' => 'id',
             'KEY created' => 'created',
         );
-        
+
         $parser = new StructureParser();
-        
+
         $structure = new \Pina\DB\Structure;
         $structure->setFields($parser->parseGatewayFields($fields));
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
-        
+
         $conditions = $structure->makePathTo($existedStructure);
-        
+
         $this->assertEmpty($conditions);
-        
-        
     }
-    
+
     public function testConfigUpgrade()
     {
         $tableCondition = <<<SQL
@@ -234,7 +234,7 @@ CREATE TABLE `config` (
   UNIQUE KEY `namespace` (`namespace`,`group`,`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 SQL;
-        
+
         $parser = new StructureParser();
         $parser->parse($tableCondition);
         $existedStructure = $parser->getStructure();
@@ -254,20 +254,18 @@ SQL;
             'PRIMARY KEY' => ['namespace', 'key'],
             'UNIQUE KEY group_key' => ['namespace', 'group', 'key']
         );
-        
+
         $parser = new StructureParser();
-        
+
         $structure = new \Pina\DB\Structure;
         $structure->setFields($parser->parseGatewayFields($fields));
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
-        
+
         $path = $structure->makeAlterTable('config', $existedStructure);
-        
+
         $this->assertEquals('', $path);
-        
-        
     }
-    
+
     public function testUserConstraintUpgrade()
     {
         $tableCondition = <<<SQL
@@ -296,7 +294,7 @@ SQL;
             'PRIMARY KEY' => 'id',
         );
         $constraints = array(
-            (new \Pina\DB\ForeignKey('user_id'))
+                (new \Pina\DB\ForeignKey('user_id'))
                 ->references('user', 'id')
         );
 
@@ -311,5 +309,5 @@ SQL;
 
         $this->assertEquals('', $path);
     }
-    
+
 }

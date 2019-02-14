@@ -286,14 +286,17 @@ class App
 
     public static function getUpgrades()
     {
-        $upgrades = [];
-        $triggers = [];
-        App::walkClasses('Gateway', function(TableDataGateway $gw) use (&$upgrades, &$triggers) {
-            $upgrades = array_merge($upgrades, $gw->getUpgrades());
+        $firstUpgrades = array();
+        $lastUpgrades = array();
+        $triggers = array();
+        App::walkClasses('Gateway', function(TableDataGateway $gw) use (&$firstUpgrades, &$lastUpgrades, &$triggers) {
+            list($first, $last) = $gw->getUpgrades();
+            $firstUpgrades = array_merge($firstUpgrades, $first);
+            $lastUpgrades = array_merge($lastUpgrades, $last);
             $triggers = array_merge($triggers, $gw->getTriggers());
         });
 
-        $upgrades = array_merge($upgrades, TriggerUpgrade::getUpgrades($triggers));
+        $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers));
 
         return $upgrades;
     }
