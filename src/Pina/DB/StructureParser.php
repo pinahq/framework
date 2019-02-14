@@ -66,7 +66,7 @@ class StructureParser
         $structure = new Structure();
         $structure->setFields($this->getFields());
         $structure->setIndexes($this->getIndexes());
-        $structure->setConstraints($this->getConstraints());
+        $structure->setForeignKeys($this->getForeignKeys());
         return $structure;
     }
 
@@ -93,7 +93,7 @@ class StructureParser
         return $indexes;
     }
 
-    public function getConstraints()
+    public function getForeignKeys()
     {
         if (empty($this->meta['indexes'])) {
             return array();

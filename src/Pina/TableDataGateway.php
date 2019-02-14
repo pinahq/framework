@@ -30,7 +30,7 @@ class TableDataGateway extends SQL
         return array();
     }
 
-    public function getConstraints()
+    public function getForeignKeys()
     {
         return array();
     }
@@ -63,19 +63,21 @@ class TableDataGateway extends SQL
     public function getUpgrades()
     {
         if (empty(static::$fields)) {
-            return array();
+            return array(array(), array());
         }
 
-        $r = array();
+        $first = array();
+        $last = array();
         if (!in_array(static::$table, $this->db->col("SHOW TABLES"))) {
-            $r[] = $this->getStructure()->makeCreateTable($this->getTable());
+            $first[] = $this->getStructure()->makeCreateTable($this->getTable());
+            $last[] = $this->getStructure()->makeCreateForeignKeys($this->getTable());
         } else {
             $path = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
             if (!empty($path)) {
-                $r[] = $path;
+                $first[] = $path;
             }
         }
-        return $r;
+        return array(array_filter($first), array_filter($last));
     }
 
     public function getStructure()
@@ -84,7 +86,7 @@ class TableDataGateway extends SQL
         $structure = new Structure;
         $structure->setFields($parser->parseGatewayFields($this->getFields()));
         $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
-        $structure->setConstraints($this->getConstraints());
+        $structure->setForeignKeys($this->getForeignKeys());
         return $structure;
     }
 

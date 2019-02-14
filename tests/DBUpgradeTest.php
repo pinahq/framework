@@ -45,17 +45,17 @@ CREATE TABLE `child` (
 SQL;
         $parser = new StructureParser();
         $parser->parse($tableCondition);
-        $existedConstraints = $parser->getConstraints();
-        $this->assertEquals('CONSTRAINT FOREIGN KEY (`parent_id`,`ddd`) REFERENCES `parent` (`id`,`eee`) ON DELETE CASCADE', $existedConstraints['child_ibfk_1']->make());
-        $this->assertEquals('CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)', $existedConstraints['child_ibfk_2']->make());
+        $existedForeignKeys = $parser->getForeignKeys();
+        $this->assertEquals('CONSTRAINT FOREIGN KEY (`parent_id`,`ddd`) REFERENCES `parent` (`id`,`eee`) ON DELETE CASCADE', $existedForeignKeys['child_ibfk_1']->make());
+        $this->assertEquals('CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent` (`id`)', $existedForeignKeys['child_ibfk_2']->make());
 
         $existedIndexes = $parser->getIndexes();
 
         $existedStructure = $parser->getStructure();
 
-        $gatewayContraints = array();
-        $gatewayContraints[] = (new ForeignKey('parent_id2'))->references('parent', 'id');
-        $gatewayContraints[] = (new ForeignKey('parent_id2'))->references('parent2', 'id');
+        $gatewayForeignKeys = array();
+        $gatewayForeignKeys[] = (new ForeignKey('parent_id2'))->references('parent', 'id');
+        $gatewayForeignKeys[] = (new ForeignKey('parent_id2'))->references('parent2', 'id');
 
         $gatewayIndexes = array();
         $gatewayIndexes[] = (new Index('id2'))->type('PRIMARY');
@@ -69,7 +69,7 @@ SQL;
         $structure = new \Pina\DB\Structure;
         $structure->setFields($gatewayFields);
         $structure->setIndexes($gatewayIndexes);
-        $structure->setConstraints($gatewayContraints);
+        $structure->setForeignKeys($gatewayForeignKeys);
         $conditions = $structure->makePathTo($existedStructure);
 
         $this->assertContains('DROP COLUMN `id`', $conditions);
@@ -130,7 +130,7 @@ SQL;
             'KEY resource_type_enabled' => ['resource_type_id', 'enabled'],
             'FULLTEXT title' => 'title'
         );
-        $constraints = array(
+        $foreignKeys = array(
             (new ForeignKey('media_id'))->references('media', 'id'),
         );
 
@@ -139,7 +139,7 @@ SQL;
         $structure = new \Pina\DB\Structure;
         $structure->setFields($parser->parseGatewayFields($fields));
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
-        $structure->setConstraints($constraints);
+        $structure->setForeignKeys($foreignKeys);
 
         $conditions = $structure->makePathTo($existedStructure);
 
@@ -293,7 +293,7 @@ SQL;
         $indexes = array(
             'PRIMARY KEY' => 'id',
         );
-        $constraints = array(
+        $foreignKeys = array(
                 (new \Pina\DB\ForeignKey('user_id'))
                 ->references('user', 'id')
         );
@@ -303,7 +303,7 @@ SQL;
         $structure = new \Pina\DB\Structure;
         $structure->setFields($parser->parseGatewayFields($fields));
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
-        $structure->setConstraints($constraints);
+        $structure->setForeignKeys($foreignKeys);
 
         $path = $structure->makeAlterTable('cons', $existedStructure);
 

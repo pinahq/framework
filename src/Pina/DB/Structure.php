@@ -7,7 +7,7 @@ class Structure
 
     protected $fields = array();
     protected $indexes = array();
-    protected $constraints = array();
+    protected $foreignKeys = array();
 
     public function setFields($fields)
     {
@@ -29,14 +29,14 @@ class Structure
         return $this->indexes;
     }
 
-    public function setConstraints($constraints)
+    public function setForeignKeys($foreignKeys)
     {
-        $this->constraints = $constraints;
+        $this->foreignKeys = $foreignKeys;
     }
 
-    public function getConstraints()
+    public function getForeignKeys()
     {
-        return $this->constraints;
+        return $this->foreignKeys;
     }
     
     public function makeCreateTable($name, $extra = 'ENGINE=InnoDB DEFAULT CHARSET=utf8')
@@ -48,7 +48,11 @@ class Structure
     
     public function makeCreateForeignKeys($table)
     {
-        return 'ALTER TABLE `'.$table.'` '.implode(', ', $this->makeIndexPath(array(), $this->constraints));
+        $conditions = $this->makeIndexPath(array(), $this->foreignKeys);
+        if (empty($conditions)) {
+            return '';
+        }
+        return 'ALTER TABLE `'.$table.'` '.implode(', ', $conditions);
     }
     
     public function makeAlterTable($table, $existedStructure)
@@ -64,14 +68,14 @@ class Structure
     {
         $fields = $this->makeFieldPath($existedStructure->getFields(), $this->fields);
         $indexes = $this->makeIndexPath($existedStructure->getIndexes(), array_merge($this->indexes, $this->getConstraintIndexes()));
-        $constraints = $this->makeIndexPath($existedStructure->getConstraints(), $this->constraints);
-        return array_merge($fields, $indexes, $constraints);
+        $foreignKeys = $this->makeIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
+        return array_merge($fields, $indexes, $foreignKeys);
     }
     
     protected function getConstraintIndexes()
     {
         $indexes = array();
-        foreach ($this->constraints as $foreignKey) {
+        foreach ($this->foreignKeys as $foreignKey) {
             $indexes[] = new Index($foreignKey->getColumns());
         }
         return $indexes;
