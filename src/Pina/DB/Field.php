@@ -8,6 +8,8 @@ class Field implements StructureItemInterface
     protected $name = '';
     protected $type = '';
     protected $length = '';
+    protected $unsigned = false;
+    protected $zerofill = false;
     protected $default = null;
     protected $null = true;
     protected $values = '';
@@ -29,6 +31,16 @@ class Field implements StructureItemInterface
     {
         $this->length = $length;
         return $this;
+    }
+    
+    public function unsigned()
+    {
+        $this->unsigned = true;
+    }
+    
+    public function zerofill()
+    {
+        $this->zerofill = true;
     }
 
     public function def($def)
@@ -65,6 +77,8 @@ class Field implements StructureItemInterface
         return implode(' ', array_filter(array(
             '`' . $this->name . '`',
             strtoupper($this->type) . (!empty($this->length) ? '(' . $this->length . ')' : '') . $this->makeValues(),
+            $this->unsigned ? 'UNSIGNED' : '',
+            $this->zerofill ? 'ZEROFILL' : '',
             (!empty($this->null) ? 'NULL' : 'NOT NULL'),
             $this->makeDefault(),
             $this->extra,

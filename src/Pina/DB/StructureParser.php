@@ -149,6 +149,12 @@ class StructureParser
             }
             $field->length($length);
         }
+        if (!empty($f['unsigned'])) {
+            $field->unsigned();
+        }
+        if (!empty($f['zerofill'])) {
+            $field->zerofill();
+        }
         if (isset($f['default'])) {
             $field->def($f['default']);
         } else if ($isNull) {

@@ -19,6 +19,10 @@ class DBUpgradeTest extends TestCase
         $this->assertEquals("`balance` DECIMAL(12,4) NOT NULL DEFAULT '0.0000'", $field->make());
         $field = $parser->parseField("`id` int(10) NOT NULL AUTO_INCREMENT");
         $this->assertEquals("`id` INT(10) NOT NULL AUTO_INCREMENT", $field->make());
+        $field = $parser->parseField("`ip` INT(10) UNSIGNED NOT NULL DEFAULT 0");
+        $this->assertEquals("`ip` INT(10) UNSIGNED NOT NULL DEFAULT '0'", $field->make());
+        $field = $parser->parseField("`ip` INT(10) UNSIGNED ZEROFILL NOT NULL DEFAULT 0");
+        $this->assertEquals("`ip` INT(10) UNSIGNED ZEROFILL NOT NULL DEFAULT '0'", $field->make());
     }
 
     public function testParse()
