@@ -76,15 +76,16 @@ SQL;
         $structure->setFields($gatewayFields);
         $structure->setIndexes($gatewayIndexes);
         $structure->setForeignKeys($gatewayForeignKeys);
-        $conditions = $structure->makePathTo($existedStructure);
+        $path = $structure->makeAlterTable('tbl', $existedStructure);
+        $pathFK = $structure->makeAlterTableForeignKeys('tbl', $existedStructure);
 
-        $this->assertContains('DROP COLUMN `id`', $conditions);
-        $this->assertContains('DROP FOREIGN KEY `child_ibfk_1`', $conditions);
-        $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $conditions);
-        $this->assertContains('DROP PRIMARY KEY', $conditions);
-        $this->assertContains('ADD PRIMARY KEY (`id2`)', $conditions);
-        $this->assertContains('ADD KEY (`parent_id3`)', $conditions);
-        $this->assertContains('ADD KEY (`parent_id4`)', $conditions);
+        $this->assertContains('DROP COLUMN `id`', $path);
+        $this->assertContains('DROP FOREIGN KEY `child_ibfk_1`', $pathFK);
+        $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $pathFK);
+        $this->assertContains('DROP PRIMARY KEY', $path);
+        $this->assertContains('ADD PRIMARY KEY (`id2`)', $path);
+        $this->assertContains('ADD KEY (`parent_id3`)', $path);
+        $this->assertContains('ADD KEY (`parent_id4`)', $path);
     }
 
     public function testResourceUpgrade()
@@ -147,15 +148,16 @@ SQL;
         $structure->setIndexes($parser->parseGatewayIndexes($indexes));
         $structure->setForeignKeys($foreignKeys);
 
-        $conditions = $structure->makePathTo($existedStructure);
-
-        $this->assertContains($c1 = 'DROP COLUMN `image_id`', $conditions);
-        $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $conditions);
-        $this->assertContains($c3 = "ADD KEY (`media_id`)", $conditions);
-        $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $conditions);
-
         $path = $structure->makeAlterTable('resource', $existedStructure);
-        $this->assertEquals('ALTER TABLE `resource` ' . $c1 . ', ' . $c2 . ', ' . $c3 . ', ' . $c4, $path);
+        $this->assertContains($c1 = 'DROP COLUMN `image_id`', $path);
+        $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $path);
+        $this->assertContains($c3 = "ADD KEY (`media_id`)", $path);
+        
+        $pathFK = $structure->makeAlterTableForeignKeys('resource', $existedStructure);
+        $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $pathFK);
+
+        $this->assertEquals('ALTER TABLE `resource` ' . $c1 . ', ' . $c2 . ', ' . $c3, $path);
+        $this->assertEquals('ALTER TABLE `resource` ' . $c4, $pathFK);
 
         $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (

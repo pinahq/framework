@@ -72,10 +72,8 @@ class TableDataGateway extends SQL
             $first[] = $this->getStructure()->makeCreateTable($this->getTable());
             $last[] = $this->getStructure()->makeCreateForeignKeys($this->getTable());
         } else {
-            $path = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
-            if (!empty($path)) {
-                $first[] = $path;
-            }
+            $first[] = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
+            $last[] = $this->getStructure()->makeAlterTableForeignKeys($this->getTable(), $this->getExistedStructure());
         }
         return array(array_filter($first), array_filter($last));
     }

@@ -38,40 +38,48 @@ class Structure
     {
         return $this->foreignKeys;
     }
-    
+
     public function makeCreateTable($name, $extra = 'ENGINE=InnoDB DEFAULT CHARSET=utf8')
     {
         $schema = array_merge($this->getFields(), $this->getIndexes());
         $strings = array_map(array($this, 'callMake'), $schema);
-        return 'CREATE TABLE IF NOT EXISTS `'.$name.'` ('."\n  ".implode(",\n  ", $strings)."\n".') '.$extra;
+        return 'CREATE TABLE IF NOT EXISTS `' . $name . '` (' . "\n  " . implode(",\n  ", $strings) . "\n" . ') ' . $extra;
     }
-    
+
     public function makeCreateForeignKeys($table)
     {
         $conditions = $this->makeIndexPath(array(), $this->foreignKeys);
         if (empty($conditions)) {
             return '';
         }
-        return 'ALTER TABLE `'.$table.'` '.implode(', ', $conditions);
+        return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
     }
-    
+
     public function makeAlterTable($table, $existedStructure)
     {
         $conditions = $this->makePathTo($existedStructure);
         if (empty($conditions)) {
             return '';
         }
-        return 'ALTER TABLE `'.$table.'` '.implode(', ', $conditions);
+        return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
+    }
+
+    public function makeAlterTableForeignKeys($table, $existedStructure)
+    {
+        $conditions = $this->makeIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
+        if (empty($conditions)) {
+            return '';
+        }
+        return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
     }
 
     public function makePathTo($existedStructure)
     {
         $fields = $this->makeFieldPath($existedStructure->getFields(), $this->fields);
         $indexes = $this->makeIndexPath($existedStructure->getIndexes(), array_merge($this->indexes, $this->getConstraintIndexes()));
-        $foreignKeys = $this->makeIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
-        return array_merge($fields, $indexes, $foreignKeys);
+        return array_merge($fields, $indexes);
     }
-    
+
     protected function getConstraintIndexes()
     {
         $indexes = array();
@@ -87,7 +95,7 @@ class Structure
 
         $gatewayStrings = array_reduce($to, array($this, 'reduceFields'), array());
         $existedStrings = array_reduce($from, array($this, 'reduceFields'), array());
-        
+
         $toDelete = array_diff_key($existedStrings, $gatewayStrings);
         $toCreate = array_diff_key($gatewayStrings, $existedStrings);
         $toModify = array_intersect_key($gatewayStrings, $existedStrings);
