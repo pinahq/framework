@@ -176,8 +176,16 @@ class Url
             }
             $resource = trim(str_replace(':' . $k . '/', $v . '/', $resource . '/'), '/');
         }
-        if ($resource[0] == '$') {
-            $resource = Input::getResource() . substr($resource, 1);
+        $level = 0;
+        while (isset($resource[$level]) && $resource[$level] == '$') {
+            $level ++;
+        }
+        if ($level > 0) {
+            $parentResource = explode('/', Input::getResource());
+            for ($i = 0; $i < $level - 1; $i++) {
+                array_pop($parentResource);
+            }
+            $resource = implode('/', $parentResource) . substr($resource, $level);
         }
         return $resource;
     }
