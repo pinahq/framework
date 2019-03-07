@@ -33,7 +33,7 @@ class Url
             return '';
         }
         $info = pathinfo($resource);
-        $resource = trim(trim($info['dirname'],  '\/.') . '/' . $info['filename'], '\/');
+        $resource = trim(trim($info['dirname'], '\/.') . '/' . $info['filename'], '\/');
         return $resource;
     }
 
@@ -74,7 +74,7 @@ class Url
     public static function route($resource, $method)
     {
         $resource = self::trim($resource);
-        
+
         $parts = explode("/", $resource);
         $cnt = count($parts);
         $r = array();
@@ -99,7 +99,7 @@ class Url
             $d[] = $parts[$i];
             $i++;
         }
-        
+
         $isCollection = $i % 2;
         if (empty($a)) {
             switch ($method) {
@@ -175,6 +175,9 @@ class Url
                 $v = 0;
             }
             $resource = trim(str_replace(':' . $k . '/', $v . '/', $resource . '/'), '/');
+        }
+        if ($resource[0] == '$') {
+            $resource = Input::getResource() . substr($resource, 1);
         }
         return $resource;
     }
