@@ -167,7 +167,7 @@ class Url
         return false;
     }
 
-    public static function resource($pattern, $parsed)
+    public static function resource($pattern, $parsed, $parent = '')
     {
         $resource = $pattern;
         foreach ($parsed as $k => $v) {
@@ -181,7 +181,7 @@ class Url
             $level ++;
         }
         if ($level > 0) {
-            $parentResource = explode('/', Input::getResource());
+            $parentResource = explode('/', $parent);
             for ($i = 0; $i < $level - 1; $i++) {
                 array_pop($parentResource);
             }

@@ -54,7 +54,7 @@ class Route
     public static function resource($pattern, $parsed)
     {
         $parsed = Arr::merge(self::$context, $parsed);
-        return Url::resource($pattern, $parsed);
+        return Url::resource($pattern, $parsed, Request::resource());
     }
 
 }

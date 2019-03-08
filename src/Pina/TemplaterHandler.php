@@ -5,7 +5,6 @@ namespace Pina;
 class TemplaterHandler extends RequestHandler
 {
 
-    private $resource = null;
     private $method = null;
     private $controller = '';
     private $action = '';

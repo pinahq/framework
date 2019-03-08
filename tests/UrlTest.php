@@ -148,9 +148,9 @@ class UrlTest extends TestCase
     
     public function testParent()
     {
-        $_SERVER['REQUEST_URI'] = 'warehouses/2/deposit-activities/create';
-        $this->assertEquals('warehouses/2/deposit-activities/create', Url::resource('$', array('param' => '123')));
-        $this->assertEquals('warehouses/2/addresses', Url::resource('$$$/addresses', array('param' => '123')));
+        $parent = 'warehouses/2/deposit-activities/create';
+        $this->assertEquals('warehouses/2/deposit-activities/create', Url::resource('$', array('param' => '123'), $parent));
+        $this->assertEquals('warehouses/2/addresses', Url::resource('$$$/addresses', array('param' => '123'), $parent));
     }
 
 }

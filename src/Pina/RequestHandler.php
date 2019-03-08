@@ -9,8 +9,8 @@ class RequestHandler
     protected $module = '';
     protected $layout = '';
     protected $places = [];
+    protected $resource = null;
     private $raw = '';
-    private $resource = null;
     private $method = null;
     private $controller = '';
     private $action = '';
