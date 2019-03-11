@@ -109,8 +109,18 @@ class App
         }
 
         Request::push($handler);
-        $response = Request::run();
-        $response->send();
+        try {
+            $response = Request::run();
+            $response->send();
+        } catch (BadRequestException $e) {
+            Response::badRequest($e->getMessage())->send();
+        } catch (NotFoundException $e) {
+            Response::notFound()->send();
+        } catch (ForbiddenException $e) {
+            Response::forbidden()->send();
+        } catch (InternalErrorException $e) {
+            Response::internalError()->send();
+        }
     }
 
     public static function setDefaultLayout($layout)
