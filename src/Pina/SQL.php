@@ -56,7 +56,7 @@ class SQL
         $this->ons = array();
         return $this;
     }
-    
+
     public function cloneObject()
     {
         return clone $this;
@@ -78,21 +78,21 @@ class SQL
     {
         return $this->alias ? ('`' . $this->alias . '`') : $this->getFrom();
     }
-    
+
     public function getFrom()
     {
         if (is_string($this->from)) {
-            return '`'.$this->from.'`';
+            return '`' . $this->from . '`';
         }
-        
-        return '('.$this->from.')';
+
+        return '(' . $this->from . ')';
     }
 
     public function makeFrom()
     {
         return $this->getFrom() . ($this->alias ? (' `' . $this->alias . '`') : '');
     }
-    
+
     public function resetSelect()
     {
         $this->select = [];
@@ -102,40 +102,37 @@ class SQL
         return $this;
     }
 
-    public function select($field, $alias = null /*@alias is deprecated*/)
+    public function selectIfNotSelected($field)
     {
-        if (!empty($alias)) {
-            $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
-            return $this;
-        }
-        
-        $fields = !is_array($field)?explode(',', $field):$field;
-        $as = ' as ';
-        $asLength = strlen($as);
-        foreach ($fields as $k => $v) {
-            $asPosition = stripos($v, $as);
-            
-            if ($asPosition !== false) {
-                $alias = substr($v, $asPosition + $asLength);
-                $v = substr($v, 0, $asPosition);
-                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v), trim($alias));
-            } else {
-                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
+        foreach ($this->select as $item) {
+            if (isset($item[1]) && $item[1] == $field) {
+                return $this;
+            }
+            if (isset($item[2]) && $item[2] == $field) {
+                return $this;
             }
         }
-        
+        return $this->select($field);
+    }
+
+    public function select($field)
+    {
+        $fields = is_array($field) ? $field : array($field);
+        foreach ($fields as $v) {
+            $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
+        }
         return $this;
     }
-    
+
     public function selectAs($field, $alias)
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
         return $this;
     }
-    
+
     public function selectWithPrefix($field, $prefix)
     {
-        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($prefix).'_'.trim($field));
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($prefix) . '_' . trim($field));
         return $this;
     }
 
@@ -170,7 +167,7 @@ class SQL
     {
         return $this->join('RIGHT', $table, $field, $table2, $field2);
     }
-    
+
     public function crossJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('CROSS', $table, $field, $table2, $field2);
@@ -208,10 +205,10 @@ class SQL
                 $q .= ' AND ';
             }
             if (is_array($on)) {
-            $q .= $this->makeByCondition($on, $parentAlias);
+                $q .= $this->makeByCondition($on, $parentAlias);
             } else {
                 $q .= '(' . $on . ')';
-        }
+            }
         }
         return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
@@ -303,26 +300,26 @@ class SQL
             if (!in_array($direction, ['asc', 'desc'])) {
                 $direction = 'asc';
             }
-            
+
             if (!preg_match('/^[\w_\.]+$/', $orderBy)) {
                 return $this;
             }
-            
+
             $cond = '';
             if (strpos($orderBy, '.') !== false) {
-                $cond = $this->db->escape($orderBy).' '.$direction;
+                $cond = $this->db->escape($orderBy) . ' ' . $direction;
             } else {
-                $cond = $this->getAlias().'.`'.$this->db->escape($orderBy).'` '.$direction;
+                $cond = $this->getAlias() . '.`' . $this->db->escape($orderBy) . '` ' . $direction;
             }
-            
+
             if (in_array($cond, $this->orderBy)) {
                 return $this;
             }
-            
+
             $this->orderBy[] = $cond;
             return $this;
         }
-        
+
         if (empty($orderBy) || in_array($orderBy, $this->orderBy)) {
             return $this;
         }
@@ -496,10 +493,10 @@ class SQL
             $alias = array_shift($v);
             switch ($type) {
                 case self::SQL_SELECT_FIELD:
-                    $fields[] = $this->getAlias() . '.`' . $field . '`' . ($alias ? (' as `'.$alias.'`') : '');
+                    $fields[] = $this->getAlias() . '.`' . $field . '`' . ($alias ? (' as `' . $alias . '`') : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
-                    $fields[] = $field . ($alias ? (' as `'.$alias.'`') : '');
+                    $fields[] = $field . ($alias ? (' as `' . $alias . '`') : '');
                     break;
                 default:
                     throw new Exception('unkown field type');
@@ -593,19 +590,19 @@ class SQL
             $this->limit(1);
         }
 
-        return $this->db->one($this->select($name)->make());
+        return $this->db->one($this->selectIfNotSelected($name)->make());
     }
-    
+
     public function column($name, $key = null)
     {
         $oldSelect = $this->select;
-        
+
         $nameAliasLine = $this->getSelectItemByAlias($name);
         $keyAliasLine = null;
         if ($key) {
             $keyAliasLine = $this->getSelectItemByAlias($key);
         }
-        
+
         $this->select = array();
         if ($nameAliasLine) {
             $this->select[] = $nameAliasLine;
@@ -624,7 +621,7 @@ class SQL
         $this->select = $oldSelect;
         return $r;
     }
-    
+
     protected function getSelectItemByAlias($needle)
     {
         foreach ($this->select as $k => $v) {
@@ -635,7 +632,7 @@ class SQL
                 return $this->select[$k];
             }
         }
-        
+
         return null;
     }
 
@@ -881,7 +878,7 @@ class SQL
         }
         return $this->db->query($q);
     }
-    
+
     public function insertIgnore($data, $fields = false)
     {
         $q = $this->makeInsert($data, $fields, $a = 'INSERT IGNORE');
@@ -898,22 +895,22 @@ class SQL
         }
 
         if (!is_array(reset($data))) {
-            return $cmd." INTO " . $this->getFrom() . " SET " . $this->makeSetCondition($data, $fields);
+            return $cmd . " INTO " . $this->getFrom() . " SET " . $this->makeSetCondition($data, $fields);
         }
 
         list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
 
-        return $cmd." INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
+        return $cmd . " INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
     }
 
     public function insertGetId($data, $fields = false)
     {
-        return $this->insert($data, $fields)?$this->db->insertId():0;
+        return $this->insert($data, $fields) ? $this->db->insertId() : 0;
     }
-    
+
     public function insertIgnoreGetId($data, $fields = false)
     {
-        return $this->insertIgnore($data, $fields)?$this->db->insertId():0;
+        return $this->insertIgnore($data, $fields) ? $this->db->insertId() : 0;
     }
 
     public function put($data, $fields = false)
@@ -956,7 +953,7 @@ class SQL
 
     public function putGetId($data, $fields = false)
     {
-        return $this->put($data, $fields)?$this->db->insertId():0;
+        return $this->put($data, $fields) ? $this->db->insertId() : 0;
     }
 
     private function getOnDuplicateKeyCondition($keys)
@@ -1022,7 +1019,7 @@ class SQL
         if (empty($q)) {
             return false;
         }
-        return $this->db->query($q)?$this->db->affectedRows():0;
+        return $this->db->query($q) ? $this->db->affectedRows() : 0;
     }
 
     public function makeUpdate($data, $fields = false)
@@ -1070,7 +1067,7 @@ class SQL
             $field = $this->getAlias();
         }
         if (!empty($field)) {
-            $field = ' '.$field;
+            $field = ' ' . $field;
         }
         return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
             . $this->makeOrderBy() . $this->makeLimit();
@@ -1083,7 +1080,7 @@ class SQL
 
     public function makeTruncate()
     {
-        return "TRUNCATE ".$this->makeFrom();
+        return "TRUNCATE " . $this->makeFrom();
     }
 
     public function copyGetId($replaces = array())
@@ -1108,7 +1105,7 @@ class SQL
             }
         }
 
-        return "INSERT INTO ".$this->getFrom()." (" . implode(",", $fields) . ")"
+        return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
             . " SELECT " . implode(",", $select)
             . ' FROM ' . $this->getFrom()
             . $this->makeWhere();
