@@ -106,8 +106,8 @@ class SQL
     {
         foreach ($this->select as $item) {
             if (isset($item[1]) && $item[1] == $field) {
-                return $this;
-            }
+            return $this;
+        }
             if (isset($item[2]) && $item[2] == $field) {
                 return $this;
             }
@@ -119,8 +119,8 @@ class SQL
     {
         $fields = is_array($field) ? $field : array($field);
         foreach ($fields as $v) {
-            $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
-        }
+                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
+            }
         return $this;
     }
 
@@ -288,6 +288,11 @@ class SQL
     }
 
     public function union($sql)
+    {
+        $this->unionAll($sql);
+    }
+
+    public function unionAll($sql)
     {
         $this->unions[] = $sql;
         return $this;
@@ -465,7 +470,7 @@ class SQL
 
         $sql = '';
         foreach ($this->unions as $union) {
-            $sql .= ' UNION ';
+            $sql .= ' UNION ALL ';
             $sql .= $union->make();
         }
 
