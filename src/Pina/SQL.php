@@ -739,8 +739,13 @@ class SQL
             } else {
                 $result .= ", ";
             }
+            
+            if (is_null($value)) {
+                $result .= "`" . $key . "` = NULL";
+            } else {
+                $result .= "`" . $key . "` = '" . $this->db->escape($value) . "'";
+            }
 
-            $result .= "`" . $key . "` = '" . $this->db->escape($value) . "'";
         }
         if ($first) {
             return false;
@@ -1002,10 +1007,11 @@ class SQL
                 if (!empty($sql_line)) {
                     $sql_line .= ",";
                 }
-                if (isset($line[$key])) {
-                    $sql_line .= "'" . $this->db->escape($line[$key]) . "'";
+                
+                if (!isset($line[$key]) || is_null($line[$key])) {
+                    $sql_line .= "NULL";
                 } else {
-                    $sql_line .= "''";
+                    $sql_line .= "'" . $this->db->escape($line[$key]) . "'";
                 }
             }
             $sql .= "(" . $sql_line . ")";
