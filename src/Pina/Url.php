@@ -174,7 +174,7 @@ class Url
             if (empty($v)) {
                 $v = 0;
             }
-            $resource = trim(str_replace(':' . $k . '/', $v . '/', $resource . '/'), '/');
+            $resource = trim(str_replace(':' . $k . '/', (is_array($v) ? '' : $v) . '/', $resource . '/'), '/');
         }
         $level = 0;
         while (isset($resource[$level]) && $resource[$level] == '$') {
