@@ -101,6 +101,21 @@ class Arr
         return $result;
     }
 
+    public static function groupWithoutKey($data, $key)
+    {
+        $result = array();
+
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                $k = $d[$key];
+                unset($d[$key]);
+                $result[$k][] = $d;
+            }
+        }
+
+        return $result;
+    }
+
     public static function groupUnique($data, $key)
     {
         $result = array();
@@ -190,7 +205,7 @@ class Arr
         $a[trim($subject, "_")] = $r;
         return $a;
     }
-    
+
     public static function get($array, $path, $default = null)
     {
         if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
@@ -201,12 +216,12 @@ class Arr
 
         while (!is_null($segment = array_shift($path))) {
             if ($segment === '*') {
-                if (! is_array($array)) {
+                if (!is_array($array)) {
                     return value($default);
                 }
 
                 $result = static::getFromNextLevel($array, $path);
-                
+
                 return in_array('*', $path) ? static::collapse($result) : $result;
             }
 
@@ -219,7 +234,7 @@ class Arr
 
         return $array;
     }
-    
+
     protected static function getFromNextLevel($array, $key)
     {
         $r = [];
@@ -232,7 +247,7 @@ class Arr
 
         return $r;
     }
-    
+
     public static function collapse($a)
     {
         $r = [];
@@ -247,14 +262,14 @@ class Arr
 
         return $r;
     }
-    
+
     public static function set(&$array, $path, $value)
     {
         if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
             return;
         }
 
-        $keys = is_array($path)? $path : explode('.', $path);
+        $keys = is_array($path) ? $path : explode('.', $path);
 
         while (count($keys) > 1) {
             $key = array_shift($keys);
@@ -268,7 +283,7 @@ class Arr
 
         $array[array_shift($keys)] = $value;
     }
-    
+
     public static function forget(&$array, $keys)
     {
         $original = &$array;
@@ -305,7 +320,7 @@ class Arr
             unset($array[array_shift($parts)]);
         }
     }
-    
+
     public static function has($array, $keys)
     {
         if (is_null($keys)) {
@@ -340,12 +355,12 @@ class Arr
 
         return true;
     }
-    
+
     public static function only($array, $keys)
     {
         return array_intersect_key($array, array_flip((array) $keys));
     }
-    
+
     public static function pull(&$array, $key, $default = null)
     {
         $value = static::get($array, $key, $default);
