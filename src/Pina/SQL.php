@@ -471,7 +471,7 @@ class SQL
         $sql = '';
         foreach ($this->unions as $union) {
             $sql .= ' UNION ALL ';
-            $sql .= $union->make();
+            $sql .= strval($union);
         }
 
         return $sql;
