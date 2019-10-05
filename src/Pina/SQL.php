@@ -106,8 +106,8 @@ class SQL
     {
         foreach ($this->select as $item) {
             if (isset($item[1]) && $item[1] == $field) {
-            return $this;
-        }
+                return $this;
+            }
             if (isset($item[2]) && $item[2] == $field) {
                 return $this;
             }
@@ -119,8 +119,8 @@ class SQL
     {
         $fields = is_array($field) ? $field : array($field);
         foreach ($fields as $v) {
-                $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
-            }
+            $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
+        }
         return $this;
     }
 
@@ -739,13 +739,12 @@ class SQL
             } else {
                 $result .= ", ";
             }
-            
+
             if (is_null($value)) {
                 $result .= "`" . $key . "` = NULL";
             } else {
                 $result .= "`" . $key . "` = '" . $this->db->escape($value) . "'";
             }
-
         }
         if ($first) {
             return false;
@@ -1007,7 +1006,7 @@ class SQL
                 if (!empty($sql_line)) {
                     $sql_line .= ",";
                 }
-                
+
                 if (!isset($line[$key]) || is_null($line[$key])) {
                     $sql_line .= "NULL";
                 } else {
@@ -1063,7 +1062,7 @@ class SQL
         if (empty($operation)) {
             return '';
         }
-        return "UPDATE " . $this->getFrom() . " " . $this->makeJoins() . ' SET ' . $operation . $this->makeWhere();
+        return "UPDATE " . $this->getFrom() . " " . $this->makeJoins() . ' SET ' . $operation . $this->makeWhere() . $this->makeLimit();
     }
 
     public function delete($what = false)
@@ -1081,7 +1080,7 @@ class SQL
             $field = ' ' . $field;
         }
         return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
-            . $this->makeOrderBy() . $this->makeLimit();
+                . $this->makeOrderBy() . $this->makeLimit();
     }
 
     public function truncate()
@@ -1117,9 +1116,9 @@ class SQL
         }
 
         return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
-            . " SELECT " . implode(",", $select)
-            . ' FROM ' . $this->getFrom()
-            . $this->makeWhere();
+                . " SELECT " . implode(",", $select)
+                . ' FROM ' . $this->getFrom()
+                . $this->makeWhere();
     }
 
     public function startTransaction()

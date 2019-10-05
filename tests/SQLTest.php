@@ -361,4 +361,12 @@ class SQLTest extends TestCase
         $this->assertEquals("INSERT INTO `config`(`namespace`,`key`,`value`) VALUES ('Pina\\\\Modules\\\\CMS','phone','123') ON DUPLICATE KEY UPDATE `namespace` = VALUES(`namespace`),`key` = VALUES(`key`),`value` = VALUES(`value`)", $sql);
     }
     
+    public function testUpdate()
+    {
+        $sql = SQL::table('ticket')->limit(1)->whereBy('product_id', 2)->makeUpdate([
+            'order_id' => 3,
+        ]);
+        $this->assertEquals("UPDATE `ticket`  SET `order_id` = '3' WHERE (`ticket`.`product_id` = '2') LIMIT 1", $sql);
+    }
+    
 }
