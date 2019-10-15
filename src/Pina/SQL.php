@@ -498,7 +498,7 @@ class SQL
             $alias = array_shift($v);
             switch ($type) {
                 case self::SQL_SELECT_FIELD:
-                    $fields[] = $this->getAlias() . '.`' . $field . '`' . ($alias ? (' as `' . $alias . '`') : '');
+                    $fields[] = $this->getAlias() . '.' . ($field == '*' ? $field : '`' . $field . '`' ) . ($alias ? (' as `' . $alias . '`') : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
                     $fields[] = $field . ($alias ? (' as `' . $alias . '`') : '');
@@ -1080,7 +1080,7 @@ class SQL
             $field = ' ' . $field;
         }
         return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
-                . $this->makeOrderBy() . $this->makeLimit();
+            . $this->makeOrderBy() . $this->makeLimit();
     }
 
     public function truncate()
@@ -1116,9 +1116,9 @@ class SQL
         }
 
         return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
-                . " SELECT " . implode(",", $select)
-                . ' FROM ' . $this->getFrom()
-                . $this->makeWhere();
+            . " SELECT " . implode(",", $select)
+            . ' FROM ' . $this->getFrom()
+            . $this->makeWhere();
     }
 
     public function startTransaction()

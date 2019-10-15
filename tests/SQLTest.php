@@ -280,6 +280,20 @@ class SQLTest extends TestCase
             "SELECT SUM(quantity) - SUM(delivered) as `left`, `order_product`.`left2` FROM `order_product` WHERE (`order_product`.`order_id` = '38') GROUP BY order_id",
             SQL::table('order_product')->whereBy('order_id', 38)->groupBy('order_id')->calculate('SUM(quantity) - SUM(delivered)', 'left')->selectIfNotSelected('left2')->make()
         );
+        
+        $this->assertEquals(
+            "SELECT `order_product`.*, `order`.`id`, `order`.`status` FROM `order_product` INNER JOIN `order` ON `order`.`id` = `order_product`.`order_id`", 
+            SQL::table('order_product')->select('*')->innerJoin(
+                SQL::table('order')->on('id', 'order_id')->select('id')->select('status')
+            )->make()
+        );
+
+        $this->assertEquals(
+            "SELECT `op`.*, `o`.`id`, `o`.`status` as `sts` FROM `order_product` `op` INNER JOIN `order` `o` ON `o`.`id` = `op`.`order_id`",
+            SQL::table('order_product')->alias('op')->select('*')->innerJoin(
+                SQL::table('order')->alias('o')->on('id', 'order_id')->select('id')->selectAs('status', 'sts')
+            )->make()
+        );
     }
 
     public function testInsert()
