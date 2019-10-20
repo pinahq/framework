@@ -1,0 +1,16 @@
+name: Lint
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: PHP Lint
+        uses: michaelw90/PHP-Lint@1.0.0
