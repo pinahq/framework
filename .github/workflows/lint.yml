@@ -12,5 +12,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: PHP Lint
-        uses: michaelw90/PHP-Lint@1.0.0
+      - name: PHPCodeSniffer
+        uses: rtCamp/action-phpcs-inspection@v1.0.0
