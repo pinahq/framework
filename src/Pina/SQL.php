@@ -589,6 +589,15 @@ class SQL
         return $this->db->row($this->make());
     }
 
+    public function firstOrFail()
+    {
+        $line = $this->first();
+        if (!isset($line)) {
+            throw new \Pina\NotFoundException;
+        }
+        return $line;
+    }
+
     public function value($name, $useLimit = true)
     {
         if ($useLimit) {
@@ -1080,7 +1089,7 @@ class SQL
             $field = ' ' . $field;
         }
         return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
-            . $this->makeOrderBy() . $this->makeLimit();
+                . $this->makeOrderBy() . $this->makeLimit();
     }
 
     public function truncate()
@@ -1116,9 +1125,9 @@ class SQL
         }
 
         return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
-            . " SELECT " . implode(",", $select)
-            . ' FROM ' . $this->getFrom()
-            . $this->makeWhere();
+                . " SELECT " . implode(",", $select)
+                . ' FROM ' . $this->getFrom()
+                . $this->makeWhere();
     }
 
     public function startTransaction()

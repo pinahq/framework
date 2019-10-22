@@ -141,6 +141,15 @@ class TableDataGateway extends SQL
         return $this->whereId($id)->first();
     }
 
+    public function findOrFail($id)
+    {
+        $line = $this->find($id);
+        if (!isset($line)) {
+            throw new \Pina\NotFoundException;
+        }
+        return $line;
+    }
+
     public function id()
     {
         return $this->value($this->primaryKey());
