@@ -164,7 +164,7 @@ class Response implements ResponseInterface
         return $this->header('Content-Type', $type . '; charset=' . $charset);
     }
 
-    public static function contentRange($start, $end, $max)
+    public function contentRange($start, $end, $max)
     {
         return $this->header('Content-Range', 'bytes ' . $start . '-' . $end . '/' . $max);
     }
