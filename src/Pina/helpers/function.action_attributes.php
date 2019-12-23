@@ -15,6 +15,18 @@ function smarty_function_action_attributes($params, &$view)
         return;
     }
     
+    global $__pinaLinkContext;
+
+    if (is_array($__pinaLinkContext)) {
+        foreach ($__pinaLinkContext as $level) {
+            foreach ($level as $k => $v) {
+                if (isset($v) && $v !== '' && !isset($params[$k])) {
+                    $params[$k] = $v;
+                }
+            }
+        }
+    }
+    
     $assign = '';
     if (isset($params['assign'])) {
         $assign = $params['assign'];
