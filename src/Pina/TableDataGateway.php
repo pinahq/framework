@@ -25,11 +25,19 @@ class TableDataGateway extends SQL
     protected $orderBy = "";
     protected $context = array();
 
+    /**
+     * Возвращает список триггеров
+     * @return array
+     */
     public function getTriggers()
     {
         return array();
     }
-
+    
+    /**
+     * Возвращает список внешних ключей таблицы
+     * @return array
+     */
     public function getForeignKeys()
     {
         return array();
@@ -40,26 +48,48 @@ class TableDataGateway extends SQL
         parent::__construct($this->getTable());
     }
 
+    /**
+     * Возвращает название таблицы
+     * @return string
+     */
     public function getTable()
     {
         return static::$table;
     }
 
+    /**
+     * Возвращает список полей
+     * @return array
+     */
     public function getFields()
     {
         return static::$fields;
     }
 
+    /**
+     * Возвращает список индексов
+     * @return array
+     */
     public function getIndexes()
     {
         return static::$indexes;
     }
 
+    /**
+     * Возвращает тип движка таблицы
+     * @return string
+     */
     public function getEngine()
     {
         return static::$engine;
     }
 
+    /**
+     * Генерирует массив запросов на обновление структуры таблицы, 
+     * которые необходимо выполнить, чтобы привести состояние таблицы к описанному
+     * в классе модели
+     * @return array
+     */
     public function getUpgrades()
     {
         if (empty(static::$fields)) {
@@ -78,6 +108,11 @@ class TableDataGateway extends SQL
         return array(array_filter($first), array_filter($last));
     }
 
+    /**
+     * Разбирает структуру описания таблицы, представленную в классе модели,
+     * и возвращает класс структуры
+     * @return Structure
+     */
     public function getStructure()
     {
         $parser = new StructureParser;
@@ -88,6 +123,11 @@ class TableDataGateway extends SQL
         return $structure;
     }
 
+    /**
+     * Разбирает структуру таблицы, представленную в базе данных
+     * и возвращает класс структуры
+     * @return Structure
+     */
     public function getExistedStructure()
     {
         $parser = new StructureParser;
@@ -96,6 +136,12 @@ class TableDataGateway extends SQL
         return $parser->getStructure();
     }
 
+    /**
+     * Возвращает набор корректных вариантов для поля типа ENUM на основании
+     * анализа описания этого поля
+     * @param string $field
+     * @return array
+     */
     public function getEnumVariants($field)
     {
         if (empty(static::$fields[$field])) {
@@ -114,33 +160,58 @@ class TableDataGateway extends SQL
         return $fields;
     }
 
-    /*
+    /**
      * Возвращает экземпляр конкретного класса
-     * @return TableDataGateway
+     * @return $this
      */
-
     public static function instance()
     {
         $cl = get_called_class();
         return new $cl();
     }
 
+    /**
+     * Добавляет контекст выполнения запроса.
+     * Контекст используется как в выборке, так и при вставке 
+     * @param string $field
+     * @param mixed $value
+     * @return $this
+     */
     public function context($field, $value)
     {
         $this->context[$field] = $value;
         return $this->whereBy($field, $value);
     }
 
+    /**
+     * Проверяет, есть ли поле с заданным именем
+     * @param string $field
+     * @return bool
+     */
     public function hasField($field)
     {
         return isset(static::$fields[$field]);
     }
 
+    /**
+     * Добавляет к запросу условие по ID, выполняет его
+     * и возвращает первую строку выборки
+     * @param string|int $id
+     * @return array
+     */
     public function find($id)
     {
         return $this->whereId($id)->first();
     }
 
+    /**
+     * Добавляет к запросу условие по ID, выполняет его
+     * и возвращает первую строку выборки
+     * Если запись не найдена, то выбрасывает исключение
+     * @param string|int $id
+     * @return array
+     * @throws \Pina\NotFoundException
+     */
     public function findOrFail($id)
     {
         $line = $this->find($id);
@@ -150,11 +221,22 @@ class TableDataGateway extends SQL
         return $line;
     }
 
+    /**
+     * Выполняет запрос и возвращает значение первичного ключа для первой строки
+     * @return string|int
+     */
     public function id()
     {
         return $this->value($this->primaryKey());
     }
 
+    /**
+     * Проводит подготовку массива под вставку:
+     * - убирает лишние поля (которых нет в параметре $fields или в поле $field)
+     * - добавляет значения контекста
+     * @param array $data
+     * @param array $fields
+     */
     protected function adjustDataAndFields(&$data, &$fields)
     {
         if (!empty($fields)) {
@@ -174,6 +256,12 @@ class TableDataGateway extends SQL
         }
     }
 
+    /**
+     * Возвращает названия поля первичного ключа
+     * Если первичный ключ составной, возвращает название первого поля 
+     * первичого ключа
+     * @return string
+     */
     protected function primaryKey()
     {
         if (empty(static::$indexes['PRIMARY KEY'])) {
@@ -187,6 +275,12 @@ class TableDataGateway extends SQL
         return static::$indexes['PRIMARY KEY'];
     }
 
+    /**
+     * Возвращает список ключей на обновление в случае, если будут дубликаты
+     * По сути выбирает все имена полей кроме первичного ключа
+     * @param array $keys
+     * @return array
+     */
     protected function getOnDuplicateKeys($keys)
     {
         $primaryKeys = !empty($this->indexes['PRIMARY KEY']) ? $this->indexes['PRIMARY KEY'] : array();
@@ -197,6 +291,13 @@ class TableDataGateway extends SQL
         return array_diff($keys, $primaryKeys);
     }
 
+    /**
+     * Собирает и возвращает текст запроса на вставку данных в таблицу
+     * @param array $data
+     * @param array $fields
+     * @param string $cmd
+     * @return string
+     */
     public function makeInsert($data = array(), $fields = false, $cmd = 'INSERT')
     {
         $this->adjustDataAndFields($data, $fields);
@@ -204,12 +305,24 @@ class TableDataGateway extends SQL
         return parent::makeInsert($data, $fields, $cmd);
     }
 
+    /**
+     * Собирает и возвращает текст запроса на замену данных в таблице
+     * @param array $data
+     * @param array $fields
+     * @return string
+     */
     public function makePut($data, $fields = false)
     {
         $this->adjustDataAndFields($data, $fields);
         return parent::makePut($data, $fields);
     }
 
+    /**
+     * Собирает и возвращает текст запроса на обновление данных в таблице
+     * @param array $data
+     * @param array $fields
+     * @return string
+     */
     public function update($data, $fields = false)
     {
         if (empty($data)) {
@@ -220,16 +333,31 @@ class TableDataGateway extends SQL
         return parent::update($data, $fields);
     }
 
+    /**
+     * Добавляет условие на соответствие ID заданному значению
+     * @param string|int $id
+     * @return $this
+     */
     public function whereId($id)
     {
         return $this->whereBy($this->primaryKey(), $id);
     }
 
+    /**
+     * Добавляет в запрос условие на несоответствие ID заданному значению
+     * @param string|int $id
+     * @return $this
+     */
     public function whereNotId($id)
     {
         return $this->whereNotBy($this->primaryKey(), $id);
     }
 
+    /**
+     * Добавляет в запрос выборку всех полей кроме заданных
+     * @param array|string $field
+     * @return $this
+     */
     public function selectAllExcept($field)
     {
         $excludedFields = is_array($field) ? $field : explode(",", $field);
@@ -241,6 +369,10 @@ class TableDataGateway extends SQL
         return $this;
     }
 
+    /**
+     * @deprecated
+     * @return $this
+     */
     public function enabled()
     {
         $prefix = str_replace("cody_", "", $this->table);
@@ -248,6 +380,11 @@ class TableDataGateway extends SQL
         return $this->whereBy($prefix . "_enabled", 'Y');
     }
 
+    /**
+     * Собирает и возвращает текст запроса, отвечающего за сортировку (для ORDER BY)
+     * @param string $s
+     * @return string
+     */
     public function getSorting($s)
     {
 
@@ -283,11 +420,24 @@ class TableDataGateway extends SQL
         return $order;
     }
 
+    /**
+     * Добавляет в запрос условие сортировки
+     * @param string $s
+     * @return $this
+     */
     public function sort($s)
     {
         return $this->orderBy($this->getSorting($s));
     }
 
+    /**
+     * Выполняет запрос на изменение порядка данных в таблице, 
+     * основываясь на порядке идентификаторов первичного ключа в массиве $ids 
+     * и имени поля $field, отвечающего за сортировку
+     * @param array $ids
+     * @param string $field
+     * @return void
+     */
     public function reorder($ids, $field = 'order')
     {
         if (!isset(static::$fields[$field])) {
@@ -322,12 +472,13 @@ class TableDataGateway extends SQL
             $gw->whereId($id)->update([$field => intval($order)]);
         }
     }
-
-    /* Проверяет поля массива $data
-     * на соответствие размерности полей БД mysql.
-     * При несоответствии помещает сообщения в Request::error
+    
+    /**
+     * Проверяет входной массив на соответствие требованиям типа данных полей таблицы.
+     * Возвращает список ошибок.
+     * @param array $data
+     * @return array
      */
-
     public function validate($data)
     {
         $errors = [];
@@ -368,10 +519,14 @@ class TableDataGateway extends SQL
         return $errors;
     }
 
-    /*
+    /**
+     * Загружает данные из объекта читателя согласно схеме
      * $schema = array("file_field" => "table_field");
+     * 
+     * @param array $schema
+     * @param object $reader
+     * @return int
      */
-
     public function load($schema, $reader)
     {
         $cnt = 0;
@@ -398,6 +553,12 @@ class TableDataGateway extends SQL
         return $cnt;
     }
 
+    /**
+     * Загружает CSV из файла по указанному пути согласно схеме
+     * @param array $schema
+     * @param string $path
+     * @return int
+     */
     public function loadCSV($schema, $path)
     {
         $csv = \League\Csv\Reader::createFromPath($path);

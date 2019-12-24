@@ -6,7 +6,7 @@ namespace Pina;
  * TODO:
  * 1) добавить возможность использовать подзапросы в select/from/where
  * 2) для Join возможность использовать and/or в условии соединения
- * 3) автоматически вычислять, какой join нужен для подсчета постраничной 
+ * 3) автоматически вычислять, какой join нужен для подсчета постраничной
  * навигации, а какой нет
  */
 
@@ -32,16 +32,31 @@ class SQL
     private $unions = array();
     private $ons = array();
 
+    /**
+     * Создает объект запроса к БД на основе имени таблицы и драйвера БД
+     * @param string $table
+     * @param \Pina\DatabaseDriverInterface $db
+     * @return \Pina\SQL
+     */
     public static function table($table, $db = false)
     {
         return new SQL($table, $db);
     }
 
+    /**
+     * Создает объект подзапроса на основании текста запроса или объекта другого запроса
+     * @param mixed $query
+     * @return \Pina\SQL
+     */
     public static function subquery($query)
     {
         return new SQL($query);
     }
 
+    /**
+     * Обнуляет запрос
+     * @return $this
+     */
     public function init()
     {
         $this->select = array();
@@ -57,28 +72,50 @@ class SQL
         return $this;
     }
 
+    /**
+     * Создает и возвращает копию запроса
+     * @return $this
+     */
     public function cloneObject()
     {
         return clone $this;
     }
 
+    /**
+     * Создает конструктор запроса
+     * @param string $table
+     * @param \Pina\DatabaseDriverInterface $db
+     */
     protected function __construct($table, $db = null)
     {
         $this->db = $db ? $db : App::container()->get(\Pina\DatabaseDriverInterface::class);
         $this->from = $table;
     }
 
+    /**
+     * Добавляет в запрос alias для таблицы
+     * @param string $alias
+     * @return $this
+     */
     public function alias($alias)
     {
         $this->alias = $alias;
         return $this;
     }
 
+    /**
+     * Возвращает alias таблицы или имя таблицы, если alias не настроен
+     * @return string
+     */
     public function getAlias()
     {
         return $this->alias ? ('`' . $this->alias . '`') : $this->getFrom();
     }
 
+    /**
+     * Возвращает имя таблицы или вложенный запрос вместо него
+     * @return string
+     */
     public function getFrom()
     {
         if (is_string($this->from)) {
@@ -88,11 +125,19 @@ class SQL
         return '(' . $this->from . ')';
     }
 
+    /**
+     * Собирает конструкцию для FROM
+     * @return string
+     */
     public function makeFrom()
     {
         return $this->getFrom() . ($this->alias ? (' `' . $this->alias . '`') : '');
     }
 
+    /**
+     * Сбрасывает список выбранных полей
+     * @return $this
+     */
     public function resetSelect()
     {
         $this->select = [];
@@ -102,6 +147,11 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос выбор поля, если оно еще не выбрано
+     * @param string $field
+     * @return $this
+     */
     public function selectIfNotSelected($field)
     {
         foreach ($this->select as $item) {
@@ -115,6 +165,11 @@ class SQL
         return $this->select($field);
     }
 
+    /**
+     * Добавляет в запрос выбор поля
+     * @param string $field
+     * @return $this
+     */
     public function select($field)
     {
         $fields = is_array($field) ? $field : array($field);
@@ -124,79 +179,161 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос выбор поля с псевданимом
+     * @param string $field
+     * @param string $alias
+     * @return $this
+     */
     public function selectAs($field, $alias)
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
         return $this;
     }
 
+    /**
+     * Добавляет в запрос выбор поля с префиксом
+     * @param string $field
+     * @param string $prefix
+     * @return $this
+     */
     public function selectWithPrefix($field, $prefix)
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($prefix) . '_' . trim($field));
         return $this;
     }
 
+    /**
+     * Добавляет в запрос вычисление поля с псевданимом
+     * @param string $field
+     * @param string $alias
+     * @return $this
+     */
     public function calculate($field, $alias = null)
     {
         $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias);
         return $this;
     }
 
+    /**
+     * Проверяет, есть ли в запросе конструкции на выбор поля
+     * @return int
+     */
     protected function selected()
     {
         return count($this->select) > 0;
     }
 
+    /**
+     * Добавляет в запрос JOIN другой таблицы
+     * @param string $type
+     * @param \Pina\SQL $table
+     * @return $this
+     */
     public function join($type, $table)
     {
         $this->joins[] = array($type, $table);
         return $this;
     }
 
+    /**
+     * Добавляет в запрос LEFT JOIN другой таблицы
+     * @param \Pina\SQL $table
+     * @return $this
+     */
     public function leftJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('LEFT', $table, $field, $table2, $field2);
     }
 
+    /**
+     * Добавляет в запрос INNER JOIN другой таблицы
+     * @param \Pina\SQL $table
+     * @return $this
+     */
     public function innerJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('INNER', $table, $field, $table2, $field2);
     }
 
+    /**
+     * Добавляет в запрос RIGHT JOIN другой таблицы
+     * @param \Pina\SQL $table
+     * @return $this
+     */
     public function rightJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('RIGHT', $table, $field, $table2, $field2);
     }
 
+    /**
+     * Добавляет в запрос CROSS JOIN другой таблицы
+     * @param \Pina\SQL $table
+     * @return $this
+     */
     public function crossJoin($table, $field = false, $table2 = false, $field2 = false)
     {
         return $this->join('CROSS', $table, $field, $table2, $field2);
     }
 
+    /**
+     * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
+     * Условие задается как имена полей текущей и вышестоящей таблицы, значения которых должны быть равны
+     * @param string $field1
+     * @param string $field2
+     * @return $this
+     */
     public function on($field1, $field2 = '')
     {
         $this->ons[] = array('=', self::SQL_OPERAND_FIELD, $field1, self::SQL_OPERAND_FIELD, $field2 ? $field2 : $field1);
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
+     * Условие задается как отношение поля к некоторому значению или массиву значений
+     * @param string $field
+     * @param array|string $needle
+     * @param string $op
+     * @return $this
+     */
     public function onBy($field, $needle, $op = '=')
     {
         $this->ons[] = array($op, self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
+     * Условие задается как отношение поля к некоторому значению или массиву значений
+     * @param string $field
+     * @param array|string $needle
+     * @param string $op
+     * @return $this
+     */
     public function onNotBy($field, $needle)
     {
         $this->ons[] = array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle);
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
+     * Условие может быть произвольным, но соответствовать формату
+     * @param array|string $condition
+     * @return $this
+     */
     public function onRaw($condition)
     {
         $this->ons[] = $condition;
         return $this;
     }
 
+    /**
+     * Собирает и возвращает текст ON-части запроса
+     * @param string $parentAlias
+     * @return string
+     */
     public function makeOns($parentAlias)
     {
         $q = '';
@@ -213,52 +350,126 @@ class SQL
         return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
 
+    /**
+     * Добавляет в запрос произвольное условие выборки
+     * @param string $condition
+     * @return $this
+     */
     public function where($condition)
     {
         $this->where[] = $condition;
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на равенстве поля заданному значению
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция IN
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
     public function whereBy($field, $needle)
     {
         return $this->where($this->makeByCondition(array('=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на неравенстве поля заданному значению
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция NOT IN
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
     public function whereNotBy($field, $needle)
     {
         return $this->where($this->makeByCondition(array('<>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции LIKE
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция OR
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
     public function whereLike($field, $needle)
     {
         return $this->where($this->makeByCondition(array('LIKE', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции NOT LIKE
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция OR
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
     public function whereNotLike($field, $needle)
     {
         return $this->where($this->makeByCondition(array('NOT LIKE', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции BETWEEN
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * @param array|string $field
+     * @param string $start
+     * @param string $end
+     * @return $this
+     */
     public function whereBetween($field, $start, $end)
     {
         return $this->where($this->makeByCondition(array('BETWEEN', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $start, self::SQL_OPERAND_VALUE, $end)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции NOT BETWEEN
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция OR
+     * @param array|string $field
+     * @param string $start
+     * @param string $end
+     * @return $this
+     */
     public function whereNotBetween($field, $start, $end)
     {
         return $this->where($this->makeByCondition(array('NOT BETWEEN', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $start, self::SQL_OPERAND_VALUE, $end)));
     }
 
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции IS NULL
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * @param array|string $field
+     * @return $this
+     */
     public function whereNull($field)
     {
         return $this->where($this->makeByCondition(array('IS NULL', self::SQL_OPERAND_FIELD, $field)));
     }
 
+    
+    /**
+     * Добавляет в запрос условие выборки, основанное на конструкции IS NOT NULL
+     * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
+     * @param array|string $field
+     * @return $this
+     */
     public function whereNotNull($field)
     {
         return $this->where($this->makeByCondition(array('IS NOT NULL', self::SQL_OPERAND_FIELD, $field)));
     }
 
+    /**
+     * Добавляет в запрос набор условий выборки, 
+     * основанных на равенстве полей, указанных в ключах входного ассоциативного массива,
+     * значениям, указанным в значениях входного массива
+     * @param array $ps
+     * @return $this
+     */
     public function whereFields($ps)
     {
         if (!is_array($ps)) {
@@ -271,6 +482,12 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие группировки
+     * @param string $table
+     * @param string $field
+     * @return $this
+     */
     public function groupBy($table, $field = false)
     {
         if (empty($field)) {
@@ -281,23 +498,43 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос произвольное условие типа HAVING
+     * @param string $having
+     * @return $this
+     */
     public function having($having)
     {
         $this->having[] = $having;
         return $this;
     }
 
+    /**
+     * @deprecated
+     * @param mixed $sql
+     */
     public function union($sql)
     {
         $this->unionAll($sql);
     }
 
+    /**
+     * Добавляет в запрос объединение с другим запросом
+     * @param mixed $sql
+     * @return $this
+     */
     public function unionAll($sql)
     {
         $this->unions[] = $sql;
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие сортировки
+     * @param string $orderBy
+     * @param string $direction
+     * @return $this
+     */
     public function orderBy($orderBy, $direction = null)
     {
         if (!empty($direction)) {
@@ -333,6 +570,12 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос условие на базе LIMIT
+     * @param string|int $start
+     * @param string|int $count
+     * @return $this
+     */
     public function limit($start, $count = null)
     {
         if ($count === null) {
@@ -346,6 +589,14 @@ class SQL
         return $this;
     }
 
+    /**
+     * Добавляет в запрос набор условий, связанных с постраничной навигацией
+     * 
+     * @param \Pina\Paging $paging
+     * @param string $field название поля, по которому будет считаться COUNT()
+     * @param bool $useJoin указывает, необходимо ли подключать другие таблицы через JOIN
+     * @return $this
+     */
     public function paging(&$paging, $field = false, $useJoin = true)
     {
         $paging->setTotal($this->pagingCount($field, $useJoin));
@@ -357,6 +608,9 @@ class SQL
         return $this;
     }
 
+    /**
+     * @deprecated
+     */
     protected function extractTableLink($table)
     {
         if (strpos($table, 'AS') !== false) {
@@ -370,6 +624,10 @@ class SQL
         return $table;
     }
 
+    /**
+     * Собирает и возвращает строку запроса, связанну с частью WHERE
+     * @return string
+     */
     public function makeWhere()
     {
         $sql = join(' AND ', $this->getWhereArray());
@@ -381,6 +639,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Возвращает массив с подготовленным набором условий для конструкции WHERE
+     * @return array
+     */
     public function getWhereArray()
     {
         $wheres = array();
@@ -395,6 +657,11 @@ class SQL
         return array_merge($wheres, $this->getJoinWhereArray());
     }
 
+    /**
+     * Возвращает массив с подготовленным набором условий для конструкции WHERE,
+     * полученным из присоединенных таблиц (JOIN)
+     * @return array
+     */
     public function getJoinWhereArray()
     {
         $wheres = array();
@@ -407,6 +674,10 @@ class SQL
         return $wheres;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкций типа JOIN
+     * @return string
+     */
     public function makeJoins()
     {
         $sql = '';
@@ -424,6 +695,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции GROUP BY
+     * @return string
+     */
     public function makeGroupBy()
     {
         if (empty($this->groupBy)) {
@@ -432,6 +707,10 @@ class SQL
         return ' GROUP BY ' . join(', ', $this->groupBy);
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции HAVING
+     * @return string
+     */
     public function makeHaving()
     {
         if (empty($this->having)) {
@@ -441,6 +720,10 @@ class SQL
         return ' HAVING ' . join(' AND ', $this->having);
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции ORDER BY
+     * @return string
+     */
     public function makeOrderBy()
     {
         $sql = join(', ', $this->orderBy);
@@ -451,6 +734,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции LIMIT
+     * @return string
+     */
     public function makeLimit()
     {
         $sql = '';
@@ -462,6 +749,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции UNION
+     * @return string
+     */
     public function makeUnions()
     {
         if (empty($this->unions)) {
@@ -477,6 +768,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и возвращает строку со списком полей на выборку
+     * @return string
+     */
     public function makeFields()
     {
         $fields = $this->getFieldArray();
@@ -489,6 +784,10 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Возвращает подготовленный массив со списком полей
+     * @return array
+     */
     public function getFieldArray()
     {
         $fields = array();
@@ -512,6 +811,10 @@ class SQL
         return $fields;
     }
 
+    /**
+     * Возвращает подготовленный массив со списком полей из вложенных через JOIN таблиц
+     * @return array
+     */
     public function getJoinFieldArray()
     {
         $fields = array();
@@ -524,6 +827,11 @@ class SQL
         return $fields;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции COUNT
+     * @param string $field
+     * @return string
+     */
     public function makeCountFields($field)
     {
         if (empty($field)) {
@@ -539,6 +847,10 @@ class SQL
         return join($flds);
     }
 
+    /**
+     * Собирает и возвращает строку запроса
+     * @return string
+     */
     public function make()
     {
         $sql = 'SELECT ';
@@ -559,12 +871,20 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и выводит текущее состояние запроса
+     * @return $this
+     */
     public function debug()
     {
         echo $this->make();
         return $this;
     }
 
+    /**
+     * Выполняет запрос и возвращает двумерный массив (таблицу) с набором записей
+     * @return array
+     */
     public function get($a = false)
     {
         if (!empty($a)) {
@@ -582,6 +902,10 @@ class SQL
         return $this->db->table($this->make());
     }
 
+    /**
+     * Выполняет запрос и возвращает первую запись из выборки
+     * @return array
+     */
     public function first()
     {
         $this->limit(1);
@@ -589,6 +913,12 @@ class SQL
         return $this->db->row($this->make());
     }
 
+    /**
+     * Выполняет запрос и возвращает первую запись из выборки
+     * Если запись не найдена, выбрасывает исключение
+     * @return array
+     * @throws \Pina\NotFoundException
+     */
     public function firstOrFail()
     {
         $line = $this->first();
@@ -598,6 +928,12 @@ class SQL
         return $line;
     }
 
+    /**
+     * Выполняет запрос и возвращает заданную ячейку из первой записи выборки
+     * @param string $name
+     * @param bool $useLimit
+     * @return string
+     */
     public function value($name, $useLimit = true)
     {
         if ($useLimit) {
@@ -607,6 +943,14 @@ class SQL
         return $this->db->one($this->selectIfNotSelected($name)->make());
     }
 
+    /**
+     * Выполняет запрос и возвращает заданную колонку $name из выборки.
+     * Если задан второй параметр $key, то значения из этого поля станут ключами
+     * выходного массива.
+     * @param string $name
+     * @param string $key 
+     * @return array
+     */
     public function column($name, $key = null)
     {
         $oldSelect = $this->select;
@@ -636,6 +980,10 @@ class SQL
         return $r;
     }
 
+    /**
+     * @param string $needle
+     * @return array
+     */
     protected function getSelectItemByAlias($needle)
     {
         foreach ($this->select as $k => $v) {
@@ -650,11 +998,21 @@ class SQL
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->make();
     }
 
+    /**
+     * Возвращает количества записей в выборке, чтобы
+     * использовать их в методе paging.
+     * @param string $field
+     * @param bool $useJoin
+     * @return string
+     */
     public function pagingCount($field = false, $useJoin = true)
     {
         if ($this->from == '') {
@@ -674,6 +1032,11 @@ class SQL
         return $this->db->one($sql);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса с COUNT заданного поля
+     * @param string $field
+     * @return string
+     */
     public function count($field = false)
     {
         if ($this->from == '') {
@@ -693,6 +1056,13 @@ class SQL
         return $this->db->one($sql);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса 
+     * с заданной агрегатной функцией
+     * @param string $func
+     * @param string $what
+     * @return string
+     */
     private function aggregate($func, $what)
     {
         if ($this->from == '') {
@@ -709,31 +1079,60 @@ class SQL
         return $this->db->one($sql);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса MAX заданного поля
+     * @param string $what
+     * @return string
+     */
     public function max($what)
     {
         return $this->aggregate('max', $what);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса MIN заданного поля
+     * @param string $what
+     * @return string
+     */
     public function min($what)
     {
         return $this->aggregate('min', $what);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса AVG заданного поля
+     * @param string $what
+     * @return string
+     */
     public function avg($what)
     {
         return $this->aggregate('avg', $what);
     }
 
+    /**
+     * Собирает, выполняет и возвращает результат запроса SUM заданного поля
+     * @param string $what
+     * @return string
+     */
     public function sum($what)
     {
         return $this->aggregate('sum', $what);
     }
 
+    /**
+     * @return string|bool
+     */
     public function exists()
     {
         return $this->limit(1)->count();
     }
 
+    /**
+     * Собирает строку запроса для конструкции SET
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean|string
+     */
     public function makeSetCondition($data, $fields = false)
     {
         $first = true;
@@ -762,6 +1161,12 @@ class SQL
         return $result;
     }
 
+    /**
+     * Собирает и возвращает строку для конструкции ON BY, WHERE и т.д.
+     * @param array $condition
+     * @param string $parentAlias
+     * @return string
+     */
     public function makeByCondition($condition, $parentAlias = '')//$fields, $needle, $operand = '='
     {
 
@@ -811,6 +1216,12 @@ class SQL
         return '';
     }
 
+    /**
+     * Собирает и возвращает строку для бинарного оператора
+     * @param array $condition
+     * @param string $parentAlias
+     * @return string
+     */
     private function getBinaryCondition($condition, $parentAlias = '')
     {
         list($operation, $type1, $operand1, $type2, $operand2) = $condition;
@@ -818,6 +1229,12 @@ class SQL
         return $this->getOperand('', $type1, $operand1) . ' ' . $this->getOperand($operation, $type2, $operand2, $parentAlias);
     }
 
+    /**
+     * Собирает и возвращает строку для унарного оператора, где операция идет после операнда
+     * @param array $condition
+     * @param string $parentAlias
+     * @return string
+     */
     private function getUnaryPostfixCondition($condition, $parentAlias = '')
     {
         list($operation, $type1, $operand1) = $condition;
@@ -825,6 +1242,12 @@ class SQL
         return $this->getOperand('', $type1, $operand1) . ' ' . $operation;
     }
 
+    /**
+     * Собирает и возвращает строку для унарного оператора, где операция идете перед операндом
+     * @param array $condition
+     * @param string $parentAlias
+     * @return string
+     */
     private function getUnaryPrefixCondition($condition, $parentAlias = '')
     {
         list($operation, $type1, $operand1) = $condition;
@@ -832,6 +1255,12 @@ class SQL
         return $this->getOperand($operation, $type1, $operand1);
     }
 
+    /**
+     * Собирает и возвращает строку для оператора BETWEEN
+     * @param array $condition
+     * @param string $parentAlias
+     * @return string
+     */
     private function getBetweenCondition($condition, $parentAlias)
     {
         list($operation, $type1, $operand1, $type2, $operand2, $type3, $operand3) = $condition;
@@ -839,6 +1268,14 @@ class SQL
         return $this->getOperand('', $type1, $operand1) . ' ' . $this->getOperand($operation, $type2, $operand2, $parentAlias) . ' AND ' . $this->getOperand('', $type3, $operand3, $parentAlias);
     }
 
+    /**
+     * Собирает и возвращает строку для оператора
+     * @param string $operation
+     * @param string $type
+     * @param array|string $operand
+     * @param string $alias
+     * @return string
+     */
     private function getOperand($operation, $type, $operand, $alias = '')
     {
         if (is_array($operand) && $type === self::SQL_OPERAND_VALUE && empty($operation)) {
@@ -869,6 +1306,11 @@ class SQL
         return $prefix . "'" . $this->db->escape($operand) . "'";
     }
 
+    /**
+     * Собирает и возвращает строку для оператора IN
+     * @param array $needle
+     * @return string
+     */
     public function getInCondition($needle)
     {
         $first = true;
@@ -888,6 +1330,12 @@ class SQL
         return $condition;
     }
 
+    /**
+     * Собирает и выполняет запрос на вставку (INSERT)
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean
+     */
     public function insert($data, $fields = false)
     {
         $q = $this->makeInsert($data, $fields);
@@ -897,6 +1345,12 @@ class SQL
         return $this->db->query($q);
     }
 
+    /**
+     * Собирает и выполняет запрос на вставку с игнорированием дубликатов (INSERT IGNORE)
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean
+     */
     public function insertIgnore($data, $fields = false)
     {
         $q = $this->makeInsert($data, $fields, $a = 'INSERT IGNORE');
@@ -906,6 +1360,13 @@ class SQL
         return $this->db->query($q);
     }
 
+    /**
+     * Собирает и возвращает строку запроса на вставку
+     * @param array $data
+     * @param array|false $fields
+     * @param string $cmd
+     * @return string
+     */
     public function makeInsert($data, $fields = false, $cmd = 'INSERT')
     {
         if (empty($data) || !is_array($data)) {
@@ -921,16 +1382,36 @@ class SQL
         return $cmd . " INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
     }
 
+    /**
+     * Собирает и выполняет запрос на вставку (INSERT),
+     * а также возвращает ID добавленной записи
+     * @param array $data
+     * @param array|false $fields
+     * @return string
+     */
     public function insertGetId($data, $fields = false)
     {
         return $this->insert($data, $fields) ? $this->db->insertId() : 0;
     }
 
+    /**
+     * Собирает и выполняет запрос на вставку с игнорированием дубликатов (INSERT IGNORE),
+     * а также возвращает ID добавленной записи
+     * @param array $data
+     * @param array|false $fields
+     * @return string
+     */
     public function insertIgnoreGetId($data, $fields = false)
     {
         return $this->insertIgnore($data, $fields) ? $this->db->insertId() : 0;
     }
 
+    /**
+     * Собирает и выполняет запрос на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean
+     */
     public function put($data, $fields = false)
     {
         $q = $this->makePut($data, $fields);
@@ -940,6 +1421,12 @@ class SQL
         return $this->db->query($q);
     }
 
+    /**
+     * Собирает и возвращает строку запроса на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
+     * @param array $data
+     * @param array|false $fields
+     * @return string
+     */
     public function makePut($data, $fields = false)
     {
         if (empty($data) || !is_array($data)) {
@@ -969,11 +1456,23 @@ class SQL
         return $sql;
     }
 
+    /**
+     * Собирает и выполняет запрос на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
+     * а также возвращает ID добавленной записи
+     * @param array $data
+     * @param array|false $fields
+     * @return string
+     */
     public function putGetId($data, $fields = false)
     {
         return $this->put($data, $fields) ? $this->db->insertId() : 0;
     }
 
+    /**
+     * Собирает строку конструкции ON DUPLICATE KEY UPDATE
+     * @param array $keys
+     * @return string
+     */
     private function getOnDuplicateKeyCondition($keys)
     {
         $keys = $this->getOnDuplicateKeys($keys);
@@ -991,11 +1490,20 @@ class SQL
         return $q;
     }
 
+    /**
+     * @param array $keys
+     * @return array
+     */
     protected function getOnDuplicateKeys($keys)
     {
         return $keys;
     }
 
+    /**
+     * @param array $data
+     * @param array|false $fields
+     * @return array|false
+     */
     private function getKeyValuesCondition($data, $fields)
     {
         $keys = array_keys(current($data));
@@ -1032,6 +1540,12 @@ class SQL
         return array($keys, $sql);
     }
 
+    /**
+     * Собирает и выполняет запрос на обновление таблицы (UPDATE)
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean
+     */
     public function update($data, $fields = false)
     {
         $q = $this->makeUpdate($data, $fields);
@@ -1041,6 +1555,12 @@ class SQL
         return $this->db->query($q) ? $this->db->affectedRows() : 0;
     }
 
+    /**
+     * Собирает строку запроса на обновление таблицы (UPDATE)
+     * @param array $data
+     * @param array|false $fields
+     * @return boolean
+     */
     public function makeUpdate($data, $fields = false)
     {
         if (empty($data) || !is_array($data)) {
@@ -1050,22 +1570,44 @@ class SQL
         return $this->makeUpdateOperation($this->makeSetCondition($data, $fields));
     }
 
+    /**
+     * Собирает и выполняет запрос на увеличение ячейки таблицы на заданное значение (UPDATE)
+     * @param string $field
+     * @param string $value
+     * @return int
+     */
     public function increment($field, $value)
     {
         return $this->updateOperation('`' . $field . '` = `' . $field . '` + ' . $this->db->escape($value));
     }
 
+    /**
+     * Собирает и выполняет запрос на уменьшение ячейки таблицы на заданное значение (UPDATE)
+     * @param string $field
+     * @param string $value
+     * @return int
+     */
     public function decrement($field, $value)
     {
         return $this->updateOperation('`' . $field . '` = `' . $field . '` - ' . $this->db->escape($value));
     }
 
+    /**
+     * Собирает и выполняет запрос на произвольное обновление таблицы (UPDATE)
+     * @param string $operation
+     * @return int
+     */
     protected function updateOperation($operation)
     {
         $this->db->query($this->makeUpdateOperation($operation));
         return $this->db->affectedRows();
     }
 
+    /**
+     * Собирает и возвращает строку запроса на произвольное обновление таблицы (UPDATE)
+     * @param string $operation
+     * @return int
+     */
     protected function makeUpdateOperation($operation)
     {
         if (empty($operation)) {
@@ -1074,11 +1616,21 @@ class SQL
         return "UPDATE " . $this->getFrom() . " " . $this->makeJoins() . ' SET ' . $operation . $this->makeWhere() . $this->makeLimit();
     }
 
+    /**
+     * Собирает и выполняет запрос на удаление записей из таблицы (DELETE)
+     * @param string $what
+     * @return bool
+     */
     public function delete($what = false)
     {
         return $this->db->query($this->makeDelete($what));
     }
 
+    /**
+     * Собирает и возвращает строку запроса на удаление записей из таблицы (DELETE)
+     * @param string $what
+     * @return bool
+     */
     public function makeDelete($what = false)
     {
         $field = ($what ? ('`' . $what . '`') : '');
@@ -1092,27 +1644,51 @@ class SQL
                 . $this->makeOrderBy() . $this->makeLimit();
     }
 
+    /**
+     * Выполняет запрос на обнуление таблицы (TRUNCATE)
+     * @return bool
+     */
     public function truncate()
     {
         return $this->db->query($this->makeTruncate());
     }
 
+    /**
+     * Собирает и возвращает строку запроса на обнуление таблицы (TRUNCATE)
+     * @return bool
+     */
     public function makeTruncate()
     {
         return "TRUNCATE " . $this->makeFrom();
     }
 
+    /**
+     * Выполняет запрос на копирование записей таблицы (INSERT .. SELECT)
+     * а так же возвращает ID добавленной записи
+     * @param array $replaces
+     * @return string
+     */
     public function copyGetId($replaces = array())
     {
         $this->copy($replaces);
         return $this->db->insertId();
     }
 
+    /**
+     * Выполняет запрос на копирование записей таблицы (INSERT .. SELECT)
+     * @param array $replaces
+     * @return bool
+     */
     public function copy($replaces = array())
     {
         return $this->db->query($this->makeCopy($replaces));
     }
 
+    /**
+     * Собирает и возвращает строку запроса на копирование записей таблицы (INSERT .. SELECT)
+     * @param array $replaces
+     * @return string
+     */
     public function makeCopy($replaces = array())
     {
         $fields = array_diff(array_keys($this->fields), array($this->primaryKey));
@@ -1130,16 +1706,28 @@ class SQL
                 . $this->makeWhere();
     }
 
+    /**
+     * Запускает транзакцию
+     * @return bool
+     */
     public function startTransaction()
     {
         return $this->db->query("START TRANSACTION");
     }
 
+    /**
+     * Завершает транзакцию
+     * @return bool
+     */
     public function commit()
     {
         return $this->db->query("COMMIT");
     }
 
+    /**
+     * Откатывает транзакцию
+     * @return bool
+     */
     public function rollback()
     {
         return $this->db->query("ROLLBACK");
