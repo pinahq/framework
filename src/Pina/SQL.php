@@ -656,6 +656,16 @@ class SQL
 
         return array_merge($wheres, $this->getJoinWhereArray());
     }
+    
+    /**
+     * Сбрасывает все накопленные условия для конструкции WHERE
+     * @return $this
+     */
+    public function resetWhere()
+    {
+        $this->where = [];
+        return $this;
+    }
 
     /**
      * Возвращает массив с подготовленным набором условий для конструкции WHERE,

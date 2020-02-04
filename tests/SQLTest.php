@@ -84,6 +84,23 @@ class SQLTest extends TestCase
             . " OR `cody_product`.`brand_title` LIKE '2'"
             . " OR `cody_product`.`brand_title` LIKE '3'"
             . ")", $q);
+        $q = SQL::table('cody_product')
+            ->whereBy(array('product_id', 'brand_id'), array(1,2,3))
+            ->whereLike(array('product_title', 'brand_title'), 'kuku')
+            ->whereLike(array('product_title', 'brand_title'), array(1, 2 ,3))
+            ->resetWhere()
+            ->make();
+        
+        $this->assertEquals('SELECT * FROM `cody_product`', $q);
+        $q = SQL::table('cody_product')
+            ->whereBy(array('product_id', 'brand_id'), array(1,2,3))
+            ->whereLike(array('product_title', 'brand_title'), 'kuku')
+            ->whereLike(array('product_title', 'brand_title'), array(1, 2 ,3))
+            ->resetWhere()
+            ->whereBy('sku', '123')
+            ->make();
+        
+        $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`sku` = '123')", $q);
     }
 
     public function testJoin()
