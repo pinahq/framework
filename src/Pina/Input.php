@@ -94,7 +94,7 @@ class Input
 
     public static function getContentType()
     {
-        $contentTypeHeader = filter_input(INPUT_SERVER, 'HTTP_CONTENT_TYPE');
+        $contentTypeHeader = isset($_SERVER['HTTP_CONTENT_TYPE']) ? $_SERVER['HTTP_CONTENT_TYPE'] : '';
         $contentType = $contentTypeHeader;
         $tmp = '';
         if (strpos($contentTypeHeader, ';') !== false) {
