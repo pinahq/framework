@@ -7,7 +7,7 @@ class Language
 
     private static $code = null;
     private static $data = [];
-    
+
     public static function init()
     {
         $config = Config::load('language');
@@ -32,38 +32,44 @@ class Language
         if (!isset(self::$code)) {
             static::init();
         }
-        
+
         if (empty(self::$code)) {
             return '';
         }
-        
+
         $string = trim($string);
         if (empty($string)) {
             return '';
         }
-        
+
         $modules = App::container()->get(ModuleRegistryInterface::class);
         $module = $ns ? $modules->get($ns) : Request::module();
         if (empty($module)) {
             return '';
         }
-        
+
         $moduleKey = $module->getNamespace();
-        
+
         if (!isset(static::$data[static::$code])) {
             static::$data[static::$code] = [];
         }
-        
+
         if (!isset(static::$data[static::$code][$moduleKey])) {
             $path = $module->getPath();
-            $file = $path."/lang/".static::$code.'.php';
+            $file = $path . "/lang/" . static::$code . '.php';
             static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
         }
-        
+
+        if (!isset(static::$data[static::$code][$moduleKey][$string])) {
+            $moduleKey = '__fallback__';
+            $file = App::path() . '/../lang/' . static::$code . '.php';
+            static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
+        }
+
         if (!isset(static::$data[static::$code][$moduleKey][$string])) {
             return $string;
         }
-        
+
         return static::$data[static::$code][$moduleKey][$string];
     }
 

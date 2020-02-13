@@ -22,6 +22,7 @@ class Templater extends \Smarty
             }
         }
 
+        $this->default_template_handler_func = [$this, 'defaultTemplateHandlerFunc'];
         $this->use_sub_dirs = false;
         $this->template_dir = array();
 
@@ -44,7 +45,7 @@ class Templater extends \Smarty
             "getTemplateSecure",
             "getTemplateTrusted",
         ]);
-        
+
         $this->register_resource('email', [
             "\Pina\Templater",
             "getEmailTemplate",
@@ -52,6 +53,11 @@ class Templater extends \Smarty
             "getEmailTemplateSecure",
             "getEmailTemplateTrusted",
         ]);
+    }
+
+    public function defaultTemplateHandlerFunc()
+    {
+        return true;
     }
 
     public function _smarty_include($params)
@@ -69,14 +75,14 @@ class Templater extends \Smarty
         if (!isset($params['get'])) {
             return '';
         }
-        
+
         $vars_backup = $view->_tpl_vars;
         $params['get'] = Route::resource($params['get'], $params);
         $handler = new TemplaterHandler($params['get'], 'get', $params);
         $handler->setTemplater($view);
-        
+
         $result = Request::internal($handler)->fetchContent();
-        
+
         $view->_tpl_vars = $vars_backup;
 
         if (!empty($params['wrapper']) && !empty($result)) {
@@ -95,7 +101,7 @@ class Templater extends \Smarty
         if (!isset($params['display'])) {
             $params['display'] = '';
         }
-        
+
         $vars_backup = $view->_tpl_vars;
 
         $params['get'] = Route::resource($params['get'], $params);
@@ -157,34 +163,34 @@ class Templater extends \Smarty
     public static function getTemplatePaths($template, &$view)
     {
         list($controller, $action, $display) = explode('!', $template);
-        
+
         $module = Route::owner($controller);
         if (empty($module)) {
             return [];
         }
-        
+
         $handler = Url::handler($controller, $action);
-        
+
         if (!empty($display)) {
             $handler .= '.' . $display;
         }
-        
+
         $handler .= ".tpl";
-        
+
         $moduleFolder = $module->getTitle();
-        
+
         $paths = $view->template_dir;
         foreach ($paths as $k => $v) {
             $paths[$k] .= 'Modules/' . $moduleFolder . '/' . $handler;
         }
-        
+
         $modulePath = $module->getPath();
         if (!empty($modulePath)) {
             $paths[] = $modulePath . '/' . $handler;
         }
         return array_unique($paths);
     }
-    
+
     public static function getTemplate($template, &$tpl_source, &$view)
     {
         $paths = static::getTemplatePaths($template, $view);
@@ -208,7 +214,7 @@ class Templater extends \Smarty
         }
         return false;
     }
-    
+
     public static function isTemplateExists($template, &$view)
     {
         $paths = static::getTemplatePaths($template, $view);
@@ -229,31 +235,31 @@ class Templater extends \Smarty
     {
         
     }
-    
+
     public static function getEmailTemplatePaths($template, &$view)
     {
-        
+
         $module = Request::module();
         if (empty($module)) {
             return true;
         }
-        
+
         $handler = $template . ".tpl";
-        
+
         $moduleFolder = substr(strrchr($module->getNamespace(), "\\"), 1);
-        
+
         $paths = $view->template_dir;
         foreach ($paths as $k => $v) {
             $paths[$k] .= 'Modules/' . $moduleFolder . '/emails/' . $handler;
         }
-        
+
         $modulePath = $module->getPath();
         if (!empty($modulePath)) {
             $paths[] = $modulePath . '/emails/' . $handler;
         }
         return array_unique($paths);
     }
-    
+
     public static function getEmailTemplate($template, &$tpl_source, &$view)
     {
         $paths = static::getEmailTemplatePaths($template, $view);
@@ -277,7 +283,7 @@ class Templater extends \Smarty
         }
         return false;
     }
-    
+
     public static function isEmailTemplateExists($template, &$view)
     {
         $paths = static::getEmailTemplatePaths($template, $view);

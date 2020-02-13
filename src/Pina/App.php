@@ -19,6 +19,11 @@ class App
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
     );
 
+    /**
+     * Иницирует приложение
+     * @param type $env Режим работы (например, live или test)
+     * @param type $configPath Путь к каталогу с настройками
+     */
     public static function init($env, $configPath)
     {
         self::env($env);
@@ -48,11 +53,29 @@ class App
         }
     }
 
+    /**
+     * Возвращает DI контейнер
+     * @return Container
+     */
     public static function container()
     {
         return self::$container;
     }
 
+    /**
+     * Возвращает объект для работы с БД
+     * @return DatabaseDriverInterface
+     */
+    public static function db()
+    {
+        return self::$container->get(\Pina\DatabaseDriverInterface::class);
+    }
+
+    /**
+     * Запускает приложение: анализирует параметры, 
+     * выбирает и выполняет цепочку контроллеров
+     * отрисовывает результат
+     */
     public static function run()
     {
         if (self::host() != Input::getHost()) {
@@ -123,16 +146,32 @@ class App
         }
     }
 
+    /**
+     * Задает шаблон layout`а по умолчанию
+     * @param type $layout Имя шаблона layout`а
+     */
     public static function setDefaultLayout($layout)
     {
         self::$layout = $layout;
     }
 
+    /**
+     * Возвращает шаблон layout`а по умолчанию
+     * @return string
+     */
     public static function getDefaultLayout()
     {
         return self::$layout;
     }
 
+    /**
+     * Инициализирует обрабатываемый ресурс (единожды во время запуска
+     * приложения, повторная инициализация запрещена)
+     * Возвращает текущий ресурс
+     * @staticvar string $item хранит текущий ресурс
+     * @param type $resource ресурс
+     * @return string
+     */
     public static function resource($resource = '')
     {
         static $item = false;
@@ -144,61 +183,111 @@ class App
         return $item;
     }
 
+    /**
+     * Базовый URL на основе настроек схемы и домена приложения
+     * @return string
+     */
     public static function baseUrl()
     {
         return self::scheme() . "://" . self::host() . "/";
     }
 
+    /**
+     * Схема URL приложения
+     * @return string
+     */
     public static function scheme()
     {
         return isset(self::$config['scheme']) ? self::$config['scheme'] : Input::getScheme();
     }
 
+    /**
+     * Домен приложения
+     * @return string
+     */
     public static function host()
     {
         return isset(self::$config['host']) ? self::$config['host'] : Input::getHost();
     }
 
+    /**
+     * Шаблон (скин) приложения
+     * @return string
+     */
     public static function template()
     {
         return isset(self::$config['template']) ? self::$config['template'] : null;
     }
 
+    /**
+     * Путь на диске к папке с приложением
+     * @return string
+     */
     public static function path()
     {
         return self::$config['path'];
     }
 
+    /**
+     * Путь на диске к папке с загрузками (deprecated)
+     * @return string
+     */
     public static function uploads()
     {
         return self::$config['uploads'];
     }
 
+    /**
+     * Кодировка приложения
+     * @return string
+     */
     public static function charset()
     {
         return self::$config['charset'];
     }
 
+    /**
+     * Путь на диске к директории для временных файлов
+     * @return string
+     */
     public static function tmp()
     {
         return self::$config['tmp'];
     }
 
+    /**
+     * Путь на диске к директории кэша шаблонизатора
+     * @return string
+     */
     public static function templaterCache()
     {
         return self::$config['templater']['cache'];
     }
 
+    /**
+     * Путь на диске к директории компилированных данных шаблонизатора
+     * @return string
+     */
     public static function templaterCompiled()
     {
         return self::$config['templater']['compiled'];
     }
 
+    /**
+     * Версия приложения
+     * @return string
+     */
     public static function version()
     {
         return isset(self::$config['version']) ? self::$config['version'] : '';
     }
 
+    /**
+     * Инициализирует и считывает окружение (режим работы) приложения
+     * @staticvar string $item хранит режим работы
+     * @param string $env режим работы
+     * @return string
+     */
     public static function env($env = '')
     {
         static $item = false;
@@ -210,6 +299,12 @@ class App
         return $item;
     }
 
+    /**
+     * Генерирует набор параметров для ресурса в момент сбора ссылки
+     * @param string $pattern Маска ресурса
+     * @param array $params Набор параметров
+     * @return string
+     */
     public static function getParamsString($pattern, $params)
     {
         $systemParamKeys = array('get', 'app', 'anchor');
@@ -223,6 +318,12 @@ class App
         return http_build_query($params);
     }
 
+    /**
+     * Формирует ссылку по заданной маске
+     * @param string $pattern Маска ссылки
+     * @param array $params Параметры
+     * @return string
+     */
     public static function link($pattern, $params = array())
     {
         $url = self::baseUrl();
@@ -243,11 +344,19 @@ class App
         return $url;
     }
 
+    /**
+     * Принудительно задает mime-тип, который должно вернуть приложение
+     * @param string $mime
+     */
     public static function forceMimeType($mime)
     {
         static::$forcedMimeType = $mime;
     }
 
+    /**
+     * Вычисляет mime-тип, который должно вернуть приложение
+     * @return string
+     */
     public static function negotiateMimeType()
     {
         if (!empty(static::$forcedMimeType)) {
@@ -281,6 +390,13 @@ class App
         return 'text/html';
     }
 
+    /**
+     * Инстанцирует контент в соответствии с mime-типом приложения
+     * @param mixed $results Результат выполнения запроса
+     * @param string $controller Контроллер
+     * @param string $action Метод контроллера
+     * @return ContentInterface
+     */
     public static function createResponseContent($results, $controller, $action)
     {
         $mime = static::negotiateMimeType();
@@ -294,6 +410,10 @@ class App
         return new TemplaterContent($results, $template, Request::isExternalRequest());
     }
 
+    /**
+     * Предлагает набор обновлений для структуре БД
+     * @return array
+     */
     public static function getUpgrades()
     {
         $firstUpgrades = array();
@@ -311,6 +431,12 @@ class App
         return $upgrades;
     }
 
+    /**
+     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную 
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
     public static function walkClasses($type, $callback)
     {
         $paths = self::$container->get(ModuleRegistryInterface::class)->getPaths();
