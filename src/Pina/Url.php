@@ -177,7 +177,7 @@ class Url
             $resource = trim(str_replace(':' . $k . '/', (is_array($v) ? '' : $v) . '/', $resource . '/'), '/');
         }
         $level = 0;
-        while (isset($resource[$level]) && $resource[$level] == '$') {
+        while (isset($resource[$level]) && in_array($resource[$level], ['$', '@'])) {
             $level ++;
         }
         if ($level > 0) {
