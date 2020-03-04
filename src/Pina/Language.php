@@ -26,6 +26,11 @@ class Language
 
         return $oldCode;
     }
+    
+    public static function getCode()
+    {
+        return static::$code;
+    }
 
     public static function translate($string, $ns = null)
     {
