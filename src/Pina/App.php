@@ -142,6 +142,7 @@ class App
         } catch (ForbiddenException $e) {
             Response::forbidden()->send();
         } catch (InternalErrorException $e) {
+            Log::error('system', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
             Response::internalError()->send();
         }
     }
