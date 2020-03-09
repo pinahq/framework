@@ -43,7 +43,7 @@ class CSRF
         if (self::$token) {
             return;
         }
-        self::$token = filter_input(INPUT_COOKIE, 'csrf_token');
+        self::$token = isset($_COOKIE['csrf_token']) ? $_COOKIE['csrf_token'] : '';
         if (!self::$token) {
             self::$token = self::generate();
         }
@@ -86,8 +86,8 @@ class CSRF
         if (in_array(Route::base($controller), self::$whitelist)) {
             return true;
         }
-        $cookie = filter_input(INPUT_COOKIE, 'csrf_token');
-        $header = filter_input(INPUT_SERVER, 'HTTP_X_CSRF_TOKEN');
+        $cookie = isset($_COOKIE['csrf_token']) ? $_COOKIE['csrf_token'] : '';
+        $header = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '';
         if (!empty($header)) {
             return $header === $cookie;
         }
