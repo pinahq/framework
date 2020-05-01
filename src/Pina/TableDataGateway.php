@@ -22,7 +22,6 @@ class TableDataGateway extends SQL
     protected static $fields = false;
     protected static $indexes = [];
     protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    protected $orderBy = "";
     protected $context = array();
 
     /**
@@ -33,7 +32,7 @@ class TableDataGateway extends SQL
     {
         return array();
     }
-    
+
     /**
      * Возвращает список внешних ключей таблицы
      * @return array
@@ -472,7 +471,7 @@ class TableDataGateway extends SQL
             $gw->whereId($id)->update([$field => intval($order)]);
         }
     }
-    
+
     /**
      * Проверяет входной массив на соответствие требованиям типа данных полей таблицы.
      * Возвращает список ошибок.

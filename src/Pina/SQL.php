@@ -570,6 +570,12 @@ class SQL
         return $this;
     }
 
+    protected function orderByRaw($orderBy)
+    {
+        $this->orderBy[] = $orderBy;
+        return $this;
+    }
+
     /**
      * Добавляет в запрос условие на базе LIMIT
      * @param string|int $start
@@ -656,7 +662,7 @@ class SQL
 
         return array_merge($wheres, $this->getJoinWhereArray());
     }
-    
+
     /**
      * Сбрасывает все накопленные условия для конструкции WHERE
      * @return $this
