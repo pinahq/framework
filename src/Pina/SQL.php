@@ -32,6 +32,13 @@ class SQL
     private $unions = array();
     private $ons = array();
 
+    public function __clone()
+    {
+        foreach ($this->joins as $k => $join) {
+            $this->joins[$k][1] = clone($join[1]);
+        }
+    }
+
     /**
      * Создает объект запроса к БД на основе имени таблицы и драйвера БД
      * @param string $table
