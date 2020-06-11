@@ -458,7 +458,6 @@ class SQL
         return $this->where($this->makeByCondition(array('IS NULL', self::SQL_OPERAND_FIELD, $field)));
     }
 
-    
     /**
      * Добавляет в запрос условие выборки, основанное на конструкции IS NOT NULL
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
@@ -517,12 +516,14 @@ class SQL
     }
 
     /**
-     * @deprecated
+     * Добавляет в запрос объединение с другим запросом
      * @param mixed $sql
+     * @return $this
      */
     public function union($sql)
     {
-        $this->unionAll($sql);
+        $this->unions[] = [$sql, ''];
+        return $this;
     }
 
     /**
@@ -532,7 +533,7 @@ class SQL
      */
     public function unionAll($sql)
     {
-        $this->unions[] = $sql;
+        $this->unions[] = [$sql, 'ALL'];
         return $this;
     }
 
@@ -784,8 +785,9 @@ class SQL
 
         $sql = '';
         foreach ($this->unions as $union) {
-            $sql .= ' UNION ALL ';
-            $sql .= strval($union);
+            list($q, $type) = $union;
+            $sql .= ' ' . trim('UNION' . ' ' . $type) . ' ';
+            $sql .= strval($q);
         }
 
         return $sql;
@@ -1664,7 +1666,7 @@ class SQL
             $field = ' ' . $field;
         }
         return "DELETE" . $field . " FROM " . $this->makeFrom() . $this->makeJoins() . $this->makeWhere()
-                . $this->makeOrderBy() . $this->makeLimit();
+            . $this->makeOrderBy() . $this->makeLimit();
     }
 
     /**
@@ -1724,9 +1726,9 @@ class SQL
         }
 
         return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
-                . " SELECT " . implode(",", $select)
-                . ' FROM ' . $this->getFrom()
-                . $this->makeWhere();
+            . " SELECT " . implode(",", $select)
+            . ' FROM ' . $this->getFrom()
+            . $this->makeWhere();
     }
 
     /**

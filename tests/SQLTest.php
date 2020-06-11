@@ -400,4 +400,16 @@ class SQLTest extends TestCase
         $this->assertEquals("UPDATE `ticket`  SET `order_id` = '3' WHERE (`ticket`.`product_id` = '2') LIMIT 1", $sql);
     }
     
+    public function testUnions()
+    {
+        $gw = SQL::table('order_product')->whereBy('order_id', 38)->groupBy('order_id')->calculate('SUM(quantity) - SUM(delivered)', 'left')->selectIfNotSelected('left');
+        $q = $gw->make();
+        
+        $union = $gw->cloneObject();
+        
+        $this->assertEquals($q.' UNION '.$q, $r = $gw->cloneObject()->union($union)->make());
+        $this->assertEquals($q.' UNION ALL '.$q, $r = $gw->cloneObject()->unionAll($union)->make());
+        
+    }
+    
 }
