@@ -21,18 +21,18 @@ class TableComponent extends ListData //implements ComponentInterface
 
     public function draw()
     {
-        $r = $this->drawRow($this->schema->getTitles(), 'th');
+        $r = $this->drawHeader($this->schema->getTitles());
         foreach ($this as $record) {
             $r .= RowComponent::basedOn($record)->draw();
         }
         return Html::tag('table', $r);
     }
 
-    protected function drawRow($data, $tag = 'td')
+    protected function drawHeader($data)
     {
         $r = '';
         foreach ($data as $k => $v) {
-            $r .= Html::tag($tag, $v);
+            $r .= Html::tag('th', $v);
         }
         return Html::tag('tr', $r);
     }
