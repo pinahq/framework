@@ -5,22 +5,22 @@ namespace Pina;
 class EndpointController
 {
 
-    public function index(Request $request)
+    public function index($params)
     {
         
     }
 
-    public function show(Request $request)
+    public function show($params)
     {
         
     }
     
-    public function destroy(Request $request)
+    public function destroy($params)
     {
         
     }
     
-    public function update(Request $request)
+    public function update($params)
     {
         
     }

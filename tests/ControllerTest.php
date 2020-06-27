@@ -20,16 +20,25 @@ class ControllerTest extends TestCase
         Pina\CronEventGateway::instance()->truncate();
         Pina\CronEventGateway::instance()->insert($data);
         
-        $endpoint = new CronEventEndpoint();
-        $html = $endpoint->index([])->forgetColumn('id')->draw();
-        $this->assertEquals(
-            '<table>'
+        $expectedHtml = '<table>'
             . '<tr><th>Событие</th><th>Дата создания</th></tr>'
             . '<tr><td>order.paid</td><td>2020-01-02 03:04:05</td></tr>'
             . '<tr><td>order.canceled</td><td>2020-01-02 04:05:06</td></tr>'
             . '<tr><td>order.returned</td><td>2020-01-02 05:06:07</td></tr>'
-            . '</table>', $html
-        );
+            . '</table>';
+        
+        $endpoint = new CronEventEndpoint();
+        $html = $endpoint->index([])->forgetColumn('id')->draw();
+        $this->assertEquals($expectedHtml, $html);
+        
+        $router = new Pina\Router;
+        $router->register('cron-events', CronEventEndpoint::class);
+        $router->register('lk/:profile_id/cron-events', CronEventEndpoint::class);
+        
+        $html = $router->run("cron-events", 'get')->forgetColumn('id')->draw();
+        $this->assertEquals($expectedHtml, $html);
+        $html = $router->run("lk/1/cron-events", 'get')->forgetColumn('id')->draw();
+        $this->assertEquals($expectedHtml, $html);
     }
 
 }

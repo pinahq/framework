@@ -58,7 +58,7 @@ class Schema
     {
         $newLine = [];
         foreach ($this->fields as $k) {
-            $newLine[] = $line[$k] ?? '';
+            $newLine[] = $line[$k] ? $line[$k] : '';
         }
         return $newLine;
     }
