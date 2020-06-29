@@ -10,20 +10,18 @@ class TableComponent extends ListData //implements ComponentInterface
     /**
      * 
      * @param \Pina\ListData $list
-     * @return \Pina\TableComponent
+     * @return $this
      */
-    public static function basedOn(ListData $list)
+    public function basedOn(ListData $list)
     {
-        $r = new TableComponent();
-        $r->load($list->data, $list->schema);
-        return $r;
+        return $this->load($list->data, $list->schema);
     }
 
     public function draw()
     {
         $r = $this->drawHeader($this->schema->getTitles());
         foreach ($this as $record) {
-            $r .= RowComponent::basedOn($record)->draw();
+            $r .= RowComponent::instance()->basedOn($record)->draw();
         }
         return Html::tag('table', $r);
     }

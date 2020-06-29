@@ -9,6 +9,11 @@ class DataObject
      * @var Schema
      */
     protected $schema = null;
+    
+    public static function instance()
+    {
+        return new static();
+    }
 
     public function setSchema(Schema $schema)
     {
@@ -23,7 +28,7 @@ class DataObject
 
     public function turnTo($alias)
     {
-        return \Pina\App::container()->get('component:' . $alias)->basedOn($this);
+        return \Pina\App::getComponent($alias)->basedOn($this);
     }
 
 }

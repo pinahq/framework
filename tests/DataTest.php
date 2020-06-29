@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\App;
 use Pina\Components\ListData;
 use Pina\Components\TableComponent;
 use Pina\Components\ListComponent;
@@ -21,22 +22,20 @@ class DataTest extends TestCase
             ['id' => 2, 'event' => 'order.canceled', 'created_at' => '2020-01-02 04:05:06'],
             ['id' => 3, 'event' => 'order.returned', 'created_at' => '2020-01-02 05:06:07'],
         ];
-
-        $list = new ListData();
-        $list->load($data, $schema);
-        $html = TableComponent::basedOn($list)->draw();
-        $this->assertEquals(
-            '<table>'
+        
+        $expectedHtml = '<table>'
             . '<tr><th>#</th><th>Событие</th><th>Дата создания</th></tr>'
             . '<tr><td>1</td><td>order.paid</td><td>2020-01-02 03:04:05</td></tr>'
             . '<tr><td>2</td><td>order.canceled</td><td>2020-01-02 04:05:06</td></tr>'
             . '<tr><td>3</td><td>order.returned</td><td>2020-01-02 05:06:07</td></tr>'
-            . '</table>', $html
-        );
+            . '</table>';
 
-//        $list->turnTo("table")->draw();
-        
-        $html = ListComponent::basedOn(TableComponent::basedOn($list))->select('event')->draw();
+        $list = new ListData();
+        $list->load($data, $schema);
+        $html = TableComponent::instance()->basedOn($list)->draw();
+        $this->assertEquals($expectedHtml, $html);
+
+        $html = ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('event')->draw();
         $this->assertEquals(
             '<ul>'
             . '<li>order.paid</li>'
@@ -45,14 +44,15 @@ class DataTest extends TestCase
             . '</ul>', $html
         );
         $this->assertEquals(
-            ListComponent::basedOn(TableComponent::basedOn($list))->select('event')->draw(), ListComponent::basedOn($list)->select('event')->draw()
+            ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('event')->draw(), ListComponent::instance()->basedOn($list)->select('event')->draw()
         );
         $this->assertEquals(
-            ListComponent::basedOn(TableComponent::basedOn($list))->select('id')->draw(), ListComponent::basedOn($list)->select('id')->draw()
+            ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('id')->draw(), ListComponent::instance()->basedOn($list)->select('id')->draw()
         );
 
-
-//        $list->representAs(new TableComponent)->draw();
+        App::registerComponent('table', TableComponent::class);
+        $html = $list->turnTo("table")->draw();
+        $this->assertEquals($expectedHtml, $html);
     }
 
 }

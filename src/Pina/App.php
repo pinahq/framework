@@ -71,6 +71,16 @@ class App
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
     }
 
+    public static function registerComponent($alias, $concrete)
+    {
+        static::$container->set('component:' . $alias, $concrete);
+    }
+
+    public static function getComponent($alias)
+    {
+        return static::$container->get('component:' . $alias);
+    }
+
     /**
      * Запускает приложение: анализирует параметры, 
      * выбирает и выполняет цепочку контроллеров

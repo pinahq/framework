@@ -7,6 +7,12 @@ class RecordData extends DataObject
 
     protected $data = [];
     
+    /**
+     * 
+     * @param type $data
+     * @param \Pina\Components\Schema $schema
+     * @return $this
+     */
     public function load($data, Schema $schema)
     {
         $this->data = $data;
@@ -14,9 +20,14 @@ class RecordData extends DataObject
         return $this;
     }
     
+    /**
+     * Получить поле записи
+     * @param string $field
+     * @return mixed
+     */
     public function get($field)
     {
-        return $this->data[$field] ?? null;
+        return isset($this->data[$field]) ? $this->data[$field] : null;
     }
 
 }

@@ -12,15 +12,14 @@ class ListComponent extends ListData //implements ComponentInterface
     /**
      * 
      * @param \Pina\ListData $list
-     * @return \Pina\TableComponent
+     * @return $this
      */
-    public static function basedOn(ListData $list)
+    public function basedOn(ListData $list)
     {
-        $r = new ListComponent();
-        $r->load($list->data, $list->schema);
+        $this->load($list->data, $list->schema);
         $fields = $list->schema->getFields();
-        $r->select = $fields[0] ?? null;
-        return $r;
+        $this->select = isset($fields[0]) ? $fields[0] : null;
+        return $this;
     }
 
     public function select($column)

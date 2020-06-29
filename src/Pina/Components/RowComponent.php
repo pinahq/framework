@@ -11,13 +11,11 @@ class RowComponent extends RecordData //implements ComponentInterface
     /**
      * 
      * @param \Pina\RecordData $record
-     * @return \Pina\TableComponent
+     * @return $this
      */
-    public static function basedOn(RecordData $record)
+    public function basedOn(RecordData $record)
     {
-        $r = new RowComponent();
-        $r->load($record->data, $record->schema);
-        return $r;
+        return $this->load($record->data, $record->schema);
     }
     
     public function setTag($tag)
