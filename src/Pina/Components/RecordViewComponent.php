@@ -7,17 +7,6 @@ use Pina\Html;
 class RecordViewComponent extends RecordData //implements ComponentInterface
 {
 
-    protected $tag = 'td';
-    /**
-     * 
-     * @param \Pina\RecordData $record
-     * @return $this
-     */
-    public function basedOn(RecordData $record)
-    {
-        return $this->load($record->data, $record->schema);
-    }
-    
     public function draw()
     {
         $fields = $this->schema->getFields();

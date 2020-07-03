@@ -14,7 +14,7 @@ class RecordData extends DataObject
      */
     public function basedOn(RecordData $record)
     {
-        return $this->load($record->data, $record->schema);
+        return $this->load($record->data, $record->schema, $record->meta);
     }
 
     /**
@@ -23,10 +23,11 @@ class RecordData extends DataObject
      * @param \Pina\Components\Schema $schema
      * @return $this
      */
-    public function load($data, Schema $schema)
+    public function load($data, Schema $schema, $meta = [])
     {
         $this->data = $data;
         $this->schema = $schema;
+        $this->meta = $meta;
         return $this;
     }
 

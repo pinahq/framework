@@ -30,17 +30,21 @@ class Router
         if ($c === null) {
             throw new Container\NotFoundException;
         }
-
+        
         $cl = $this->endpoints[$c];
         $inst = new $cl;
 
-        $pattern = $this->patterns[$controller];
+        $pattern = $this->patterns[$c];
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
-
         $params = array_merge($parsed, $params);
+        
+        $deeper = [];
+        if ($this->parse($resource, $pattern."/:id/:__action", $deeper)) {
+            $action .= $this->ucfirstEveryWord($deeper['__action']);
+        }
 
-        return $inst->$action($params);
+        return $inst->$action($params)->setMeta('location', $resource);
     }
 
     public function base($controller)
@@ -76,6 +80,15 @@ class Router
             return true;
         }
         return false;
+    }
+    
+    private function ucfirstEveryWord($s)
+    {
+        $parts = preg_split("/[^\w]/s", $s);
+        foreach ($parts as $k => $v) {
+            $parts[$k] = ucfirst($v);
+        }
+        return implode($parts);
     }
 
 }

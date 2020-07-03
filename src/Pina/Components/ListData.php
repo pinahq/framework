@@ -15,13 +15,14 @@ class ListData extends DataObject implements \Iterator
      */
     public function basedOn(ListData $list)
     {
-        return $this->load($list->data, $list->schema);
+        return $this->load($list->data, $list->schema, $list->meta);
     }
     
-    public function load($data, Schema $schema)
+    public function load($data, Schema $schema, $meta = [])
     {
         $this->data = $data;
         $this->schema = $schema;
+        $this->meta = $meta;
         return $this;
     }
     
@@ -29,13 +30,7 @@ class ListData extends DataObject implements \Iterator
     {
         $this->data[] = $line;
     }
-    
-    public function forgetColumn($column)
-    {
-        $this->schema->forgetField($column);
-        return $this;
-    }
-    
+
     /**
      * 
      * @return \Pina\RecordData

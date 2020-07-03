@@ -15,18 +15,18 @@ class Schema
         $this->titles[] = $title;
         $this->types[] = $type;
     }
-    
+
     public function forgetField($key)
     {
         $index = array_search($key, $this->fields);
         if ($index === false) {
             return $this;
         }
-        
+
         array_splice($this->fields, $index, 1);
         array_splice($this->titles, $index, 1);
         array_splice($this->types, $index, 1);
-        
+
         return $this;
     }
 
@@ -34,7 +34,7 @@ class Schema
     {
         return $this->fields;
     }
-    
+
     public function getTitles()
     {
         return $this->titles;
@@ -43,6 +43,18 @@ class Schema
     public function getTypes()
     {
         return $this->types;
+    }
+
+    public function getTitle($field)
+    {
+        $index = array_search($field, $this->fields);
+        return $this->titles[$index];
+    }
+
+    public function getType($field)
+    {
+        $index = array_search($field, $this->fields);
+        return $this->types[$index];
     }
 
     public function fetch()

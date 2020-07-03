@@ -33,7 +33,7 @@ class ListComponent extends ListData //implements ComponentInterface
         foreach ($this as $row) {
             $r .= Html::tag('li', $row->get($this->select));
         }
-        return Html::tag('ul', $r);
+        return $r ? Html::tag('ul', $r) : '';
     }
 
 }

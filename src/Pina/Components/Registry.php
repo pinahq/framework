@@ -11,6 +11,8 @@ class Registry
         'table' => TableComponent::class,
         'row' => RowComponent::class,
         'list' => ListComponent::class,
+        'form' => RecordEditComponent::class,
+        'location' => Location::class,
     ];
 
     public static function register($id, $concrete)

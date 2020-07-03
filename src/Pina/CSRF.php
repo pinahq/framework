@@ -53,7 +53,7 @@ class CSRF
              $expired = self::$expired;
         }
         
-        setcookie('csrf_token', self::$token, time() + $expired, '/');
+        @setcookie('csrf_token', self::$token, time() + $expired, '/');
     }
     
     public static function formField($method)
