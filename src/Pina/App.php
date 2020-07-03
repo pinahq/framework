@@ -17,6 +17,7 @@ class App
         \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
+        'router' => \Pina\Router::class,
     );
 
     /**
@@ -69,6 +70,15 @@ class App
     public static function db()
     {
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
+    }
+
+    /**
+     * Возвращает объект для работы с БД
+     * @return Router
+     */
+    public static function router()
+    {
+        return self::$container->get('router');
     }
 
     public static function registerComponent($alias, $concrete)
