@@ -16,10 +16,9 @@ class ListComponent extends ListData //implements ComponentInterface
      */
     public function basedOn(ListData $list)
     {
-        $this->load($list->data, $list->schema);
         $fields = $list->schema->getFields();
         $this->select = isset($fields[0]) ? $fields[0] : null;
-        return $this;
+        return parent::basedOn($list);
     }
 
     public function select($column)

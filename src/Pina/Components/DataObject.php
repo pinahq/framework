@@ -2,13 +2,14 @@
 
 namespace Pina\Components;
 
-class DataObject
+abstract class DataObject
 {
 
     /**
      * @var Schema
      */
     protected $schema = null;
+    protected $meta = [];
     
     public static function instance()
     {
@@ -28,7 +29,15 @@ class DataObject
 
     public function turnTo($alias)
     {
-        return \Pina\App::getComponent($alias)->basedOn($this);
+        return Registry::get($alias)->basedOn($this);
     }
+    
+    public function meta($key, $value)
+    {
+        $this->meta[$key] = $value;
+        return $this;
+    }
+    
+    abstract function draw();
 
 }

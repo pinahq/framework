@@ -6,7 +6,17 @@ class RecordData extends DataObject
 {
 
     protected $data = [];
-    
+
+    /**
+     * 
+     * @param \Pina\RecordData $record
+     * @return $this
+     */
+    public function basedOn(RecordData $record)
+    {
+        return $this->load($record->data, $record->schema);
+    }
+
     /**
      * 
      * @param type $data
@@ -19,7 +29,7 @@ class RecordData extends DataObject
         $this->schema = $schema;
         return $this;
     }
-    
+
     /**
      * Получить поле записи
      * @param string $field
@@ -28,6 +38,11 @@ class RecordData extends DataObject
     public function get($field)
     {
         return isset($this->data[$field]) ? $this->data[$field] : null;
+    }
+
+    public function draw()
+    {
+        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
     }
 
 }

@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\App;
+use Pina\Components\Registry;
 use Pina\Components\ListData;
 use Pina\Components\TableComponent;
 use Pina\Components\ListComponent;
@@ -50,7 +51,6 @@ class DataTest extends TestCase
             ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('id')->draw(), ListComponent::instance()->basedOn($list)->select('id')->draw()
         );
 
-        App::registerComponent('table', TableComponent::class);
         $html = $list->turnTo("table")->draw();
         $this->assertEquals($expectedHtml, $html);
     }

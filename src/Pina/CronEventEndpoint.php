@@ -24,14 +24,30 @@ class CronEventEndpoint extends EndpointController
     {
         $data = CronEventGateway::instance()->get();
 
-        return (new TableComponent())->load($data, $this->schema);
+        return (new TableComponent())
+                ->load($data, $this->schema)
+                ->meta('title', 'Events')
+                ->meta('breadcrumb', $this->getBreadcrumb())
+        ;
     }
-    
+
     public function show($params)
     {
         $data = CronEventGateway::instance()->find($params['id']);
 
-        return (new RecordViewComponent())->load($data, $this->schema);
+        return (new RecordViewComponent())
+                ->load($data, $this->schema)
+                ->meta('title', $data['event'])
+                ->meta('breadcrumb', $this->getBreadcrumb()->add(['', 'Component ' . $data['event']]))
+        ;
+    }
+
+    public function getBreadcrumb()
+    {
+        return new ListData([
+            ['url' => '/', 'title' => 'Home'],
+            ['url' => '/events', 'title' => 'Events'],
+        ]);
     }
 
 }

@@ -7,16 +7,6 @@ use Pina\Html;
 class TableComponent extends ListData //implements ComponentInterface
 {
 
-    /**
-     * 
-     * @param \Pina\ListData $list
-     * @return $this
-     */
-    public function basedOn(ListData $list)
-    {
-        return $this->load($list->data, $list->schema);
-    }
-
     public function draw()
     {
         $r = $this->drawHeader($this->schema->getTitles());

@@ -8,11 +8,26 @@ class ListData extends DataObject implements \Iterator
     protected $data = [];
     protected $cursor = 0;
     
+    /**
+     * 
+     * @param \Pina\ListData $list
+     * @return $this
+     */
+    public function basedOn(ListData $list)
+    {
+        return $this->load($list->data, $list->schema);
+    }
+    
     public function load($data, Schema $schema)
     {
         $this->data = $data;
         $this->schema = $schema;
         return $this;
+    }
+    
+    public function add($line)
+    {
+        $this->data[] = $line;
     }
     
     public function forgetColumn($column)
@@ -48,6 +63,11 @@ class ListData extends DataObject implements \Iterator
     public function valid()
     {
         return isset($this->data[$this->cursor]);
+    }
+    
+    public function draw()
+    {
+        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
     }
 
 }

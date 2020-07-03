@@ -8,15 +8,6 @@ class RowComponent extends RecordData //implements ComponentInterface
 {
 
     protected $tag = 'td';
-    /**
-     * 
-     * @param \Pina\RecordData $record
-     * @return $this
-     */
-    public function basedOn(RecordData $record)
-    {
-        return $this->load($record->data, $record->schema);
-    }
     
     public function setTag($tag)
     {
