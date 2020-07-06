@@ -72,6 +72,14 @@ class CSRF
         return ' data-csrf-token="'.self::token().'"';
     }
     
+    public static function tagAttributeArray($method)
+    {
+        if (in_array(strtolower($method), self::$saveMethods)) {
+            return [];
+        }
+        return ['data-csrf-token' => self::token()];
+    }
+    
     public static function token()
     {
         self::init();

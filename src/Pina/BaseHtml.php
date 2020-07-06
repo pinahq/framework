@@ -408,7 +408,7 @@ class BaseHtml
     public static function a($text, $url = null, $options = [])
     {
         if ($url !== null) {
-            $options['href'] = Url::to($url);
+            $options['href'] = $url;
         }
 
         return static::tag('a', $text, $options);
