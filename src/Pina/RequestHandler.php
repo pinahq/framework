@@ -179,7 +179,7 @@ class RequestHandler
     {
         if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
 //            try {
-            $html = App::router()->run($this->resource, $this->method)->draw();
+            $html = App::router()->run($this->resource, $this->method, $this->data)->draw();
             $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
             $content->drawLayout($html);
             return Response::ok()->setContent($content);

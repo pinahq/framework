@@ -19,10 +19,11 @@ class Router
      * 
      * @param string $resource
      * @param string $method
+     * @param array $data
      * @return Components\DataObject
      * @throws Container\NotFoundException
      */
-    public function run($resource, $method)
+    public function run($resource, $method, $data = [])
     {
         list($controller, $action, $params) = Url::route($resource, $method);
 
@@ -30,7 +31,7 @@ class Router
         if ($c === null) {
             throw new Container\NotFoundException;
         }
-        
+
         $cl = $this->endpoints[$c];
         $inst = new $cl;
 
@@ -38,13 +39,13 @@ class Router
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
         $params = array_merge($parsed, $params);
-        
+
         $deeper = [];
-        if ($this->parse($resource, $pattern."/:id/:__action", $deeper)) {
+        if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
             $action .= $this->ucfirstEveryWord($deeper['__action']);
         }
 
-        return $inst->$action($params)->setMeta('location', $resource);
+        return $inst->$action(array_merge($data, $params))->setMeta('location', $resource);
     }
 
     public function base($controller)
@@ -81,7 +82,7 @@ class Router
         }
         return false;
     }
-    
+
     private function ucfirstEveryWord($s)
     {
         $parts = preg_split("/[^\w]/s", $s);
