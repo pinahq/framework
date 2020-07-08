@@ -447,7 +447,7 @@ class BaseHtml
      */
     public static function img($src, $options = [])
     {
-        $options['src'] = Url::to($src);
+        $options['src'] = $src;
 
         if (isset($options['srcset']) && is_array($options['srcset'])) {
             $srcset = [];
