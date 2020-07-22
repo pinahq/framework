@@ -737,11 +737,49 @@ class SQL
      */
     public function makeHaving()
     {
-        if (empty($this->having)) {
-            return '';
+        
+        $sql = join(' AND ', $this->getHavingArray());
+
+        if ($sql != '') {
+            $sql = ' HAVING ' . $sql;
         }
 
-        return ' HAVING ' . join(' AND ', $this->having);
+        return $sql;
+    }
+
+    /**
+     * Возвращает массив с подготовленным набором условий для конструкции HAVING
+     * @return array
+     */
+    public function getHavingArray()
+    {
+        $havings = array();
+        foreach ($this->having as $having) {
+            if (empty($having)) {
+                continue;
+            }
+
+            $havings[] = '(' . $having . ')';
+        }
+
+        return array_merge($havings, $this->getJoinHavingArray());
+    }
+
+    /**
+     * Возвращает массив с подготовленным набором условий для конструкции HAVING,
+     * полученным из присоединенных таблиц (JOIN)
+     * @return array
+     */
+    public function getJoinHavingArray()
+    {
+        $havings = array();
+        foreach ($this->joins as $line) {
+            if (count($line) == 2) {
+                list($type, $table) = $line;
+                $havings = array_merge($havings, $table->getHavingArray());
+            }
+        }
+        return $havings;
     }
 
     /**

@@ -412,4 +412,25 @@ class SQLTest extends TestCase
         
     }
     
+    public function testHavings()
+    {
+        $gw = SQL::table('order_product')->select('sku')->groupBy('sku')->having('SUM(quantity) > 100')->having('SUM(quantity) < 200');
+        $q = 'SELECT `order_product`.`sku` FROM `order_product` GROUP BY sku HAVING (SUM(quantity) > 100) AND (SUM(quantity) < 200)';
+        $this->assertEquals($q, $gw->make());
+        
+        $gw = SQL::table('order')
+            ->select('shipping_method_id')
+            ->groupBy('shipping_method_id')
+            ->innerJoin(
+                SQL::table('order_product')
+                    ->on('order_id', 'id')
+                    ->having('SUM(quantity) > 100')
+            )
+            ->having('SUM(shipping_subtotal) / SUM(quantity) > 0');
+        
+        $q = 'SELECT `order`.`shipping_method_id` FROM `order` INNER JOIN `order_product` ON `order_product`.`order_id` = `order`.`id` GROUP BY shipping_method_id HAVING (SUM(shipping_subtotal) / SUM(quantity) > 0) AND (SUM(quantity) > 100)';
+        $this->assertEquals($q, $gw->make());
+        
+    }
+    
 }
