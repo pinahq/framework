@@ -1212,9 +1212,9 @@ class SQL
             }
 
             if (is_null($value)) {
-                $result .= "`" . $key . "` = NULL";
+                $result .= $this->getAlias() . ".`" . $key . "` = NULL";
             } else {
-                $result .= "`" . $key . "` = '" . $this->db->escape($value) . "'";
+                $result .= $this->getAlias() . ".`" . $key . "` = '" . $this->db->escape($value) . "'";
             }
         }
         if ($first) {

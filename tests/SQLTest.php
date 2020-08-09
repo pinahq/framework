@@ -319,7 +319,7 @@ class SQLTest extends TestCase
             'product_title' => 'Toy',
             'brand_id' => 1,
         ));
-        $this->assertEquals("INSERT INTO `cody_product` SET `product_title` = 'Toy', `brand_id` = '1'", $q);
+        $this->assertEquals("INSERT INTO `cody_product` SET `cody_product`.`product_title` = 'Toy', `cody_product`.`brand_id` = '1'", $q);
     }
 
     public function testDelete()
@@ -397,7 +397,7 @@ class SQLTest extends TestCase
         $sql = SQL::table('ticket')->limit(1)->whereBy('product_id', 2)->makeUpdate([
             'order_id' => 3,
         ]);
-        $this->assertEquals("UPDATE `ticket`  SET `order_id` = '3' WHERE (`ticket`.`product_id` = '2') LIMIT 1", $sql);
+        $this->assertEquals("UPDATE `ticket`  SET `ticket`.`order_id` = '3' WHERE (`ticket`.`product_id` = '2') LIMIT 1", $sql);
     }
     
     public function testUnions()
