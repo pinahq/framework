@@ -2,25 +2,23 @@
 
 namespace Pina\Components;
 
-use Pina\Html;
+use Pina\Controls\FormStatic;
 
 class RecordViewComponent extends RecordData //implements ComponentInterface
 {
 
-    public function draw()
+    public function build()
     {
         $fields = $this->schema->getFields();
         $titles = $this->schema->getTitles();
-        
-        $r = '';
+
         foreach ($fields as $k => $field) {
             $title = $titles[$k] ? $titles[$k] : '';
             $value = $this->data[$field] ? $this->data[$field] : '';
-            $r .= Html::tag('label', $title);
-            $r .= Html::tag('span', $value);
+            $static = FormStatic::instance()->setTitle($title)->setValue($value);
+            $this->append($static);
         }
         
-        return $r;
     }
 
 }

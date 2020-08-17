@@ -2,7 +2,8 @@
 
 namespace Pina\Components;
 
-use Pina\Html;
+use Pina\Controls\UnorderedList;
+use Pina\Controls\ListItem;
 
 class ListComponent extends ListData //implements ComponentInterface
 {
@@ -27,13 +28,14 @@ class ListComponent extends ListData //implements ComponentInterface
         return $this;
     }
 
-    public function draw()
+    public function build()
     {
-        $r = '';
+        $list = UnorderedList::instance();
         foreach ($this as $row) {
-            $r .= Html::tag('li', $row->get($this->select));
+            $text = $row->get($this->select);
+            $list->append(ListItem::instance()->setText($text));
         }
-        return $r ? Html::tag('ul', $r) : '';
+        $this->append($list);
     }
 
 }

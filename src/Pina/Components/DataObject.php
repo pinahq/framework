@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-abstract class DataObject
+class DataObject extends \Pina\Controls\Control
 {
 
     /**
@@ -51,45 +51,11 @@ abstract class DataObject
     {
         return isset($this->meta[$key]) ? $this->meta[$key] : null;
     }
-
-    abstract public function draw();
-
-    public function append($obj)
+    
+    public function draw()
     {
-        $this->after[] = $obj;
-        return $this;
-    }
-
-    public function prepend($obj)
-    {
-        $this->before[] = $obj;
-        return $this;
-    }
-
-    public function wrap($obj)
-    {
-        $this->wrappers[] = $obj;
-        return $this;
-    }
-
-    protected function process($inner)
-    {
-        $r = '';
-        foreach ($this->before as $v) {
-            $r .= $v->draw();
-        }
-
-        $r .= $inner;
-
-        foreach ($this->after as $v) {
-            $r .= $v->draw();
-        }
-
-        foreach ($this->wrappers as $v) {
-            $r = $v->wrap($r, $this);
-        }
-
-        return $r;
+        $this->build();
+        return $this->compile();
     }
 
 }

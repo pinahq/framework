@@ -40,10 +40,11 @@ class RecordData extends DataObject
     {
         return isset($this->data[$field]) ? $this->data[$field] : null;
     }
-
-    public function draw()
+    
+    public function build()
     {
-        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
+        $this->append(\Pina\Controls\Json::instance()->setData($this->data));
+        return $this;
     }
 
 }

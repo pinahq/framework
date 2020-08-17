@@ -2,27 +2,20 @@
 
 namespace Pina\Components;
 
-use Pina\Html;
+use Pina\Controls\TableRow;
+use Pina\Controls\TableCell;
 
 class RowComponent extends RecordData //implements ComponentInterface
 {
 
-    protected $tag = 'td';
-    
-    public function setTag($tag)
-    {
-        $this->tag = $tag;
-        return $this;
-    }
-
-    public function draw()
+    public function build()
     {
         $data = $this->schema->makeFlatLine($this->data);
-        $r = '';
+        $row = TableRow::instance();
         foreach ($data as $k => $v) {
-            $r .= Html::tag($this->tag, $v);
+            $row->append(TableCell::instance()->setText($v));
         }
-        return Html::tag('tr', $r);
+        $this->append($row);
     }
 
 }

@@ -60,9 +60,10 @@ class ListData extends DataObject implements \Iterator
         return isset($this->data[$this->cursor]);
     }
     
-    public function draw()
+    public function build()
     {
-        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
+        $this->append(\Pina\Controls\Json::instance()->setData($this->data));
+        return $this;
     }
 
 }

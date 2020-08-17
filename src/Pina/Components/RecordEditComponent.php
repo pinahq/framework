@@ -2,29 +2,40 @@
 
 namespace Pina\Components;
 
-use Pina\Html;
+use Pina\Controls\FormInput;
+use Pina\Controls\Form;
+use Pina\Controls\CSRFHidden;
 
 class RecordEditComponent extends RecordData //implements ComponentInterface
 {
 
-    public function draw()
+    protected $controls = [];
+
+    public function build()
     {
         $fields = $this->schema->getFields();
         $titles = $this->schema->getTitles();
 
+        $method = 'PUT';
+        $form = Form::instance()
+            ->setAction($this->getMeta('location'))
+            ->setMethod($method);
+
         $r = '';
+        $controls = [];
         foreach ($fields as $field) {
             $title = $this->schema->getTitle($field);
             $type = $this->schema->getType($field);
             $value = $this->data[$field] ? $this->data[$field] : '';
-            $r .= Html::tag('label', $title);
-            $r .= Html::tag('input', '', ['value' => $value]);
-        }
-        
-        $method = 'PUT';
-        $r .= \Pina\CSRF::formField($method);
 
-        return Html::tag('form', $r, ['action' => $this->getMeta('location'), 'method' => $method, 'class' => 'form pina-form']);
+            $form->append(
+                FormInput::instance()->setTitle($title)->setValue($value)
+            );
+        }
+
+        $form->append(CSRFHidden::instance()->setMethod($method));
+        
+        $this->append($form);
     }
 
 }

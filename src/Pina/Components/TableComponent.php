@@ -2,27 +2,30 @@
 
 namespace Pina\Components;
 
-use Pina\Html;
+use Pina\Controls\TableHeaderCell;
+use Pina\Controls\TableCell;
+use Pina\Controls\TableRow;
 
 class TableComponent extends ListData //implements ComponentInterface
 {
 
-    public function draw()
+    public function build()
     {
-        $r = $this->drawHeader($this->schema->getTitles());
+        $table = \Pina\Controls\Table::instance();
+        $table->append($this->buildHeader($this->schema->getTitles()));
         foreach ($this as $record) {
-            $r .= RowComponent::instance()->basedOn($record)->draw();
+            $table->append(RowComponent::instance()->basedOn($record));
         }
-        return Html::tag('table', $r);
+        $this->append($table);
     }
 
-    protected function drawHeader($data)
+    protected function buildHeader($data)
     {
-        $r = '';
+        $header = TableRow::instance();
         foreach ($data as $k => $v) {
-            $r .= Html::tag('th', $v);
+            $header->append(TableHeaderCell::instance()->setText($v));
         }
-        return Html::tag('tr', $r);
+        return $header;
     }
 
 }
