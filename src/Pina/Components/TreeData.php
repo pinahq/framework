@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-class TreeData extends DataObject
+class TreeData extends Data
 {
 
     protected $data = [];

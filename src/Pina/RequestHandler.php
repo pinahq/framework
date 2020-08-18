@@ -179,10 +179,13 @@ class RequestHandler
     {
         if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
 //            try {
-            $html = App::router()->run($this->resource, $this->method, $this->data)->draw();
-            $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
-            $content->drawLayout($html);
-            return Response::ok()->setContent($content);
+            $data = App::router()->run($this->resource, $this->method, $this->data);
+            if (!$data->hasWrapper()) {
+                $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+                $content->drawLayout($data->draw());
+                return Response::ok()->setContent($content);
+            } 
+            return Response::ok()->setContent($data->draw());
 //            } catch (\Exception $e) {
             return $this->forbidden();
 //            }

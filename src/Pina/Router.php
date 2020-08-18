@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use Pina\Http\Request;
+
 class Router
 {
 
@@ -26,7 +28,7 @@ class Router
     public function run($resource, $method, $data = [])
     {
         list($controller, $action, $params) = Url::route($resource, $method);
-
+        
         $c = $this->base($controller);
         if ($c === null) {
             throw new Container\NotFoundException;
@@ -38,14 +40,16 @@ class Router
         $pattern = $this->patterns[$c];
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
-        $params = array_merge($parsed, $params);
+        
+        $request = new Request($_GET, $_POST, $params, $_COOKIE, $_FILES, $_SERVER);
+        $inst->setRequest($request);
 
         $deeper = [];
         if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
             $action .= $this->ucfirstEveryWord($deeper['__action']);
         }
 
-        return $inst->$action(array_merge($data, $params))->setMeta('location', $resource);
+        return call_user_func_array([$inst, $action], $params)->setMeta('location', $resource);
     }
 
     public function base($controller)

@@ -37,10 +37,8 @@ class ControllerTest extends TestCase
         $expectedRowHtml = '<label>Event</label><span>order.paid</span>'
             . '<label>Created at</label><span>2020-01-02 03:04:05</span>';
 
-        $html = $endpoint->show(['id' => $id])->draw();
+        $html = $endpoint->show($id)->draw();
         $this->assertEquals($expectedRowHtml, $html);
-
-
 
         $router = new Pina\Router;
         $router->register('cron-events', CronEventEndpoint::class);

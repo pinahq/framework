@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-class ListData extends DataObject implements \Iterator
+class ListData extends Data implements \Iterator
 {
 
     protected $data = [];

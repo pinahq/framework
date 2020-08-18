@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-class DataObject extends \Pina\Controls\Control
+class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
 {
 
     /**
@@ -10,6 +10,7 @@ class DataObject extends \Pina\Controls\Control
      */
     protected $schema = null;
     protected $meta = [];
+    protected $errors = [];
     protected $wrappers = [];
 
     public static function instance()
@@ -50,9 +51,19 @@ class DataObject extends \Pina\Controls\Control
         return isset($this->meta[$key]) ? $this->meta[$key] : null;
     }
     
+    public function addError($text, $subject)
+    {
+        $this->errors[] = [$text, $subject];
+    }
+    
     public function wrap($wrapper)
     {
         $this->wrappers[] = $wrapper;
+    }
+    
+    public function hasWrapper()
+    {
+        return !empty($this->wrappers);
     }
     
     public function compileWrappers()
@@ -72,6 +83,27 @@ class DataObject extends \Pina\Controls\Control
     {
         $this->build();
         return $this->compileWrappers();
+    }
+    
+    public function getType()
+    {
+        return 'text/html';
+    }
+    
+    public function getStatus()
+    {
+        return $this->errors ? 400 : 200;
+    }
+    
+    public function send()
+    {
+        header('HTTP/1.1 ' . $this->getStatus());
+        if ($this->errors) {
+            header('Content-Type: application/json');
+            return json_encode(['errors' => $this->errors], JSON_UNESCAPED_UNICODE);
+        }
+        header('Content-Type: ' . $this->getType());
+        echo $this->draw();
     }
 
 }

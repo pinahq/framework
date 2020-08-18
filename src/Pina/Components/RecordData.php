@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-class RecordData extends DataObject
+class RecordData extends Data
 {
 
     protected $data = [];

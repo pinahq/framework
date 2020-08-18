@@ -9,8 +9,9 @@ use Pina\Components\TableComponent;
 use Pina\Components\ListComponent;
 use Pina\Components\RecordViewComponent;
 use Pina\Components\LocationComponent;
+use Pina\Http\Endpoint;
 
-class CronEventEndpoint extends EndpointController
+class CronEventEndpoint extends Endpoint
 {
 
     protected $schema = null;
@@ -23,10 +24,12 @@ class CronEventEndpoint extends EndpointController
         $this->schema->add('event', 'Event', 'string');
         $this->schema->add('created', 'Created at', 'date');
         
+        parent::__construct();
+        
 //        $this->parent = $parent;
     }
 
-    public function index($params)
+    public function index()
     {
         $data = CronEventGateway::instance()->get();
 
@@ -37,10 +40,10 @@ class CronEventEndpoint extends EndpointController
         ;
     }
 
-    public function show($params)
+    public function show($id)
     {
-        $data = CronEventGateway::instance()->find($params['id']);
-
+        $data = CronEventGateway::instance()->find($id);
+        
         return (new RecordViewComponent())
                 ->load($data, $this->schema)
                 ->setMeta('title', $data['event'])
