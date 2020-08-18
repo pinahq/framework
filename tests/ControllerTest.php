@@ -60,6 +60,20 @@ class ControllerTest extends TestCase
             . '</form>';
         $html = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id')->turnTo('form')->draw();
         $this->assertEquals($expectedRowEditHtml, $html);
+        
+        $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
+        $component->wrap(Pina\Controls\TableCell::instance());
+        $component->wrap(Pina\Controls\TableRow::instance());
+        $component->wrap(Pina\Controls\Table::instance());
+        $component->wrap(Pina\Controls\Form::instance()->setAction('/')->setMethod('delete'));
+        
+        $expectedWrapHtml = '<form class="form pina-form" action="/" method="delete">'
+            . '<table><tr><td>'
+            . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span><label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
+            . '</td></tr></table>'
+            . '</form>';
+        $this->assertEquals($expectedWrapHtml, $component->draw());
+        
     }
 
 }

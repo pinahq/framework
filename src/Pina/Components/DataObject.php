@@ -10,8 +10,6 @@ class DataObject extends \Pina\Controls\Control
      */
     protected $schema = null;
     protected $meta = [];
-    protected $after = [];
-    protected $before = [];
     protected $wrappers = [];
 
     public static function instance()
@@ -52,10 +50,28 @@ class DataObject extends \Pina\Controls\Control
         return isset($this->meta[$key]) ? $this->meta[$key] : null;
     }
     
+    public function wrap($wrapper)
+    {
+        $this->wrappers[] = $wrapper;
+    }
+    
+    public function compileWrappers()
+    {
+        $obj = $this;
+        $isWrapper = false;
+        while ($w = array_shift($this->wrappers)) {
+            $w->append($obj);
+            $obj = $w;
+            $isWrapper = true;
+        }
+
+        return $isWrapper ? $obj->draw() : $obj->compile();
+    }
+
     public function draw()
     {
         $this->build();
-        return $this->compile();
+        return $this->compileWrappers();
     }
 
 }

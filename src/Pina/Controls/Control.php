@@ -7,7 +7,6 @@ class Control
 
     protected $controls = [];
 
-
     /**
      * 
      * @return \static
@@ -31,9 +30,6 @@ class Control
     {
         $r = '';
         foreach ($this->controls as $c) {
-            if (is_string($c)) {
-                print_r($this);
-            }
             $r .= $c->draw();
         }
         return $r;

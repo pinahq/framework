@@ -33,6 +33,7 @@ class FormInput extends Control
     {
         $r = Html::tag('label', $this->title);
         $r .= Html::tag('input', '', array_filter(['name' => $this->name, 'value' => $this->value]));
+        $r .= $this->compile();
         return $r;
     }
 

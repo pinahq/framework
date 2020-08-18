@@ -17,7 +17,7 @@ class TableCell extends Control
 
     public function draw()
     {
-        return Html::tag('td', $this->text);
+        return Html::tag('td', $this->text . $this->compile());
     }
 
 }

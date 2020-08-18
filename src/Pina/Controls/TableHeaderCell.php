@@ -17,7 +17,7 @@ class TableHeaderCell extends Control
 
     public function draw()
     {
-        return Html::tag('th', $this->text);
+        return Html::tag('th', $this->text . $this->compile());
     }
 
 }
