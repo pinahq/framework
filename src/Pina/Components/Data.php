@@ -12,6 +12,7 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     protected $meta = [];
     protected $errors = [];
     protected $wrappers = [];
+    protected $isBuilt = false;
 
     public static function instance()
     {
@@ -75,13 +76,16 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
             $obj = $w;
             $isWrapper = true;
         }
-
+        
         return $isWrapper ? $obj->draw() : $obj->compile();
     }
 
     public function draw()
     {
-        $this->build();
+        if (!$this->isBuilt) {
+            $this->build();
+            $this->isBuilt = true;
+        }
         return $this->compileWrappers();
     }
     
