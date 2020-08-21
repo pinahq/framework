@@ -9,6 +9,7 @@ class Control
     protected $controls = [];
     protected $after = [];
     protected $before = [];
+    protected $classes = [];
 
     /**
      * 
@@ -43,6 +44,17 @@ class Control
     public function prepend($control)
     {
         array_unshift($this->before, $control);
+    }
+
+    public function addClass($c)
+    {
+        $this->classes[] = $c;
+    }
+
+    protected function makeClass($additional)
+    {
+        $additionalArray = is_array($additional) ? $additional : [$additional];
+        return implode(' ', array_merge($this->classes, $additionalArray));
     }
 
     public function compile()

@@ -24,7 +24,7 @@ class Form extends Control
 
     public function draw()
     {
-        return Html::tag('form', $this->compile(), ['action' => $this->action, 'method' => $this->method, 'class' => 'form pina-form']);
+        return Html::tag('form', $this->compile(), ['action' => $this->action, 'method' => $this->method, 'class' => $this->makeClass('form pina-form')]);
     }
 
 }
