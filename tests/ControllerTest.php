@@ -67,7 +67,7 @@ class ControllerTest extends TestCase
         
         $expectedWrapHtml = '<form class="form pina-form" action="/" method="delete">'
             . '<table><tr><td>'
-            . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span><label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
+            . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
             . '</td></tr></table>'
             . '</form>';
         $this->assertEquals($expectedWrapHtml, $component->draw());
