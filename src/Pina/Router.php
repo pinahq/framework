@@ -49,7 +49,7 @@ class Router
             $action .= $this->ucfirstEveryWord($deeper['__action']);
         }
 
-        return call_user_func_array([$inst, $action], $params)->setMeta('location', $resource);
+        return call_user_func_array([$inst, $action], $params);
     }
 
     public function base($controller)
