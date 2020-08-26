@@ -30,12 +30,28 @@ class ListComponent extends ListData //implements ComponentInterface
 
     public function build()
     {
-        $list = UnorderedList::instance();
+        $list = $this->makeUnorderedList();
         foreach ($this as $row) {
             $text = $row->get($this->select);
-            $list->append(ListItem::instance()->setText($text));
+            $list->append($this->makeListItem()->setText($text));
         }
         $this->append($list);
+    }
+    
+    /**
+     * @return \Pina\Controls\UnorderedList
+     */
+    protected function makeUnorderedList()
+    {
+        return $this->control(\Pina\Controls\UnorderedList::class);
+    }
+
+    /**
+     * @return \Pina\Controls\ListItem
+     */
+    protected function makeListItem()
+    {
+        return $this->control(\Pina\Controls\ListItem::class);
     }
 
 }

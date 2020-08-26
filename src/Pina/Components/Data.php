@@ -37,7 +37,12 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
 
     public function turnTo($alias)
     {
-        return Registry::get($alias)->basedOn($this);
+        return \Pina\App::components()->get($alias)->basedOn($this);
+    }
+    
+    protected function control($control)
+    {
+        return \Pina\App::controls()->get($control);
     }
 
     public function setMeta($key, $value)

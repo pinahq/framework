@@ -15,10 +15,18 @@ class RecordViewComponent extends RecordData //implements ComponentInterface
         foreach ($fields as $k => $field) {
             $title = $titles[$k] ? $titles[$k] : '';
             $value = $this->data[$field] ? $this->data[$field] : '';
-            $static = FormStatic::instance()->setTitle($title)->setValue($value);
+            $static = $this->makeFormStatic()->setTitle($title)->setValue($value);
             $this->append($static);
         }
         
+    }
+
+    /**
+     * @return \Pina\Controls\FormStatic
+     */
+    protected function makeFormStatic()
+    {
+        return $this->control(\Pina\Controls\FormStatic::class);
     }
 
 }

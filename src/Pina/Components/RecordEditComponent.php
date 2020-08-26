@@ -17,7 +17,7 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
         $titles = $this->schema->getTitles();
 
         $method = 'PUT';
-        $form = Form::instance()
+        $form = $this->makeForm()
             ->setAction($this->getMeta('location'))
             ->setMethod($method);
 
@@ -29,13 +29,29 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
             $value = $this->data[$field] ? $this->data[$field] : '';
 
             $form->append(
-                FormInput::instance()->setTitle($title)->setValue($value)
+                $this->makeFormInput()->setTitle($title)->setValue($value)
             );
         }
 
         $form->append(CSRFHidden::instance()->setMethod($method));
-        
+
         $this->append($form);
+    }
+
+    /**
+     * @return \Pina\Controls\Form
+     */
+    protected function makeForm()
+    {
+        return $this->control(\Pina\Controls\Form::class);
+    }
+
+    /**
+     * @return \Pina\Controls\FormInput
+     */
+    protected function makeFormInput()
+    {
+        return $this->control(\Pina\Controls\FormInput::class);
     }
 
 }
