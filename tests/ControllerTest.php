@@ -82,12 +82,16 @@ class ControllerTest extends TestCase
         $component->wrap(Pina\Controls\TableCell::instance());
         $component->wrap(Pina\Controls\TableRow::instance());
         $component->wrap(Pina\Controls\Table::instance());
-        $component->wrap(Pina\Controls\Form::instance()->setAction('/')->setMethod('delete'));
+        $note = \Pina\Controls\Paragraph::instance()->setText('note');
+        $form = \Pina\Controls\Form::instance()->setAction('/')->setMethod('delete');
+        $form->append($note);
+        $component->wrap($form);
         
         $expectedWrapHtml = '<form class="form pina-form" action="/" method="delete">'
             . '<table><tr><td>'
             . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
             . '</td></tr></table>'
+            . '<p>note</p>'
             . '</form>';
         
         $this->assertEquals($expectedWrapHtml, $component->draw());
