@@ -63,6 +63,21 @@ class ControllerTest extends TestCase
             ->draw();
         $this->assertEquals($expectedRowEditHtml, $html);
         
+        $expectedWrapHtml = '<form class="form pina-form" action="lk/1/cron-events/' . $id . '" method="PUT">'
+            . '<label>Event</label><input value="order.paid">'
+            . '<label>Created at</label><input value="2020-01-02 03:04:05">'
+            . CSRF::formField('PUT')
+            . '</form>';
+
+        $component = $router->run("lk/1/cron-events/" . $id, 'get')
+            ->setMeta('location', "lk/1/cron-events/" . $id)
+            ->forgetField('id')
+            ->turnTo('form');
+
+        \Pina\App::controls()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
+        $this->assertEquals($expectedWrapHtml, $component->draw());
+        \Pina\App::controls()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormStatic::class);
+
         $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
         $component->wrap(Pina\Controls\TableCell::instance());
         $component->wrap(Pina\Controls\TableRow::instance());
@@ -78,14 +93,6 @@ class ControllerTest extends TestCase
         $this->assertEquals($expectedWrapHtml, $component->draw());
         $this->assertEquals($expectedWrapHtml, $component->draw());
         
-        $expectedWrapHtml = '<p>'
-            . '<table><tr><td>'
-            . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
-            . '</td></tr></table>'
-            . '</p>';
-        
-//        \Pina\App::controls()->set(\Pina\Controls\Form::class, \Pina\Controls\Paragraph::class);
-//        $this->assertEquals($expectedWrapHtml, $component->draw());
     }
 
 }

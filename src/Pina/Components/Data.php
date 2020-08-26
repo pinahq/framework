@@ -75,14 +75,16 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     {
         $obj = $this;
         $isWrapper = false;
-        while ($w = array_shift($this->wrappers)) {
-            $w->startBuild();
-            $w->append($obj);
-            $obj = $w;
-            $isWrapper = true;
+        $html = $obj->compile();
+        foreach ($this->wrappers as $w) {
+            $raw = new \Pina\Controls\RawHtml();
+            $raw->setText($html);
+            array_push($w->controls, $raw);
+            $html = $w->draw();
+            array_pop($w->controls);
         }
-
-        return $isWrapper ? $obj->draw() : $obj->compile();
+        
+        return $html;
     }
 
     public function draw()
