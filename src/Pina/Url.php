@@ -120,6 +120,9 @@ class Url
 
         $data = array();
         $k = $isCollection ? 'pid' : 'id';
+        if ($isCollection && in_array($a, ['update', 'destroy', 'store'])) {
+            $data['id'] = null;
+        }
         while (count($d)) {
             $data[$k] = array_pop($d);
             $k = 'p' . $k;

@@ -50,6 +50,15 @@ class CronEventEndpoint extends Endpoint
                 ->setMeta('breadcrumb', $this->getBreadcrumb()->add(LocationComponent::make('Component ' . $data['event'])))
         ;
     }
+    
+    public function destroy($id)
+    {
+        if (is_null($id)) {
+            return \Pina\Response::badRequest();
+        }
+        CronEventGateway::instance()->whereId($id)->delete();
+        return \Pina\Response::ok();
+    }
 
     public function getBreadcrumb()
     {

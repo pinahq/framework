@@ -97,6 +97,17 @@ class ControllerTest extends TestCase
         $this->assertEquals($expectedWrapHtml, $component->draw());
         $this->assertEquals($expectedWrapHtml, $component->draw());
         
+        $r = $router->run("lk/1/cron-events", 'delete');
+        $class = new \ReflectionClass($r);
+        $prop = $class->getProperty('code');
+        $prop->setAccessible(true);
+        $this->assertEquals('400 Bad Request', $prop->getValue($r));
+        
+        $r = $router->run("lk/1/cron-events/" . $id, 'delete');
+        $class = new \ReflectionClass($r);
+        $prop = $class->getProperty('code');
+        $prop->setAccessible(true);
+        $this->assertEquals('200 OK', $prop->getValue($r));
     }
 
 }
