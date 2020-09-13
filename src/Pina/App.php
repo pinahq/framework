@@ -18,7 +18,7 @@ class App
         \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
-        'router' => \Pina\Router::class,
+        Router::class => Router::class,
     );
 
     /**
@@ -106,17 +106,7 @@ class App
      */
     public static function router()
     {
-        return self::$container->get('router');
-    }
-
-    public static function registerComponent($alias, $concrete)
-    {
-        static::$container->set('component:' . $alias, $concrete);
-    }
-
-    public static function getComponent($alias)
-    {
-        return static::$container->get('component:' . $alias);
+        return static::container()->get(Router::class);
     }
 
     /**

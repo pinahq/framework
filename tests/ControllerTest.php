@@ -40,7 +40,7 @@ class ControllerTest extends TestCase
         $html = $endpoint->show($id)->draw();
         $this->assertEquals($expectedRowHtml, $html);
 
-        $router = new Pina\Router;
+        $router = App::router();
         $router->register('cron-events', CronEventEndpoint::class);
         $router->register('lk/:profile_id/cron-events', CronEventEndpoint::class);
 
