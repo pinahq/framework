@@ -76,9 +76,9 @@ class UrlTest extends TestCase
     {
         return array(
             array('menus', 'get', array('menus', 'index', array())),
-            array('menus', 'put', array('menus', 'update', array())),
-            array('menus', 'post', array('menus', 'store', array())),
-            array('menus', 'delete', array('menus', 'destroy', array())),
+            array('menus', 'put', array('menus', 'update', array('id' => null))),
+            array('menus', 'post', array('menus', 'store', array('id' => null))),
+            array('menus', 'delete', array('menus', 'destroy', array('id' => null))),
             array('menus/5', 'get', array('menus', 'show', array('id' => 5))),
             array('menus/index', 'put', array('menus', 'update', array('id' => 'index'))),
             array('menus/5', 'post', array('menus', 'store', array('id' => 5))),
@@ -88,7 +88,7 @@ class UrlTest extends TestCase
             array('menus/block', 'get', array('menus', 'block', array())),
             array('menus/5/items.admin', 'get', array('menus/items', 'index', array('pid' => 5))),
             array('menus/5/items/10.admin', 'get', array('menus/items', 'show', array('id' => 10, 'pid' => 5))),
-            array('menus/5/items.admin', 'put', array('menus/items', 'update', array('pid' => 5))),
+            array('menus/5/items.admin', 'put', array('menus/items', 'update', array('id' => null, 'pid' => 5))),
             array('menus/5/items/10.admin', 'get', array('menus/items', 'show', array('id' => 10, 'pid' => 5))),
             array('menus/5/items/dzen/relations.admin', 'get', array('menus/items/relations', 'index', array('pid' => 'dzen', 'ppid' => 5))),
             array('settings/demo-pane', 'get', array('settings', 'show', array('id' => 'demo-pane'))),

@@ -3,6 +3,7 @@
 namespace Pina;
 
 use Pina\Container\Container;
+use Pina\Container\Factory;
 use Pina\DB\TriggerUpgrade;
 
 class App
@@ -17,6 +18,7 @@ class App
         \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
+        'router' => \Pina\Router::class,
     );
 
     /**
@@ -51,6 +53,15 @@ class App
                 self::$container->share($key, $value);
             }
         }
+        
+        $components = new Container;
+        $components->set('table', \Pina\Components\TableComponent::class);
+        $components->set('row', \Pina\Components\RowComponent::class);
+        $components->set('list', \Pina\Components\ListComponent::class);
+        $components->set('form', \Pina\Components\RecordEditComponent::class);
+        $components->set('location', \Pina\Components\Location::class);
+        self::$container->share('components', $components);
+        self::$container->share('controls', \Pina\Container\Factory::class);
     }
 
     /**
@@ -69,6 +80,43 @@ class App
     public static function db()
     {
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
+    }
+    
+    /**
+     * Возвращает DI контейнер
+     * @return Container
+     */
+    public static function components()
+    {
+        return static::container()->get('components');
+    }
+    
+    /**
+     * Возвращает DI контейнер
+     * @return Container
+     */
+    public static function controls()
+    {
+        return static::container()->get('controls');
+    }
+
+    /**
+     * Возвращает объект для работы с БД
+     * @return Router
+     */
+    public static function router()
+    {
+        return self::$container->get('router');
+    }
+
+    public static function registerComponent($alias, $concrete)
+    {
+        static::$container->set('component:' . $alias, $concrete);
+    }
+
+    public static function getComponent($alias)
+    {
+        return static::$container->get('component:' . $alias);
     }
 
     /**

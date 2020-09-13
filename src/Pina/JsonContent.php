@@ -4,14 +4,14 @@ namespace Pina;
 
 class JsonContent implements ContentInterface
 {
-    
+
     protected $results;
 
     public function __construct(&$results)
     {
         $this->results = $results;
     }
-    
+
     public function setErrors($errors)
     {
         $this->results['errors'] = $errors;
@@ -25,6 +25,11 @@ class JsonContent implements ContentInterface
     public function fetch()
     {
         return json_encode($this->results, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function drawLayout($content)
+    {
+        return $content;
     }
 
 }

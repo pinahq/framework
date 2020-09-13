@@ -3,3 +3,5 @@
 /vendor/
 /tests/var/compiled/
 /tests/var/log/
+/.idea/
+/nbproject/

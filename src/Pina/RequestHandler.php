@@ -67,7 +67,7 @@ class RequestHandler
     {
         $this->places = array_merge($handler->places, $this->places);
     }
-    
+
     public function isolation()
     {
         return false;
@@ -77,7 +77,7 @@ class RequestHandler
     {
         return $this->resource;
     }
-    
+
     public function controller()
     {
         return $this->controller;
@@ -177,6 +177,17 @@ class RequestHandler
 
     public function run()
     {
+        if (empty($this->module) && Access::isHandlerPermitted($this->resource)) {
+            $data = App::router()->run($this->resource, $this->method, $this->data);
+            $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+            if (true || !$data->hasWrapper()) {
+                $content->drawLayout($data->draw());
+            } else {
+                $content->setContent($data->draw());
+            }
+            return Response::ok()->setContent($content);
+        }
+
         if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
             return $this->forbidden();
         }
@@ -202,13 +213,13 @@ class RequestHandler
         $content = \Pina\App::createResponseContent($r, $this->controller, $this->action);
         return Response::ok()->setContent($content);
     }
-    
+
     private function forbidden()
     {
         if (!empty($this->data['fallback']) && $this->data['fallback'] != $this->resource) {
             return $this->fallback();
         }
-        return Response::forbidden();        
+        return Response::forbidden();
     }
 
     private function notFound()
