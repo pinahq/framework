@@ -177,7 +177,11 @@ class RequestHandler
 
     public function run()
     {
-        if (empty($this->module) && Access::isHandlerPermitted($this->resource)) {
+        if (!Access::isHandlerPermitted($this->resource)) {
+            return $this->forbidden();
+        }
+
+        if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
             $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
             if (true || !$data->hasWrapper()) {
@@ -188,7 +192,7 @@ class RequestHandler
             return Response::ok()->setContent($content);
         }
 
-        if (empty($this->module) || !Access::isHandlerPermitted($this->resource)) {
+        if (empty($this->module)) {
             return $this->forbidden();
         }
 

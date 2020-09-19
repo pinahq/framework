@@ -17,6 +17,15 @@ class Router
         $this->patterns[$controller] = $pattern;
     }
 
+    public function exists($resource, $method)
+    {
+        list($controller, $action, $params) = Url::route($resource, $method);
+
+        $c = $this->base($controller);
+
+        return $c !== null;
+    }
+
     /**
      * 
      * @param string $resource
@@ -28,7 +37,7 @@ class Router
     public function run($resource, $method, $data = [])
     {
         list($controller, $action, $params) = Url::route($resource, $method);
-        
+
         $c = $this->base($controller);
         if ($c === null) {
             throw new Container\NotFoundException;
@@ -40,7 +49,7 @@ class Router
         $pattern = $this->patterns[$c];
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
-        
+
         $request = new Request($_GET, $_POST, $params, $_COOKIE, $_FILES, $_SERVER);
         $inst->setRequest($request);
 

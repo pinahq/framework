@@ -9,7 +9,7 @@ class Table extends Control
 
     public function draw()
     {
-        return Html::tag('table', $this->compile());
+        return Html::tag('table', $this->compile(), ['class' => $this->makeClass()]);
     }
 
 }

@@ -39,22 +39,28 @@ class Control
             //запоминаем, какие контролы хотят отрисоваться после основного блока
             $this->after[] = $control;
         }
+        return $this;
     }
 
     public function prepend($control)
     {
         array_unshift($this->before, $control);
+        return $this;
     }
 
     public function addClass($c)
     {
         $this->classes[] = $c;
+        return $this;
     }
 
-    protected function makeClass($additional)
+    protected function makeClass($additional = null)
     {
-        $additionalArray = is_array($additional) ? $additional : [$additional];
-        return implode(' ', array_merge($this->classes, $additionalArray));
+        $classes = $this->classes;
+        if (!is_null($additional)) {
+            $classes = array_merge($classes, is_array($additional) ? $additional : [$additional]);
+        }
+        return count($classes) > 0 ? implode(' ', $classes) : null;
     }
 
     public function compile()
