@@ -183,7 +183,7 @@ class RequestHandler
 
         if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
-            $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+            $content = new TemplateLayoutContent;
             if (true || !$data->hasWrapper()) {
                 $content->drawLayout($data->draw());
             } else {
