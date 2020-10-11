@@ -23,6 +23,9 @@ class TemplaterHandler extends RequestHandler
 
         list($this->controller, $this->action, $parsed) = Url::route($resource, $method);
         foreach ($parsed as $k => $v) {
+            if (is_null($v) && $this->exists($k)) {
+                continue;
+            }
             $this->set($k, $v);
         }
 
@@ -61,14 +64,14 @@ class TemplaterHandler extends RequestHandler
     {
         $params['get'] = $params['fallback'];
         unset($params['fallback']);
-        
+
         $params['get'] = Route::resource($params['get'], $params);
         list($controller, $action, $parsed) = Url::route($params['get'], 'get');
         $params = array_merge($params, $parsed);
-        
+
         $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
         $content = new TemplaterContent($params, $template, Request::isExternalRequest());
-        
+
         return Response::ok()->setContent($content);
     }
 

@@ -28,6 +28,9 @@ class RequestHandler
 
         list($this->controller, $this->action, $parsed) = Url::route($resource, $method);
         foreach ($parsed as $k => $v) {
+            if (is_null($v) && $this->exists($k)) {
+                continue;
+            }
             $this->set($k, $v);
         }
 
