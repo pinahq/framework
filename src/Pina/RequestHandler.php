@@ -226,6 +226,7 @@ class RequestHandler
         if (!empty($this->data['fallback']) && $this->data['fallback'] != $this->resource) {
             return $this->fallback();
         }
+        unset($this->data['display']);
         return Response::forbidden();
     }
 
@@ -234,6 +235,7 @@ class RequestHandler
         if (!empty($this->data['fallback']) && $this->data['fallback'] != $this->resource) {
             return $this->fallback();
         }
+        unset($this->data['display']);
         return Response::notFound();
     }
 
