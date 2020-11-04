@@ -187,7 +187,7 @@ class RequestHandler
         if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
             $content = new TemplateLayoutContent;
-            if (true || !$data->hasWrapper()) {
+            if (Request::isExternalRequest()) {
                 $content->drawLayout($data->draw());
             } else {
                 $content->setContent($data->draw());
