@@ -12,7 +12,7 @@ class TemplaterContent implements ContentInterface
     {
         static $view = null;
         if (empty($view)) {
-            $view = new Templater();
+            $view = \Pina\App::container()->has(\Smarty::class) ? \Pina\App::container()->get(\Smarty::class) : new Templater;
         }
 
         $this->view = $view;
