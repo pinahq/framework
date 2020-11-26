@@ -13,9 +13,6 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
 
     public function build()
     {
-        $fields = $this->schema->getFields();
-        $titles = $this->schema->getTitles();
-
         $method = 'PUT';
         $form = $this->makeForm()
             ->setAction($this->getMeta('location'))
@@ -23,13 +20,13 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
 
         $r = '';
         $controls = [];
-        foreach ($fields as $field) {
-            $title = $this->schema->getTitle($field);
-            $type = $this->schema->getType($field);
-            $value = $this->data[$field] ? $this->data[$field] : '';
+        foreach ($this->schema as $field) {
+            $title = $field->getTitle();
+            $key = $field->getKey();
+            $value = $field->draw($this->data);
 
             $form->append(
-                $this->makeFormInput()->setTitle($title)->setValue($value)
+                $this->makeFormInput()->setName($key)->setTitle($title)->setValue($value)
             );
         }
 

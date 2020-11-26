@@ -52,8 +52,8 @@ class ControllerTest extends TestCase
 
 
         $expectedRowEditHtml = '<form class="form pina-form" action="lk/1/cron-events/'.$id.'" method="PUT">'
-            . '<label>Event</label><input value="order.paid">'
-            . '<label>Created at</label><input value="2020-01-02 03:04:05">'
+            . '<label>Event</label><input type="text" name="event" value="order.paid">'
+            . '<label>Created at</label><input type="text" name="created" value="2020-01-02 03:04:05">'
             . CSRF::formField('PUT')
             . '</form>';
         $html = $router->run("lk/1/cron-events/" . $id, 'get')
@@ -64,8 +64,8 @@ class ControllerTest extends TestCase
         $this->assertEquals($expectedRowEditHtml, $html);
         
         $expectedWrapHtml = '<form class="form pina-form" action="lk/1/cron-events/' . $id . '" method="PUT">'
-            . '<label>Event</label><input value="order.paid">'
-            . '<label>Created at</label><input value="2020-01-02 03:04:05">'
+            . '<label>Event</label><input type="text" name="event" value="order.paid">'
+            . '<label>Created at</label><input type="text" name="created" value="2020-01-02 03:04:05">'
             . CSRF::formField('PUT')
             . '</form>';
 

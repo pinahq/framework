@@ -2,79 +2,118 @@
 
 namespace Pina\Components;
 
-class Schema
+class Schema implements \Iterator
 {
 
     protected $fields = [];
-    protected $titles = [];
-    protected $types = []; // string, integer, float, date
+    protected $cursor = 0;
 
-    public function add($field, $title, $type = '')
+    /**
+     * Добавляет в схему поле
+     * @param mixed $field
+     * @param string $title
+     * @param string $type
+     * @return void
+     */
+    public function add($field, $title = '', $type = '')
     {
+        if (is_string($field)) {
+            $this->fields[] = Field::make($field, $title, $type);
+            return;
+        }
+        
         $this->fields[] = $field;
-        $this->titles[] = $title;
-        $this->types[] = $type;
     }
 
+    /**
+     * Удаляет из схемы все поля с ключом $key
+     * @param string $key
+     * @return $this
+     */
     public function forgetField($key)
     {
-        $index = array_search($key, $this->fields);
-        if ($index === false) {
-            return $this;
+        foreach ($this->fields as $k => $field) {
+            if ($field->getKey() == $key) {
+                unset($this->fields[$k]);
+            }
         }
-
-        array_splice($this->fields, $index, 1);
-        array_splice($this->titles, $index, 1);
-        array_splice($this->types, $index, 1);
-
+        $this->fields = array_values($this->fields);
         return $this;
     }
+    
+    /**
+     * Возвращяет все ключи полей схемы
+     * @return array
+     */
+    public function getKeys()
+    {
+        $keys = array();
+        foreach ($this->fields as $k => $field) {
+            $keys[] = $field->getKey();
+        }
+        return $keys;
+    }
 
+    /**
+     * Возвращает все ключи полей схемы
+     * @return arrar
+     * @deprecated
+     */
     public function getFields()
     {
-        return $this->fields;
+        return $this->getKeys();
     }
 
+    /**
+     * Возвращает все наименования полей схемы
+     * @return array
+     */
     public function getTitles()
     {
-        return $this->titles;
+        $titles = [];
+        foreach ($this as $field) {
+            $titles[] = $field->getTitle();
+        }
+        return $titles;
     }
 
+    
+    /**
+     * Возвращает все типы полей схемы
+     * @return array
+     */
     public function getTypes()
     {
-        return $this->types;
-    }
-
-    public function getTitle($field)
-    {
-        $index = array_search($field, $this->fields);
-        return $this->titles[$index];
-    }
-
-    public function getType($field)
-    {
-        $index = array_search($field, $this->fields);
-        return $this->types[$index];
-    }
-
-    public function fetch()
-    {
-        $data = [];
-        foreach ($this->fields as $k => $v) {
-            $data[] = [$v, $this->titles[$k]];
+        $types = [];
+        foreach ($this as $field) {
+            $types[] = $field->getType();
         }
-        return $data;
+        return $types;
     }
-
+    
+    /**
+     * Превращает ассоциативный массив с данными выборки из БД 
+     * в обычный массив без ключей 
+     * в соответствие со схемой в порядке следования полей схемы
+     * @param array $line
+     * @return array
+     */
     public function makeFlatLine($line)
     {
         $newLine = [];
-        foreach ($this->fields as $k) {
-            $newLine[] = $line[$k] ? $line[$k] : '';
+        foreach ($this->fields as $field) {
+            $newLine[] = $field->draw($line);
         }
         return $newLine;
     }
 
+    /**
+     * Превращает двумерный ассоциативный массив с выборкой из БД 
+     * в двумерный массив без ключей
+     * в соответствие со схемой в порядке следования полей схемы
+     * @param array $table
+     * @return array
+     */
     public function makeFlatTable(&$table)
     {
         $flat = [];
@@ -82,6 +121,35 @@ class Schema
             $flat[] = $this->makeFlatLine($v);
         }
         return $flat;
+    }
+
+    /**
+     * Поддержка Iterable
+     * @return \Pina\Components\Field
+     */
+    public function current()
+    {
+        return $this->fields[$this->cursor];
+    }
+
+    public function key()
+    {
+        return $this->cursor;
+    }
+
+    public function next()
+    {
+        $this->cursor ++;
+    }
+
+    public function rewind()
+    {
+        $this->cursor = 0;
+    }
+
+    public function valid()
+    {
+        return isset($this->fields[$this->cursor]);
     }
 
 }

@@ -10,6 +10,7 @@ class FormInput extends Control
     protected $title = '';
     protected $name = '';
     protected $value = '';
+    protected $type = 'text';
 
     public function setTitle($title)
     {
@@ -28,11 +29,17 @@ class FormInput extends Control
         $this->value = $value;
         return $this;
     }
+    
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
 
     public function draw()
     {
         $r = Html::tag('label', $this->title);
-        $r .= Html::tag('input', '', array_filter(['name' => $this->name, 'value' => $this->value]));
+        $r .= Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value]));
         $r .= $this->compile();
         return $r;
     }
