@@ -59,11 +59,13 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     public function addError($text, $subject)
     {
         $this->errors[] = [$text, $subject];
+        return $this;
     }
 
     public function wrap($wrapper)
     {
         $this->wrappers[] = $wrapper;
+        return $this;
     }
 
     public function hasWrapper()
