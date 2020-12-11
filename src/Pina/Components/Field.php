@@ -83,10 +83,15 @@ class Field
      */
     public function draw($line)
     {
+        if (!isset($line[$this->key]) || $line[$this->key] === '') {
+            return $this->getDefault();
+        }
+        
         if ($this->pattern) {
             return $this->drawPattern($line);
         }
-        return isset($line[$this->key]) && $line[$this->key] !== '' ? $line[$this->key] : $this->getDefault();
+        
+        return $line[$this->key];
     }
     
     /**
