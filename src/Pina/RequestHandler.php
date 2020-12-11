@@ -186,6 +186,10 @@ class RequestHandler
 
         if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
+            if ($data instanceof \Pina\Response) {
+                return $data;
+            }
+            
             $content = new TemplateLayoutContent;
             if (Request::isExternalRequest()) {
                 $content->drawLayout($data->draw());
