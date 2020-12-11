@@ -187,6 +187,10 @@ class RequestHandler
         if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
             if ($data instanceof \Pina\Response) {
+                if (!$data->hasContent()) {
+                    $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+                    $data->setContent($content);
+                }
                 return $data;
             }
             
