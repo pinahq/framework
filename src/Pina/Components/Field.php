@@ -19,7 +19,7 @@ class Field
      * @param type $default
      * @return \static
      */
-    public function make($key, $title, $type = '', $default = '')
+    public static function make($key, $title, $type = '', $default = '')
     {
         $field = new static;
         $field->key = $key;
