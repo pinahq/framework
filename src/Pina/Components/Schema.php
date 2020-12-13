@@ -7,6 +7,7 @@ class Schema implements \Iterator
 
     protected $fields = [];
     protected $cursor = 0;
+    protected $processors = [];
 
     /**
      * Добавляет в схему поле
@@ -15,13 +16,13 @@ class Schema implements \Iterator
      * @param string $type
      * @return void
      */
-    public function add($field, $title = '', $type = '')
+    public function add($field, $title = '', $type = '', $default = '')
     {
         if (is_string($field)) {
-            $this->fields[] = Field::make($field, $title, $type);
+            $this->fields[] = Field::make($field, $title, $type, $default);
             return;
         }
-        
+
         $this->fields[] = $field;
     }
 
@@ -40,7 +41,7 @@ class Schema implements \Iterator
         $this->fields = array_values($this->fields);
         return $this;
     }
-    
+
     /**
      * Возвращяет все ключи полей схемы
      * @return array
@@ -77,7 +78,6 @@ class Schema implements \Iterator
         return $titles;
     }
 
-    
     /**
      * Возвращает все типы полей схемы
      * @return array
@@ -90,7 +90,45 @@ class Schema implements \Iterator
         }
         return $types;
     }
-    
+
+    /**
+     * Adds a processor on to the stack.
+     *
+     * @param  callable $callback
+     * @return $this
+     */
+    public function pushProcessor($callback)
+    {
+        if (!is_callable($callback)) {
+            throw new \InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+        }
+        array_unshift($this->processors, $callback);
+
+        return $this;
+    }
+
+    /**
+     * Removes the processor on top of the stack and returns it.
+     *
+     * @return callable
+     */
+    public function popProcessor()
+    {
+        if (!$this->processors) {
+            throw new \LogicException('You tried to pop from an empty processor stack.');
+        }
+
+        return array_shift($this->processors);
+    }
+
+    /**
+     * @return callable[]
+     */
+    public function getProcessors()
+    {
+        return $this->processors;
+    }
+
     /**
      * Превращает ассоциативный массив с данными выборки из БД 
      * в обычный массив без ключей 
@@ -100,6 +138,9 @@ class Schema implements \Iterator
      */
     public function makeFlatLine($line)
     {
+        foreach ($this->processors as $p) {
+            $line = $p($line);
+        }
         $newLine = [];
         foreach ($this->fields as $field) {
             $newLine[] = $field->draw($line);
