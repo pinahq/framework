@@ -1950,7 +1950,7 @@ class BaseHtml
                 if (in_array($name, static::$dataAttributes)) {
                     foreach ($value as $n => $v) {
                         if (is_array($v)) {
-                            $html .= " $name-$n='" . Json::htmlEncode($v) . "'";
+                            $html .= " $name-$n='" . json_encode($v, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . "'";
                         } elseif (is_bool($v)) {
                             if ($v) {
                                 $html .= " $name-$n";
@@ -1970,7 +1970,7 @@ class BaseHtml
                     }
                     $html .= " $name=\"" . static::encode(static::cssStyleFromArray($value)) . '"';
                 } else {
-                    $html .= " $name='" . Json::htmlEncode($value) . "'";
+                    $html .= " $name='" . json_encode($value, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . "'";
                 }
             } elseif ($value !== null) {
                 $html .= " $name=\"" . static::encode($value) . '"';
