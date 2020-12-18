@@ -5,11 +5,12 @@ namespace Pina;
 class CronEventQueue implements EventQueueInterface
 {
 
-    public function push($handler, $data)
+    public function push($handler, $data, $priority)
     {
         CronEventGateway::instance()->insert([
-            'event' => $handler,
+            'event' => $handler->getKey(),
             'data' => $data,
+            'priority' => $priority,
         ]);
     }
 

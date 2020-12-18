@@ -11,8 +11,12 @@ class SchemaTest extends TestCase
     {
         
         $schema = new Schema();
-        $schema->add(Field::make('order_id', 'Заказ')->setPattern('<a href="/orders/{order_id}">{order_id} at {date}</a>'));
+        $schema->add(Field::make('order_id', 'Заказ'));
         $schema->add(Field::make('name', 'ФИО'));
+        $schema->pushProcessor(function($item) {
+            $item['order_id'] = '<a href="/orders/'.$item['order_id'].'">'.$item['order_id'].' at '.$item['date'].'</a>';
+            return $item;
+        });
         
         $line = ['order_id' => '12', 'date' => '12.12.2020', 'name' => 'Ivan Ivanov'];
         $actual = $schema->makeFlatLine($line);
