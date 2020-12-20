@@ -2,6 +2,8 @@
 
 namespace Pina\Events;
 
+use Pina\Event;
+
 class ModuleEventHandler implements EventHandlerInterface
 {
     protected $namespace = '';
@@ -15,7 +17,7 @@ class ModuleEventHandler implements EventHandlerInterface
     
     public function getKey()
     {
-        return \implode(':::', ['module', $this->namespace, $this->script]);
+        return \implode('::', [$this->namespace, $this->script]);
     }
     
     public function handle($payload)

@@ -3,6 +3,8 @@
 namespace Pina\Events;
 
 use Pina\App;
+use Pina\Event;
+use function Pina\__;
 
 class EventManager implements EventManagerInterface
 {
@@ -35,14 +37,15 @@ class EventManager implements EventManagerInterface
         return $this->registry[$mode][$event][$priority];
     }
 
-    public function subscribe($eventKey, $handler, $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function subscribe($eventKey, $handler, $priority = Event::PRIORITY_NORMAL)
     {
-        $isAsync = App::container()->has(EventQueueInterface::class) ? 1 : 0;
-        $this->getRegistry($eventKey, $isAsync, $priority)->push($handler);
+        $mode = App::container()->has(\Pina\EventQueueInterface::class) ? Event::MODE_ASYNC : Event::MODE_SYNC;
+
+        $this->getRegistry($eventKey, $mode, $priority)->push($handler);
         $this->handlers[$handler->getKey()] = $handler;
     }
 
-    public function subscribeSync($eventKey, $handler, $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function subscribeSync($eventKey, $handler, $priority = Event::PRIORITY_NORMAL)
     {
         $this->getRegistry($eventKey, 0, $priority)->push($handler);
         $this->handlers[$handler->getKey()] = $handler;
@@ -56,7 +59,7 @@ class EventManager implements EventManagerInterface
     public function getHandler($key)
     {
         if (!isset($this->handlers[$key])) {
-            throw new Exception(__("Не найден обработчик для события:") . ' ' . $key);
+            throw new \Exception(__("Не найден обработчик для события:") . ' ' . $key);
         }
 
         return $this->handlers[$key];
@@ -69,21 +72,24 @@ class EventManager implements EventManagerInterface
 
     public function trigger($eventKey, $payload = '')
     {
-        $this->triggerWithPriority($eventKey, $payload, 0);
-        $this->triggerWithPriority($eventKey, $payload, 1);
-        $this->triggerWithPriority($eventKey, $payload, 2);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_HIGH);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_NORMAL);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_LOW);
     }
 
     protected function triggerWithPriority($eventKey, $payload, $priority)
     {
         //sync
-        $registry = $this->getRegistry($eventKey, 0, $priority);
+        $registry = $this->getRegistry($eventKey, \Pina\Event::MODE_SYNC, $priority);
         foreach ($registry as $handler) {
             $handler->handle($payload);
         }
 
+        if (!App::container()->has(\Pina\EventQueueInterface::class)) {
+            return;
+        }
         //async
-        $registry = $this->getRegistry($eventKey, 1, $priority);
+        $registry = $this->getRegistry($eventKey, \Pina\Event::MODE_ASYNC, $priority);
         $queue = App::container()->get(\Pina\EventQueueInterface::class);
         foreach ($registry as $handler) {
             $queue->push($handler, $payload, $priority);

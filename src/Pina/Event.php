@@ -8,10 +8,10 @@ class Event extends Request
     const PRIORITY_HIGH = 0;
     const PRIORITY_NORMAL = 1;
     const PRIORITY_LOW = 2;
-
-    private static $syncHandlers = [];
-    private static $asyncHandlers = [];
     
+    const MODE_SYNC = 0;
+    const MODE_ASYNC = 1;
+
     public static function data()
     {
         return static::top()->data(); 

@@ -10,6 +10,5 @@ return array(
         'compiled' => __DIR__.'/../var/compiled',
     ),
     'sharedDepencies' => [
-        \Pina\EventQueueInterface::class => \Pina\CronEventQueue::class,
     ],
 );
