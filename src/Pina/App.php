@@ -19,7 +19,6 @@ class App
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
         \Pina\Events\EventManagerInterface::class => \Pina\Events\EventManager::class,
-        Router::class => Router::class,
     );
 
     /**
@@ -54,7 +53,7 @@ class App
                 self::$container->share($key, $value);
             }
         }
-        
+
         $components = new Container;
         $components->set('table', \Pina\Components\TableComponent::class);
         $components->set('row', \Pina\Components\RowComponent::class);
@@ -62,7 +61,8 @@ class App
         $components->set('form', \Pina\Components\RecordEditComponent::class);
         $components->set('location', \Pina\Components\Location::class);
         self::$container->share('components', $components);
-        self::$container->share('controls', \Pina\Container\Factory::class);
+        self::$container->share('factory', \Pina\Container\Factory::class);
+        self::$container->share('loader', \Pina\Container\Loader::class);
     }
 
     /**
@@ -82,16 +82,7 @@ class App
     {
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
     }
-    
-    /**
-     * Возвращает объект для работы с событиями
-     * @return \Pina\Events\EventManagerInterface
-     */
-    public static function events()
-    {
-        return self::$container->get(\Pina\Events\EventManagerInterface::class);
-    }
-    
+
     /**
      * Возвращает DI контейнер
      * @return Container
@@ -100,14 +91,39 @@ class App
     {
         return static::container()->get('components');
     }
-    
+
     /**
      * Возвращает DI контейнер
      * @return Container
      */
-    public static function controls()
+    public static function factory()
     {
-        return static::container()->get('controls');
+        return static::container()->get('factory');
+    }
+
+    /**
+     * Подгружает класс из загрузчика
+     */
+    public static function make($id)
+    {
+        return static::factory()->get($id);
+    }
+
+    /**
+     * Возвращает DI контейнер
+     * @return Container
+     */
+    public static function loader()
+    {
+        return static::container()->get('loader');
+    }
+
+    /**
+     * Подгружает класс из загрузчика
+     */
+    public static function load($id)
+    {
+        return static::loader()->get($id);
     }
 
     /**
@@ -116,7 +132,7 @@ class App
      */
     public static function router()
     {
-        return static::container()->get(Router::class);
+        return static::loader()->get(Router::class);
     }
 
     /**

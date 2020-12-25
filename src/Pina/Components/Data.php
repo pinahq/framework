@@ -39,10 +39,10 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     {
         return \Pina\App::components()->get($alias)->basedOn($this);
     }
-    
+
     protected function control($control)
     {
-        return \Pina\App::controls()->get($control);
+        return \Pina\App::make($control);
     }
 
     public function setMeta($key, $value)
@@ -85,7 +85,7 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
             $html = $w->draw();
             array_pop($w->controls);
         }
-        
+
         return $html;
     }
 
