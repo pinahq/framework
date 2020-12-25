@@ -6,19 +6,12 @@ use Pina\App;
 use Pina\Event;
 use function Pina\__;
 
-class EventManager implements EventManagerInterface
+class EventManager
 {
 
     protected $registry = [];
     protected $handlers = [];
 
-    /**
-     * 
-     * @param string $event
-     * @param int $mode
-     * @param int $priority
-     * @return EventRegistry
-     */
     protected function getRegistry($event, $mode, $priority)
     {
         if (!isset($this->registry[$mode])) {
@@ -37,6 +30,12 @@ class EventManager implements EventManagerInterface
         return $this->registry[$mode][$event][$priority];
     }
 
+    /**
+     * 
+     * @param string $eventKey
+     * @param \Pina\Events\EventHandlerInterface $handler
+     * @param int $priority
+     */
     public function subscribe($eventKey, $handler, $priority = Event::PRIORITY_NORMAL)
     {
         $mode = App::container()->has(\Pina\EventQueueInterface::class) ? Event::MODE_ASYNC : Event::MODE_SYNC;
@@ -45,6 +44,12 @@ class EventManager implements EventManagerInterface
         $this->handlers[$handler->getKey()] = $handler;
     }
 
+    /**
+     * 
+     * @param string $eventKey
+     * @param \Pina\Events\EventHandlerInterface $handler
+     * @param int $priority
+     */
     public function subscribeSync($eventKey, $handler, $priority = Event::PRIORITY_NORMAL)
     {
         $this->getRegistry($eventKey, 0, $priority)->push($handler);
@@ -56,6 +61,11 @@ class EventManager implements EventManagerInterface
         $this->getHandler($key)->handle($payload);
     }
 
+    /**
+     * 
+     * @param string $key
+     * @return EventHandlerInterface
+     */
     public function getHandler($key)
     {
         if (!isset($this->handlers[$key])) {
@@ -65,11 +75,20 @@ class EventManager implements EventManagerInterface
         return $this->handlers[$key];
     }
 
+    /**
+     * 
+     * @return string[]
+     */
     public function getHandlerKeys()
     {
         return array_keys($this->handlers);
     }
 
+    /**
+     * 
+     * @param string $eventKey
+     * @param string $payload
+     */
     public function trigger($eventKey, $payload = '')
     {
         $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_HIGH);

@@ -38,7 +38,7 @@ class Form extends Control
 
         $action = $this->buildParsed($parsed);
 
-        return ['method' => $method, 'action' => $action, 'class' => $this->makeClass()];
+        return ['method' => $method, 'action' => $action, 'class' => $this->makeClass('form pina-form')];
     }
 
     protected function buildParsed($parsed_url)

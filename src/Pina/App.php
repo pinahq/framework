@@ -18,7 +18,6 @@ class App
         \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
         \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
-        \Pina\Events\EventManagerInterface::class => \Pina\Events\EventManager::class,
     );
 
     /**
@@ -81,6 +80,11 @@ class App
     public static function db()
     {
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
+    }
+    
+    public static function events()
+    {
+        return static::load(\Pina\Events\EventManager::class);
     }
 
     /**

@@ -30,8 +30,6 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
             );
         }
 
-        $form->append(CSRFHidden::instance()->setMethod($method));
-
         $this->append($form);
     }
 
