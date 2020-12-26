@@ -74,9 +74,9 @@ class ControllerTest extends TestCase
             ->forgetField('id')
             ->turnTo('form');
 
-        \Pina\App::factory()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
+        \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
         $this->assertEquals($expectedWrapHtml, $component->draw());
-        \Pina\App::factory()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormStatic::class);
+        \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormStatic::class);
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
         $component->wrap(Pina\Controls\TableCell::instance());

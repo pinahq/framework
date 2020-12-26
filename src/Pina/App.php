@@ -3,7 +3,6 @@
 namespace Pina;
 
 use Pina\Container\Container;
-use Pina\Container\Factory;
 use Pina\DB\TriggerUpgrade;
 
 class App
@@ -60,8 +59,6 @@ class App
         $components->set('form', \Pina\Components\RecordEditComponent::class);
         $components->set('location', \Pina\Components\Location::class);
         self::$container->share('components', $components);
-        self::$container->share('factory', \Pina\Container\Factory::class);
-        self::$container->share('loader', \Pina\Container\Loader::class);
     }
 
     /**
@@ -81,7 +78,11 @@ class App
     {
         return self::$container->get(\Pina\DatabaseDriverInterface::class);
     }
-    
+
+    /**
+     * Возвращает объект для работы с событиями
+     * @return \Pina\Events\EventManager
+     */
     public static function events()
     {
         return static::load(\Pina\Events\EventManager::class);
@@ -97,29 +98,11 @@ class App
     }
 
     /**
-     * Возвращает DI контейнер
-     * @return Container
-     */
-    public static function factory()
-    {
-        return static::container()->get('factory');
-    }
-
-    /**
      * Подгружает класс из загрузчика
      */
     public static function make($id)
     {
-        return static::factory()->get($id);
-    }
-
-    /**
-     * Возвращает DI контейнер
-     * @return Container
-     */
-    public static function loader()
-    {
-        return static::container()->get('loader');
+        return static::container()->make($id);
     }
 
     /**
@@ -127,16 +110,16 @@ class App
      */
     public static function load($id)
     {
-        return static::loader()->get($id);
+        return static::container()->load($id);
     }
 
     /**
-     * Возвращает объект для работы с БД
+     * Возвращает объект роутер
      * @return Router
      */
     public static function router()
     {
-        return static::loader()->get(Router::class);
+        return static::load(Router::class);
     }
 
     /**

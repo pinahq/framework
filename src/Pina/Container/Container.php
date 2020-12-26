@@ -49,12 +49,12 @@ class Container implements ContainerInterface
                 }
 
                 throw new NotFoundException(
-                    sprintf('Unable to create alias (%s) since class (%s) does not exists', $id, $className)
+                sprintf('Unable to create alias (%s) since class (%s) does not exists', $id, $className)
                 );
             }
 
             throw new NotFoundException(
-                sprintf('Unable to create alias (%s) as it does not have appropriate type', $id)
+            sprintf('Unable to create alias (%s) as it does not have appropriate type', $id)
             );
         }
 
@@ -62,7 +62,7 @@ class Container implements ContainerInterface
             if (is_object($this->definitions[$id])) {
                 return clone($this->definitions[$id]);
             }
-            
+
             if (is_string($this->definitions[$id])) {
                 $className = $this->definitions[$id];
                 if (class_exists($className)) {
@@ -70,17 +70,49 @@ class Container implements ContainerInterface
                 }
 
                 throw new NotFoundException(
-                    sprintf('Unable to create alias (%s) since class (%s) does not exists', $id, $className)
+                sprintf('Unable to create alias (%s) since class (%s) does not exists', $id, $className)
                 );
             }
 
             throw new NotFoundException(
-                sprintf('Unable to create alias (%s) as it does not have appropriate type', $id)
+            sprintf('Unable to create alias (%s) as it does not have appropriate type', $id)
             );
         }
-        
+
         throw new NotFoundException(
-            sprintf('Alias (%s) is not being managed by the container', $id)
+        sprintf('Alias (%s) is not being managed by the container', $id)
+        );
+    }
+
+    public function load($id)
+    {
+        if ($this->has($id)) {
+            return $this->get($id);
+        }
+
+        if (class_exists($id)) {
+            $inst = new $id;
+            $this->share($id, $inst);
+            return $inst;
+        }
+
+        throw new NotFoundException(
+        sprintf('Alias (%s) is not being managed by the container', $id)
+        );
+    }
+
+    public function make($id)
+    {
+        if ($this->has($id)) {
+            return $this->get($id);
+        }
+
+        if (class_exists($id)) {
+            return new $id;
+        }
+
+        throw new NotFoundException(
+        sprintf('Alias (%s) is not being managed by the container', $id)
         );
     }
 

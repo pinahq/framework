@@ -2,7 +2,7 @@
 
 namespace Pina\Components;
 
-class Schema implements \Iterator
+class Schema implements \IteratorAggregate
 {
 
     protected $fields = [];
@@ -165,32 +165,12 @@ class Schema implements \Iterator
     }
 
     /**
-     * Поддержка Iterable
-     * @return \Pina\Components\Field
+     * Итератор по полям схемы
+     * @return Field[]
      */
-    public function current()
+    public function getIterator()
     {
-        return $this->fields[$this->cursor];
-    }
-
-    public function key()
-    {
-        return $this->cursor;
-    }
-
-    public function next()
-    {
-        $this->cursor ++;
-    }
-
-    public function rewind()
-    {
-        $this->cursor = 0;
-    }
-
-    public function valid()
-    {
-        return isset($this->fields[$this->cursor]);
+        return new \ArrayIterator($this->fields);
     }
 
 }
