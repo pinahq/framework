@@ -53,6 +53,16 @@ class Router
         $request = new Request($_GET, $_POST, $params, $_COOKIE, $_FILES, $_SERVER);
         $inst->setRequest($request);
 
+        $location = new Http\Location($resource);
+        $inst->setLocation($location);
+
+        $controllerCount = count(explode('/', $c));
+        $amount = floor($controllerCount / 2) + $controllerCount;
+        $baseResource = implode('/', array_slice(explode('/', trim($resource, '/')), 0, $amount));
+
+        $base = new Http\Location($baseResource);
+        $inst->setBase($base);
+
         $deeper = [];
         if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
             $action .= $this->ucfirstEveryWord($deeper['__action']);

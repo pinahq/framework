@@ -9,14 +9,26 @@ use Pina\Controls\CSRFHidden;
 class RecordEditComponent extends RecordData //implements ComponentInterface
 {
 
-    protected $controls = [];
+    protected $method = 'GET';
+    protected $action = null;
+
+    public function setMethod($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    public function setAction($action)
+    {
+        $this->action = $action;
+        return $this;
+    }
 
     public function build()
     {
-        $method = 'PUT';
         $form = $this->makeForm()
-            ->setAction($this->getMeta('location'))
-            ->setMethod($method);
+            ->setAction($this->action)
+            ->setMethod($this->method);
 
         $r = '';
         $controls = [];

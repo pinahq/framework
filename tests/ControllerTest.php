@@ -57,9 +57,10 @@ class ControllerTest extends TestCase
             . '<label>Created at</label><input type="text" name="created" value="2020-01-02 03:04:05">'
             . '</form>';
         $html = $router->run("lk/1/cron-events/" . $id, 'get')
-            ->setMeta('location', "lk/1/cron-events/" . $id)
             ->forgetField('id')
             ->turnTo('form')
+            ->setMethod('PUT')
+            ->setAction("lk/1/cron-events/" . $id)
             ->draw();
         $this->assertEquals($expectedRowEditHtml, $html);
         
@@ -70,9 +71,10 @@ class ControllerTest extends TestCase
             . '</form>';
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')
-            ->setMeta('location', "lk/1/cron-events/" . $id)
             ->forgetField('id')
-            ->turnTo('form');
+            ->turnTo('form')
+            ->setMethod("PUT")
+            ->setAction("lk/1/cron-events/" . $id);
 
         \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
         $this->assertEquals($expectedWrapHtml, $component->draw());

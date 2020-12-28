@@ -16,16 +16,40 @@ class Endpoint
      */
     protected $request;
 
+    /**
+     *
+     * @var Location $location
+     */
+    protected $location;
+
+    /**
+     *
+     * @var Location $base
+     */
+    protected $base;
+
     public function __construct()
     {
         $this->request = new Request();
+        $this->location = new Location('');
+        $this->base = new Location('');
+    }
+
+    public function setLocation(Location $location)
+    {
+        $this->location = $location;
+    }
+
+    public function setBase(Location $location)
+    {
+        $this->base = $location;
     }
 
     public function setRequest(Request $request)
     {
         $this->request = $request;
     }
-    
+
     /**
      * Request body parameters ($_POST).
      * 
@@ -35,7 +59,7 @@ class Endpoint
     {
         return $this->request->request;
     }
-    
+
     /**
      * Query string parameters ($_GET).
      *
@@ -55,7 +79,7 @@ class Endpoint
     {
         return $this->request->server;
     }
-    
+
     /**
      * Uploaded files ($_FILES).
      *
@@ -65,7 +89,7 @@ class Endpoint
     {
         return $this->request->files;
     }
-    
+
     /**
      * Cookies ($_COOKIE).
      *
@@ -75,7 +99,7 @@ class Endpoint
     {
         return $this->request->cookies;
     }
-    
+
     /**
      * Headers (taken from the $_SERVER).
      *
@@ -85,4 +109,5 @@ class Endpoint
     {
         return $this->request->headers;
     }
+
 }
