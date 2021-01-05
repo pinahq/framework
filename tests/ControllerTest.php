@@ -21,12 +21,14 @@ class ControllerTest extends TestCase
         Pina\CronEventGateway::instance()->truncate();
         Pina\CronEventGateway::instance()->insert($data);
 
-        $expectedHtml = '<table>'
+        $expectedHtml = '<div class="card"><div class="card-body">'
+            . '<table class="table table-hover">'
             . '<tr><th>Event</th><th>Created at</th></tr>'
             . '<tr><td>order.paid</td><td>2020-01-02 03:04:05</td></tr>'
             . '<tr><td>order.canceled</td><td>2020-01-02 04:05:06</td></tr>'
             . '<tr><td>order.returned</td><td>2020-01-02 05:06:07</td></tr>'
-            . '</table>';
+            . '</table>'
+            . '</div></div>';
 
         $endpoint = new CronEventEndpoint();
         $html = $endpoint->index([])->forgetField('id')->draw();
@@ -34,8 +36,8 @@ class ControllerTest extends TestCase
 
         $id = Pina\CronEventGateway::instance()->id();
 
-        $expectedRowHtml = '<label>Event</label><span>order.paid</span>'
-            . '<label>Created at</label><span>2020-01-02 03:04:05</span>';
+        $expectedRowHtml = '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>';
 
         $html = $endpoint->show($id)->draw();
         $this->assertEquals($expectedRowHtml, $html);
@@ -53,8 +55,8 @@ class ControllerTest extends TestCase
 
         $expectedRowEditHtml = '<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
             . CSRF::formField('PUT')
-            . '<label>Event</label><input type="text" name="event" value="order.paid">'
-            . '<label>Created at</label><input type="text" name="created" value="2020-01-02 03:04:05">'
+            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '</form>';
         $html = $router->run("lk/1/cron-events/" . $id, 'get')
             ->forgetField('id')
@@ -66,8 +68,8 @@ class ControllerTest extends TestCase
         
         $expectedWrapHtml = '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
-            . '<label>Event</label><input type="text" name="event" value="order.paid">'
-            . '<label>Created at</label><input type="text" name="created" value="2020-01-02 03:04:05">'
+            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '</form>';
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')
@@ -92,7 +94,8 @@ class ControllerTest extends TestCase
         $expectedWrapHtml = '<form class="form pina-form" action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<table><tr><td>'
-            . '<label>Event</label><span>order.paid</span><label>Created at</label><span>2020-01-02 03:04:05</span>'
+            . '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>'
             . '</td></tr></table>'
             . '<p>note</p>'
             . '</form>';

@@ -17,11 +17,13 @@ abstract class StaticResource
     public function setSrc($src)
     {
         $this->src = $src;
+        return $this;
     }
 
     public function setContent($content)
     {
         $this->content = $content;
+        return $this;
     }
     
     public function getContent()

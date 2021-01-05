@@ -3,12 +3,11 @@
 namespace Pina\Http;
 
 use Pina\App;
-use Pina\Route;
 use Pina\Url;
 
 class Location
 {
-    
+
     protected $resource = '';
 
     public function __construct($resource)
@@ -19,7 +18,7 @@ class Location
     public function link($pattern, $params = [])
     {
         $url = App::baseUrl();
-        
+
         $resource = Url::resource($pattern, $params, $this->resource);
 
         $ps = App::getParamsString($pattern, $params);
@@ -30,8 +29,13 @@ class Location
         if (!empty($params['anchor'])) {
             $url .= "#" . $params["anchor"];
         }
-        
+
         return $url;
     }
-    
+
+    public function resource($pattern, $params = [])
+    {
+        return Url::resource($pattern, $params, $this->resource);
+    }
+
 }

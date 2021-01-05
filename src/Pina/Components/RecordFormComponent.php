@@ -1,0 +1,101 @@
+<?php
+
+namespace Pina\Components;
+
+class RecordFormComponent extends RecordData
+{
+
+    protected $method = 'GET';
+    protected $action = null;
+
+    public function setMethod($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+    
+    public function setAction($action)
+    {
+        $this->action = $action;
+        return $this;
+    }
+
+    public function build()
+    {
+        $form = $this->makeForm()
+            ->addClass('pina-form')
+            ->setAction($this->action)
+            ->setMethod($this->method);
+
+        foreach ($this->schema->getIterator() as $field) {
+            $type = $field->getType();
+            if ($type == 'static') {
+                continue;
+            }
+            
+            if (isset($type[0]) && $type[0] == '/') {
+                $resource = substr($type, 1);
+                $data = \Pina\App::router()->run($resource, 'get');
+                $input = new SelectComponent;
+                $input->basedOn($data);
+            } else {
+                $input = is_array($type) ? $this->makeFormSelect() : $this->makeFormInput();
+            }
+
+            $input->setName($field->getKey())
+                ->setTitle($field->getTitle())
+                ->setValue($field->draw($this->data));
+
+            if (is_array($type)) {
+                $input->setVariants($type);
+            }
+
+            $form->append($input);
+        }
+        
+        $form->append($this->makeSubmit()->setTitle('Сохранить'));
+        $this->append($this->makeCard()->append($form));
+    }
+
+    /**
+     * @return \Pina\Controls\Form
+     */
+    protected function makeForm()
+    {
+        return $this->control(\Pina\Controls\Form::class);
+    }
+
+    /**
+     * @return \Pina\Controls\FormInput
+     */
+    protected function makeFormInput()
+    {
+        return $this->control(\Pina\Controls\FormInput::class);
+    }
+
+    /**
+     * @return \Pina\Controls\FormSelect
+     */
+    protected function makeFormSelect()
+    {
+        return $this->control(\Pina\Controls\FormSelect::class);
+    }
+    
+    
+    /**
+     * @return \Pina\Controls\Card
+     */
+    protected function makeCard()
+    {
+        return $this->control(\Pina\Controls\Card::class);
+    }
+
+    /**
+     * @return \Pina\Controls\SubmitButton
+     */
+    protected function makeSubmit()
+    {
+        return $this->control(\Pina\Controls\SubmitButton::class);
+    }
+
+}

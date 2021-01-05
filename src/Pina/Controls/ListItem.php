@@ -9,7 +9,7 @@ class ListItem extends Control
 
     protected $text = '';
 
-    public function setText(&$text)
+    public function setText($text)
     {
         $this->text = $text;
         return $this;
@@ -17,7 +17,7 @@ class ListItem extends Control
 
     public function draw()
     {
-        return Html::tag('li', $this->text . $this->compile());
+        return Html::tag('li', $this->text . $this->compile(), ['class' => $this->makeClass()]);
     }
 
 }

@@ -29,7 +29,7 @@ class FormInput extends Control
         $this->value = $value;
         return $this;
     }
-    
+
     public function setType($type)
     {
         $this->type = $type;
@@ -38,10 +38,10 @@ class FormInput extends Control
 
     public function draw()
     {
-        $r = Html::tag('label', $this->title);
-        $r .= Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value]));
+        $r = Html::tag('label', $this->title, ['class' => 'control-label']);
+        $r .= Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value, 'class' => 'form-control']));
         $r .= $this->compile();
-        return $r;
+        return Html::tag('div', $r, ['class' => $this->makeClass('form-group')]);
     }
 
 }

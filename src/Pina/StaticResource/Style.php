@@ -2,6 +2,8 @@
 
 namespace Pina\StaticResource;
 
+use Pina\Html;
+
 class Style extends StaticResource
 {
 
@@ -18,7 +20,7 @@ class Style extends StaticResource
 
         $src = $this->isExternalUrl() ? $this->src : $this->makeLocalUrl();
 
-        return '<link rel="stylesheet" href="' . $src . '" />';
+        return Html::tag('link', '', ['rel' => 'stylesheet', 'href' => $src]);
     }
 
 }

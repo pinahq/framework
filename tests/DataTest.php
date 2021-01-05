@@ -24,12 +24,14 @@ class DataTest extends TestCase
             ['id' => 3, 'event' => 'order.returned', 'created_at' => '2020-01-02 05:06:07'],
         ];
         
-        $expectedHtml = '<table>'
+        $expectedHtml = '<div class="card"><div class="card-body">'
+            . '<table class="table table-hover">'
             . '<tr><th>#</th><th>Событие</th><th>Дата создания</th></tr>'
             . '<tr><td>1</td><td>order.paid</td><td>2020-01-02 03:04:05</td></tr>'
             . '<tr><td>2</td><td>order.canceled</td><td>2020-01-02 04:05:06</td></tr>'
             . '<tr><td>3</td><td>order.returned</td><td>2020-01-02 05:06:07</td></tr>'
-            . '</table>';
+            . '</table>'
+            . '</div></div>';
 
         $list = new ListData();
         $list->load($data, $schema);

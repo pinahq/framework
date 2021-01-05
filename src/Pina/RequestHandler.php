@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use Pina\Layouts\DefaultLayout;
+
 class RequestHandler
 {
 
@@ -193,10 +195,13 @@ class RequestHandler
                 }
                 return $data;
             }
-            
+
             $content = new TemplateLayoutContent;
             if (Request::isExternalRequest()) {
-                $content->drawLayout($data->draw());
+                //$content->drawLayout($data->draw());
+                $layout = $data->getLayout();
+                $r = App::load($layout ? $layout : DefaultLayout::class)->append($data)->draw();
+                $content->setContent($r);
             } else {
                 $content->setContent($data->draw());
             }

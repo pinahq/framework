@@ -2,50 +2,29 @@
 
 namespace Pina\Components;
 
-class TableComponent extends ListData //implements ComponentInterface
+use Pina\Controls\Card;
+
+class TableComponent extends SimpleTableComponent //implements ComponentInterface
 {
 
     public function build()
     {
-        $table = $this->makeTable();
-        $table->append($this->buildHeader($this->schema->getTitles()));
-        foreach ($this as $record) {
-            $table->append(RowComponent::instance()->basedOn($record));
-        }
-        $this->append($table);
+        $table = $this->buildTable();
+        $container = new Card;
+        $container->append($table);
+        $this->append($container);
     }
-
-    protected function buildHeader($data)
-    {
-        $header = $this->makeTableRow();
-        foreach ($data as $k => $v) {
-            $header->append($this->makeTableHeaderCell()->setText($v));
-        }
-        return $header;
-    }
-
+    
     /**
      * @return \Pina\Controls\Table
      */
     protected function makeTable()
     {
-        return $this->control(\Pina\Controls\Table::class);
-    }
-
-    /**
-     * @return \Pina\Controls\TableRow
-     */
-    protected function makeTableRow()
-    {
-        return $this->control(\Pina\Controls\TableRow::class);
-    }
-    
-    /**
-     * @return \Pina\Controls\TableHeaderCell
-     */
-    protected function makeTableHeaderCell()
-    {
-        return $this->control(\Pina\Controls\TableHeaderCell::class);
+        $table = $this->control(\Pina\Controls\Table::class);
+        $table->addClass('table');
+        $table->addClass('table-hover');
+        
+        return $table;
     }
 
 }

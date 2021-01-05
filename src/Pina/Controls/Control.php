@@ -10,6 +10,7 @@ class Control
     protected $after = [];
     protected $before = [];
     protected $classes = [];
+    protected $layout = null;
 
     /**
      * 
@@ -19,7 +20,18 @@ class Control
     {
         return new static();
     }
-
+    
+    public function setLayout($layout)
+    {
+        $this->layout = $layout;
+        return $this;
+    }
+    
+    public function getLayout()
+    {
+        return $this->layout;
+    }
+    
     public function startBuild()
     {
         $this->isBuildStarted = true;
@@ -81,6 +93,11 @@ class Control
     public function draw()
     {
         return '';
+    }
+    
+    public function __toString()
+    {
+        return $this->draw();
     }
 
 }

@@ -2,6 +2,8 @@
 
 namespace Pina\StaticResource;
 
+use Pina\Html;
+
 class Script extends StaticResource
 {
 
@@ -18,7 +20,7 @@ class Script extends StaticResource
 
         $src = $this->isExternalUrl() ? $this->src : $this->makeLocalUrl();
 
-        return '<script src="' . $src . '" type="text/javascript"></script>';
+        return Html::tag('script', '', ['src' => $src, 'type' => 'text/javascript']);
     }
 
 }

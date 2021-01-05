@@ -54,7 +54,7 @@ class ResourceManagerTest extends TestCase
         smarty_block_script(array('src' => "http://github.com/123/123/test.js"), '', $view, $repeat);
         smarty_block_script(array('src' => "/static/test.js"), '', $view, $repeat);
         
-        $this->assertEquals("<script>alert('!!!');</script>\r\n<script src=\"http://github.com/123/123/test.js\" type=\"text/javascript\"></script>\r\n<script src=\"/static/test.js?1\" type=\"text/javascript\"></script>\r\n
+        $this->assertEquals("<script>alert('!!!');</script>\r\n<script type=\"text/javascript\" src=\"http://github.com/123/123/test.js\"></script>\r\n<script type=\"text/javascript\" src=\"/static/test.js?1\"></script>\r\n
             <script>
                 alert('123');
                 alert('234');
@@ -115,7 +115,7 @@ class ResourceManagerTest extends TestCase
         smarty_block_style(array('src' => "http://github.com/123/123/test.css"), '', $view, $repeat);
         smarty_block_style(array('src' => "/static/test.css"), '', $view, $repeat);
         
-        $this->assertEquals("<style>#id{display:hidden;}</style>\r\n<link rel=\"stylesheet\" href=\"http://github.com/123/123/test.css\" />\r\n<link rel=\"stylesheet\" href=\"/static/test.css?1\" />\r\n
+        $this->assertEquals("<style>#id{display:hidden;}</style>\r\n<link href=\"http://github.com/123/123/test.css\" rel=\"stylesheet\">\r\n<link href=\"/static/test.css?1\" rel=\"stylesheet\">\r\n
             <style>
                 body {background-color: black;}
                 div {
