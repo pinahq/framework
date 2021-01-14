@@ -129,6 +129,14 @@ class Schema implements \IteratorAggregate
         return $this->processors;
     }
 
+    public function process($line)
+    {
+        foreach ($this->processors as $p) {
+            $line = $p($line);
+        }
+        return $line;
+    }
+
     /**
      * Превращает ассоциативный массив с данными выборки из БД 
      * в обычный массив без ключей 
@@ -138,9 +146,7 @@ class Schema implements \IteratorAggregate
      */
     public function makeFlatLine($line)
     {
-        foreach ($this->processors as $p) {
-            $line = $p($line);
-        }
+        $line = $this->process($line);
         $newLine = [];
         foreach ($this->fields as $field) {
             $newLine[] = $field->draw($line);

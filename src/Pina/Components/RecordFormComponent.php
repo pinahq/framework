@@ -13,7 +13,7 @@ class RecordFormComponent extends RecordData
         $this->method = $method;
         return $this;
     }
-    
+
     public function setAction($action)
     {
         $this->action = $action;
@@ -32,8 +32,10 @@ class RecordFormComponent extends RecordData
             if ($type == 'static') {
                 continue;
             }
-            
-            if (isset($type[0]) && $type[0] == '/') {
+
+            if ($type instanceof \Closure) {
+                $input = $type($this->data);
+            } elseif (isset($type[0]) && $type[0] == '/') {
                 $resource = substr($type, 1);
                 $data = \Pina\App::router()->run($resource, 'get');
                 $input = new SelectComponent;
@@ -52,7 +54,7 @@ class RecordFormComponent extends RecordData
 
             $form->append($input);
         }
-        
+
         $form->append($this->makeSubmit()->setTitle('Сохранить'));
         $this->append($this->makeCard()->append($form));
     }
@@ -80,8 +82,7 @@ class RecordFormComponent extends RecordData
     {
         return $this->control(\Pina\Controls\FormSelect::class);
     }
-    
-    
+
     /**
      * @return \Pina\Controls\Card
      */
