@@ -25,7 +25,7 @@ class RecordData extends Data
      */
     public function load($data, Schema $schema, $meta = [])
     {
-        $this->data = $data;
+        $this->data = $schema->process($data);
         $this->schema = $schema;
         $this->meta = $meta;
         return $this;

@@ -20,7 +20,7 @@ class ListData extends Data implements \Iterator
     
     public function load($data, Schema $schema, $meta = [])
     {
-        $this->data = $data;
+        $this->data = $schema->processList($data);
         $this->schema = $schema;
         $this->meta = $meta;
         return $this;

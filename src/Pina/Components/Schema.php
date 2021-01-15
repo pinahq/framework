@@ -129,12 +129,31 @@ class Schema implements \IteratorAggregate
         return $this->processors;
     }
 
+    /**
+     * 
+     * @param mixed $line
+     * @return mixed
+     */
     public function process($line)
     {
         foreach ($this->processors as $p) {
             $line = $p($line);
         }
         return $line;
+    }
+
+    /**
+     * 
+     * @param array $data
+     * @return array
+     */
+    public function processList($data)
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->process($line);
+        }
+
+        return $data;
     }
 
     /**
