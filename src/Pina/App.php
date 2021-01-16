@@ -56,7 +56,7 @@ class App
         $components->set('table', \Pina\Components\TableComponent::class);
         $components->set('row', \Pina\Components\RowComponent::class);
         $components->set('list', \Pina\Components\ListComponent::class);
-        $components->set('form', \Pina\Components\RecordEditComponent::class);
+        $components->set('form', \Pina\Components\RecordFormComponent::class);
         $components->set('location', \Pina\Components\Location::class);
         self::$container->share('components', $components);
     }

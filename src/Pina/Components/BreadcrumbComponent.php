@@ -25,13 +25,23 @@ class BreadcrumbComponent extends MenuComponent
         $this->append($list);
     }
 
+    /**
+     * Возвращает экземпляр списка-контейнера хлебных крошек
+     * @return \Pina\Controls\UnorderedList
+     */
     protected function makeList()
     {
-        $list = new \Pina\Controls\UnorderedList();
+        $list = $this->control(\Pina\Controls\UnorderedList::class);
         $list->addClass('breadcrumb');
         return $list;
     }
 
+    /**
+     * Возвращает элемент хлебных крошек
+     * @param string $title
+     * @param string $link
+     * @return \Pina\Controls\ListItem
+     */
     protected function makeListItem($title, $link)
     {
         $item = isset($link) ? $this->control(\Pina\Controls\LinkedListItem::class) : $this->control(\Pina\Controls\ListItem::class);

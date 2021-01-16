@@ -2,6 +2,9 @@
 
 namespace Pina\Components;
 
+/**
+ * Выпадающий список
+ */
 class SelectComponent extends ListData
 {
 
@@ -9,18 +12,33 @@ class SelectComponent extends ListData
     protected $name = '';
     protected $value = '';
 
+    /**
+     * Настроить название выпадаюшего списка
+     * @param string $title
+     * @return $this
+     */
     public function setTitle($title)
     {
         $this->title = $title;
         return $this;
     }
 
+    /**
+     * Настроить HTML-аттрибут name
+     * @param string $name
+     * @return $this
+     */
     public function setName($name)
     {
         $this->name = $name;
         return $this;
     }
 
+    /**
+     * Указать активный элемент выпадающего списка
+     * @param string $value
+     * @return $this
+     */
     public function setValue($value)
     {
         $this->value = $value;

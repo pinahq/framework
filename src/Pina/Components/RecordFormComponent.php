@@ -2,18 +2,31 @@
 
 namespace Pina\Components;
 
+/**
+ * Форма для редактирования записи
+ */
 class RecordFormComponent extends RecordData
 {
 
     protected $method = 'GET';
     protected $action = null;
 
+    /**
+     * Настраивает HTTP-метод для отправки формы
+     * @param type $method
+     * @return $this
+     */
     public function setMethod($method)
     {
         $this->method = $method;
         return $this;
     }
 
+    /**
+     * Настраивает HTTP-обработчик формы
+     * @param type $action
+     * @return $this
+     */
     public function setAction($action)
     {
         $this->action = $action;
@@ -48,9 +61,8 @@ class RecordFormComponent extends RecordData
                 $input = $type($data);
             } elseif (isset($type[0]) && $type[0] == '/') {
                 $resource = substr($type, 1);
-                $data = \Pina\App::router()->run($resource, 'get');
                 $input = new SelectComponent;
-                $input->basedOn($data);
+                $input->basedOn(\Pina\App::router()->run($resource, 'get'));
             } else {
                 $input = is_array($type) ? $this->makeFormSelect() : $this->makeFormInput();
             }
