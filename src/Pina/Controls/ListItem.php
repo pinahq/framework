@@ -17,7 +17,7 @@ class ListItem extends Control
 
     public function draw()
     {
-        return Html::tag('li', $this->text . $this->compile(), ['class' => $this->makeClass()]);
+        return Html::tag('li', $this->text . $this->compile(), $this->makeAttributes());
     }
 
 }

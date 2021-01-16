@@ -5,7 +5,7 @@ namespace Pina\Components;
 class RecordData extends Data
 {
 
-    protected $data = [];
+    private $data = [];
 
     /**
      * 
@@ -25,10 +25,15 @@ class RecordData extends Data
      */
     public function load($data, Schema $schema, $meta = [])
     {
-        $this->data = $schema->process($data);
+        $this->data = $data;
         $this->schema = $schema;
         $this->meta = $meta;
         return $this;
+    }
+
+    protected function getData()
+    {
+        return $this->schema->process($this->data);
     }
 
     /**
@@ -40,7 +45,7 @@ class RecordData extends Data
     {
         return isset($this->data[$field]) ? $this->data[$field] : null;
     }
-    
+
     public function build()
     {
         $this->append(\Pina\Controls\Json::instance()->setData($this->data));

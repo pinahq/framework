@@ -11,6 +11,7 @@ class Control
     protected $before = [];
     protected $classes = [];
     protected $layout = null;
+    protected $dataAttributes = [];
 
     /**
      * 
@@ -20,18 +21,18 @@ class Control
     {
         return new static();
     }
-    
+
     public function setLayout($layout)
     {
         $this->layout = $layout;
         return $this;
     }
-    
+
     public function getLayout()
     {
         return $this->layout;
     }
-    
+
     public function startBuild()
     {
         $this->isBuildStarted = true;
@@ -94,10 +95,30 @@ class Control
     {
         return '';
     }
-    
+
     public function __toString()
     {
         return $this->draw();
+    }
+
+    protected function makeAttributes($attributes = [])
+    {
+        $class = !empty($attributes['class']) ? $attributes['class'] : null;
+        $base = \array_merge(['class' => $this->makeClass($class)], $this->getDataAttributes());
+        unset($attributes['class']);
+
+        return array_merge($base, $attributes);
+    }
+
+    public function setDataAttribute($key, $value)
+    {
+        $this->dataAttributes['data-' . $key] = $value;
+        return $this;
+    }
+
+    public function getDataAttributes()
+    {
+        return $this->dataAttributes;
     }
 
 }

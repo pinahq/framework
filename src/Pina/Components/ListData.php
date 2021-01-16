@@ -5,9 +5,9 @@ namespace Pina\Components;
 class ListData extends Data implements \Iterator
 {
 
-    protected $data = [];
+    private $data = [];
     protected $cursor = 0;
-    
+
     /**
      * 
      * @param \Pina\ListData $list
@@ -17,18 +17,24 @@ class ListData extends Data implements \Iterator
     {
         return $this->load($list->data, $list->schema, $list->meta);
     }
-    
+
     public function load($data, Schema $schema, $meta = [])
     {
-        $this->data = $schema->processList($data);
+        $this->data = $data;
         $this->schema = $schema;
         $this->meta = $meta;
         return $this;
     }
-    
-    public function add($line)
+
+    public function push($line)
     {
-        $this->data[] = $line;
+        array_push($this->data, $line);
+        return $this;
+    }
+
+    protected function getData()
+    {
+        return $this->schema->processList($this->data);
     }
 
     /**
@@ -59,7 +65,7 @@ class ListData extends Data implements \Iterator
     {
         return isset($this->data[$this->cursor]);
     }
-    
+
     public function build()
     {
         $this->append(\Pina\Controls\Json::instance()->setData($this->data));

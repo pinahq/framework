@@ -32,10 +32,11 @@ class RecordEditComponent extends RecordData //implements ComponentInterface
 
         $r = '';
         $controls = [];
+        $data = $this->getData();
         foreach ($this->schema as $field) {
             $title = $field->getTitle();
             $key = $field->getKey();
-            $value = $field->draw($this->data);
+            $value = $field->draw($data);
 
             $form->append(
                 $this->makeFormInput()->setName($key)->setTitle($title)->setValue($value)

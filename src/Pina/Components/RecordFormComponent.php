@@ -22,10 +22,21 @@ class RecordFormComponent extends RecordData
 
     public function build()
     {
+        $form = $this->buildForm()->addClass('pina-form');
+        $form->append($this->makeSubmit()->setTitle('Сохранить'));
+        $this->append($this->makeCard()->append($form));
+    }
+
+    /**
+     * @return \Pina\Controls\Form
+     */
+    protected function buildForm()
+    {
         $form = $this->makeForm()
-            ->addClass('pina-form')
             ->setAction($this->action)
             ->setMethod($this->method);
+
+        $data = $this->getData();
 
         foreach ($this->schema->getIterator() as $field) {
             $type = $field->getType();
@@ -34,7 +45,7 @@ class RecordFormComponent extends RecordData
             }
 
             if ($type instanceof \Closure) {
-                $input = $type($this->data);
+                $input = $type($data);
             } elseif (isset($type[0]) && $type[0] == '/') {
                 $resource = substr($type, 1);
                 $data = \Pina\App::router()->run($resource, 'get');
@@ -46,7 +57,7 @@ class RecordFormComponent extends RecordData
 
             $input->setName($field->getKey())
                 ->setTitle($field->getTitle())
-                ->setValue($field->draw($this->data));
+                ->setValue($field->draw($data));
 
             if (is_array($type)) {
                 $input->setVariants($type);
@@ -55,8 +66,7 @@ class RecordFormComponent extends RecordData
             $form->append($input);
         }
 
-        $form->append($this->makeSubmit()->setTitle('Сохранить'));
-        $this->append($this->makeCard()->append($form));
+        return $form;
     }
 
     /**

@@ -47,7 +47,7 @@ class CronEventEndpoint extends Endpoint
         return (new RecordViewComponent())
                 ->load($data, $this->schema)
                 ->setMeta('title', $data['event'])
-                ->setMeta('breadcrumb', $this->getBreadcrumb()->add(LocationComponent::make('Component ' . $data['event'])))
+                ->setMeta('breadcrumb', $this->getBreadcrumb()->push(LocationComponent::make('Component ' . $data['event'])))
         ;
     }
     
@@ -64,8 +64,8 @@ class CronEventEndpoint extends Endpoint
     {
 //        $list = $this->parent->getBreadcrumbs();
         $list = new ListData();
-        $list->add(LocationComponent::make('Home', '/'));
-        $list->add(LocationComponent::make('Events', '/events'));
+        $list->push(LocationComponent::make('Home', '/'));
+        $list->push(LocationComponent::make('Events', '/events'));
         return $list;
     }
     

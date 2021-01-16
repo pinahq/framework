@@ -19,7 +19,7 @@ class SchemaTest extends TestCase
         });
         
         $line = ['order_id' => '12', 'date' => '12.12.2020', 'name' => 'Ivan Ivanov'];
-        $actual = $schema->makeFlatLine($line);
+        $actual = $schema->makeFlatLine($schema->process($line));
         $this->assertEquals(['<a href="/orders/12">12 at 12.12.2020</a>', 'Ivan Ivanov'], $actual);
         
         $schema->forgetField('order_id');

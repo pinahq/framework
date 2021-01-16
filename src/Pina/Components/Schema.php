@@ -165,7 +165,6 @@ class Schema implements \IteratorAggregate
      */
     public function makeFlatLine($line)
     {
-        $line = $this->process($line);
         $newLine = [];
         foreach ($this->fields as $field) {
             $newLine[] = $field->draw($line);

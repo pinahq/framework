@@ -14,17 +14,12 @@ class MenuComponent extends ListData //implements ComponentInterface
         $this->schema = $this->getDefaultSchema();
     }
 
-    public function push($line)
-    {
-        array_push($this->data, $line);
-        return $this;
-    }
-
     public function build()
     {
         $list = $this->makeList();
         $keys = $this->schema->getKeys();
-        foreach ($this->data as $idx => $line) {
+        $data = $this->getData();
+        foreach ($data as $idx => $line) {
             $title = $line[$keys[0]] ?? '';
             $link = $line[$keys[1]] ?? '';
             $list->append($this->makeListItem($title, $link));
@@ -41,10 +36,8 @@ class MenuComponent extends ListData //implements ComponentInterface
 
     protected function makeListItem($title, $link)
     {
-        $item = isset($link)
-            ? $this->control(\Pina\Controls\LinkedListItem::class)->setLinkClass('nav-link')
-            : $this->control(\Pina\Controls\ListItem::class);
-        
+        $item = isset($link) ? $this->control(\Pina\Controls\LinkedListItem::class)->setLinkClass('nav-link') : $this->control(\Pina\Controls\ListItem::class);
+
         $item->setText($title);
         $item->addClass('nav-item');
         if ($link) {

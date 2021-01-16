@@ -11,7 +11,8 @@ class TitleComponent extends RecordData
     public function build()
     {
         $h = new RawHtml();
-        $h->setText($this->data['title']);
+        $data = $this->getData();
+        $h->setText($data['title']);
 
         $this->append($h);
     }

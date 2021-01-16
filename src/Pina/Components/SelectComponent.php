@@ -30,7 +30,7 @@ class SelectComponent extends ListData
     public function build()
     {
         $select = $this->makeFormSelect();
-        $select->setVariants($this->data);
+        $select->setVariants($this->getData());
         $select->setName($this->name);
         $select->setTitle($this->title);
         $select->setValue($this->value);

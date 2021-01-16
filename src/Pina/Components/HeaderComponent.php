@@ -10,8 +10,10 @@ class HeaderComponent extends RecordData
     public function build()
     {
         $h = new RawHtml();
-        $h->setText('<h1>' . $this->data['title'] . '</h1>');
-        
+
+        $data = $this->getData();
+        $h->setText('<h1>' . $data['title'] . '</h1>');
+
         $this->append($h);
     }
 

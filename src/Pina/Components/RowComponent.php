@@ -10,7 +10,7 @@ class RowComponent extends RecordData //implements ComponentInterface
 
     public function build()
     {
-        $data = $this->schema->makeFlatLine($this->data);
+        $data = $this->schema->makeFlatLine($this->getData());
         $row = $this->makeTableRow();
         foreach ($data as $k => $v) {
             $row->append($this->makeTableCell()->setText($v));
@@ -25,7 +25,7 @@ class RowComponent extends RecordData //implements ComponentInterface
     {
         return $this->control(\Pina\Controls\TableRow::class);
     }
-    
+
     /**
      * @return \Pina\Controls\TableCell
      */

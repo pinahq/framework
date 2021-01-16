@@ -9,14 +9,14 @@ class RecordViewComponent extends RecordData //implements ComponentInterface
 
     public function build()
     {
+        $data = $this->getData();
         foreach ($this->schema as $field) {
             $title = $field->getTitle();
             $key = $field->getKey();
-            $value = $field->draw($this->data);
+            $value = $field->draw($data);
             $static = $this->makeFormStatic()->setName($key)->setTitle($title)->setValue($value);
             $this->append($static);
         }
-        
     }
 
     /**
