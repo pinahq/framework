@@ -53,11 +53,14 @@ class ControllerTest extends TestCase
         $this->assertEmpty($router->run("lk/1/cron-events/2/active-triggers", 'get')->draw());
 
 
-        $expectedRowEditHtml = '<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
+        $expectedRowEditHtml = '<div class="card"><div class="card-body">'
+            .'<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
             . CSRF::formField('PUT')
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
-            . '</form>';
+            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '</form>'
+            . '</div></div>';
         $html = $router->run("lk/1/cron-events/" . $id, 'get')
             ->forgetField('id')
             ->turnTo('form')
@@ -66,18 +69,21 @@ class ControllerTest extends TestCase
             ->draw();
         $this->assertEquals($expectedRowEditHtml, $html);
         
-        $expectedWrapHtml = '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
+        $expectedWrapHtml = '<div class="card"><div class="card-body">'
+            . '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
-            . '</form>';
+            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '</form>'
+            . '</div></div>';
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')
             ->forgetField('id')
             ->turnTo('form')
             ->setMethod("PUT")
             ->setAction("lk/1/cron-events/" . $id);
-
+        
         \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
         $this->assertEquals($expectedWrapHtml, $component->draw());
         \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormStatic::class);
@@ -91,7 +97,7 @@ class ControllerTest extends TestCase
         $form->append($note);
         $component->wrap($form);
         
-        $expectedWrapHtml = '<form class="form pina-form" action="/delete!" method="post">'
+        $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<table><tr><td>'
             . '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
