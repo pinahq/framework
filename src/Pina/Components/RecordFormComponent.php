@@ -35,7 +35,7 @@ class RecordFormComponent extends RecordData
 
     public function build()
     {
-        $form = $this->buildForm()->addClass('pina-form');
+        $form = $this->buildForm()->addClass('form')->addClass('pina-form');
         $form->append($this->makeSubmit()->setTitle('Сохранить'));
         $this->append($this->makeCard()->append($form));
     }
