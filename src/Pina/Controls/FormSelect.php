@@ -19,12 +19,16 @@ class FormSelect extends FormInput
     {
         $this->multiple = $multiple;
     }
-
+    
     public function draw()
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
         
         $options = '';
+        if ($this->placeholder) {
+            $options .= Html::tag('option', $this->placeholder, ['value' => '', 'selected' => $this->value == '' ? 'selected' : null]);
+        }
+        
         foreach ($this->variants as $variant) {
             $title = $variant['title'] ?? '';
             $id = $variant['id'] ?? $title;

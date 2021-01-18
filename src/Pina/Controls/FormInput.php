@@ -11,6 +11,7 @@ class FormInput extends Control
     protected $name = '';
     protected $value = '';
     protected $type = 'text';
+    protected $placeholder = null;
 
     public function setTitle($title)
     {
@@ -33,6 +34,12 @@ class FormInput extends Control
     public function setType($type)
     {
         $this->type = $type;
+        return $this;
+    }
+    
+    public function setPlaceholder($placeholder)
+    {
+        $this->placeholder = $placeholder;
         return $this;
     }
 

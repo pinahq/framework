@@ -11,6 +11,7 @@ class SelectComponent extends ListData
     protected $title = '';
     protected $name = '';
     protected $value = '';
+    protected $placeholder = null;
 
     /**
      * Настроить название выпадаюшего списка
@@ -44,6 +45,12 @@ class SelectComponent extends ListData
         $this->value = $value;
         return $this;
     }
+    
+    public function setPlaceholder($placeholder)
+    {
+        $this->placeholder = $placeholder;
+        return $this;
+    }
 
     public function build()
     {
@@ -52,6 +59,7 @@ class SelectComponent extends ListData
         $select->setName($this->name);
         $select->setTitle($this->title);
         $select->setValue($this->value);
+        $select->setPlaceholder($this->placeholder);
 
         $this->append($select);
     }
