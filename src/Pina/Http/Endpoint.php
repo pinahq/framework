@@ -69,6 +69,16 @@ class Endpoint
     {
         return $this->request->query;
     }
+    
+    /**
+     * Attribute string parameters.
+     *
+     * @return ParameterBag
+     */
+    public function attributes()
+    {
+        return $this->request->attributes;
+    }
 
     /**
      * Server and execution environment parameters ($_SERVER).

@@ -37,7 +37,7 @@ class Router
     public function run($resource, $method, $data = [])
     {
         list($controller, $action, $params) = Url::route($resource, $method);
-
+        
         $c = $this->base($controller);
         if ($c === null) {
             throw new Container\NotFoundException;
@@ -50,7 +50,7 @@ class Router
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
-        $request = new Request($_GET, \Pina\Input::getData(), $params, $_COOKIE, $_FILES, $_SERVER);
+        $request = new Request($_GET, \Pina\Input::getData(), $data, $_COOKIE, $_FILES, $_SERVER);
         $inst->setRequest($request);
 
         $location = new Http\Location($resource);
