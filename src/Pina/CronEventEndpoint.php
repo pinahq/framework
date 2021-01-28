@@ -22,6 +22,8 @@ class CronEventEndpoint extends Endpoint
         $this->schema = new Schema();
         $this->schema->add('id', 'ID', 'immutable');
         $this->schema->add('event', 'Event', 'string');
+        $this->schema->add('data', 'Data', 'text');
+        $this->schema->add('priority', 'Priority', 'int');
         $this->schema->add('created', 'Created at', 'date');
         
         parent::__construct();

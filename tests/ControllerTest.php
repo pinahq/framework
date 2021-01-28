@@ -13,9 +13,9 @@ class ControllerTest extends TestCase
     {
         App::init('test', __DIR__ . '/config');
         $data = [
-            ['id' => 1, 'event' => 'order.paid', 'created' => '2020-01-02 03:04:05'],
-            ['id' => 2, 'event' => 'order.canceled', 'created' => '2020-01-02 04:05:06'],
-            ['id' => 3, 'event' => 'order.returned', 'created' => '2020-01-02 05:06:07'],
+            ['id' => 1, 'event' => 'order.paid', 'data' => '123', 'priority' => '1', 'created' => '2020-01-02 03:04:05'],
+            ['id' => 2, 'event' => 'order.canceled', 'data' => '124', 'priority' => '0', 'created' => '2020-01-02 04:05:06'],
+            ['id' => 3, 'event' => 'order.returned', 'data' => '125', 'priority' => '1', 'created' => '2020-01-02 05:06:07'],
         ];
 
         Pina\CronEventGateway::instance()->truncate();
@@ -23,10 +23,10 @@ class ControllerTest extends TestCase
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>Event</th><th>Created at</th></tr>'
-            . '<tr><td>order.paid</td><td>2020-01-02 03:04:05</td></tr>'
-            . '<tr><td>order.canceled</td><td>2020-01-02 04:05:06</td></tr>'
-            . '<tr><td>order.returned</td><td>2020-01-02 05:06:07</td></tr>'
+            . '<tr><th>Event</th><th>Data</th><th>Priority</th><th>Created at</th></tr>'
+            . '<tr><td>order.paid</td><td>123</td><td>1</td><td>2020-01-02 03:04:05</td></tr>'
+            . '<tr><td>order.canceled</td><td>124</td><td>0</td><td>2020-01-02 04:05:06</td></tr>'
+            . '<tr><td>order.returned</td><td>125</td><td>1</td><td>2020-01-02 05:06:07</td></tr>'
             . '</table>'
             . '</div></div>';
 
@@ -37,7 +37,10 @@ class ControllerTest extends TestCase
         $id = Pina\CronEventGateway::instance()->id();
 
         $expectedRowHtml = '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>';
+            . '<div class="form-group"><label class="control-label">Data</label><span>123</span></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><span>1</span></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>'
+            ;
 
         $html = $endpoint->show($id)->draw();
         $this->assertEquals($expectedRowHtml, $html);
@@ -57,6 +60,8 @@ class ControllerTest extends TestCase
             .'<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
             . CSRF::formField('PUT')
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>'
@@ -73,6 +78,8 @@ class ControllerTest extends TestCase
             . '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>'
@@ -101,6 +108,8 @@ class ControllerTest extends TestCase
             . CSRF::formField('delete')
             . '<table><tr><td>'
             . '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><span>123</span></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><span>1</span></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>'
             . '</td></tr></table>'
             . '<p>note</p>'

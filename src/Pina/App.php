@@ -58,7 +58,15 @@ class App
         $components->set('list', \Pina\Components\ListComponent::class);
         $components->set('form', \Pina\Components\RecordFormComponent::class);
         $components->set('location', \Pina\Components\Location::class);
-        self::$container->share('components', $components);
+        static::$container->share('components', $components);
+        
+        $types = new Container;
+        $types->share('string', Types\StringType::class);
+        $types->share('integer', Types\IntegerType::class);
+        $types->share('int', Types\IntegerType::class);
+        $types->share('text', Types\TextType::class);
+        static::$container->share('types', $types);
+        
     }
 
     /**
@@ -95,6 +103,20 @@ class App
     public static function components()
     {
         return static::container()->get('components');
+    }
+    
+    public static function types()
+    {
+        return static::container()->get('types');
+    }
+    
+    public static function type($type)
+    {
+        $container = static::types();
+        if ($container->has($type)) {
+            return $container->get($type);
+        }
+        return static::load(Types\StringType::class);
     }
 
     /**

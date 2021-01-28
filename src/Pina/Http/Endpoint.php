@@ -18,13 +18,13 @@ class Endpoint
 
     /**
      *
-     * @var Location $location
+     * @var Location
      */
     protected $location;
 
     /**
      *
-     * @var Location $base
+     * @var Location
      */
     protected $base;
 

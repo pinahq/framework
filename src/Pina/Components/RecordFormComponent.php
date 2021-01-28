@@ -2,6 +2,8 @@
 
 namespace Pina\Components;
 
+use Pina\App;
+
 /**
  * Форма для редактирования записи
  */
@@ -56,29 +58,38 @@ class RecordFormComponent extends RecordData
             if ($type == 'static') {
                 continue;
             }
-
             if ($type instanceof \Closure) {
-                $input = $type($data);
-            } elseif (isset($type[0]) && $type[0] == '/') {
-                $resource = substr($type, 1);
-                $input = new SelectComponent;
-                $input->basedOn(\Pina\App::router()->run($resource, 'get'));
-            } else {
-                $input = is_array($type) ? $this->makeFormSelect() : $this->makeFormInput();
+                return $type($data);
             }
-
+            $input = $this->resolveTypeAsInput($type);
             $input->setName($field->getKey())
                 ->setTitle($field->getTitle())
                 ->setValue($field->draw($data));
-
-            if (is_array($type)) {
-                $input->setVariants($type);
-            }
 
             $form->append($input);
         }
 
         return $form;
+    }
+
+    protected function resolveTypeAsInput($type)
+    {
+        if (is_array($type)) {
+            $input = $this->makeFormSelect();
+            $input->setVariants($type);
+        } elseif (isset($type[0]) && $type[0] == '/') {
+            $resource = substr($type, 1);
+            $input = App::make(SelectComponent::class);
+            $input->basedOn(\Pina\App::router()->run($resource, 'get'));
+        } else {
+            $t = App::type($type);
+            $input = $t->makeControl();
+            $variants = $t->getVariants();
+            if (is_array($variants) && count($variants)) {
+                $input->setVariants($variants);
+            }
+        }
+        return $input;
     }
 
     /**
@@ -87,14 +98,6 @@ class RecordFormComponent extends RecordData
     protected function makeForm()
     {
         return $this->control(\Pina\Controls\Form::class);
-    }
-
-    /**
-     * @return \Pina\Controls\FormInput
-     */
-    protected function makeFormInput()
-    {
-        return $this->control(\Pina\Controls\FormInput::class);
     }
 
     /**
