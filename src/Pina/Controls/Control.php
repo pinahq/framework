@@ -11,7 +11,7 @@ class Control
     protected $before = [];
     protected $classes = [];
     protected $layout = null;
-    protected $dataAttributes = [];
+    protected $attributes = [];
 
     /**
      * 
@@ -104,7 +104,7 @@ class Control
     protected function makeAttributes($attributes = [])
     {
         $class = !empty($attributes['class']) ? $attributes['class'] : null;
-        $base = \array_merge(['class' => $this->makeClass($class)], $this->getDataAttributes());
+        $base = \array_merge(['class' => $this->makeClass($class)], $this->getAttributes());
         unset($attributes['class']);
 
         return array_merge($base, $attributes);
@@ -112,13 +112,13 @@ class Control
 
     public function setDataAttribute($key, $value)
     {
-        $this->dataAttributes['data-' . $key] = $value;
+        $this->attributes['data-' . $key] = $value;
         return $this;
     }
 
-    public function getDataAttributes()
+    public function getAttributes()
     {
-        return $this->dataAttributes;
+        return $this->attributes;
     }
 
 }

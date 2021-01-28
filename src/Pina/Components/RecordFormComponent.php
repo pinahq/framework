@@ -59,12 +59,13 @@ class RecordFormComponent extends RecordData
                 continue;
             }
             if ($type instanceof \Closure) {
-                return $type($data);
+                $input = $type($data);
+            } else {
+                $input = $this->resolveTypeAsInput($type);
+                $input->setName($field->getKey())
+                    ->setTitle($field->getTitle())
+                    ->setValue($field->draw($data));
             }
-            $input = $this->resolveTypeAsInput($type);
-            $input->setName($field->getKey())
-                ->setTitle($field->getTitle())
-                ->setValue($field->draw($data));
 
             $form->append($input);
         }
