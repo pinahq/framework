@@ -61,6 +61,11 @@ class Control
         return $this;
     }
 
+    public function count()
+    {
+        return count($this->before) + count($this->controls) + count($this->after);
+    }
+
     public function addClass($c)
     {
         $this->classes[] = $c;
