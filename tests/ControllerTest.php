@@ -36,10 +36,10 @@ class ControllerTest extends TestCase
 
         $id = Pina\CronEventGateway::instance()->id();
 
-        $expectedRowHtml = '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><span>123</span></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><span>1</span></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>'
+        $expectedRowHtml = '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             ;
 
         $html = $endpoint->show($id)->draw();
@@ -107,10 +107,10 @@ class ControllerTest extends TestCase
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<table><tr><td>'
-            . '<div class="form-group"><label class="control-label">Event</label><span>order.paid</span></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><span>123</span></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><span>1</span></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><span>2020-01-02 03:04:05</span></div>'
+            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             . '</td></tr></table>'
             . '<p>note</p>'
             . '</form>';

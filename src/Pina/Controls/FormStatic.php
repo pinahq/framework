@@ -32,7 +32,7 @@ class FormStatic extends Control
     public function draw()
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
-        $r .= Html::tag('span', $this->value . $this->compile());
+        $r .= Html::tag('p', $this->value . $this->compile(), ['class' => 'form-control-static']);
         return Html::tag('div', $r, ['class' => $this->makeClass('form-group')]);
     }
 

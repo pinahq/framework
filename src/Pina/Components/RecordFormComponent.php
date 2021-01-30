@@ -55,9 +55,6 @@ class RecordFormComponent extends RecordData
 
         foreach ($this->schema->getIterator() as $field) {
             $type = $field->getType();
-            if ($type == 'static') {
-                continue;
-            }
             if ($type instanceof \Closure) {
                 $input = $type($data);
             } else {
