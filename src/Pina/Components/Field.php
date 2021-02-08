@@ -63,6 +63,11 @@ class Field
     {
         return $this->default;
     }
+    
+    public function isMandatory()
+    {
+        return true;
+    }
 
     /**
      * Отрисовать данные в поле в соответствие с настройками поля 

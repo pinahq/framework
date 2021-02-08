@@ -3,13 +3,19 @@
 namespace Pina\Types;
 
 use Pina\Controls\FormInput;
+use Pina\Components\Field;
+use function Pina\__;
 
 class IntegerType implements TypeInterface
 {
 
-    public function makeControl()
+    public function makeControl(Field $field, $value)
     {
-        return \Pina\App::make(FormInput::class)->setType('number');
+        return \Pina\App::make(FormInput::class)
+            ->setName($field->getKey())
+            ->setTitle($field->getTitle())
+            ->setValue($value)
+            ->setType('number');
     }
 
     public function getSize()
@@ -30,6 +36,15 @@ class IntegerType implements TypeInterface
     public function getVariants()
     {
         return [];
+    }
+    
+    public function validate(&$value)
+    {
+        if (!is_integer($value)) {
+            return __("Укажите целое число");
+        }
+        
+        return null;
     }
 
 }

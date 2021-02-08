@@ -55,14 +55,9 @@ class RecordFormComponent extends RecordData
 
         foreach ($this->schema->getIterator() as $field) {
             $type = $field->getType();
-            if ($type instanceof \Closure) {
-                $input = $type($data);
-            } else {
-                $input = $this->resolveTypeAsInput($type);
-                $input->setName($field->getKey())
-                    ->setTitle($field->getTitle())
-                    ->setValue($field->draw($data));
-            }
+            $name = $field->getKey();
+            $value = isset($data[$name]) ? $data[$name] : null;
+            $input = App::type($type)->makeControl($field, $value);
 
             $form->append($input);
         }
@@ -70,25 +65,6 @@ class RecordFormComponent extends RecordData
         return $form;
     }
 
-    protected function resolveTypeAsInput($type)
-    {
-        if (is_array($type)) {
-            $input = $this->makeFormSelect();
-            $input->setVariants($type);
-        } elseif (isset($type[0]) && $type[0] == '/') {
-            $resource = substr($type, 1);
-            $input = App::make(SelectComponent::class);
-            $input->basedOn(\Pina\App::router()->run($resource, 'get'));
-        } else {
-            $t = App::type($type);
-            $input = $t->makeControl();
-            $variants = $t->getVariants();
-            if (is_array($variants) && count($variants)) {
-                $input->setVariants($variants);
-            }
-        }
-        return $input;
-    }
 
     /**
      * @return \Pina\Controls\Form
@@ -96,14 +72,6 @@ class RecordFormComponent extends RecordData
     protected function makeForm()
     {
         return $this->control(\Pina\Controls\Form::class);
-    }
-
-    /**
-     * @return \Pina\Controls\FormSelect
-     */
-    protected function makeFormSelect()
-    {
-        return $this->control(\Pina\Controls\FormSelect::class);
     }
 
     /**

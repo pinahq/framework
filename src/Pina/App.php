@@ -105,6 +105,10 @@ class App
         return static::container()->get('components');
     }
     
+    /**
+     * Возвращает DI контейнер
+     * @return Container
+     */
     public static function types()
     {
         return static::container()->get('types');
@@ -112,10 +116,29 @@ class App
     
     public static function type($type)
     {
+        if ($type instanceof Types\TypeInterface) {
+            return $type;
+        }
+        
+        if ($type instanceof \Closure) {
+            return static::make(Types\CallbackType::class)->setCallback($type);
+        }
+        
+        if (is_array($type)) {
+            return static::make(Types\EnumType::class)->setVariants($type);
+        }
+        
+        if (isset($type[0]) && $type[0] == '/') {
+            $resource = substr($type, 1);
+            $t = static::make(Types\ModuleType::class)->setResource($resource);
+            return $t;
+        }
+
         $container = static::types();
         if ($container->has($type)) {
             return $container->get($type);
         }
+
         return static::load(Types\StringType::class);
     }
 
@@ -534,5 +557,5 @@ class App
 
 function __($string)
 {
-    return Language::translate($string);
+    return Language::translate($string, __NAMESPACE__);
 }

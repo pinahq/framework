@@ -2,9 +2,18 @@
 
 namespace Pina\Components;
 
+use Pina\Types\TypeInterface;
+use Pina\App;
+use Pina\Arr;
+use function Pina\__;
+
 class Schema implements \IteratorAggregate
 {
 
+    /**
+     *
+     * @var Field[]
+     */
     protected $fields = [];
     protected $cursor = 0;
     protected $processors = [];
@@ -195,6 +204,33 @@ class Schema implements \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->fields);
+    }
+    
+    public function validate($data)
+    {
+        $errors = [];
+        $record = [];
+        
+        foreach ($this->fields as $k => $field) {
+            
+            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $value = Arr::get($data, $path, null);
+            
+            if (empty($value) && $field->isMandatory()) {
+                $errors[] = [__('Укажите значение'), $field->getKey()];
+            }
+            
+            $error = App::type($field->getType())->validate($value);
+            if (!empty($error)) {
+                $errors[] = [$error, $field->getKey()];
+            }
+            
+            if ($path) {
+                Arr::set($record, $path, $value);
+            }
+        }
+        
+        return [$errors, $record];
     }
 
 }

@@ -36,4 +36,26 @@ class SchemaTest extends TestCase
         
         
     }
+    
+    public function testValidate()
+    {
+        $schema = new Schema();
+        $schema->add('order_id', 'Номер заказа', 'string');
+        $schema->add('name', 'ФИО', 'string');
+        
+        list($errors, $record) = $schema->validate([
+            'order_id' => 12,
+            'name' => str_repeat('A', 512),
+        ]);
+        
+        $this->assertEquals([], $errors);
+        $this->assertEquals(str_repeat('A', 512), $record['name']);
+        
+        list($errors, $record) = $schema->validate([
+            'order_id' => 12,
+            'name' => str_repeat('A', 513),
+        ]);
+        
+        $this->assertEquals([['Укажите значение короче. Максимальная длина 512 символов', 'name']], $errors);
+    }
 }

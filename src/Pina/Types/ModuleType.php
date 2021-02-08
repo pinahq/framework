@@ -2,18 +2,24 @@
 
 namespace Pina\Types;
 
-use Pina\Controls\FormInput;
+use Pina\Components\SelectComponent;
+use Pina\App;
 use Pina\Components\Field;
-use function Pina\__;
 
-class StringType implements TypeInterface
+class ModuleType implements TypeInterface
 {
-
+    
+    protected $resource = null;
+    
+    public function setResource($resource)
+    {
+        $this->resource = $resource;
+    }
+    
     public function makeControl(Field $field, $value)
     {
-        /** @var FormInput $input */
-        $input = \Pina\App::make(FormInput::class);
-        $input->setType('text');
+        $input = App::make(SelectComponent::class);
+        $input->basedOn(App::router()->run($this->resource, 'get'));
         $input->setName($field->getKey());
         $input->setTitle($field->getTitle());
         $input->setValue($value);
@@ -22,7 +28,7 @@ class StringType implements TypeInterface
 
     public function getSize()
     {
-        return 512;
+        return null;
     }
 
     public function getDefault()
@@ -34,19 +40,14 @@ class StringType implements TypeInterface
     {
         return false;
     }
-    
+
     public function getVariants()
     {
         return [];
     }
-    
+
     public function validate(&$value)
     {
-        $size = $this->getSize();
-        if (strlen($value) > $size) {
-            return \sprintf(__("Укажите значение короче. Максимальная длина %s символов"), $size);
-        }
-
         return null;
     }
 
