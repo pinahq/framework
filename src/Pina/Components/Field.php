@@ -2,6 +2,8 @@
 
 namespace Pina\Components;
 
+use Pina\App;
+
 class Field
 {
 
@@ -12,10 +14,10 @@ class Field
 
     /**
      * Создает экземпляр поля
-     * @param type $key
-     * @param type $title
-     * @param type $type
-     * @param type $default
+     * @param string $key
+     * @param string $title
+     * @param mixed $type
+     * @param boolean $isMandatory
      * @return \static
      */
     public static function make($key, $title, $type = 'string', $isMandatory = false)
@@ -54,15 +56,6 @@ class Field
     {
         return $this->type;
     }
-
-    /**
-     * Получить значение по умолчанию
-     * @return string
-     */
-    public function getDefault()
-    {
-        return $this->default;
-    }
     
     public function isMandatory()
     {
@@ -77,7 +70,7 @@ class Field
     public function draw($line)
     {
         if (!isset($line[$this->key]) || $line[$this->key] === '') {
-            return $this->getDefault();
+            return App::type($this->getType())->getDefault();
         }
 
         return $line[$this->key];

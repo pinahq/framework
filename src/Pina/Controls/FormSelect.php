@@ -13,28 +13,30 @@ class FormSelect extends FormInput
     public function setVariants($list)
     {
         $this->variants = $list;
+        return $this;
     }
-    
+
     public function setMultiple($multiple)
     {
         $this->multiple = $multiple;
+        return $this;
     }
-    
+
     public function draw()
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
-        
+
         $options = '';
         if ($this->placeholder) {
             $options .= Html::tag('option', $this->placeholder, ['value' => '', 'selected' => $this->value == '' ? 'selected' : null]);
         }
-        
+
         foreach ($this->variants as $variant) {
-            $title = $variant['title'] ?? '';
-            $id = $variant['id'] ?? $title;
+            $title = isset($variant['title']) ? $variant['title'] : '';
+            $id = isset($variant['id']) ? $variant['id'] : $title;
             $options .= Html::tag('option', $title, ['value' => $id, 'selected' => $this->value == $id ? 'selected' : null]);
         }
-        
+
         $r .= Html::tag('select', $options, array_filter(['name' => $this->name . ($this->multiple ? '[]' : ''), 'value' => $this->value, 'multiple' => $this->multiple, 'class' => 'form-control']));
         $r .= $this->compile();
         return Html::tag('div', $r, ['class' => $this->makeClass('form-group')]);

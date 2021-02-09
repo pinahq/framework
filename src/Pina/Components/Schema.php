@@ -2,13 +2,16 @@
 
 namespace Pina\Components;
 
+use ArrayIterator;
+use InvalidArgumentException;
+use IteratorAggregate;
+use LogicException;
 use Pina\BadRequestException;
-use Pina\Types\TypeInterface;
 use Pina\App;
 use Pina\Arr;
 use function Pina\__;
 
-class Schema implements \IteratorAggregate
+class Schema implements IteratorAggregate
 {
 
     /**
@@ -68,7 +71,7 @@ class Schema implements \IteratorAggregate
 
     /**
      * Возвращает все ключи полей схемы
-     * @return arrar
+     * @return array
      * @deprecated
      */
     public function getFields()
@@ -111,7 +114,7 @@ class Schema implements \IteratorAggregate
     public function pushProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new \InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
         }
         array_unshift($this->processors, $callback);
 
@@ -126,7 +129,7 @@ class Schema implements \IteratorAggregate
     public function popProcessor()
     {
         if (!$this->processors) {
-            throw new \LogicException('You tried to pop from an empty processor stack.');
+            throw new LogicException('You tried to pop from an empty processor stack.');
         }
 
         return array_shift($this->processors);
@@ -141,7 +144,7 @@ class Schema implements \IteratorAggregate
     }
 
     /**
-     * 
+     *
      * @param mixed $line
      * @return mixed
      */
@@ -154,7 +157,7 @@ class Schema implements \IteratorAggregate
     }
 
     /**
-     * 
+     *
      * @param array $data
      * @return array
      */
@@ -168,8 +171,8 @@ class Schema implements \IteratorAggregate
     }
 
     /**
-     * Превращает ассоциативный массив с данными выборки из БД 
-     * в обычный массив без ключей 
+     * Превращает ассоциативный массив с данными выборки из БД
+     * в обычный массив без ключей
      * в соответствие со схемой в порядке следования полей схемы
      * @param array $line
      * @return array
@@ -184,7 +187,7 @@ class Schema implements \IteratorAggregate
     }
 
     /**
-     * Превращает двумерный ассоциативный массив с выборкой из БД 
+     * Превращает двумерный ассоциативный массив с выборкой из БД
      * в двумерный массив без ключей
      * в соответствие со схемой в порядке следования полей схемы
      * @param array $table
@@ -205,11 +208,11 @@ class Schema implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->fields);
+        return new ArrayIterator($this->fields);
     }
-    
+
     /**
-     * 
+     *
      * @param array $data
      * @return array
      */
@@ -227,7 +230,7 @@ class Schema implements \IteratorAggregate
                 $errors[] = [__('Укажите значение'), $field->getKey()];
             }
 
-            $error = App::type($field->getType())->validate($value);
+            $error = App::type($field->getType())->setContext($data)->validate($value);
             if (!empty($error)) {
                 $errors[] = [$error, $field->getKey()];
             }

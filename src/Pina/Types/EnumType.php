@@ -2,32 +2,40 @@
 
 namespace Pina\Types;
 
+use Pina\App;
 use Pina\Controls\FormSelect;
 use Pina\Components\Field;
 use function Pina\__;
 
 class EnumType implements TypeInterface
 {
-    
+
     /**
      * @var array $variants
      */
     protected $variants;
-    
+
     public function setVariants($variants)
     {
         $this->variants = $variants;
+        return $this;
+    }
+
+    public function setContext($context)
+    {
+        return $this;
     }
 
     public function makeControl(Field $field, $value)
     {
-        return \Pina\App::make(FormSelect::class)
+        $star = $field->isMandatory() ? ' *' : '';
+        return App::make(FormSelect::class)
             ->setName($field->getKey())
-            ->setTitle($field->getTitle())
+            ->setTitle($field->getTitle() . $star)
             ->setValue($value)
             ->setVariants($this->variants);
     }
-    
+
     public function getSize()
     {
         return null;

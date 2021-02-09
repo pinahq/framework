@@ -113,7 +113,11 @@ class App
     {
         return static::container()->get('types');
     }
-    
+
+    /**
+     * @param string $type
+     * @return Types\TypeInterface
+     */
     public static function type($type)
     {
         if ($type instanceof Types\TypeInterface) {

@@ -9,7 +9,14 @@ interface TypeInterface
 {
 
     /**
-     * @return Control 
+     *
+     * @param array $context
+     * @return static
+     */
+    public function setContext($context);
+
+    /**
+     * @return Control
      */
     public function makeControl(Field $field, $value);
 

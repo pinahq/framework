@@ -3,6 +3,9 @@
 namespace Pina\Components;
 
 use Pina\App;
+use Pina\Controls\Card;
+use Pina\Controls\Form;
+use Pina\Controls\SubmitButton;
 
 /**
  * Форма для редактирования записи
@@ -15,7 +18,7 @@ class RecordFormComponent extends RecordData
 
     /**
      * Настраивает HTTP-метод для отправки формы
-     * @param type $method
+     * @param string $method
      * @return $this
      */
     public function setMethod($method)
@@ -26,7 +29,7 @@ class RecordFormComponent extends RecordData
 
     /**
      * Настраивает HTTP-обработчик формы
-     * @param type $action
+     * @param string $action
      * @return $this
      */
     public function setAction($action)
@@ -43,7 +46,7 @@ class RecordFormComponent extends RecordData
     }
 
     /**
-     * @return \Pina\Controls\Form
+     * @return Form
      */
     protected function buildForm()
     {
@@ -57,7 +60,7 @@ class RecordFormComponent extends RecordData
             $type = $field->getType();
             $name = $field->getKey();
             $value = isset($data[$name]) ? $data[$name] : null;
-            $input = App::type($type)->makeControl($field, $value);
+            $input = App::type($type)->setContext($data)->makeControl($field, $value);
 
             $form->append($input);
         }
@@ -67,27 +70,27 @@ class RecordFormComponent extends RecordData
 
 
     /**
-     * @return \Pina\Controls\Form
+     * @return Form
      */
     protected function makeForm()
     {
-        return $this->control(\Pina\Controls\Form::class);
+        return $this->control(Form::class);
     }
 
     /**
-     * @return \Pina\Controls\Card
+     * @return Card
      */
     protected function makeCard()
     {
-        return $this->control(\Pina\Controls\Card::class);
+        return $this->control(Card::class);
     }
 
     /**
-     * @return \Pina\Controls\SubmitButton
+     * @return SubmitButton
      */
     protected function makeSubmit()
     {
-        return $this->control(\Pina\Controls\SubmitButton::class);
+        return $this->control(SubmitButton::class);
     }
 
 }

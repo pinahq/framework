@@ -2,24 +2,34 @@
 
 namespace Pina\Types;
 
+use Closure;
 use Pina\Components\Field;
 
 class CallbackType implements TypeInterface
 {
 
     /**
-     * @var \Closure $callback
+     * @var Closure $callback
      */
     protected $callback;
+    protected $context = [];
 
-    public function setCallback(\Closure $callback)
+    public function setCallback(Closure $callback)
     {
         $this->callback = $callback;
+        return $this;
     }
 
-    public function makeControl(Field $field, $value)
+    public function setContext($context)
     {
-        return $this->callback($field, $value);
+        $this->context = $context;
+        return $this;
+    }
+
+    public function makeControl(Field $field, $value, $data = [])
+    {
+        $callback = $this->callback;
+        return $callback($field, $value, $this->context);
     }
 
     public function getSize()
