@@ -2,6 +2,7 @@
 
 namespace Pina\Components;
 
+use Pina\BadRequestException;
 use Pina\Types\TypeInterface;
 use Pina\App;
 use Pina\Arr;
@@ -23,12 +24,13 @@ class Schema implements \IteratorAggregate
      * @param mixed $field
      * @param string $title
      * @param string $type
+     * @param bool $isMandatory
      * @return void
      */
-    public function add($field, $title = '', $type = '', $default = '')
+    public function add($field, $title = '', $type = '', $isMandatory = false)
     {
         if (is_string($field)) {
-            $this->fields[] = Field::make($field, $title, $type, $default);
+            $this->fields[] = Field::make($field, $title, $type, $isMandatory);
             return;
         }
 
@@ -206,31 +208,42 @@ class Schema implements \IteratorAggregate
         return new \ArrayIterator($this->fields);
     }
     
+    /**
+     * 
+     * @param array $data
+     * @return array
+     */
     public function validate($data)
     {
         $errors = [];
         $record = [];
-        
+
         foreach ($this->fields as $k => $field) {
-            
+
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
-            
+
             if (empty($value) && $field->isMandatory()) {
                 $errors[] = [__('Укажите значение'), $field->getKey()];
             }
-            
+
             $error = App::type($field->getType())->validate($value);
             if (!empty($error)) {
                 $errors[] = [$error, $field->getKey()];
             }
-            
+
             if ($path) {
                 Arr::set($record, $path, $value);
             }
         }
-        
-        return [$errors, $record];
+
+        if (!empty($errors)) {
+            $e = new BadRequestException();
+            $e->setErrors($errors);
+            throw $e;
+        }
+
+        return $record;
     }
 
 }

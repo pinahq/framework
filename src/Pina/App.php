@@ -232,7 +232,7 @@ class App
             $response = Request::run();
             $response->send();
         } catch (BadRequestException $e) {
-            Response::badRequest($e->getMessage())->send();
+            Response::badRequest()->setErrors($e->getErrors())->send();
         } catch (NotFoundException $e) {
             Response::notFound()->send();
         } catch (ForbiddenException $e) {

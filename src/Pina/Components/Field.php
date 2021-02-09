@@ -8,7 +8,7 @@ class Field
     protected $key = '';
     protected $title = '';
     protected $type = '';
-    protected $default = '';
+    protected $isMandatory = '';
 
     /**
      * Создает экземпляр поля
@@ -18,13 +18,13 @@ class Field
      * @param type $default
      * @return \static
      */
-    public static function make($key, $title, $type = '', $default = '')
+    public static function make($key, $title, $type = 'string', $isMandatory = false)
     {
         $field = new static;
         $field->key = $key;
         $field->title = $title;
         $field->type = $type;
-        $field->default = $default;
+        $field->isMandatory = $isMandatory;
         return $field;
     }
 
@@ -66,7 +66,7 @@ class Field
     
     public function isMandatory()
     {
-        return true;
+        return $this->isMandatory;
     }
 
     /**
