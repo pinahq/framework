@@ -52,6 +52,10 @@ class SchemaTest extends TestCase
         $this->assertEquals(str_repeat('A', 512), $validated['name']);
 
         $this->expectException(BadRequestExceptionAlias::class);
+        $validated = $schema->validate([
+            'order_id' => 12,
+            'name' => str_repeat('A', 513),
+        ]);
         try {
             $validated = $schema->validate([
                 'order_id' => 12,

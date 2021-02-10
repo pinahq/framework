@@ -21,6 +21,10 @@ class AccessTest extends TestCase
         Access::addGroup('owner');
         Access::addCondition('self', array('user_id' => 2));
         $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        
+        $groups = Access::getGroups();
+        $this->assertEquals(['enabled', 'provider', 'owner'], $groups);
+        $this->assertTrue(Access::hasGroup('enabled'));
 
         Access::reset();
         Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');

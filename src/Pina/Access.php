@@ -136,4 +136,14 @@ class Access
         self::$conditions[] = array($group, $condition);
     }
 
+    public static function getGroups()
+    {
+        return self::$groups;
+    }
+
+    public static function hasGroup($group)
+    {
+        return in_array($group, self::$groups);
+    }
+
 }
