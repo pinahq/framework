@@ -7,21 +7,6 @@ class ModuleRegistry
 
     protected $registry = [];
 
-    public function __construct()
-    {
-        Access::reset();
-        $this->registry = [];
-
-        $this->load(Module::class);
-        
-        $modules = Config::load('modules');
-        if (is_array($modules)) {
-            foreach ($modules as $ns) {
-                $this->load($ns . '\\Module');
-            }
-        }
-    }
-
     public function load($module)
     {
         if (isset($this->registry[$module])) {
@@ -32,6 +17,15 @@ class ModuleRegistry
 
     public function boot($method = null)
     {
+        $this->load(Module::class);
+
+        $modules = Config::load('modules');
+        if (is_array($modules)) {
+            foreach ($modules as $ns) {
+                $this->load($ns . '\\Module');
+            }
+        }
+
         foreach ($this->registry as $ns => $module) {
             if (!$method || !method_exists($module, $method)) {
                 continue;
@@ -51,7 +45,7 @@ class ModuleRegistry
     public function get($module)
     {
         if (!isset($this->registry[$module])) {
-            return false;
+            return null;
         }
 
         return $this->registry[$module];

@@ -49,7 +49,7 @@ class Language
 
         $module = $ns ? App::modules()->get($ns . "\\Module") : Request::module();
         if (empty($module)) {
-            return '';
+            return $string;
         }
 
         $moduleKey = $module->getNamespace();

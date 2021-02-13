@@ -222,7 +222,6 @@ class App
         App::resource($resource);
 
         $modules = self::modules();
-        $modules->load(Module::class);
         $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
         $modules->boot('http');
 

@@ -231,7 +231,7 @@ class Schema implements IteratorAggregate
             }
 
             $error = App::type($field->getType())->setContext($data)->validate($value);
-            if (!empty($error)) {
+            if (!is_null($error)) {
                 $errors[] = [$error, $field->getKey()];
             }
 
@@ -239,7 +239,7 @@ class Schema implements IteratorAggregate
                 Arr::set($record, $path, $value);
             }
         }
-
+        
         if (!empty($errors)) {
             $e = new BadRequestException();
             $e->setErrors($errors);
