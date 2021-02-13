@@ -10,7 +10,5 @@ interface ModuleInterface
     public function getNamespace();
 
     public function getTitle();
-    
-    public function boot();
 
 }
