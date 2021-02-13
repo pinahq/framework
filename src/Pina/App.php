@@ -16,7 +16,6 @@ class App
     private static $defaultSharedDepencies = array(
         \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
         \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
-        \Pina\ModuleRegistryInterface::class => \Pina\ModuleRegistry::class,
     );
 
     /**
@@ -59,14 +58,13 @@ class App
         $components->set('form', \Pina\Components\RecordFormComponent::class);
         $components->set('location', \Pina\Components\Location::class);
         static::$container->share('components', $components);
-        
+
         $types = new Container;
         $types->share('string', Types\StringType::class);
         $types->share('integer', Types\IntegerType::class);
         $types->share('int', Types\IntegerType::class);
         $types->share('text', Types\TextType::class);
         static::$container->share('types', $types);
-        
     }
 
     /**
@@ -88,6 +86,15 @@ class App
     }
 
     /**
+     * Возвращает реестр модулей
+     * @return \Pina\ModuleRegistry
+     */
+    public static function modules()
+    {
+        return static::load(\Pina\ModuleRegistry::class);
+    }
+    
+    /**
      * Возвращает объект для работы с событиями
      * @return \Pina\Events\EventManager
      */
@@ -104,7 +111,7 @@ class App
     {
         return static::container()->get('components');
     }
-    
+
     /**
      * Возвращает DI контейнер
      * @return Container
@@ -123,15 +130,15 @@ class App
         if ($type instanceof Types\TypeInterface) {
             return $type;
         }
-        
+
         if ($type instanceof \Closure) {
             return static::make(Types\CallbackType::class)->setCallback($type);
         }
-        
+
         if (is_array($type)) {
             return static::make(Types\EnumType::class)->setVariants($type);
         }
-        
+
         if (isset($type[0]) && $type[0] == '/') {
             $resource = substr($type, 1);
             $t = static::make(Types\ModuleType::class)->setResource($resource);
@@ -214,7 +221,9 @@ class App
 
         App::resource($resource);
 
-        $modules = self::$container->get(ModuleRegistryInterface::class);
+        $modules = self::modules();
+        $modules->load(Module::class);
+        $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
         $modules->boot('http');
 
         $resource = DispatcherRegistry::dispatch($resource);
@@ -540,7 +549,7 @@ class App
      */
     public static function walkClasses($type, $callback)
     {
-        $paths = self::$container->get(ModuleRegistryInterface::class)->getPaths();
+        $paths = self::modules()->getPaths();
         $suffix = $type . '.php';
         $suffixLength = strlen($suffix);
         $r = [];

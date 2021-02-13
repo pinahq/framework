@@ -26,7 +26,7 @@ class Language
 
         return $oldCode;
     }
-    
+
     public static function getCode()
     {
         return static::$code;
@@ -47,8 +47,7 @@ class Language
             return '';
         }
 
-        $modules = App::container()->get(ModuleRegistryInterface::class);
-        $module = $ns ? $modules->get($ns) : Request::module();
+        $module = $ns ? App::modules()->get($ns . "\\Module") : Request::module();
         if (empty($module)) {
             return '';
         }

@@ -6,13 +6,13 @@ class EventHandler extends RequestHandler
 {
     private $script;
 
-    public function __construct($namespace, $script, $data)
+    public function __construct($module, $script, $data)
     {
-        $this->module = App::container()->get(ModuleRegistryInterface::class)->get($namespace);
+        $this->module = $module;
         $this->script = $script;
         $this->data = $data;
     }
-    
+
     public function data()
     {
         return $this->data;
@@ -26,7 +26,7 @@ class EventHandler extends RequestHandler
         }
 
         $path .= '/events/' . $this->script;
-        
+
         if (!is_file($path . ".php")) {
             return;
         }

@@ -18,13 +18,13 @@ class Event extends Request
 
     public static function subscribe($module, $event, $script = '', $priority = Event::PRIORITY_NORMAL)
     {
-        $handler = new Events\ModuleEventHandler($module->getNamespace(), $script ? $script : $event);
+        $handler = new Events\ModuleEventHandler($module, $script ? $script : $event);
         App::events()->subscribe($event, $handler, $priority);
     }
 
     public static function subscribeSync($module, $event, $script = '', $priority = Event::PRIORITY_NORMAL)
     {
-        $handler = new Events\ModuleEventHandler($module->getNamespace(), $script ? $script : $event);
+        $handler = new Events\ModuleEventHandler($module, $script ? $script : $event);
         App::events()->subscribeSync($event, $handler, $priority);
     }
 
