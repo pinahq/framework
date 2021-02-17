@@ -19,10 +19,15 @@ class IntegerType implements TypeInterface
     {
         $star = $field->isMandatory() ? ' *' : '';
         return App::make(FormInput::class)
-            ->setName($field->getKey())
-            ->setTitle($field->getTitle() . $star)
-            ->setValue($value)
-            ->setType('number');
+                ->setName($field->getKey())
+                ->setTitle($field->getTitle() . $star)
+                ->setValue($value)
+                ->setType('number');
+    }
+
+    public function format($value)
+    {
+        return $value;
     }
 
     public function getSize()

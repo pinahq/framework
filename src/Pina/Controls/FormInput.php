@@ -18,13 +18,13 @@ class FormInput extends Control
         $this->title = $title;
         return $this;
     }
-    
+
     public function setName($name)
     {
         $this->name = $name;
         return $this;
     }
-    
+
     public function setValue($value)
     {
         $this->value = $value;
@@ -36,7 +36,7 @@ class FormInput extends Control
         $this->type = $type;
         return $this;
     }
-    
+
     public function setPlaceholder($placeholder)
     {
         $this->placeholder = $placeholder;
@@ -46,9 +46,14 @@ class FormInput extends Control
     public function draw()
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
-        $r .= Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value, 'class' => 'form-control']));
+        $r .= $this->drawControl();
         $r .= $this->compile();
-        return Html::tag('div', $r, ['class' => $this->makeClass('form-group')]);
+        return Html::tag('div', $r, $this->makeAttributes(['class' => 'form-group']));
+    }
+
+    protected function drawControl()
+    {
+        return Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value, 'class' => 'form-control']));
     }
 
 }

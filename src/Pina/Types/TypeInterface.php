@@ -21,6 +21,13 @@ interface TypeInterface
     public function makeControl(Field $field, $value);
 
     /**
+     * 
+     * @param mixed $value
+     * @return string
+     */
+    public function format($value);
+
+    /**
      * @return int
      */
     public function getSize();
@@ -46,5 +53,6 @@ interface TypeInterface
      * @param mixed $value
      * @return null|string
      */
+
     public function validate(&$value);
 }

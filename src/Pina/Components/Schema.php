@@ -14,13 +14,31 @@ use function Pina\__;
 class Schema implements IteratorAggregate
 {
 
+    protected $title = '';
+
     /**
      *
      * @var Field[]
      */
     protected $fields = [];
-    protected $cursor = 0;
     protected $processors = [];
+
+    /**
+     *
+     * @var Schema[]
+     */
+    protected $groups = [];
+
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
 
     /**
      * Добавляет в схему поле
@@ -40,6 +58,17 @@ class Schema implements IteratorAggregate
         $this->fields[] = $field;
     }
 
+    public function addGroup(Schema $schema)
+    {
+        $this->groups[] = $schema;
+    }
+
+    public function merge(Schema $schema)
+    {
+        $this->fields = array_merge($this->fields, $schema->fields);
+        $this->processors = array_merge($this->processors, $schema->processors);
+    }
+
     /**
      * Удаляет из схемы все поля с ключом $key
      * @param string $key
@@ -53,6 +82,11 @@ class Schema implements IteratorAggregate
             }
         }
         $this->fields = array_values($this->fields);
+
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->forgetField($key);
+        }
+
         return $this;
     }
 
@@ -65,6 +99,9 @@ class Schema implements IteratorAggregate
         $keys = array();
         foreach ($this->fields as $k => $field) {
             $keys[] = $field->getKey();
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $keys = array_merge($keys, $group->getKeys());
         }
         return $keys;
     }
@@ -89,6 +126,9 @@ class Schema implements IteratorAggregate
         foreach ($this as $field) {
             $titles[] = $field->getTitle();
         }
+        foreach ($this->getInnerSchemas() as $group) {
+            $titles = array_merge($titles, $group->getTitles());
+        }
         return $titles;
     }
 
@@ -101,6 +141,9 @@ class Schema implements IteratorAggregate
         $types = [];
         foreach ($this as $field) {
             $types[] = $field->getType();
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $types = array_merge($types, $group->getTypes());
         }
         return $types;
     }
@@ -153,6 +196,9 @@ class Schema implements IteratorAggregate
         foreach ($this->processors as $p) {
             $line = $p($line);
         }
+        foreach ($this->getInnerSchemas() as $group) {
+            $line = $group->process($line);
+        }
         return $line;
     }
 
@@ -167,6 +213,9 @@ class Schema implements IteratorAggregate
             $data[$k] = $this->process($line);
         }
 
+        foreach ($this->getInnerSchemas() as $group) {
+            $data = $group->processList($data);
+        }
         return $data;
     }
 
@@ -182,6 +231,9 @@ class Schema implements IteratorAggregate
         $newLine = [];
         foreach ($this->fields as $field) {
             $newLine[] = $field->draw($line);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $newLine = array_merge($newLine, $group->makeFlatLine($line));
         }
         return $newLine;
     }
@@ -208,7 +260,40 @@ class Schema implements IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->fields);
+        $fields = $this->fields;
+        foreach ($this->getInnerSchemas() as $group) {
+            $fields = array_merge($fields, $group->fields);
+        }
+        return new ArrayIterator($fields);
+    }
+
+    /**
+     * Итератор по группам
+     * @return Schema[]
+     */
+    public function getGroupIterator()
+    {
+        $schemas = array_merge([$this->getMainSchema()], $this->getInnerSchemas());
+        return new ArrayIterator($schemas);
+    }
+
+    protected function getMainSchema()
+    {
+        $schema = new Schema();
+        $schema->title = $this->title;
+        $schema->fields = $this->fields;
+        $schema->processors = $this->processors;
+        return $schema;
+    }
+
+    protected function getInnerSchemas()
+    {
+        $schemas = [];
+        foreach ($this->groups as $group) {
+            $schemas[] = $group->getMainSchema();
+            $schemas = array_merge($schemas, $group->getInnerSchemas());
+        }
+        return $schemas;
     }
 
     /**
@@ -221,7 +306,7 @@ class Schema implements IteratorAggregate
         $errors = [];
         $record = [];
 
-        foreach ($this->fields as $k => $field) {
+        foreach ($this->getIterator() as $k => $field) {
 
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
@@ -239,7 +324,7 @@ class Schema implements IteratorAggregate
                 Arr::set($record, $path, $value);
             }
         }
-        
+
         if (!empty($errors)) {
             $e = new BadRequestException();
             $e->setErrors($errors);

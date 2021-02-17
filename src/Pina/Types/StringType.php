@@ -28,6 +28,11 @@ class StringType implements TypeInterface
         return $input;
     }
 
+    public function format($value)
+    {
+        return $value;
+    }
+
     public function getSize()
     {
         return 512;

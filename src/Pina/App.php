@@ -62,6 +62,8 @@ class App
         $types = new Container;
         $types->share('string', Types\StringType::class);
         $types->share('integer', Types\IntegerType::class);
+        $types->share('float', Types\NumericType::class);
+        $types->share('numeric', Types\NumericType::class);
         $types->share('int', Types\IntegerType::class);
         $types->share('text', Types\TextType::class);
         static::$container->share('types', $types);
@@ -93,7 +95,7 @@ class App
     {
         return static::load(\Pina\ModuleRegistry::class);
     }
-    
+
     /**
      * Возвращает объект для работы с событиями
      * @return \Pina\Events\EventManager

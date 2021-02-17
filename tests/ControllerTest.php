@@ -36,10 +36,12 @@ class ControllerTest extends TestCase
 
         $id = Pina\CronEventGateway::instance()->id();
 
-        $expectedRowHtml = '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
+        $expectedRowHtml = '<div class="card"><div class="card-body">'
+            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
             . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '</div></div>'
             ;
 
         $html = $endpoint->show($id)->draw();
@@ -56,34 +58,38 @@ class ControllerTest extends TestCase
         $this->assertEmpty($router->run("lk/1/cron-events/2/active-triggers", 'get')->draw());
 
 
-        $expectedRowEditHtml = '<div class="card"><div class="card-body">'
+        $expectedRowEditHtml = ''
             .'<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
             . CSRF::formField('PUT')
+            . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
+            . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>'
-            . '</div></div>';
-        $html = $router->run("lk/1/cron-events/" . $id, 'get')
+            ;
+        $html = (new \Pina\Components\RecordFormComponent)
+            ->basedOn($router->run("lk/1/cron-events/" . $id, 'get'))
             ->forgetField('id')
-            ->turnTo('form')
             ->setMethod('PUT')
             ->setAction("lk/1/cron-events/" . $id)
             ->draw();
         $this->assertEquals($expectedRowEditHtml, $html);
         
-        $expectedWrapHtml = '<div class="card"><div class="card-body">'
+        $expectedWrapHtml = ''
             . '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
+            . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
+            . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>'
-            . '</div></div>';
+            ;
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')
             ->forgetField('id')
@@ -107,10 +113,12 @@ class ControllerTest extends TestCase
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<table><tr><td>'
+            . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
             . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '</div></div>'
             . '</td></tr></table>'
             . '<p>note</p>'
             . '</form>';

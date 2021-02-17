@@ -32,6 +32,11 @@ class CallbackType implements TypeInterface
         return $callback($field, $value, $this->context);
     }
 
+    public function format($value)
+    {
+        return $value;
+    }
+
     public function getSize()
     {
         return null;

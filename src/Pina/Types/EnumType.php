@@ -30,10 +30,21 @@ class EnumType implements TypeInterface
     {
         $star = $field->isMandatory() ? ' *' : '';
         return App::make(FormSelect::class)
-            ->setName($field->getKey())
-            ->setTitle($field->getTitle() . $star)
-            ->setValue($value)
-            ->setVariants($this->variants);
+                ->setName($field->getKey())
+                ->setTitle($field->getTitle() . $star)
+                ->setValue($value)
+                ->setVariants($this->variants);
+    }
+
+    public function format($value)
+    {
+        foreach ($this->variants as $v) {
+            if ($v['id'] == $value) {
+                return $v['title'] ?? '';
+            }
+        }
+
+        return $value;
     }
 
     public function getSize()

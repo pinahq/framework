@@ -42,7 +42,7 @@ class RecordFormComponent extends RecordData
     {
         $form = $this->buildForm()->addClass('form')->addClass('pina-form');
         $form->append($this->makeSubmit()->setTitle('Сохранить'));
-        $this->append($this->makeCard()->append($form));
+        $this->append($form);
     }
 
     /**
@@ -56,18 +56,23 @@ class RecordFormComponent extends RecordData
 
         $data = $this->getData();
 
-        foreach ($this->schema->getIterator() as $field) {
-            $type = $field->getType();
-            $name = $field->getKey();
-            $value = isset($data[$name]) ? $data[$name] : null;
-            $input = App::type($type)->setContext($data)->makeControl($field, $value);
+        foreach ($this->schema->getGroupIterator() as $schema) {
+            $card = $this->makeCard()->setTitle($schema->getTitle());
 
-            $form->append($input);
+            foreach ($schema->getIterator() as $field) {
+                $type = $field->getType();
+                $name = $field->getKey();
+                $value = isset($data[$name]) ? $data[$name] : null;
+                $input = App::type($type)->setContext($data)->makeControl($field, $value);
+
+                $card->append($input);
+            }
+
+            $form->append($card);
         }
 
         return $form;
     }
-
 
     /**
      * @return Form
