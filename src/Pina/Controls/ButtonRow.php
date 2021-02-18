@@ -35,7 +35,6 @@ class ButtonRow extends Control
 
         $attributes = $this->makeAttributes();
         if (count($attributes) > 0) {
-            print_r($attributes);
             return Html::tag('div', $this->main->draw(), $this->makeAttributes());
         }
 
