@@ -28,16 +28,24 @@ class ButtonRow extends Control
     {
         $compiled = $this->compile();
         if ($compiled) {
-            $left = Html::tag('div', $this->main->draw(), ['class' => 'col-sm-4']);
+            $left = Html::tag('div', $this->drawMain(), ['class' => 'col-sm-4']);
             $right = Html::tag('div', $this->compile(), ['class' => 'col-sm-8 text-right']);
             return Html::tag('div', $left . $right, $this->makeAttributes(['class' => 'row']));
         }
 
         $attributes = $this->makeAttributes();
         if (count($attributes) > 0) {
-            return Html::tag('div', $this->main->draw(), $this->makeAttributes());
+            return Html::tag('div', $this->drawMain(), $this->makeAttributes());
         }
 
+        return $this->drawMain();
+    }
+
+    public function drawMain()
+    {
+        if (is_null($this->main)) {
+            return '';
+        }
         return $this->main->draw();
     }
 }
