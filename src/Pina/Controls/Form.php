@@ -2,28 +2,50 @@
 
 namespace Pina\Controls;
 
+use Pina\CSRF;
 use Pina\Html;
-use Pina\Controls\Control;
 
+/**
+ * HTML-форма
+ * @package Pina\Controls
+ */
 class Form extends Control
 {
 
     protected $action = '';
     protected $method = '';
 
+    /**
+     * @param string $action
+     * @return $this
+     */
     public function setAction($action)
     {
         $this->action = $action;
         return $this;
     }
 
+    /**
+     * @param string $method
+     * @return $this
+     */
     public function setMethod($method)
     {
         $this->method = $method;
         return $this;
     }
 
-    public function makeOptions()
+    public function draw()
+    {
+        $csrf = CSRF::formField($this->method);
+
+        return Html::tag('form', $csrf . $this->compile(), $this->makeOptions());
+    }
+
+    /**
+     * @return array
+     */
+    protected function makeOptions()
     {
         $method = strtolower($this->method);
         $parsed = parse_url($this->action);
@@ -38,9 +60,13 @@ class Form extends Control
 
         $action = $this->buildParsed($parsed);
 
-        return ['method' => $method, 'action' => $action, 'class' => $this->makeClass()];
+        return $this->makeAttributes(['method' => $method, 'action' => $action]);
     }
 
+    /**
+     * @param array $parsed_url
+     * @return string
+     */
     protected function buildParsed($parsed_url)
     {
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
@@ -55,11 +81,5 @@ class Form extends Control
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
 
-    public function draw()
-    {
-        $csrf = \Pina\CSRF::formField($this->method);
-
-        return Html::tag('form', $csrf . $this->compile(), $this->makeOptions());
-    }
 
 }

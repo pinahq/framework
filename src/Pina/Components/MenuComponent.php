@@ -2,8 +2,11 @@
 
 namespace Pina\Components;
 
-use Pina\Components\ListData;
-use Pina\Components\Schema;
+use Pina\Controls\LinkedListItem;
+use Pina\Controls\ListItem;
+
+use Pina\Controls\UnorderedList;
+
 use function Pina\__;
 
 class MenuComponent extends ListData //implements ComponentInterface
@@ -20,8 +23,8 @@ class MenuComponent extends ListData //implements ComponentInterface
         $keys = $this->schema->getKeys();
         $data = $this->getData();
         foreach ($data as $idx => $line) {
-            $title = $line[$keys[0]] ?? '';
-            $link = $line[$keys[1]] ?? '';
+            $title = isset($line[$keys[0]]) ? $line[$keys[0]] : '';
+            $link = isset($line[$keys[1]]) ? $line[$keys[1]] : '';
             $list->append($this->makeListItem($title, $link));
         }
         $this->append($list);
@@ -29,14 +32,16 @@ class MenuComponent extends ListData //implements ComponentInterface
 
     protected function makeList()
     {
-        $list = $this->control(\Pina\Controls\UnorderedList::class);
+        $list = $this->control(UnorderedList::class);
         $list->addClass('nav');
         return $list;
     }
 
     protected function makeListItem($title, $link)
     {
-        $item = isset($link) ? $this->control(\Pina\Controls\LinkedListItem::class)->setLinkClass('nav-link') : $this->control(\Pina\Controls\ListItem::class);
+        $item = isset($link) ? $this->control(LinkedListItem::class)->setLinkClass(
+            'nav-link'
+        ) : $this->control(ListItem::class);
 
         $item->setText($title);
         $item->addClass('nav-item');

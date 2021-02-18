@@ -2,15 +2,18 @@
 
 namespace Pina\Components;
 
-class ListData extends Data implements \Iterator
+use Iterator;
+use Pina\Controls\Json;
+
+class ListData extends Data implements Iterator
 {
 
     private $data = [];
     protected $cursor = 0;
 
     /**
-     * 
-     * @param \Pina\ListData $list
+     *
+     * @param \Pina\Components\ListData $list
      * @return $this
      */
     public function basedOn(ListData $list)
@@ -26,10 +29,24 @@ class ListData extends Data implements \Iterator
         return $this;
     }
 
+    /**
+     * Добавить строчку к данным
+     * @param array $line
+     * @return $this
+     */
     public function push($line)
     {
         array_push($this->data, $line);
         return $this;
+    }
+
+    /**
+     * Извлечь последнюю добавленную строчку из данных
+     * @return mixed
+     */
+    public function pop()
+    {
+        return array_pop($this->data);
     }
 
     protected function getData()
@@ -38,8 +55,8 @@ class ListData extends Data implements \Iterator
     }
 
     /**
-     * 
-     * @return \Pina\RecordData
+     *
+     * @return \Pina\Components\RecordData
      */
     public function current()
     {
@@ -68,7 +85,7 @@ class ListData extends Data implements \Iterator
 
     public function build()
     {
-        $this->append(\Pina\Controls\Json::instance()->setData($this->data));
+        $this->append(Json::instance()->setData($this->data));
         return $this;
     }
 

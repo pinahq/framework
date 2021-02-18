@@ -2,6 +2,8 @@
 
 namespace Pina\Controls;
 
+use function array_merge;
+
 class Control
 {
 
@@ -109,8 +111,11 @@ class Control
     protected function makeAttributes($attributes = [])
     {
         $class = !empty($attributes['class']) ? $attributes['class'] : null;
-        $base = \array_merge(['class' => $this->makeClass($class)], $this->getAttributes());
+        $base = array_merge(['class' => $this->makeClass($class)], $this->getAttributes());
         unset($attributes['class']);
+        if (empty($base['class'])) {
+            unset($base['class']);
+        }
 
         return array_merge($base, $attributes);
     }

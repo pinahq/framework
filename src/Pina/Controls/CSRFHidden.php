@@ -2,13 +2,22 @@
 
 namespace Pina\Controls;
 
-use Pina\Html;
+use Pina\CSRF;
 
+/**
+ * Поле с CSRF-токеном
+ * @package Pina\Controls
+ */
 class CSRFHidden extends Control
 {
 
     protected $method = '';
 
+    /**
+     * Указать HTTP-метод, которым будет передаваться CSRF-токен
+     * @param $method
+     * @return $this
+     */
     public function setMethod($method)
     {
         $this->method = $method;
@@ -17,7 +26,7 @@ class CSRFHidden extends Control
 
     public function draw()
     {
-        return \Pina\CSRF::formField($this->method);
+        return CSRF::formField($this->method);
     }
 
 }

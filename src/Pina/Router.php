@@ -2,6 +2,7 @@
 
 namespace Pina;
 
+use Pina\Http\Endpoint;
 use Pina\Http\Request;
 
 class Router
@@ -27,30 +28,31 @@ class Router
     }
 
     /**
-     * 
+     *
      * @param string $resource
      * @param string $method
      * @param array $data
-     * @return Components\DataObject
+     * @return Components\Data
      * @throws Container\NotFoundException
      */
     public function run($resource, $method, $data = [])
     {
         list($controller, $action, $params) = Url::route($resource, $method);
-        
+
         $c = $this->base($controller);
         if ($c === null) {
             throw new Container\NotFoundException;
         }
 
         $cl = $this->endpoints[$c];
+        /** @var Endpoint $inst */
         $inst = new $cl;
 
         $pattern = $this->patterns[$c];
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
-        $request = new Request($_GET, \Pina\Input::getData(), $data, $_COOKIE, $_FILES, $_SERVER);
+        $request = new Request($_GET, Input::getData(), $data, $_COOKIE, $_FILES, $_SERVER);
         $inst->setRequest($request);
 
         $location = new Http\Location($resource);
@@ -65,7 +67,9 @@ class Router
 
         $deeper = [];
         if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
-            $action .= $this->ucfirstEveryWord($deeper['__action']);
+            $deeperAction = pathinfo($deeper['__action'], PATHINFO_FILENAME);
+
+            $action .= $this->ucfirstEveryWord($deeperAction);
         }
 
         return call_user_func_array([$inst, $action], $params);

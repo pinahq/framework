@@ -2,36 +2,40 @@
 
 namespace Pina\Components;
 
-use Pina\Controls\TableRow;
 use Pina\Controls\TableCell;
+use Pina\Controls\TableRow;
 
 class RowComponent extends RecordData //implements ComponentInterface
 {
 
     public function build()
     {
-        $data = $this->schema->makeFlatLine($this->getData());
         $row = $this->makeTableRow();
-        foreach ($data as $k => $v) {
+        $data = $this->getData();
+        if (!empty($data['class'])) {
+            $row->addClass($data['class']);
+        }
+        $flat = $this->schema->makeFlatLine($data);
+        foreach ($flat as $v) {
             $row->append($this->makeTableCell()->setText($v));
         }
         $this->append($row);
     }
 
     /**
-     * @return \Pina\Controls\TableRow
+     * @return TableRow
      */
     protected function makeTableRow()
     {
-        return $this->control(\Pina\Controls\TableRow::class);
+        return $this->control(TableRow::class);
     }
 
     /**
-     * @return \Pina\Controls\TableCell
+     * @return TableCell
      */
     protected function makeTableCell()
     {
-        return $this->control(\Pina\Controls\TableCell::class);
+        return $this->control(TableCell::class);
     }
 
 }

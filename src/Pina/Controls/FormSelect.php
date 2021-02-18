@@ -3,20 +3,31 @@
 namespace Pina\Controls;
 
 use Pina\Html;
-use Pina\Controls\Control;
 
+/**
+ * Поле ввода с выбором из выпадающего списка
+ * @package Pina\Controls
+ */
 class FormSelect extends FormInput
 {
 
     protected $variants = [];
     protected $multiple = false;
 
+    /**
+     * @param array $list
+     * @return $this
+     */
     public function setVariants($list)
     {
         $this->variants = $list;
         return $this;
     }
 
+    /**
+     * @param boolean $multiple
+     * @return $this
+     */
     public function setMultiple($multiple)
     {
         $this->multiple = $multiple;
@@ -27,8 +38,8 @@ class FormSelect extends FormInput
     {
         $options = '';
         foreach ($this->variants as $variant) {
-            $title = $variant['title'] ?? '';
-            $id = $variant['id'] ?? $title;
+            $title = isset($variant['title']) ? $variant['title'] : '';
+            $id = isset($variant['id']) ? $variant['id'] : $title;
             $options .= Html::tag('option', $title, ['value' => $id, 'selected' => $this->value == $id ? 'selected' : null]);
         }
 

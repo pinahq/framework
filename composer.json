@@ -1,37 +1,41 @@
 {
-    "name": "pinahq/framework",
-    "description": "The Pina2 Framework.",
-    "keywords": ["framework", "pina2"],
-    "license": "MIT",
-    "homepage": "http://pinahq.com",
-    "support": {
-        "issues": "https://github.com/pinahq/framework/issues",
-        "source": "https://github.com/pinahq/framework"
-    },
-    "authors": [
-        {
-            "name": "Alex Yashin",
-            "email": "alex@alex-yashin.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.6",
-        "psr/container": "^1.0",
-        "smarty/smarty":"2.6.*",
-        "monolog/monolog": "1.23.*",
-        "phpmailer/phpmailer": "5.2.*",
-        "symfony/http-foundation": "^5.0",
-        "league/climate": "3.2.*",
-        "league/csv": "^8.1",
-        "pinahq/sql-parser": "0.3"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "6.*"
-    },
-    "autoload": {
-        "psr-4": {
-            "Pina\\": "src/Pina/"
-        }
-    },
-    "minimum-stability": "dev"
+  "name": "pinahq/framework",
+  "description": "The Pina2 Framework.",
+  "keywords": [
+    "framework",
+    "pina2"
+  ],
+  "license": "MIT",
+  "homepage": "http://pinahq.com",
+  "support": {
+    "issues": "https://github.com/pinahq/framework/issues",
+    "source": "https://github.com/pinahq/framework"
+  },
+  "authors": [
+    {
+      "name": "Alex Yashin",
+      "email": "alex@alex-yashin.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.6",
+    "psr/container": "^1.0",
+    "smarty/smarty": "2.6.*",
+    "monolog/monolog": "1.23.*",
+    "phpmailer/phpmailer": "5.2.*",
+    "symfony/http-foundation": "^5.0",
+    "league/climate": "3.2.*",
+    "league/csv": "^8.1",
+    "pinahq/sql-parser": "0.3",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pina\\": "src/Pina/"
+    }
+  },
+  "minimum-stability": "dev"
 }

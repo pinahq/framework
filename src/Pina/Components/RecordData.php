@@ -2,6 +2,8 @@
 
 namespace Pina\Components;
 
+use Pina\Controls\Json;
+
 class RecordData extends Data
 {
 
@@ -9,7 +11,7 @@ class RecordData extends Data
 
     /**
      * 
-     * @param \Pina\RecordData $record
+     * @param RecordData $record
      * @return $this
      */
     public function basedOn(RecordData $record)
@@ -19,7 +21,7 @@ class RecordData extends Data
 
     /**
      * 
-     * @param type $data
+     * @param array $data
      * @param \Pina\Components\Schema $schema
      * @return $this
      */
@@ -48,7 +50,7 @@ class RecordData extends Data
 
     public function build()
     {
-        $this->append(\Pina\Controls\Json::instance()->setData($this->data));
+        $this->append(Json::instance()->setData($this->data));
         return $this;
     }
 

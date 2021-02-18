@@ -19,10 +19,10 @@ class IntegerType implements TypeInterface
     {
         $star = $field->isMandatory() ? ' *' : '';
         return App::make(FormInput::class)
-                ->setName($field->getKey())
-                ->setTitle($field->getTitle() . $star)
-                ->setValue($value)
-                ->setType('number');
+            ->setName($field->getKey())
+            ->setTitle($field->getTitle() . $star)
+            ->setValue($value)
+            ->setType('text');
     }
 
     public function format($value)
@@ -52,9 +52,11 @@ class IntegerType implements TypeInterface
 
     public function validate(&$value)
     {
-        if (!is_integer($value)) {
+        if (strval(intval($value)) != strval($value)) {
             return __("Укажите целое число");
         }
+
+        $value = intval($value);
 
         return null;
     }

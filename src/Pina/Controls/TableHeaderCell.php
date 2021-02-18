@@ -4,20 +4,16 @@ namespace Pina\Controls;
 
 use Pina\Html;
 
-class TableHeaderCell extends Control
+/**
+ * Ячейка заголовка таблицы
+ * @package Pina\Controls
+ */
+class TableHeaderCell extends TableCell
 {
-
-    protected $text = '';
-
-    public function setText($text)
-    {
-        $this->text = $text;
-        return $this;
-    }
 
     public function draw()
     {
-        return Html::tag('th', $this->text . $this->compile());
+        return Html::tag('th', $this->text . $this->compile(), $this->makeAttributes());
     }
 
 }

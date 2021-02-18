@@ -1,7 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Arr;
 
 class ControlTest extends TestCase
 {
@@ -13,7 +12,7 @@ class ControlTest extends TestCase
         $link->setTitle('Title');
         $link->setLink('http://mywebsite.com/some-page');
         
-        $this->assertEquals('<a class="btn btn-primary" href="http://mywebsite.com/some-page">Title</a>', $link->draw());
+        $this->assertEquals('<a class="btn btn-default" href="http://mywebsite.com/some-page">Title</a>', $link->draw());
         
     }
     

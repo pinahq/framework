@@ -4,6 +4,10 @@ namespace Pina\Controls;
 
 use Pina\Html;
 
+/**
+ * Обычный список без нумерации
+ * @package Pina\Controls
+ */
 class UnorderedList extends Control
 {
 

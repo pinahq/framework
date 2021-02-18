@@ -4,6 +4,10 @@ namespace Pina\Controls;
 
 use Pina\Html;
 
+/**
+ * Поле ввода многострочного текста
+ * @package Pina\Controls
+ */
 class FormTextarea extends FormInput
 {
 
@@ -12,11 +16,13 @@ class FormTextarea extends FormInput
 
     /**
      * Указать количество строк в поле ввода
-     * @param int $rows
+     * @param integer $rows
+     * @return $this
      */
     public function setRows($rows)
     {
         $this->rows = $rows;
+        return $this;
     }
 
     public function drawControl()

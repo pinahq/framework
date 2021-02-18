@@ -2,26 +2,33 @@
 
 namespace Pina;
 
+use Closure;
+use Pina\Components\ListComponent;
+use Pina\Components\RecordFormComponent;
+use Pina\Components\RowComponent;
+use Pina\Components\TableComponent;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
+use Pina\Events\EventManager;
 
 class App
 {
 
     private static $config = false;
     private static $layout = null;
+    /** @var Container */
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
     private static $defaultSharedDepencies = array(
-        \Pina\DatabaseDriverInterface::class => \Pina\DatabaseDriver::class,
-        \Pina\ResourceManagerInterface::class => \Pina\ResourceManager::class,
+        DatabaseDriverInterface::class => DatabaseDriver::class,
+        ResourceManagerInterface::class => ResourceManager::class,
     );
 
     /**
      * Иницирует приложение
-     * @param type $env Режим работы (например, live или test)
-     * @param type $configPath Путь к каталогу с настройками
+     * @param string $env Режим работы (например, live или test)
+     * @param string $configPath Путь к каталогу с настройками
      */
     public static function init($env, $configPath)
     {
@@ -52,11 +59,10 @@ class App
         }
 
         $components = new Container;
-        $components->set('table', \Pina\Components\TableComponent::class);
-        $components->set('row', \Pina\Components\RowComponent::class);
-        $components->set('list', \Pina\Components\ListComponent::class);
-        $components->set('form', \Pina\Components\RecordFormComponent::class);
-        $components->set('location', \Pina\Components\Location::class);
+        $components->set('table', TableComponent::class);
+        $components->set('row', RowComponent::class);
+        $components->set('list', ListComponent::class);
+        $components->set('form', RecordFormComponent::class);
         static::$container->share('components', $components);
 
         $types = new Container;
@@ -84,25 +90,25 @@ class App
      */
     public static function db()
     {
-        return self::$container->get(\Pina\DatabaseDriverInterface::class);
+        return self::$container->get(DatabaseDriverInterface::class);
     }
 
     /**
      * Возвращает реестр модулей
-     * @return \Pina\ModuleRegistry
+     * @return ModuleRegistry
      */
     public static function modules()
     {
-        return static::load(\Pina\ModuleRegistry::class);
+        return static::load(ModuleRegistry::class);
     }
 
     /**
      * Возвращает объект для работы с событиями
-     * @return \Pina\Events\EventManager
+     * @return EventManager
      */
     public static function events()
     {
-        return static::load(\Pina\Events\EventManager::class);
+        return static::load(EventManager::class);
     }
 
     /**
@@ -133,7 +139,7 @@ class App
             return $type;
         }
 
-        if ($type instanceof \Closure) {
+        if ($type instanceof Closure) {
             return static::make(Types\CallbackType::class)->setCallback($type);
         }
 
@@ -259,7 +265,7 @@ class App
 
     /**
      * Задает шаблон layout`а по умолчанию
-     * @param type $layout Имя шаблона layout`а
+     * @param string $layout Имя шаблона layout`а
      */
     public static function setDefaultLayout($layout)
     {
@@ -280,7 +286,7 @@ class App
      * приложения, повторная инициализация запрещена)
      * Возвращает текущий ресурс
      * @staticvar string $item хранит текущий ресурс
-     * @param type $resource ресурс
+     * @param string $resource ресурс
      * @return string
      */
     public static function resource($resource = '')
@@ -488,7 +494,8 @@ class App
         arsort($acceptTypes);
 
         if (!static::$supportedMimeTypes) {
-            return $acceptTypes;
+            $keys = array_keys($acceptTypes);
+            return reset($keys);
         }
 
         $supported = array_map('strtolower', static::$supportedMimeTypes);
@@ -553,7 +560,6 @@ class App
         $paths = self::modules()->getPaths();
         $suffix = $type . '.php';
         $suffixLength = strlen($suffix);
-        $r = [];
         foreach ($paths as $ns => $path) {
             $files = array_filter(scandir($path), function($s) use ($suffix, $suffixLength) {
                 return strrpos($s, $suffix) === (strlen($s) - $suffixLength);

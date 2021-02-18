@@ -1,10 +1,14 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\Components\RecordFormComponent;
+use Pina\Controls\Form;
+use Pina\Controls\FormInput;
+use Pina\Controls\FormStatic;
+use Pina\Controls\Paragraph;
 use Pina\CronEventEndpoint;
 use Pina\App;
 use Pina\CSRF;
-use Pina\Request;
 
 class ControllerTest extends TestCase
 {
@@ -64,13 +68,13 @@ class ControllerTest extends TestCase
             . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>'
             ;
-        $html = (new \Pina\Components\RecordFormComponent)
+        $html = (new RecordFormComponent)
             ->basedOn($router->run("lk/1/cron-events/" . $id, 'get'))
             ->forgetField('id')
             ->setMethod('PUT')
@@ -84,7 +88,7 @@ class ControllerTest extends TestCase
             . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><input type="number" class="form-control" name="priority" value="1"></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
@@ -97,16 +101,16 @@ class ControllerTest extends TestCase
             ->setMethod("PUT")
             ->setAction("lk/1/cron-events/" . $id);
         
-        \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormInput::class);
+        App::container()->set(FormStatic::class, FormInput::class);
         $this->assertEquals($expectedWrapHtml, $component->draw());
-        \Pina\App::container()->set(\Pina\Controls\FormStatic::class, \Pina\Controls\FormStatic::class);
+        App::container()->set(FormStatic::class, FormStatic::class);
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
         $component->wrap(Pina\Controls\TableCell::instance());
         $component->wrap(Pina\Controls\TableRow::instance());
         $component->wrap(Pina\Controls\Table::instance());
-        $note = \Pina\Controls\Paragraph::instance()->setText('note');
-        $form = \Pina\Controls\Form::instance()->setAction('/')->setMethod('delete');
+        $note = Paragraph::instance()->setText('note');
+        $form = Form::instance()->setAction('/')->setMethod('delete');
         $form->append($note);
         $component->wrap($form);
         
@@ -127,13 +131,13 @@ class ControllerTest extends TestCase
         $this->assertEquals($expectedWrapHtml, $component->draw());
         
         $r = $router->run("lk/1/cron-events", 'delete');
-        $class = new \ReflectionClass($r);
+        $class = new ReflectionClass($r);
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('400 Bad Request', $prop->getValue($r));
         
         $r = $router->run("lk/1/cron-events/" . $id, 'delete');
-        $class = new \ReflectionClass($r);
+        $class = new ReflectionClass($r);
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('200 OK', $prop->getValue($r));

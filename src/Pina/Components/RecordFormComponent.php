@@ -3,6 +3,7 @@
 namespace Pina\Components;
 
 use Pina\App;
+use Pina\Controls\ButtonRow;
 use Pina\Controls\Card;
 use Pina\Controls\Form;
 use Pina\Controls\SubmitButton;
@@ -15,6 +16,14 @@ class RecordFormComponent extends RecordData
 
     protected $method = 'GET';
     protected $action = null;
+
+    /** @var ButtonRow */
+    protected $buttonRow;
+
+    public function __construct()
+    {
+        $this->buttonRow = App::make(ButtonRow::class);
+    }
 
     /**
      * Настраивает HTTP-метод для отправки формы
@@ -38,10 +47,21 @@ class RecordFormComponent extends RecordData
         return $this;
     }
 
+    /**
+     * Получить ссылку на строчку с кнопками под формой
+     * @return ButtonRow
+     */
+    public function getButtonRow()
+    {
+        return $this->buttonRow;
+    }
+
     public function build()
     {
         $form = $this->buildForm()->addClass('form')->addClass('pina-form');
-        $form->append($this->makeSubmit()->setTitle('Сохранить'));
+        $mainButton = $this->makeSubmit()->setTitle('Сохранить');
+        $this->buttonRow->setMain($mainButton);
+        $form->append($this->buttonRow);
         $this->append($form);
     }
 
