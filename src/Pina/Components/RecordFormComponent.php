@@ -61,7 +61,6 @@ class RecordFormComponent extends RecordData
         $form = $this->buildForm()->addClass('form')->addClass('pina-form');
         $mainButton = $this->makeSubmit()->setTitle('Сохранить');
         $this->buttonRow->setMain($mainButton);
-        $form->append($this->buttonRow);
         $this->append($form);
     }
 
@@ -90,6 +89,8 @@ class RecordFormComponent extends RecordData
 
             $form->append($card);
         }
+
+        $form->append($this->buttonRow);
 
         return $form;
     }

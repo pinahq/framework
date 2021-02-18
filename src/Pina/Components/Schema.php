@@ -90,6 +90,20 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    public function getVolume()
+    {
+        $count = count($this->fields);
+        foreach ($this->getInnerSchemas() as $group) {
+            $count +=  $group->getVolume();
+        }
+        return $count;
+    }
+
+    public function isEmpty()
+    {
+        return $this->getVolume() == 0;
+    }
+
     /**
      * Возвращяет все ключи полей схемы
      * @return array
