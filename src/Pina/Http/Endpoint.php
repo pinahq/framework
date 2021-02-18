@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Endpoint
 {
@@ -52,7 +53,7 @@ class Endpoint
 
     /**
      * Request body parameters ($_POST).
-     * 
+     *
      * @return InputBag|ParameterBag
      */
     public function request()
@@ -69,7 +70,7 @@ class Endpoint
     {
         return $this->request->query;
     }
-    
+
     /**
      * Attribute string parameters.
      *
