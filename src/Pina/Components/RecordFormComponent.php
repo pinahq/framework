@@ -76,6 +76,9 @@ class RecordFormComponent extends RecordData
         $data = $this->getData();
 
         foreach ($this->schema->getGroupIterator() as $schema) {
+            if ($schema->isEmpty()) {
+                continue;
+            }
             $card = $this->makeCard()->setTitle($schema->getTitle());
 
             foreach ($schema->getIterator() as $field) {

@@ -12,9 +12,16 @@ use function Pina\__;
 class MenuComponent extends ListData //implements ComponentInterface
 {
 
+    protected $location = '';
+
     public function __construct()
     {
         $this->schema = $this->getDefaultSchema();
+    }
+
+    public function setLocation($location)
+    {
+        $this->location = $location;
     }
 
     public function build()
@@ -34,13 +41,17 @@ class MenuComponent extends ListData //implements ComponentInterface
     {
         $list = $this->control(UnorderedList::class);
         $list->addClass('nav');
+        foreach ($this->classes as $cl) {
+            $list->addClass($cl);
+        }
         return $list;
     }
 
     protected function makeListItem($title, $link)
     {
+        $isActive = strncmp($this->location, $link, max(strlen($this->location), strlen($link))) == 0;
         $item = isset($link) ? $this->control(LinkedListItem::class)->setLinkClass(
-            'nav-link'
+            'nav-link'.($isActive ? ' active' : '')
         ) : $this->control(ListItem::class);
 
         $item->setText($title);

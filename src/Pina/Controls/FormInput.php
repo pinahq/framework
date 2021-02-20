@@ -77,7 +77,11 @@ class FormInput extends Control
 
     protected function drawControl()
     {
-        return Html::tag('input', '', array_filter(['type' => $this->type, 'name' => $this->name, 'value' => $this->value, 'class' => 'form-control']));
+        $options = ['type' => $this->type, 'value' => $this->value, 'class' => 'form-control'];
+        if ($this->name) {
+            $options['name'] = $this->name;
+        }
+        return Html::tag('input', '', $options);
     }
 
 }
