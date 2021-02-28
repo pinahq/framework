@@ -128,7 +128,17 @@ class ControllerTest extends TestCase
             . '</form>';
         
         $this->assertEquals($expectedWrapHtml, $component->draw());
-        $this->assertEquals($expectedWrapHtml, $component->draw());
+        
+        $expectedWrapHtml = '<table><tr><td>'
+            . '<div class="card"><div class="card-body">'
+            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '</div></div>'
+            . '</td></tr></table>';
+
+        $this->assertEquals($expectedWrapHtml, $component->unwrap()->draw());
         
         $r = $router->run("lk/1/cron-events", 'delete');
         $class = new ReflectionClass($r);

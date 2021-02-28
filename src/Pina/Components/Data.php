@@ -64,9 +64,26 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
 
     public function wrap($wrapper)
     {
-        $this->wrappers[] = $wrapper;
+        return $this->pushWrapper($wrapper);
+    }
+    
+    public function unwrap()
+    {
+        $this->popWrapper();
         return $this;
     }
+    
+    public function pushWrapper($wrapper)
+    {
+        array_push($this->wrappers, $wrapper);
+        return $this;
+    }
+    
+    public function popWrapper()
+    {
+        return array_pop($this->wrappers);
+    }
+    
 
     public function hasWrapper()
     {
