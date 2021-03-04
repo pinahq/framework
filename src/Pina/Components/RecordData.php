@@ -10,7 +10,7 @@ class RecordData extends Data
     private $data = [];
 
     /**
-     * 
+     *
      * @param RecordData $record
      * @return $this
      */
@@ -20,7 +20,7 @@ class RecordData extends Data
     }
 
     /**
-     * 
+     *
      * @param array $data
      * @param \Pina\Components\Schema $schema
      * @return $this
@@ -35,7 +35,17 @@ class RecordData extends Data
 
     protected function getData()
     {
-        return $this->schema->process($this->data);
+        return $this->schema->processLineAsData($this->data);
+    }
+
+    protected function getTextData()
+    {
+        return $this->schema->processLineAsText($this->data);
+    }
+
+    protected function getHtmlData()
+    {
+        return $this->schema->processLineAsHtml($this->data);
     }
 
     /**

@@ -51,7 +51,17 @@ class ListData extends Data implements Iterator
 
     protected function getData()
     {
-        return $this->schema->processList($this->data);
+        return $this->schema->processListAsData($this->data);
+    }
+
+    protected function getTextData()
+    {
+        return $this->schema->processListAsText($this->data);
+    }
+
+    protected function getHtmlData()
+    {
+        return $this->schema->processListAsHtml($this->data);
     }
 
     /**

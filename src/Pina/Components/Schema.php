@@ -21,7 +21,21 @@ class Schema implements IteratorAggregate
      * @var Field[]
      */
     protected $fields = [];
-    protected $processors = [];
+
+    /**
+     * @var callable[]
+     */
+    protected $dataProcessors = [];
+
+    /**
+     * @var callable[]
+     */
+    protected $textProcessors = [];
+
+    /**
+     * @var callable[]
+     */
+    protected $htmlProcessors = [];
 
     /**
      *
@@ -66,7 +80,9 @@ class Schema implements IteratorAggregate
     public function merge(Schema $schema)
     {
         $this->fields = array_merge($this->fields, $schema->fields);
-        $this->processors = array_merge($this->processors, $schema->processors);
+        $this->dataProcessors = array_merge($this->dataProcessors, $schema->dataProcessors);
+        $this->textProcessors = array_merge($this->textProcessors, $schema->textProcessors);
+        $this->htmlProcessors = array_merge($this->htmlProcessors, $schema->htmlProcessors);
     }
 
     /**
@@ -168,12 +184,12 @@ class Schema implements IteratorAggregate
      * @param  callable $callback
      * @return $this
      */
-    public function pushProcessor($callback)
+    public function pushDataProcessor($callback)
     {
         if (!is_callable($callback)) {
             throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
         }
-        array_unshift($this->processors, $callback);
+        array_push($this->dataProcessors, $callback);
 
         return $this;
     }
@@ -183,21 +199,98 @@ class Schema implements IteratorAggregate
      *
      * @return callable
      */
-    public function popProcessor()
+    public function popDataProcessor()
     {
-        if (!$this->processors) {
+        if (!$this->dataProcessors) {
             throw new LogicException('You tried to pop from an empty processor stack.');
         }
 
-        return array_shift($this->processors);
+        return array_pop($this->dataProcessors);
     }
 
     /**
      * @return callable[]
      */
-    public function getProcessors()
+    public function getDataProcessors()
     {
-        return $this->processors;
+        return $this->dataProcessors;
+    }
+
+    /**
+     * Adds a formatter on to the stack.
+     *
+     * @param  callable $callback
+     * @return $this
+     */
+    public function pushTextProcessor($callback)
+    {
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+        }
+        array_push($this->textProcessors, $callback);
+
+        return $this;
+    }
+
+    /**
+     * Removes the formatter on top of the stack and returns it.
+     *
+     * @return callable
+     */
+    public function popTextProcessor()
+    {
+        if (!$this->textProcessors) {
+            throw new LogicException('You tried to pop from an empty text processor stack.');
+        }
+
+        return array_pop($this->textProcessors);
+    }
+
+    /**
+     * @return callable[]
+     */
+    public function getTextProcessors()
+    {
+        return $this->textProcessors;
+    }
+
+
+    /**
+     * Adds a designer on to the stack.
+     *
+     * @param  callable $callback
+     * @return $this
+     */
+    public function pushHtmlProcessor($callback)
+    {
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+        }
+        array_push($this->htmlProcessors, $callback);
+
+        return $this;
+    }
+
+    /**
+     * Removes the html processor on top of the stack and returns it.
+     *
+     * @return callable
+     */
+    public function popHtmlProcessor()
+    {
+        if (!$this->htmlProcessors) {
+            throw new LogicException('You tried to pop from an empty html processor stack.');
+        }
+
+        return array_pop($this->htmlProcessors);
+    }
+
+    /**
+     * @return callable[]
+     */
+    public function getHtmlProcessors()
+    {
+        return $this->htmlProcessors;
     }
 
     /**
@@ -205,13 +298,13 @@ class Schema implements IteratorAggregate
      * @param mixed $line
      * @return mixed
      */
-    public function process($line)
+    public function processLineAsData($line)
     {
-        foreach ($this->processors as $p) {
+        foreach ($this->dataProcessors as $p) {
             $line = $p($line);
         }
         foreach ($this->getInnerSchemas() as $group) {
-            $line = $group->process($line);
+            $line = $group->processLineAsData($line);
         }
         return $line;
     }
@@ -221,16 +314,69 @@ class Schema implements IteratorAggregate
      * @param array $data
      * @return array
      */
-    public function processList($data)
+    public function processListAsData($data)
     {
         foreach ($data as $k => $line) {
-            $data[$k] = $this->process($line);
-        }
-
-        foreach ($this->getInnerSchemas() as $group) {
-            $data = $group->processList($data);
+            $data[$k] = $this->processLineAsData($line);
         }
         return $data;
+    }
+
+    public function callTextProcessors($processed, $raw)
+    {
+        foreach ($this->textProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $processed = $group->callTextProcessors($processed, $raw);
+        }
+        return $processed;
+    }
+
+    public function processLineAsText($line)
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = [];
+        foreach ($this->getIterator() as $field) {
+            $key = $field->getKey();
+            $value = $field->draw($processed);
+            $type = App::type($field->getType());
+            $formatted[$key] = $type->format($value);
+        }
+        return $this->callTextProcessors($formatted, $line);
+    }
+
+    public function processListAsText($data)
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->processLineAsText($line);
+        }
+        return $data;
+    }
+
+    public function processLineAsHtml($line)
+    {
+        $processed = $this->processLineAsText($line);
+        return $this->callHtmlProcessors($processed, $line);
+    }
+
+    public function processListAsHtml($data)
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->processLineAsHtml($line);
+        }
+        return $data;
+    }
+
+    public function callHtmlProcessors($processed, $raw)
+    {
+        foreach ($this->htmlProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $processed = $group->callHtmlProcessors($processed, $raw);
+        }
+        return $processed;
     }
 
     /**
@@ -243,11 +389,9 @@ class Schema implements IteratorAggregate
     public function makeFlatLine($line)
     {
         $newLine = [];
-        foreach ($this->fields as $field) {
-            $newLine[] = $field->draw($line);
-        }
-        foreach ($this->getInnerSchemas() as $group) {
-            $newLine = array_merge($newLine, $group->makeFlatLine($line));
+        foreach ($this->getIterator() as $field) {
+            $key = $field->getKey();
+            $newLine[] = isset($line[$key]) ? $line[$key] : '';
         }
         return $newLine;
     }
@@ -296,10 +440,15 @@ class Schema implements IteratorAggregate
         $schema = new Schema();
         $schema->title = $this->title;
         $schema->fields = $this->fields;
-        $schema->processors = $this->processors;
+        $schema->dataProcessors = $this->dataProcessors;
+        $schema->textProcessors = $this->textProcessors;
+        $schema->htmlProcessors = $this->htmlProcessors;
         return $schema;
     }
 
+    /**
+     * @return Schema[]
+     */
     protected function getInnerSchemas()
     {
         $schemas = [];

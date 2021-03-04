@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
 use Pina\Components\Schema;
-use Pina\Components\Field;
+use Pina\Html;
 
 class SchemaTest extends TestCase
 {
@@ -12,15 +12,15 @@ class SchemaTest extends TestCase
     {
 
         $schema = new Schema();
-        $schema->add(Field::make('order_id', 'Заказ'));
-        $schema->add(Field::make('name', 'ФИО'));
-        $schema->pushProcessor(function ($item) {
-            $item['order_id'] = '<a href="/orders/' . $item['order_id'] . '">' . $item['order_id'] . ' at ' . $item['date'] . '</a>';
+        $schema->add('order_id', 'Заказ');
+        $schema->add('name', 'ФИО');
+        $schema->pushHtmlProcessor(function ($item, $raw) {
+            $item['order_id'] = Html::a($raw['order_id'] . ' at ' . $raw['date'] , '/orders/' . $raw['order_id']);
             return $item;
         });
 
         $line = ['order_id' => '12', 'date' => '12.12.2020', 'name' => 'Ivan Ivanov'];
-        $actual = $schema->makeFlatLine($schema->process($line));
+        $actual = $schema->makeFlatLine($schema->processLineAsHtml($line));
         $this->assertEquals(['<a href="/orders/12">12 at 12.12.2020</a>', 'Ivan Ivanov'], $actual);
 
         $schema->forgetField('order_id');

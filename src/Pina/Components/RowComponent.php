@@ -11,7 +11,7 @@ class RowComponent extends RecordData //implements ComponentInterface
     public function build()
     {
         $row = $this->makeTableRow();
-        $data = $this->getData();
+        $data = $this->getHtmlData();
         if (!empty($data['class'])) {
             $row->addClass($data['class']);
         }

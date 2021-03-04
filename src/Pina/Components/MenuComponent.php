@@ -28,7 +28,7 @@ class MenuComponent extends ListData //implements ComponentInterface
     {
         $list = $this->makeList();
         $keys = $this->schema->getKeys();
-        $data = $this->getData();
+        $data = $this->getTextData();
         foreach ($data as $idx => $line) {
             $title = isset($line[$keys[0]]) ? $line[$keys[0]] : '';
             $link = isset($line[$keys[1]]) ? $line[$keys[1]] : '';

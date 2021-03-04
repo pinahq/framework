@@ -2,6 +2,8 @@
 
 namespace Pina\Components;
 
+use Pina\Controls\FormSelect;
+
 /**
  * Выпадающий список
  */
@@ -45,7 +47,7 @@ class SelectComponent extends ListData
         $this->value = $value;
         return $this;
     }
-    
+
     public function setPlaceholder($placeholder)
     {
         $this->placeholder = $placeholder;
@@ -65,11 +67,11 @@ class SelectComponent extends ListData
     }
 
     /**
-     * @return \Pina\Controls\FormSelect
+     * @return FormSelect
      */
     protected function makeFormSelect()
     {
-        return $this->control(\Pina\Controls\FormSelect::class);
+        return $this->control(FormSelect::class);
     }
 
 }

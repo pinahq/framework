@@ -74,7 +74,6 @@ class RecordFormComponent extends RecordData
             ->setMethod($this->method);
 
         $data = $this->getData();
-
         foreach ($this->schema->getGroupIterator() as $schema) {
             if ($schema->isEmpty()) {
                 continue;

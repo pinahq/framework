@@ -2,7 +2,6 @@
 
 namespace Pina\Components;
 
-use Pina\App;
 use Pina\Controls\Card;
 use Pina\Controls\FormStatic;
 
@@ -11,8 +10,7 @@ class RecordViewComponent extends RecordData //implements ComponentInterface
 
     public function build()
     {
-        $data = $this->getData();
-
+        $data = $this->getHtmlData();
 
         foreach ($this->schema->getGroupIterator() as $schema) {
             if ($schema->isEmpty()) {
@@ -22,14 +20,12 @@ class RecordViewComponent extends RecordData //implements ComponentInterface
             foreach ($schema->getIterator() as $field) {
                 $title = $field->getTitle();
                 $key = $field->getKey();
-                $value = $field->draw($data);
-
-                $type = App::type($field->getType());
+                $value = $data[$key];
 
                 $static = $this->makeFormStatic()
                     ->setName($key)
                     ->setTitle($title)
-                    ->setValue($type->format($value));
+                    ->setValue($value);
                 $container->append($static);
             }
             $this->append($container);

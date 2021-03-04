@@ -2,23 +2,22 @@
 
 namespace Pina\Components;
 
+use Pina\Controls\LinkedListItem;
+use Pina\Controls\ListItem;
+use Pina\Controls\UnorderedList;
+
 class BreadcrumbComponent extends MenuComponent
 {
-
-    public function __construct()
-    {
-        $this->schema = $this->getDefaultSchema();
-    }
 
     public function build()
     {
         $list = $this->makeList();
         $keys = $this->schema->getKeys();
-        $data = $this->getData();
+        $data = $this->getTextData();
         $count = count($data);
         foreach ($data as $idx => $line) {
-            $title = $line[$keys[0]] ?? '';
-            $link = ($idx < $count - 1) ? ($line[$keys[1]] ?? '') : null;
+            $title = isset($line[$keys[0]]) ? $line[$keys[0]] : '';
+            $link = ($idx < $count - 1) ? (isset($line[$keys[1]]) ? $line[$keys[1]] : '') : null;
 
             $list->append($this->makeListItem($title, $link));
         }
@@ -27,11 +26,11 @@ class BreadcrumbComponent extends MenuComponent
 
     /**
      * Возвращает экземпляр списка-контейнера хлебных крошек
-     * @return \Pina\Controls\UnorderedList
+     * @return UnorderedList
      */
     protected function makeList()
     {
-        $list = $this->control(\Pina\Controls\UnorderedList::class);
+        $list = $this->control(UnorderedList::class);
         $list->addClass('breadcrumb');
         return $list;
     }
@@ -40,11 +39,13 @@ class BreadcrumbComponent extends MenuComponent
      * Возвращает элемент хлебных крошек
      * @param string $title
      * @param string $link
-     * @return \Pina\Controls\ListItem
+     * @return ListItem
      */
     protected function makeListItem($title, $link)
     {
-        $item = isset($link) ? $this->control(\Pina\Controls\LinkedListItem::class) : $this->control(\Pina\Controls\ListItem::class);
+        $item = isset($link) ? $this->control(LinkedListItem::class) : $this->control(
+            ListItem::class
+        );
 
         $item->setText($title);
         $item->addClass('breadcrumb-item');
