@@ -37,6 +37,11 @@ class FormSelect extends FormInput
     public function drawControl()
     {
         $options = '';
+        
+        if ($this->placeholder) {
+            $options .= Html::tag('option', $this->placeholder, ['value' => '']);
+        }
+        
         foreach ($this->variants as $variant) {
             $title = isset($variant['title']) ? $variant['title'] : '';
             $id = isset($variant['id']) ? $variant['id'] : $title;
