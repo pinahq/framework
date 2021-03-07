@@ -39,13 +39,13 @@ class Form extends Control
     {
         $csrf = CSRF::formField($this->method);
 
-        return Html::tag('form', $csrf . $this->compile(), $this->makeOptions());
+        return Html::tag('form', $csrf . $this->compile(), $this->makeAttributes());
     }
 
     /**
      * @return array
      */
-    protected function makeOptions()
+    protected function makeAttributes($attributes = [])
     {
         $method = strtolower($this->method);
         $parsed = parse_url($this->action);
@@ -60,7 +60,9 @@ class Form extends Control
 
         $action = $this->buildParsed($parsed);
 
-        return $this->makeAttributes(['method' => $method, 'action' => $action]);
+        $attributes = array_merge(['method' => $method, 'action' => $action], $attributes);
+        
+        return parent::makeAttributes($attributes);
     }
 
     /**
@@ -80,6 +82,5 @@ class Form extends Control
         $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
-
 
 }
