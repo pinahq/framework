@@ -59,7 +59,7 @@ class ArrTest extends TestCase
 
         $this->assertEquals(['something', 'something3'], Arr::get($a, 'deep.*.deepest'));
         $this->assertEquals(['something', 'something2', 'something3', 'something4'], Arr::get($a, 'deep.*.*'));
-        
+
         $this->assertEquals('value', Arr::get($a, 'name', 12));
         $this->assertEquals(12, Arr::get($a, 'name2', 12));
     }
@@ -100,16 +100,19 @@ class ArrTest extends TestCase
 
         $b = $a;
         Arr::forget($b, 'deep.deeper2');
-        $this->assertEquals([
-            'name' => 'value',
-            'key' => 'other-value',
-            'deep' => [
-                'deeper' => [
-                    'deepest' => 'something',
-                    'deepest2' => 'something2',
+        $this->assertEquals(
+            [
+                'name' => 'value',
+                'key' => 'other-value',
+                'deep' => [
+                    'deeper' => [
+                        'deepest' => 'something',
+                        'deepest2' => 'something2',
+                    ]
                 ]
-            ]
-                ], $b);
+            ],
+            $b
+        );
     }
 
     public function testArrHas()
@@ -154,20 +157,24 @@ class ArrTest extends TestCase
             ]
         ];
         $b = Arr::only($a, ['key', 'deep']);
-        $this->assertEquals([
-            'key' => 'other-value',
-            'deep' => [
-                'deeper' => [
-                    'deepest' => 'something',
-                    'deepest2' => 'something2',
-                ],
-                'deeper2' => [
-                    'deepest' => 'something3',
-                    'deepest3' => 'something4',
+        $this->assertEquals(
+            [
+                'key' => 'other-value',
+                'deep' => [
+                    'deeper' => [
+                        'deepest' => 'something',
+                        'deepest2' => 'something2',
+                    ],
+                    'deeper2' => [
+                        'deepest' => 'something3',
+                        'deepest3' => 'something4',
+                    ]
                 ]
-            ]
-        ], $b);
+            ],
+            $b
+        );
     }
+
     public function testArrPull()
     {
         $a = [
@@ -185,20 +192,78 @@ class ArrTest extends TestCase
             ]
         ];
         $b = Arr::pull($a, 'deep');
-        $this->assertEquals([
-            'name' => 'value',
-            'key' => 'other-value',
-        ], $a);
-        $this->assertEquals([
-            'deeper' => [
-                'deepest' => 'something',
-                'deepest2' => 'something2',
+        $this->assertEquals(
+            [
+                'name' => 'value',
+                'key' => 'other-value',
             ],
-            'deeper2' => [
-                'deepest' => 'something3',
-                'deepest3' => 'something4',
+            $a
+        );
+        $this->assertEquals(
+            [
+                'deeper' => [
+                    'deepest' => 'something',
+                    'deepest2' => 'something2',
+                ],
+                'deeper2' => [
+                    'deepest' => 'something3',
+                    'deepest3' => 'something4',
+                ]
+            ],
+            $b
+        );
+    }
+
+    public function testGroup()
+    {
+        $a = [
+            ['test' => 4, 'test2' => 5, 'zzz' => 'test'],
+            ['test' => 4, 'test2' => 7, 'zzz' => 'dddd'],
+            ['test' => 5, 'test2' => 8, 'zzz' => 'wwww']
+        ];
+
+        $exptected = [
+            4 => [
+                ['test' => 4, 'test2' => 5, 'zzz' => 'test'],
+                ['test' => 4, 'test2' => 7, 'zzz' => 'dddd'],
+            ],
+            5 => [
+                ['test' => 5, 'test2' => 8, 'zzz' => 'wwww']
             ]
-        ], $b);
+        ];
+
+        $this->assertEquals($exptected, Arr::group($a, 'test'));
+        $this->assertEquals(['' => $a], Arr::group($a, 'not_found_key'));
+        $this->assertEquals(['' => $a], Arr::groupWithoutKey($a, 'not_found_key'));
+
+        $exptected = [
+            4 => [
+                ['test2' => 5, 'zzz' => 'test'],
+                ['test2' => 7, 'zzz' => 'dddd'],
+            ],
+            5 => [
+                ['test2' => 8, 'zzz' => 'wwww']
+            ]
+        ];
+        $this->assertEquals($exptected, Arr::groupWithoutKey($a, 'test'));
+
+        $exptected = [
+            4 => ['test' => 4, 'test2' => 7, 'zzz' => 'dddd'],
+            5 => ['test' => 5, 'test2' => 8, 'zzz' => 'wwww'],
+        ];
+        $this->assertEquals($exptected, Arr::groupUnique($a, 'test'));
+    }
+
+    public function testMineTreeValues()
+    {
+        $a = [
+            ['test' => 4, 'test2' => 5, 'zzz' => 'test'],
+            ['test' => 4, 'test2' => 7, 'zzz' => 'dddd'],
+            ['test' => 5, 'test2' => 8, 'zzz' => 'wwww']
+        ];
+
+        $exptected = [4, 5, 'test', 4, 7, 'dddd', 5, 8, 'wwww'];
+        $this->assertEquals($exptected, Arr::mineTreeValues($a));
     }
 
 }

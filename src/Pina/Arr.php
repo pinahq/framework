@@ -87,13 +87,13 @@ class Arr
         return $table;
     }
 
-    public static function group($data, $key)
+    public static function group($data, $key, $default = '')
     {
         $result = array();
 
         if (is_array($data)) {
             foreach ($data as $d) {
-                $k = $d[$key];
+                $k = isset($d[$key]) ? $d[$key] : $default;
                 $result[$k][] = $d;
             }
         }
@@ -101,13 +101,13 @@ class Arr
         return $result;
     }
 
-    public static function groupWithoutKey($data, $key)
+    public static function groupWithoutKey($data, $key, $default = '')
     {
         $result = array();
 
         if (is_array($data)) {
             foreach ($data as $d) {
-                $k = $d[$key];
+                $k = isset($d[$key]) ? $d[$key] : $default;
                 unset($d[$key]);
                 $result[$k][] = $d;
             }
@@ -116,13 +116,13 @@ class Arr
         return $result;
     }
 
-    public static function groupUnique($data, $key)
+    public static function groupUnique($data, $key, $default = '')
     {
         $result = array();
 
         if (is_array($data)) {
             foreach ($data as $d) {
-                $k = $d[$key];
+                $k = isset($d[$key]) ? $d[$key] : $default;
                 $result[$k] = $d;
             }
         }
@@ -170,7 +170,7 @@ class Arr
         $r = array();
         foreach ($a as $v) {
             if (is_array($v)) {
-                $r = self::merge($r, mineTreeValues($v));
+                $r = self::merge($r, static::mineTreeValues($v));
             } else {
                 $r[] = $v;
             }
@@ -181,7 +181,7 @@ class Arr
     public static function mineValues($subject, $a)
     {
         $a = self::mine($subject, $a);
-        return mineTreeValues($a);
+        return static::mineTreeValues($a);
     }
 
     public static function mineSub($subject, $a)
@@ -209,7 +209,7 @@ class Arr
     public static function get($array, $path, $default = null)
     {
         if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
-            return;
+            return $default;
         }
 
         $path = is_array($path) ? $path : explode('.', $path);
@@ -217,7 +217,7 @@ class Arr
         while (!is_null($segment = array_shift($path))) {
             if ($segment === '*') {
                 if (!is_array($array)) {
-                    return value($default);
+                    return $default;
                 }
 
                 $result = static::getFromNextLevel($array, $path);
