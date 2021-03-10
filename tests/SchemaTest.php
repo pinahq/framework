@@ -66,4 +66,31 @@ class SchemaTest extends TestCase
                 $e->getErrors());
         }
     }
+
+    public function testMerge()
+    {
+        $schema = new Schema();
+        $schema->add('test1', 'Title1');
+        $schema->add('test2', 'Title2');
+        $schema2 = new Schema();
+        $schema2->add('test3', 'Title3');
+        $schema2->add('test4', 'Title4');
+        $schema3 = new Schema();
+        $schema3->add('test5', 'Title5');
+        $schema3->add('test6', 'Title6');
+        $schema->addGroup($schema2);
+        $schema2->addGroup($schema3);
+
+        $expected = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'];
+        $this->assertEquals($expected, $schema->getKeys());
+
+        $expected = ['Title1', 'Title2', 'Title3', 'Title4', 'Title5', 'Title6'];
+        $this->assertEquals($expected, $schema->getTitles());
+
+        $expected = ['', '', '', '', '', ''];
+        $this->assertEquals($expected, $schema->getTypes());
+
+        $this->assertEquals(6, $schema->getVolume());
+
+    }
 }

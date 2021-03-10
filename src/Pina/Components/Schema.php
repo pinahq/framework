@@ -153,7 +153,7 @@ class Schema implements IteratorAggregate
     public function getTitles()
     {
         $titles = [];
-        foreach ($this as $field) {
+        foreach ($this->fields as $field) {
             $titles[] = $field->getTitle();
         }
         foreach ($this->getInnerSchemas() as $group) {
@@ -169,7 +169,7 @@ class Schema implements IteratorAggregate
     public function getTypes()
     {
         $types = [];
-        foreach ($this as $field) {
+        foreach ($this->fields as $field) {
             $types[] = $field->getType();
         }
         foreach ($this->getInnerSchemas() as $group) {
