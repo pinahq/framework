@@ -2,8 +2,7 @@
 
 namespace Pina\Types;
 
-use Closure;
-use Pina\Components\Field;
+use function Pina\__;
 
 abstract class ConfigurableType implements TypeInterface
 {
@@ -23,18 +22,18 @@ abstract class ConfigurableType implements TypeInterface
     {
         return $this->nullable == true;
     }
-    
+
     public function setSize($size)
     {
         $this->size = $size;
         return $this;
     }
-    
+
     public function getSize()
     {
         return $this->size;
     }
-    
+
     public function setDefault($default)
     {
         $this->default = $default;
@@ -45,7 +44,7 @@ abstract class ConfigurableType implements TypeInterface
     {
         return $this->default;
     }
-    
+
     public function setVariants($variants)
     {
         $this->variants = $variants;
@@ -57,19 +56,19 @@ abstract class ConfigurableType implements TypeInterface
         return $this->variants;
     }
 
-    public function validate(&$value)
+    public function normalize($value)
     {
         if (!empty($this->variants)) {
             if (!in_array($value, array_column($this->variants, 'id'))) {
-                return __("Выберите вариант");
+                throw new ValidateException(__("Выберите вариант"));
             }
         }
-        
+
         if (empty($value)) {
-            $value = $this->default;
+            return $this->default;
         }
-        
-        return null;
+
+        return $value;
     }
 
 }

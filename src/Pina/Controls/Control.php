@@ -15,15 +15,6 @@ class Control
     protected $layout = null;
     protected $attributes = [];
 
-    /**
-     * 
-     * @return \static
-     */
-    public static function instance()
-    {
-        return new static();
-    }
-
     public function setLayout($layout)
     {
         $this->layout = $layout;

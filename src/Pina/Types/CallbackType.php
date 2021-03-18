@@ -57,9 +57,9 @@ class CallbackType implements TypeInterface
         return [];
     }
 
-    public function validate(&$value)
+    public function normalize($value)
     {
-        return null;
+        return $value;
     }
 
 }

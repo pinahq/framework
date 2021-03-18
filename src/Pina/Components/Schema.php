@@ -9,6 +9,8 @@ use LogicException;
 use Pina\BadRequestException;
 use Pina\App;
 use Pina\Arr;
+use Pina\Types\ValidateException;
+
 use function Pina\__;
 
 class Schema implements IteratorAggregate
@@ -110,7 +112,7 @@ class Schema implements IteratorAggregate
     {
         $count = count($this->fields);
         foreach ($this->getInnerSchemas() as $group) {
-            $count +=  $group->getVolume();
+            $count += $group->getVolume();
         }
         return $count;
     }
@@ -181,13 +183,18 @@ class Schema implements IteratorAggregate
     /**
      * Adds a processor on to the stack.
      *
-     * @param  callable $callback
+     * @param callable $callback
      * @return $this
      */
     public function pushDataProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+            throw new InvalidArgumentException(
+                'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
+                    $callback,
+                    true
+                ) . ' given'
+            );
         }
         array_push($this->dataProcessors, $callback);
 
@@ -219,13 +226,18 @@ class Schema implements IteratorAggregate
     /**
      * Adds a formatter on to the stack.
      *
-     * @param  callable $callback
+     * @param callable $callback
      * @return $this
      */
     public function pushTextProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+            throw new InvalidArgumentException(
+                'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
+                    $callback,
+                    true
+                ) . ' given'
+            );
         }
         array_push($this->textProcessors, $callback);
 
@@ -258,13 +270,18 @@ class Schema implements IteratorAggregate
     /**
      * Adds a designer on to the stack.
      *
-     * @param  callable $callback
+     * @param callable $callback
      * @return $this
      */
     public function pushHtmlProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), ' . var_export($callback, true) . ' given');
+            throw new InvalidArgumentException(
+                'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
+                    $callback,
+                    true
+                ) . ' given'
+            );
         }
         array_push($this->htmlProcessors, $callback);
 
@@ -464,13 +481,12 @@ class Schema implements IteratorAggregate
      * @param array $data
      * @return array
      */
-    public function validate($data)
+    public function normalize($data)
     {
         $errors = [];
         $record = [];
 
         foreach ($this->getIterator() as $k => $field) {
-
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
 
@@ -478,9 +494,10 @@ class Schema implements IteratorAggregate
                 $errors[] = [__('Укажите значение'), $field->getKey()];
             }
 
-            $error = App::type($field->getType())->setContext($data)->validate($value);
-            if (!is_null($error)) {
-                $errors[] = [$error, $field->getKey()];
+            try {
+                $value = App::type($field->getType())->setContext($data)->normalize($value);
+            } catch (ValidateException $e) {
+                $errors[] = [$e->getMessage(), $field->getKey()];
             }
 
             if ($path) {

@@ -2,6 +2,11 @@
 
 namespace Pina\Components;
 
+use Pina\App;
+use Pina\Controls\Table;
+use Pina\Controls\TableHeaderCell;
+use Pina\Controls\TableRow;
+
 class SimpleTableComponent extends ListData //implements ComponentInterface
 {
 
@@ -9,13 +14,13 @@ class SimpleTableComponent extends ListData //implements ComponentInterface
     {
         $this->append($this->buildTable());
     }
-    
+
     protected function buildTable()
     {
         $table = $this->makeTable();
         $table->append($this->buildHeader($this->schema->getTitles()));
         foreach ($this as $record) {
-            $table->append(RowComponent::instance()->basedOn($record));
+            $table->append($this->makeRow()->basedOn($record));
         }
         return $table;
     }
@@ -30,27 +35,35 @@ class SimpleTableComponent extends ListData //implements ComponentInterface
     }
 
     /**
-     * @return \Pina\Controls\Table
+     * @return RowComponent
      */
-    protected function makeTable()
+    protected function makeRow()
     {
-        return $this->control(\Pina\Controls\Table::class);
+        return App::make(RowComponent::class);
     }
 
     /**
-     * @return \Pina\Controls\TableRow
+     * @return Table
+     */
+    protected function makeTable()
+    {
+        return $this->control(Table::class);
+    }
+
+    /**
+     * @return TableRow
      */
     protected function makeTableRow()
     {
-        return $this->control(\Pina\Controls\TableRow::class);
+        return $this->control(TableRow::class);
     }
-    
+
     /**
-     * @return \Pina\Controls\TableHeaderCell
+     * @return TableHeaderCell
      */
     protected function makeTableHeaderCell()
     {
-        return $this->control(\Pina\Controls\TableHeaderCell::class);
+        return $this->control(TableHeaderCell::class);
     }
 
 }

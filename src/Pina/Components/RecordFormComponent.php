@@ -7,6 +7,8 @@ use Pina\Controls\ButtonRow;
 use Pina\Controls\Card;
 use Pina\Controls\Form;
 use Pina\Controls\SubmitButton;
+use Pina\ResourceManagerInterface;
+use Pina\StaticResource\Script;
 
 /**
  * Форма для редактирования записи
@@ -16,6 +18,7 @@ class RecordFormComponent extends RecordData
 
     protected $method = 'GET';
     protected $action = null;
+    protected $formClass = '';
 
     /** @var ButtonRow */
     protected $buttonRow;
@@ -23,6 +26,7 @@ class RecordFormComponent extends RecordData
     public function __construct()
     {
         $this->buttonRow = App::make(ButtonRow::class);
+        $this->formClass = uniqid('fm');
     }
 
     /**
@@ -54,6 +58,11 @@ class RecordFormComponent extends RecordData
     public function getButtonRow()
     {
         return $this->buttonRow;
+    }
+
+    public function getFormClass()
+    {
+        return $this->formClass;
     }
 
     public function build()
@@ -94,6 +103,14 @@ class RecordFormComponent extends RecordData
 
         $form->append($this->buttonRow);
 
+        $form->addClass($this->formClass);
+
+        $this->resources()->append(
+            (new Script())->setContent(
+                '<script>$(".' . $this->formClass . '").on("success", function(event, packet, status, xhr) {if (!PinaRequest.handleRedirect(xhr)) {var target = $(self).attr("data-success") ? $(self).attr("data-success") : document.location.pathname; document.location = target + "?changed=" + Math.random(); }});</script>'
+            )
+        );
+
         return $form;
     }
 
@@ -119,6 +136,15 @@ class RecordFormComponent extends RecordData
     protected function makeSubmit()
     {
         return $this->control(SubmitButton::class);
+    }
+
+    /**
+     *
+     * @return ResourceManagerInterface
+     */
+    protected function resources()
+    {
+        return App::container()->get(ResourceManagerInterface::class);
     }
 
 }

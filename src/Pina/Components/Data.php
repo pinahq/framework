@@ -2,7 +2,12 @@
 
 namespace Pina\Components;
 
-class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
+use Pina\App;
+use Pina\Controls\Control;
+use Pina\Controls\RawHtml;
+use Pina\ResponseInterface;
+
+class Data extends Control implements ResponseInterface
 {
 
     /**
@@ -12,11 +17,6 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     protected $meta = [];
     protected $errors = [];
     protected $wrappers = [];
-
-    public static function instance()
-    {
-        return new static();
-    }
 
     public function setSchema(Schema $schema)
     {
@@ -35,14 +35,18 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
         return $this;
     }
 
+    /**
+     * @param $alias
+     * @return Data
+     */
     public function turnTo($alias)
     {
-        return \Pina\App::components()->get($alias)->basedOn($this);
+        return App::components()->get($alias)->basedOn($this);
     }
 
     protected function control($control)
     {
-        return \Pina\App::make($control);
+        return App::make($control);
     }
 
     public function setMeta($key, $value)
@@ -66,24 +70,24 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     {
         return $this->pushWrapper($wrapper);
     }
-    
+
     public function unwrap()
     {
         $this->popWrapper();
         return $this;
     }
-    
+
     public function pushWrapper($wrapper)
     {
         array_push($this->wrappers, $wrapper);
         return $this;
     }
-    
+
     public function popWrapper()
     {
         return array_pop($this->wrappers);
     }
-    
+
 
     public function hasWrapper()
     {
@@ -93,10 +97,9 @@ class Data extends \Pina\Controls\Control implements \Pina\ResponseInterface
     public function compileWrappers()
     {
         $obj = $this;
-        $isWrapper = false;
         $html = $obj->compile();
         foreach ($this->wrappers as $w) {
-            $raw = new \Pina\Controls\RawHtml();
+            $raw = new RawHtml();
             $raw->setText($html);
             array_push($w->controls, $raw);
             $html = $w->draw();

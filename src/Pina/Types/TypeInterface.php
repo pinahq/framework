@@ -21,7 +21,7 @@ interface TypeInterface
     public function makeControl(Field $field, $value);
 
     /**
-     * 
+     *
      * @param mixed $value
      * @return string
      */
@@ -48,11 +48,11 @@ interface TypeInterface
     public function getVariants();
 
     /*
-     * Проверяет значение на предмет наличия ошибок перед сохранением
-     * Возвращает описание ошибки и меняет значение при необходимости
+     * Проверяет значение на предмет наличия ошибок и нормализует его
+     * Возвращает нормализованное значение
      * @param mixed $value
-     * @return null|string
+     * @return mixed
      */
 
-    public function validate(&$value);
+    public function normalize($value);
 }

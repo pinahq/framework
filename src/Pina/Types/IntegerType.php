@@ -5,6 +5,7 @@ namespace Pina\Types;
 use Pina\App;
 use Pina\Controls\FormInput;
 use Pina\Components\Field;
+
 use function Pina\__;
 
 class IntegerType implements TypeInterface
@@ -50,15 +51,13 @@ class IntegerType implements TypeInterface
         return [];
     }
 
-    public function validate(&$value)
+    public function normalize($value)
     {
         if (strval(intval($value)) != strval($value)) {
-            return __("Укажите целое число");
+            throw new ValidateException(__("Укажите целое число"));
         }
 
-        $value = intval($value);
-
-        return null;
+        return intval($value);
     }
 
 }

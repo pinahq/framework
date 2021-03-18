@@ -2,8 +2,6 @@
 
 namespace Pina\Types;
 
-use Pina\App;
-use Pina\Controls\FormInput;
 use Pina\Components\Field;
 use function Pina\__;
 
@@ -15,17 +13,17 @@ class NumericType extends IntegerType
         return parent::makeControl($field, $value)->setType('text');
     }
 
-    public function validate(&$value)
+    public function normalize($value)
     {
         if (!is_numeric($value)) {
-            return __("Укажите число");
+            throw new ValidateException( __("Укажите число"));
         }
         
         if (empty($value)) {
-            $value = 0;
+            return 0;
         }
 
-        return null;
+        return $value;
     }
 
 }

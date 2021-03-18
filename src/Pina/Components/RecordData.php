@@ -60,7 +60,8 @@ class RecordData extends Data
 
     public function build()
     {
-        $this->append(Json::instance()->setData($this->data));
+        $json = new Json();
+        $this->append($json->setData($this->data));
         return $this;
     }
 

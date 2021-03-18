@@ -5,6 +5,7 @@ namespace Pina\Types;
 use Pina\App;
 use Pina\Controls\FormSelect;
 use Pina\Components\Field;
+
 use function Pina\__;
 
 class EnumType implements TypeInterface
@@ -30,17 +31,17 @@ class EnumType implements TypeInterface
     {
         $star = $field->isMandatory() ? ' *' : '';
         return App::make(FormSelect::class)
-                ->setName($field->getKey())
-                ->setTitle($field->getTitle() . $star)
-                ->setValue($value)
-                ->setVariants($this->variants);
+            ->setName($field->getKey())
+            ->setTitle($field->getTitle() . $star)
+            ->setValue($value)
+            ->setVariants($this->variants);
     }
 
     public function format($value)
     {
         foreach ($this->variants as $v) {
             if ($v['id'] == $value) {
-                return $v['title'] ?? '';
+                return isset($v['title']) ? $v['title'] : '';
             }
         }
 
@@ -67,14 +68,14 @@ class EnumType implements TypeInterface
         return $this->variants;
     }
 
-    public function validate(&$value)
+    public function normalize($value)
     {
         $ids = array_column($this->variants, 'id');
         if (!in_array($value, $ids)) {
-            return __("Выберите значение");
+            throw new ValidateException(__("Выберите значение"));
         }
 
-        return null;
+        return $value;
     }
 
 }

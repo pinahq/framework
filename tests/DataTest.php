@@ -1,8 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\App;
-use Pina\Components\Registry;
 use Pina\Components\ListData;
 use Pina\Components\TableComponent;
 use Pina\Components\ListComponent;
@@ -23,7 +21,7 @@ class DataTest extends TestCase
             ['id' => 2, 'event' => 'order.canceled', 'created_at' => '2020-01-02 04:05:06'],
             ['id' => 3, 'event' => 'order.returned', 'created_at' => '2020-01-02 05:06:07'],
         ];
-        
+
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
             . '<tr><th>#</th><th>Событие</th><th>Дата создания</th></tr>'
@@ -35,22 +33,25 @@ class DataTest extends TestCase
 
         $list = new ListData();
         $list->load($data, $schema);
-        $html = TableComponent::instance()->basedOn($list)->draw();
+        $html = (new TableComponent)->basedOn($list)->draw();
         $this->assertEquals($expectedHtml, $html);
 
-        $html = ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('event')->draw();
+        $html = (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->draw();
         $this->assertEquals(
             '<ul>'
             . '<li>order.paid</li>'
             . '<li>order.canceled</li>'
             . '<li>order.returned</li>'
-            . '</ul>', $html
+            . '</ul>',
+            $html
         );
         $this->assertEquals(
-            ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('event')->draw(), ListComponent::instance()->basedOn($list)->select('event')->draw()
+            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->draw(),
+            (new ListComponent)->basedOn($list)->select('event')->draw()
         );
         $this->assertEquals(
-            ListComponent::instance()->basedOn(TableComponent::instance()->basedOn($list))->select('id')->draw(), ListComponent::instance()->basedOn($list)->select('id')->draw()
+            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('id')->draw(),
+            (new ListComponent)->basedOn($list)->select('id')->draw()
         );
 
         $html = $list->turnTo("table")->draw();

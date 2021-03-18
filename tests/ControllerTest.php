@@ -17,9 +17,27 @@ class ControllerTest extends TestCase
     {
         App::init('test', __DIR__ . '/config');
         $data = [
-            ['id' => 1, 'event' => 'order.paid', 'data' => '123', 'priority' => '1', 'created' => '2020-01-02 03:04:05'],
-            ['id' => 2, 'event' => 'order.canceled', 'data' => '124', 'priority' => '0', 'created' => '2020-01-02 04:05:06'],
-            ['id' => 3, 'event' => 'order.returned', 'data' => '125', 'priority' => '1', 'created' => '2020-01-02 05:06:07'],
+            [
+                'id' => 1,
+                'event' => 'order.paid',
+                'data' => '123',
+                'priority' => '1',
+                'created' => '2020-01-02 03:04:05'
+            ],
+            [
+                'id' => 2,
+                'event' => 'order.canceled',
+                'data' => '124',
+                'priority' => '0',
+                'created' => '2020-01-02 04:05:06'
+            ],
+            [
+                'id' => 3,
+                'event' => 'order.returned',
+                'data' => '125',
+                'priority' => '1',
+                'created' => '2020-01-02 05:06:07'
+            ],
         ];
 
         Pina\CronEventGateway::instance()->truncate();
@@ -45,8 +63,7 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
-            . '</div></div>'
-            ;
+            . '</div></div>';
 
         $html = $endpoint->show($id)->draw();
         $this->assertEquals($expectedRowHtml, $html);
@@ -62,28 +79,16 @@ class ControllerTest extends TestCase
         $this->assertEmpty($router->run("lk/1/cron-events/2/active-triggers", 'get')->draw());
 
 
-        $expectedRowEditHtml = ''
-            .'<form class="form pina-form" action="/put!lk/1/cron-events/'.$id.'" method="post">'
-            . CSRF::formField('PUT')
-            . '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
-            . '</div></div>'
-            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
-            . '</form>'
-            ;
-        $html = (new RecordFormComponent)
+        $form = (new RecordFormComponent)
             ->basedOn($router->run("lk/1/cron-events/" . $id, 'get'))
             ->forgetField('id')
             ->setMethod('PUT')
-            ->setAction("lk/1/cron-events/" . $id)
-            ->draw();
-        $this->assertEquals($expectedRowEditHtml, $html);
-        
-        $expectedWrapHtml = ''
-            . '<form class="form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
+            ->setAction("lk/1/cron-events/" . $id);
+
+        $cl = $form->getFormClass();
+
+        $expectedRowEditHtml = ''
+            . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
@@ -92,28 +97,46 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
-            . '</form>'
-            ;
+            . '</form>';
 
+
+        $this->assertEquals($expectedRowEditHtml, $form->draw());
+
+
+        /** @var RecordFormComponent $component */
         $component = $router->run("lk/1/cron-events/" . $id, 'get')
             ->forgetField('id')
             ->turnTo('form')
             ->setMethod("PUT")
             ->setAction("lk/1/cron-events/" . $id);
-        
+
+        $cl = $component->getFormClass();
+
+        $expectedWrapHtml = ''
+            . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
+            . CSRF::formField('PUT')
+            . '<div class="card"><div class="card-body">'
+            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
+            . '</div></div>'
+            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '</form>';
+
         App::container()->set(FormStatic::class, FormInput::class);
         $this->assertEquals($expectedWrapHtml, $component->draw());
         App::container()->set(FormStatic::class, FormStatic::class);
 
         $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
-        $component->wrap(Pina\Controls\TableCell::instance());
-        $component->wrap(Pina\Controls\TableRow::instance());
-        $component->wrap(Pina\Controls\Table::instance());
-        $note = Paragraph::instance()->setText('note');
-        $form = Form::instance()->setAction('/')->setMethod('delete');
+        $component->wrap(new Pina\Controls\TableCell);
+        $component->wrap(new Pina\Controls\TableRow);
+        $component->wrap(new Pina\Controls\Table);
+        $note = (new Paragraph)->setText('note');
+        $form = (new Form)->setAction('/')->setMethod('delete');
         $form->append($note);
         $component->wrap($form);
-        
+
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<table><tr><td>'
@@ -126,9 +149,9 @@ class ControllerTest extends TestCase
             . '</td></tr></table>'
             . '<p>note</p>'
             . '</form>';
-        
+
         $this->assertEquals($expectedWrapHtml, $component->draw());
-        
+
         $expectedWrapHtml = '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
@@ -139,13 +162,13 @@ class ControllerTest extends TestCase
             . '</td></tr></table>';
 
         $this->assertEquals($expectedWrapHtml, $component->unwrap()->draw());
-        
+
         $r = $router->run("lk/1/cron-events", 'delete');
         $class = new ReflectionClass($r);
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('400 Bad Request', $prop->getValue($r));
-        
+
         $r = $router->run("lk/1/cron-events/" . $id, 'delete');
         $class = new ReflectionClass($r);
         $prop = $class->getProperty('code');

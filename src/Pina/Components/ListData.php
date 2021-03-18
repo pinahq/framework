@@ -80,7 +80,7 @@ class ListData extends Data implements Iterator
 
     public function next()
     {
-        $this->cursor ++;
+        $this->cursor++;
     }
 
     public function rewind()
@@ -95,7 +95,8 @@ class ListData extends Data implements Iterator
 
     public function build()
     {
-        $this->append(Json::instance()->setData($this->data));
+        $json = new Json();
+        $this->append($json->setData($this->data));
         return $this;
     }
 
