@@ -13,6 +13,11 @@ class DefaultExport extends ExportableListData
         $this->export = new CSV();
     }
 
+    public function load($data, Schema $schema, $meta = [])
+    {
+        $this->export->load($data, $schema, $meta);
+    }
+
     public function download()
     {
         return $this->export->download();
