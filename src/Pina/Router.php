@@ -11,6 +11,10 @@ class Router
     protected $endpoints = [];
     protected $patterns = [];
 
+    /**
+     * @param string $pattern
+     * @param string $class
+     */
     public function register($pattern, $class)
     {
         $controller = Url::controller($pattern);
@@ -18,13 +22,24 @@ class Router
         $this->patterns[$controller] = $pattern;
     }
 
+    /**
+     * @param string $resource
+     * @param string $method
+     * @return bool
+     */
     public function exists($resource, $method)
     {
         list($controller, $action, $params) = Url::route($resource, $method);
 
         $c = $this->base($controller);
 
-        return $c !== null;
+        if (is_null($c)) {
+            return false;
+        }
+
+        $action .= $this->calcDeeperAction($resource, $this->patterns[$c]);
+
+        return method_exists($this->endpoints[$c], $action);
     }
 
     /**
@@ -65,16 +80,19 @@ class Router
         $base = new Http\Location($baseResource);
         $inst->setBase($base);
 
-        $deeper = [];
-        if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
-            $deeperAction = pathinfo($deeper['__action'], PATHINFO_FILENAME);
+        $action .= $this->calcDeeperAction($resource, $pattern);
 
-            $action .= $this->ucfirstEveryWord($deeperAction);
+        if (!method_exists($inst, $action)) {
+            throw new NotFoundException();
         }
 
         return call_user_func_array([$inst, $action], $params);
     }
 
+    /**
+     * @param string $controller
+     * @return string|null
+     */
     public function base($controller)
     {
         $controller = trim($controller, "/");
@@ -92,12 +110,25 @@ class Router
         return null;
     }
 
+    /**
+     * @param string $resource
+     * @param string $pattern
+     * @param array $parsed
+     * @return bool
+     */
     public function parse($resource, $pattern, &$parsed)
     {
         list($preg, $map) = Url::preg($pattern);
         return $this->pregParse($resource, $preg, $map, $parsed);
     }
 
+    /**
+     * @param string $resource
+     * @param string $preg
+     * @param array $map
+     * @param array $parsed
+     * @return bool
+     */
     public function pregParse($resource, $preg, $map, &$parsed)
     {
         $parsed = [];
@@ -110,6 +141,27 @@ class Router
         return false;
     }
 
+    /**
+     * @param string $resource
+     * @param string $pattern
+     * @return string
+     */
+    private function calcDeeperAction($resource, $pattern)
+    {
+        $deeper = [];
+        if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
+            $deeperAction = pathinfo($deeper['__action'], PATHINFO_FILENAME);
+
+            return $this->ucfirstEveryWord($deeperAction);
+        }
+
+        return '';
+    }
+
+    /**
+     * @param string $s
+     * @return string
+     */
     private function ucfirstEveryWord($s)
     {
         $parts = preg_split("/[^\w]/s", $s);

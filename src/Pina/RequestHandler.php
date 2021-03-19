@@ -188,9 +188,9 @@ class RequestHandler
 
         if (App::router()->exists($this->resource, $this->method)) {
             $data = App::router()->run($this->resource, $this->method, $this->data);
-            if ($data instanceof \Pina\Response) {
+            if ($data instanceof Response) {
                 if (!$data->hasContent()) {
-                    $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+                    $content = App::createResponseContent([], $this->controller, $this->action);
                     $data->setContent($content);
                 }
                 return $data;
@@ -209,7 +209,7 @@ class RequestHandler
         }
 
         if (empty($this->module)) {
-            return $this->forbidden();
+            return $this->notFound();
         }
 
         $handler = $this->module->getPath() . '/' . Url::handler($this->controller, $this->action);
@@ -222,15 +222,15 @@ class RequestHandler
             return Response::ok();
         }
 
-        if ($r instanceof \Pina\ResponseInterface) {
+        if ($r instanceof ResponseInterface) {
             if (!$r->hasContent()) {
-                $content = \Pina\App::createResponseContent([], $this->controller, $this->action);
+                $content = App::createResponseContent([], $this->controller, $this->action);
                 $r->setContent($content);
             }
             return $r;
         }
 
-        $content = \Pina\App::createResponseContent($r, $this->controller, $this->action);
+        $content = App::createResponseContent($r, $this->controller, $this->action);
         return Response::ok()->setContent($content);
     }
 
