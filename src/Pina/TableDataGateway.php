@@ -2,6 +2,7 @@
 
 namespace Pina;
 
+use League\Csv\Reader;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
 
@@ -539,14 +540,14 @@ class TableDataGateway extends SQL
                 }
             }
             list($ks, $valueCondition) = $this->getKeyValuesCondition($prepared, $schema);
-            if (strlen($values) > self::LOAD_BUFFER_LIMIT) {
-                $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+            if (strlen($valueCondition) > self::LOAD_BUFFER_LIMIT) {
+                $this->db->query("REPLACE INTO `" . $this->getFrom() . "` " . join($schema) . " VALUES " . $buffer);
                 $cnt += $this->db->affectedRows();
             }
             $buffer .= $valueCondition;
         }
         if (!empty($buffer)) {
-            $this->db->query("REPLACE INTO `" . $this->from . "` " . join($schema) . " VALUES " . $buffer);
+            $this->db->query("REPLACE INTO `" . $this->getFrom() . "` " . join($schema) . " VALUES " . $buffer);
             $cnt += $this->db->affectedRows();
         }
         return $cnt;
@@ -560,7 +561,7 @@ class TableDataGateway extends SQL
      */
     public function loadCSV($schema, $path)
     {
-        $csv = \League\Csv\Reader::createFromPath($path);
+        $csv = Reader::createFromPath($path);
         return $this->load($schema, $csv);
     }
 

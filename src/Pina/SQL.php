@@ -10,6 +10,8 @@ namespace Pina;
  * навигации, а какой нет
  */
 
+use Exception;
+
 class SQL
 {
 
@@ -42,7 +44,7 @@ class SQL
     /**
      * Создает объект запроса к БД на основе имени таблицы и драйвера БД
      * @param string $table
-     * @param \Pina\DatabaseDriverInterface $db
+     * @param DatabaseDriverInterface $db
      * @return \Pina\SQL
      */
     public static function table($table, $db = false)
@@ -91,11 +93,11 @@ class SQL
     /**
      * Создает конструктор запроса
      * @param string $table
-     * @param \Pina\DatabaseDriverInterface $db
+     * @param DatabaseDriverInterface $db
      */
     protected function __construct($table, $db = null)
     {
-        $this->db = $db ? $db : App::container()->get(\Pina\DatabaseDriverInterface::class);
+        $this->db = $db ? $db : App::container()->get(DatabaseDriverInterface::class);
         $this->from = $table;
     }
 
@@ -248,9 +250,9 @@ class SQL
      * @param \Pina\SQL $table
      * @return $this
      */
-    public function leftJoin($table, $field = false, $table2 = false, $field2 = false)
+    public function leftJoin($table)
     {
-        return $this->join('LEFT', $table, $field, $table2, $field2);
+        return $this->join('LEFT', $table);
     }
 
     /**
@@ -258,9 +260,9 @@ class SQL
      * @param \Pina\SQL $table
      * @return $this
      */
-    public function innerJoin($table, $field = false, $table2 = false, $field2 = false)
+    public function innerJoin($table)
     {
-        return $this->join('INNER', $table, $field, $table2, $field2);
+        return $this->join('INNER', $table);
     }
 
     /**
@@ -268,9 +270,9 @@ class SQL
      * @param \Pina\SQL $table
      * @return $this
      */
-    public function rightJoin($table, $field = false, $table2 = false, $field2 = false)
+    public function rightJoin($table)
     {
-        return $this->join('RIGHT', $table, $field, $table2, $field2);
+        return $this->join('RIGHT', $table);
     }
 
     /**
@@ -278,9 +280,9 @@ class SQL
      * @param \Pina\SQL $table
      * @return $this
      */
-    public function crossJoin($table, $field = false, $table2 = false, $field2 = false)
+    public function crossJoin($table)
     {
-        return $this->join('CROSS', $table, $field, $table2, $field2);
+        return $this->join('CROSS', $table);
     }
 
     /**
@@ -479,7 +481,7 @@ class SQL
     public function whereFields($ps)
     {
         if (!is_array($ps)) {
-            return;
+            return $this;
         }
 
         foreach ($ps as $k => $v) {
@@ -951,15 +953,11 @@ class SQL
     public function get($a = false)
     {
         if (!empty($a)) {
-            echo '<h1>deprecated usage! please replace ->get(id) to ->find($id)</h1>';
-            echo '<pre>';
-            debug_print_backtrace();
-            echo '</pre>';
-            exit;
+            throw new Exception(__('deprecated usage! please replace ->get(id) to ->find($id)'));
         }
 
         if ($this->from == '') {
-            return '';
+            throw new Exception(__("Wrong query: empty FROM condition"));
         }
 
         return $this->db->table($this->make());
@@ -980,13 +978,13 @@ class SQL
      * Выполняет запрос и возвращает первую запись из выборки
      * Если запись не найдена, выбрасывает исключение
      * @return array
-     * @throws \Pina\NotFoundException
+     * @throws NotFoundException
      */
     public function firstOrFail()
     {
         $line = $this->first();
         if (!isset($line)) {
-            throw new \Pina\NotFoundException;
+            throw new NotFoundException;
         }
         return $line;
     }
@@ -1183,11 +1181,11 @@ class SQL
     }
 
     /**
-     * @return string|bool
+     * @return bool
      */
     public function exists()
     {
-        return $this->limit(1)->count();
+        return $this->limit(1)->count() > 0;
     }
 
     /**
@@ -1342,7 +1340,7 @@ class SQL
     private function getOperand($operation, $type, $operand, $alias = '')
     {
         if (is_array($operand) && $type === self::SQL_OPERAND_VALUE && empty($operation)) {
-            throw new \Exception('unsupported format');
+            throw new Exception('unsupported format');
         }
 
         $prefix = $operation ? $operation . ' ' : '';
@@ -1359,10 +1357,10 @@ class SQL
             } else if ($operation === '<>') {
                 return 'NOT IN ' . $this->getInCondition($operand);
             } else if ($operation === 'IN' || $operation === 'NOT IN') {
-                return $prefix . $this->getInCondition($needle);
+                return $prefix . $this->getInCondition($operand);
             }
 
-            throw new \Exception('bad array operation');
+            throw new Exception('bad array operation');
             return '';
         }
 
@@ -1567,7 +1565,7 @@ class SQL
      * @param array|false $fields
      * @return array|false
      */
-    private function getKeyValuesCondition($data, $fields)
+    protected function getKeyValuesCondition($data, $fields)
     {
         $keys = array_keys(current($data));
 

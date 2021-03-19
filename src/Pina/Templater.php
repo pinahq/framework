@@ -2,7 +2,9 @@
 
 namespace Pina;
 
-class Templater extends \Smarty
+use Smarty;
+
+class Templater extends Smarty
 {
 
     public function __construct()
@@ -107,11 +109,6 @@ class Templater extends \Smarty
         $params['get'] = Route::resource($params['get'], $params);
         $result = Request::internal(new RequestHandler($params['get'], 'get', $params))->fetchContent();
 
-        if (is_array($request->error_messages) && count($request->error_messages)) {
-            echo '<p>' . join("<br />", $request->error_messages) . "</p>";
-            return;
-        }
-
         $view->_tpl_vars = $vars_backup;
 
         if (!empty($params['wrapper']) && !empty($result)) {
@@ -128,6 +125,7 @@ class Templater extends \Smarty
             return array('', '');
         }
         $params = array();
+        $i = 0;
         while (1) {
             $pos = strrpos($rest, '=');
             if ($pos === false) {
