@@ -335,7 +335,7 @@ class TableDataGateway extends SQL
 
     /**
      * Добавляет условие на соответствие ID заданному значению
-     * @param string|int $id
+     * @param array|string $id
      * @return $this
      */
     public function whereId($id)
@@ -345,7 +345,7 @@ class TableDataGateway extends SQL
 
     /**
      * Добавляет в запрос условие на несоответствие ID заданному значению
-     * @param string|int $id
+     * @param array|string $id
      * @return $this
      */
     public function whereNotId($id)
