@@ -4,9 +4,20 @@ namespace Pina;
 
 interface InstallationInterface
 {
+    
+    /**
+     * Выполняется перед патчем БД
+     */
+    public function prepare();
 
-    public static function install();
+    /**
+     * Выполняется после патча БД
+     */
+    public function install();
 
-    public static function remove();
+    /**
+     * Выполняется при удалении модуля
+     */
+    public function remove();
 
 }
