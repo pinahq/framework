@@ -1,18 +1,18 @@
-    <?php
+<?php
 
-    namespace Pina;
+namespace Pina;
 
-    App::walkClasses('Installation', function($cl) {
-        $cl->prepare();
-    });
+App::walkClasses('Installation', function($cl) {
+    $cl->prepare();
+});
 
-    $upgrades = App::getUpgrades();
-    App::db()->batch($upgrades);
+$upgrades = App::getUpgrades();
+App::db()->batch($upgrades);
 
-    if (!empty($upgrades) && is_array($upgrades)) {
-        echo join($upgrades, "\r\n")."\r\n";
-    }
+if (!empty($upgrades) && is_array($upgrades)) {
+    echo join($upgrades, "\r\n") . "\r\n";
+}
 
-    App::walkClasses('Installation', function($cl) {
-        $cl->install();
-    });
+App::walkClasses('Installation', function($cl) {
+    $cl->install();
+});
