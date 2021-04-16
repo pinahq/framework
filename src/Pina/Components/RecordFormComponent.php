@@ -107,7 +107,7 @@ class RecordFormComponent extends RecordData
 
         $this->resources()->append(
             (new Script())->setContent(
-                '<script>$(".' . $this->formClass . '").on("success", function(event, packet, status, xhr) {if (!PinaRequest.handleRedirect(xhr)) {var target = $(self).attr("data-success") ? $(self).attr("data-success") : document.location.pathname; document.location = target + "?changed=" + Math.random(); }});</script>'
+                '<script>$(".' . $this->formClass . '").on("success", function(event, packet, status, xhr) {if (!PinaRequest.handleRedirect(xhr)) {var target = $(this).attr("data-success") ? $(this).attr("data-success") : document.location.pathname; document.location = target + "?changed=" + Math.random(); }});</script>'
             )
         );
 
