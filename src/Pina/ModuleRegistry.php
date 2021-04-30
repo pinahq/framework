@@ -2,7 +2,10 @@
 
 namespace Pina;
 
-class ModuleRegistry
+use IteratorAggregate;
+use ArrayIterator;
+
+class ModuleRegistry implements IteratorAggregate
 {
 
     protected $registry = [];
@@ -13,6 +16,15 @@ class ModuleRegistry
             return;
         }
         $this->registry[$module] = new $module;
+    }
+
+    /**
+     * Итератор по модулям
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->registry);
     }
 
     public function boot($method = null)
