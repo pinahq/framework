@@ -7,6 +7,7 @@ namespace Pina;
 abstract class Command
 {
 
+    protected $input = '';
     protected $before = [];
     protected $after = [];
 
@@ -25,6 +26,8 @@ abstract class Command
 
     public function __invoke($input = '')
     {
+        $this->input = $input;
+
         foreach ($this->before as $cmd) {
             $cmd($input);
         }
@@ -36,6 +39,11 @@ abstract class Command
         }
 
         return $output;
+    }
+
+    public function __toString()
+    {
+        return get_class($this) . '(' . $this->input . ')';
     }
 
 }

@@ -3,6 +3,7 @@
 
 namespace Pina;
 
+use GO\Job;
 use GO\Scheduler as GoScheduler;
 
 class Scheduler
@@ -21,7 +22,15 @@ class Scheduler
      */
     public function run()
     {
-        $this->handler->run();
+        $executed = $this->handler->run();
+        foreach ($executed as $job) {
+            /** @var Job $job */
+            $context = [
+                'cmd' => strval($job->compile()),
+                'output' => $job->getOutput(),
+            ];
+            Log::info('scheduler', 'Done', $context);
+        }
     }
 
     /**
