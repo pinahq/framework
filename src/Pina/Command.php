@@ -11,7 +11,7 @@ abstract class Command
     protected $before = [];
     protected $after = [];
 
-    abstract function execute($input = '');
+    abstract protected function execute($input = '');
 
     public function before($command)
     {
