@@ -69,4 +69,9 @@ class StringType implements TypeInterface
         return $value;
     }
 
+    public function getSQLType()
+    {
+        return "varchar(" . $this->getSize() . ")";
+    }
+
 }

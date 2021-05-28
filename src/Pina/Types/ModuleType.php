@@ -2,11 +2,15 @@
 
 namespace Pina\Types;
 
+use Exception;
 use Pina\Components\SelectedTextComponent;
 use Pina\Components\SelectComponent;
 use Pina\Controls\FormContentControl;
 use Pina\App;
 use Pina\Components\Field;
+use Pina\Controls\RawHtml;
+use Pina\Request;
+use Pina\RequestHandler;
 
 class ModuleType extends ConfigurableType
 {
@@ -46,11 +50,11 @@ class ModuleType extends ConfigurableType
         $content = new FormContentControl();
         $star = $field->isMandatory() ? ' *' : '';
         $content->setTitle($field->getTitle() . $star);
-        $handler = new \Pina\RequestHandler(
+        $handler = new RequestHandler(
             $parsed['path'], 'get', $params
         );
         $handler->set('inline', true);
-        $response = \Pina\Request::internal($handler)->fetchContent();
+        $response = Request::internal($handler)->fetchContent();
         $content->setContent($response);
         return $content;
     }
@@ -70,22 +74,22 @@ class ModuleType extends ConfigurableType
 
         $params = array_merge(['value' => $value, 'display' => 'text'], $params);
 
-        $content = new \Pina\Controls\RawHtml();
-        $handler = new \Pina\RequestHandler(
+        $content = new RawHtml();
+        $handler = new RequestHandler(
             $parsed['path'], 'get', $params
         );
         $handler->set('inline', true);
-        $response = \Pina\Request::internal($handler)->fetchContent();
+        $response = Request::internal($handler)->fetchContent();
         $content->setText($response);
         return $content;
 
 
-        return $this->makeControlByMode(new Field(), $value, false)->draw();
+//        return $this->makeControlByMode(new Field(), $value, false)->draw();
     }
 
     protected function makeControlByMode(Field $field, $value, $isEditable)
     {
-        
+        throw new Exception("Not implemented");
     }
 
 }

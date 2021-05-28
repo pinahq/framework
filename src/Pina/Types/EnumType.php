@@ -78,4 +78,10 @@ class EnumType implements TypeInterface
         return $value;
     }
 
+    public function getSQLType()
+    {
+        $variants = array_column($this->variants, 'id');
+        return "enum('" . implode("','", $variants) . "')";
+    }
+
 }

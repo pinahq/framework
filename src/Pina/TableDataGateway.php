@@ -3,6 +3,7 @@
 namespace Pina;
 
 use League\Csv\Reader;
+use Pina\Components\Schema;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
 
@@ -20,7 +21,7 @@ class TableDataGateway extends SQL
     const LOAD_BUFFER_LIMIT = 1024000;
 
     protected static $table = "";
-    protected static $fields = false;
+    protected static $fields = [];
     protected static $indexes = [];
     protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
     protected $context = array();
@@ -58,12 +59,21 @@ class TableDataGateway extends SQL
     }
 
     /**
+     * Возвращает схему таблицы
+     * @return Schema
+     */
+    public function getSchema()
+    {
+        return new Schema();
+    }
+
+    /**
      * Возвращает список полей
      * @return array
      */
     public function getFields()
     {
-        return static::$fields;
+        return $this->getSchema()->makeSQLFields(static::$fields);
     }
 
     /**
@@ -92,7 +102,8 @@ class TableDataGateway extends SQL
      */
     public function getUpgrades()
     {
-        if (empty(static::$fields)) {
+        $fields = $this->getFields();
+        if (empty($fields)) {
             return array(array(), array());
         }
 
@@ -144,11 +155,12 @@ class TableDataGateway extends SQL
      */
     public function getEnumVariants($field)
     {
-        if (empty(static::$fields[$field])) {
+        $fields = $this->getFields();
+        if (empty($fields[$field])) {
             return [];
         }
 
-        $meta = static::$fields[$field];
+        $meta = $fields[$field];
         if (!preg_match('/enum\((.*)\)/si', $meta, $matches)) {
             return [];
         }
@@ -190,7 +202,8 @@ class TableDataGateway extends SQL
      */
     public function hasField($field)
     {
-        return isset(static::$fields[$field]);
+        $fields = $this->getFields();
+        return isset($fields[$field]);
     }
 
     /**
@@ -210,13 +223,13 @@ class TableDataGateway extends SQL
      * Если запись не найдена, то выбрасывает исключение
      * @param string|int $id
      * @return array
-     * @throws \Pina\NotFoundException
+     * @throws NotFoundException
      */
     public function findOrFail($id)
     {
         $line = $this->find($id);
         if (!isset($line)) {
-            throw new \Pina\NotFoundException;
+            throw new NotFoundException;
         }
         return $line;
     }
@@ -239,10 +252,11 @@ class TableDataGateway extends SQL
      */
     protected function adjustDataAndFields(&$data, &$fields)
     {
+        $myFields = $this->getFields();
         if (!empty($fields)) {
-            $fields = array_intersect($fields, array_keys(static::$fields));
+            $fields = array_intersect($fields, array_keys($myFields));
         } else {
-            $fields = array_keys(static::$fields);
+            $fields = array_keys($myFields);
         }
 
         foreach ($this->context as $field => $value) {
@@ -283,7 +297,7 @@ class TableDataGateway extends SQL
      */
     protected function getOnDuplicateKeys($keys)
     {
-        $primaryKeys = !empty($this->indexes['PRIMARY KEY']) ? $this->indexes['PRIMARY KEY'] : array();
+        $primaryKeys = !empty(static::$indexes['PRIMARY KEY']) ? static::$indexes['PRIMARY KEY'] : array();
         if (!is_array($primaryKeys)) {
             $primaryKeys = array($primaryKeys);
         }
@@ -362,7 +376,7 @@ class TableDataGateway extends SQL
     {
         $excludedFields = is_array($field) ? $field : explode(",", $field);
         array_walk($excludedFields, 'trim');
-        $selectedFields = array_diff(array_keys(static::$fields), $excludedFields);
+        $selectedFields = array_diff(array_keys($this->getFields()), $excludedFields);
         foreach ($selectedFields as $selectedField) {
             $this->select($selectedField);
         }
@@ -375,7 +389,7 @@ class TableDataGateway extends SQL
      */
     public function enabled()
     {
-        $prefix = str_replace("cody_", "", $this->table);
+        $prefix = str_replace("cody_", "", static::$table);
 
         return $this->whereBy($prefix . "_enabled", 'Y');
     }
@@ -394,7 +408,7 @@ class TableDataGateway extends SQL
 
         $order = '';
         $ss = explode(',', $s);
-        foreach ($ss as $k => $v) {
+        foreach ($ss as $v) {
             $v = trim($v);
 
             $isAsc = true;
@@ -440,7 +454,8 @@ class TableDataGateway extends SQL
      */
     public function reorder($ids, $field = 'order')
     {
-        if (!isset(static::$fields[$field])) {
+        $fields = $this->getFields();
+        if (!isset($fields[$field])) {
             return;
         }
 
@@ -482,9 +497,10 @@ class TableDataGateway extends SQL
     public function validate($data)
     {
         $errors = [];
+        $fields = $this->getFields();
         foreach ($data as $k => $v) {
             $matches = array();
-            if (preg_match("/(varchar|decimal)\((\d+)(,(\d+))?\)/i", static::$fields[$k], $matches)) {
+            if (preg_match("/(varchar|decimal)\((\d+)(,(\d+))?\)/i", $fields[$k], $matches)) {
                 $length = 0;
                 $type = strtolower($matches[1]);
                 $maxLength = strtolower($matches[2]);

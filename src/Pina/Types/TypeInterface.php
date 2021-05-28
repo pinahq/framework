@@ -42,12 +42,12 @@ interface TypeInterface
      */
     public function isNullable();
 
-    /*
+    /**
      * @return array
      */
     public function getVariants();
 
-    /*
+    /**
      * Проверяет значение на предмет наличия ошибок и нормализует его
      * Возвращает нормализованное значение
      * @param mixed $value
@@ -55,4 +55,9 @@ interface TypeInterface
      */
 
     public function normalize($value);
+
+    /**
+     * @return string
+     */
+    public function getSQLType();
 }

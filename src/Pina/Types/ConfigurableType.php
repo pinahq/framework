@@ -71,4 +71,9 @@ abstract class ConfigurableType implements TypeInterface
         return $value;
     }
 
+    public function getSQLType()
+    {
+        return 'varchar(128)';
+    }
+
 }

@@ -3,10 +3,16 @@
 namespace Pina\Types;
 
 use Pina\Components\Field;
+
 use function Pina\__;
 
 class NumericType extends IntegerType
 {
+
+    public function getSize()
+    {
+        return 12;
+    }
 
     public function makeControl(Field $field, $value)
     {
@@ -16,14 +22,20 @@ class NumericType extends IntegerType
     public function normalize($value)
     {
         if (!is_numeric($value)) {
-            throw new ValidateException( __("Укажите число"));
+            throw new ValidateException(__("Укажите число"));
         }
-        
+
         if (empty($value)) {
             return 0;
         }
 
         return $value;
+    }
+
+    public function getSQLType()
+    {
+        $decimals = 2;
+        return "decimal(" . $this->getSize() . "," . $decimals . ")";
     }
 
 }

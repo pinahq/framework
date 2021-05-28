@@ -67,11 +67,16 @@ class App
 
         $types = new Container;
         $types->share('string', Types\StringType::class);
+        $types->share('boolean', Types\BooleanType::class);
+        $types->share('bool', Types\BooleanType::class);
         $types->share('integer', Types\IntegerType::class);
         $types->share('float', Types\NumericType::class);
         $types->share('numeric', Types\NumericType::class);
         $types->share('int', Types\IntegerType::class);
         $types->share('text', Types\TextType::class);
+        $types->share('timestamp', Types\TimestampType::class);
+        $types->share('uuid', Types\UUIDType::class);
+        $types->share('blob', Types\BlobType::class);
         static::$container->share('types', $types);
     }
 

@@ -60,4 +60,9 @@ class IntegerType implements TypeInterface
         return intval($value);
     }
 
+    public function getSQLType()
+    {
+        return "int(" . $this->getSize() . ")";
+    }
+
 }

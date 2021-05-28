@@ -31,4 +31,21 @@ class TextType extends StringType
         return true;
     }
 
+    public function getDefault()
+    {
+        return null;
+    }
+
+    public function getSQLType()
+    {
+        $size = $this->getSize();
+        if ($size <= 65535) {
+            return "text";
+        }
+        if ($size <= 16777215) {
+            return "mediumtext";
+        }
+        return "longtext";
+    }
+
 }

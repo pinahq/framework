@@ -45,6 +45,30 @@ class Schema implements IteratorAggregate
      */
     protected $groups = [];
 
+    /**
+     * @var string[]
+     */
+    protected $primaryKey = [];
+
+    /**
+     * @var string[][]
+     */
+    protected $uniqueKeys = [];
+
+    /**
+     * @var string[][]
+     */
+    protected $keys = [];
+
+    /**
+     * @var array
+     */
+    protected $definitions = [];
+
+    /**
+     * @param $title
+     * @return $this
+     */
     public function setTitle($title)
     {
         $this->title = $title;
@@ -62,12 +86,13 @@ class Schema implements IteratorAggregate
      * @param string $title
      * @param string $type
      * @param bool $isMandatory
+     * @param mixed $default
      * @return void
      */
-    public function add($field, $title = '', $type = '', $isMandatory = false)
+    public function add($field, $title = '', $type = '', $isMandatory = false, $default = null)
     {
         if (is_string($field)) {
-            $this->fields[] = Field::make($field, $title, $type, $isMandatory);
+            $this->fields[] = Field::make($field, $title, $type, $isMandatory, $default);
             return;
         }
 
@@ -129,7 +154,7 @@ class Schema implements IteratorAggregate
     public function getKeys()
     {
         $keys = array();
-        foreach ($this->fields as $k => $field) {
+        foreach ($this->fields as $field) {
             $keys[] = $field->getKey();
         }
         foreach ($this->getInnerSchemas() as $group) {
@@ -486,7 +511,7 @@ class Schema implements IteratorAggregate
         $errors = [];
         $record = [];
 
-        foreach ($this->getIterator() as $k => $field) {
+        foreach ($this->getIterator() as $field) {
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
 
@@ -512,6 +537,55 @@ class Schema implements IteratorAggregate
         }
 
         return $record;
+    }
+
+    public function makeSQLFields($fields = [])
+    {
+        foreach ($this->getIterator() as $field) {
+            /** @var Field $field */
+            $key = $field->getKey();
+            if (isset($fields[$key])) {
+                continue;
+            }
+            $fields[$key] = $field->makeSQLDeclaration();
+        }
+        return $fields;
+    }
+
+    /**
+     * @param array|string $fields
+     */
+    public function setPrimaryKey($fields)
+    {
+        $this->primaryKey = is_array($fields) ? $fields : func_get_args();
+    }
+
+    /**
+     * @param array|string $fields
+     */
+    public function addUniqueKey($fields)
+    {
+        $this->uniqueKeys[] = is_array($fields) ? $fields : func_get_args();
+    }
+
+    /**
+     * @param array|string $fields
+     */
+    public function addKey($fields)
+    {
+        $this->keys[] = is_array($fields) ? $fields : func_get_args();
+    }
+
+    /**
+     * @param string $field
+     * @param string $definition
+     */
+    public function addFieldDefinition($field, $definition)
+    {
+        if (!isset($this->definitions[$field])) {
+            $this->definitions[$field] = [];
+        }
+        $this->definitions[$field][] = $definition;
     }
 
 }

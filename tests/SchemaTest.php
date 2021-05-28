@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
 use Pina\Components\Schema;
+use Pina\CronEventGateway;
 use Pina\Html;
 
 class SchemaTest extends TestCase
@@ -98,5 +99,40 @@ class SchemaTest extends TestCase
         $this->assertEquals($expected, $schema->getTypes());
 
         $this->assertEquals(6, $schema->getVolume());
+    }
+
+    public function testSQL()
+    {
+        $schema = new Schema();
+        $schema->add('id', 'ID', 'int');
+        $schema->add('title', 'Title', 'string');
+        $schema->add('price', 'Price', 'numeric');
+        $schema->add('description', 'Description', 'text');
+        $schema->add('enabled', 'Enabled', 'bool');
+
+        $fields = $schema->makeSQLFields(['title' => "varchar(255) NOT NULL DEFAULT ''"]);
+        $expected = [
+            'id' => "int(11) NOT NULL DEFAULT 0",
+            'title' => "varchar(255) NOT NULL DEFAULT ''",
+            'price' => "decimal(12,2) NOT NULL DEFAULT 0",
+            'description' => "mediumtext DEFAULT NULL",
+            'enabled' => "enum('Y','N') NOT NULL DEFAULT 'Y'",
+        ];
+        $this->assertEquals($expected, $fields);
+    }
+
+    public function testGateway()
+    {
+        $expected = [
+            'id' => "varchar(36) NOT NULL DEFAULT ''",
+            'event' => "varchar(512) NOT NULL DEFAULT ''",
+            'data' => "mediumblob DEFAULT NULL",
+            'priority' => "int(11) NOT NULL DEFAULT 0",
+            'created' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+        ];
+        $schema = CronEventGateway::instance()->getSchema();
+        $fields = $schema->makeSQLFields();
+        $this->assertEquals($expected, $fields);
+
     }
 }
