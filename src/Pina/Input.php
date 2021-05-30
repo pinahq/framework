@@ -76,16 +76,16 @@ class Input
     public static function getData()
     {
         $data = array();
-        if ($_SERVER["REQUEST_METHOD"] == 'GET') {
+        if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == 'GET') {
             $data = $_GET;
-        } elseif ($_SERVER["REQUEST_METHOD"] == 'POST') {
+        } elseif (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == 'POST') {
             $data = $_POST;
         } else {
             $contentType = self::getContentType();
             if ($contentType == 'application/x-www-form-urlencoded') {
                 $putdata = file_get_contents('php://input');
                 parse_str($putdata, $data);
-            } else if ($contentType == 'multipart/form-data') {
+            } elseif ($contentType == 'multipart/form-data') {
                 //TODO: implement multipart/form-data parsing
             }
         }
@@ -96,7 +96,6 @@ class Input
     {
         $contentTypeHeader = isset($_SERVER['HTTP_CONTENT_TYPE']) ? $_SERVER['HTTP_CONTENT_TYPE'] : '';
         $contentType = $contentTypeHeader;
-        $tmp = '';
         if (strpos($contentTypeHeader, ';') !== false) {
             list($contentType, $tmp) = explode(';', $contentTypeHeader, 2);
         }

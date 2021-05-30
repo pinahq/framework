@@ -4,10 +4,9 @@ namespace Pina\Components;
 
 use Pina\App;
 use Pina\Controls\Control;
-use Pina\Controls\RawHtml;
 use Pina\ResponseInterface;
 
-class Data extends Control implements ResponseInterface
+abstract class Data extends Control implements ResponseInterface
 {
 
     /**
@@ -16,7 +15,8 @@ class Data extends Control implements ResponseInterface
     protected $schema = null;
     protected $meta = [];
     protected $errors = [];
-    protected $wrappers = [];
+
+    abstract protected function build();
 
     public function setSchema(Schema $schema)
     {
@@ -66,56 +66,13 @@ class Data extends Control implements ResponseInterface
         return $this;
     }
 
-    public function wrap($wrapper)
-    {
-        return $this->pushWrapper($wrapper);
-    }
-
-    public function unwrap()
-    {
-        $this->popWrapper();
-        return $this;
-    }
-
-    public function pushWrapper($wrapper)
-    {
-        array_push($this->wrappers, $wrapper);
-        return $this;
-    }
-
-    public function popWrapper()
-    {
-        return array_pop($this->wrappers);
-    }
-
-
-    public function hasWrapper()
-    {
-        return !empty($this->wrappers);
-    }
-
-    public function compileWrappers()
-    {
-        $obj = $this;
-        $html = $obj->compile();
-        foreach ($this->wrappers as $w) {
-            $raw = new RawHtml();
-            $raw->setText($html);
-            array_push($w->controls, $raw);
-            $html = $w->draw();
-            array_pop($w->controls);
-        }
-
-        return $html;
-    }
-
     public function draw()
     {
         if (!$this->isBuildStarted()) {
             $this->startBuild();
             $this->build();
         }
-        return $this->compileWrappers();
+        return $this->compile();
     }
 
     public function getType()
@@ -133,7 +90,8 @@ class Data extends Control implements ResponseInterface
         header('HTTP/1.1 ' . $this->getStatus());
         if ($this->errors) {
             header('Content-Type: application/json');
-            return json_encode(['errors' => $this->errors], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['errors' => $this->errors], JSON_UNESCAPED_UNICODE);
+            return;
         }
         header('Content-Type: ' . $this->getType());
         echo $this->draw();

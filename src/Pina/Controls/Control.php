@@ -2,40 +2,89 @@
 
 namespace Pina\Controls;
 
-use function array_merge;
-
-class Control
+abstract class Control extends AttributedBlock
 {
 
     protected $isBuildStarted = false;
-    protected $controls = [];
-    protected $after = [];
-    protected $before = [];
-    protected $classes = [];
-    protected $layout = null;
-    protected $attributes = [];
 
+    /**
+     * @var Control[]
+     */
+    protected $controls = [];
+
+    /**
+     * @var Control[]
+     */
+    protected $innerAfter = [];
+
+    /**
+     * @var Control[]
+     */
+    protected $innerBefore = [];
+
+    /**
+     * @var Control[]
+     */
+    protected $wrappers = [];
+
+    /**
+     * @var Control[]
+     */
+    protected $after = [];
+
+    /**
+     * @var Control[]
+     */
+    protected $before = [];
+
+    /**
+     * @var Control|null
+     */
+    protected $layout = null;
+
+    /**
+     * @return string
+     */
+    abstract protected function draw();
+
+    /**
+     * @param Control $layout
+     * @return $this
+     */
     public function setLayout($layout)
     {
         $this->layout = $layout;
         return $this;
     }
 
+    /**
+     * @return Control
+     */
     public function getLayout()
     {
         return $this->layout;
     }
 
+    /**
+     * @return void
+     */
     public function startBuild()
     {
         $this->isBuildStarted = true;
     }
 
+    /**
+     * @return bool
+     */
     public function isBuildStarted()
     {
         return $this->isBuildStarted;
     }
 
+    /**
+     * @param Control $control
+     * @return $this
+     */
     public function append($control)
     {
         if ($this->isBuildStarted) {
@@ -43,83 +92,141 @@ class Control
             $this->controls[] = $control;
         } else {
             //запоминаем, какие контролы хотят отрисоваться после основного блока
-            $this->after[] = $control;
+            $this->innerAfter[] = $control;
         }
         return $this;
     }
 
+    /**
+     * @param Control $control
+     * @return $this
+     */
     public function prepend($control)
     {
-        array_unshift($this->before, $control);
+        array_unshift($this->innerBefore, $control);
         return $this;
     }
 
+    /**
+     * @param Control $control
+     */
+    public function after($control)
+    {
+        $this->after[] = $control;
+    }
+
+    /**
+     * @param Control $control
+     */
+    public function before($control)
+    {
+        $this->before[] = $control;
+    }
+
+    /**
+     * @param Control $wrapper
+     * @return $this
+     */
+    public function wrap($wrapper)
+    {
+        return $this->pushWrapper($wrapper);
+    }
+
+    /**
+     * @return $this
+     */
+    public function unwrap()
+    {
+        $this->popWrapper();
+        return $this;
+    }
+
+    /**
+     * @param Control $wrapper
+     * @return $this
+     */
+    public function pushWrapper($wrapper)
+    {
+        array_push($this->wrappers, $wrapper);
+        return $this;
+    }
+
+    /**
+     * @return Control|null
+     */
+    public function popWrapper()
+    {
+        return array_pop($this->wrappers);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasWrapper()
+    {
+        return !empty($this->wrappers);
+    }
+
+    /**
+     * @return int
+     */
     public function count()
     {
-        return count($this->before) + count($this->controls) + count($this->after);
+        return count($this->innerBefore) + count($this->controls) + count($this->innerAfter);
     }
 
-    public function addClass($c)
-    {
-        $this->classes[] = $c;
-        return $this;
-    }
-
-    protected function makeClass($additional = null)
-    {
-        $classes = $this->classes;
-        if (!is_null($additional)) {
-            $classes = array_merge($classes, is_array($additional) ? $additional : [$additional]);
-        }
-        return count($classes) > 0 ? implode(' ', $classes) : null;
-    }
-
+    /**
+     * @return string
+     */
     public function compile()
     {
         $r = '';
-        foreach ($this->before as $c) {
-            $r .= $c->draw();
+        foreach ($this->innerBefore as $c) {
+            $r .= $c->drawWithWrappers();
         }
         foreach ($this->controls as $c) {
-            $r .= $c->draw();
+            $r .= $c->drawWithWrappers();
         }
-        foreach ($this->after as $c) {
-            $r .= $c->draw();
+        foreach ($this->innerAfter as $c) {
+            $r .= $c->drawWithWrappers();
         }
         return $r;
     }
 
-    public function draw()
+    /**
+     * @return string
+     */
+    public function drawWithWrappers()
     {
-        return '';
-    }
-
-    public function __toString()
-    {
-        return $this->draw();
-    }
-
-    protected function makeAttributes($attributes = [])
-    {
-        $class = !empty($attributes['class']) ? $attributes['class'] : null;
-        $base = array_merge(['class' => $this->makeClass($class)], $this->getAttributes());
-        unset($attributes['class']);
-        if (empty($base['class'])) {
-            unset($base['class']);
+        $r = '';
+        foreach ($this->before as $c) {
+            $r .= $c->drawWithWrappers();
         }
 
-        return array_merge($base, $attributes);
+        $inner = $this->draw();
+        foreach ($this->wrappers as $w) {
+            $raw = new RawHtml();
+            $raw->setText($inner);
+            array_push($w->controls, $raw);
+            $inner = $w->draw();
+            array_pop($w->controls);
+        }
+
+        $r .= $inner;
+
+        foreach ($this->after as $c) {
+            $r .= $c->drawWithWrappers();
+        }
+        return $r;
     }
 
-    public function setDataAttribute($key, $value)
+    /**
+     * @return string
+     */
+    public function __toString()
     {
-        $this->attributes['data-' . $key] = $value;
-        return $this;
+        return $this->drawWithWrappers();
     }
 
-    public function getAttributes()
-    {
-        return $this->attributes;
-    }
 
 }
