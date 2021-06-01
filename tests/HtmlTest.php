@@ -38,6 +38,8 @@ class HtmlTest extends TestCase
         $this->assertEquals('<div><table id="some-id sss" class="my-class other_class"><tr><td>hello!</td></tr></table></div>', $r);
         $r = Html::nest('div/table#some-id#sss.my-class.other_class/tr/td', 'hello!');
         $this->assertEquals('<div><table id="some-id sss" class="my-class other_class"><tr><td>hello!</td></tr></table></div>', $r);
+        $r = Html::nest('div#first/table#some-id#sss.my-class.other_class/tr/td.last', 'hello!');
+        $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class"><tr><td class="last">hello!</td></tr></table></div>', $r);
     }
 
 }
