@@ -1,8 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\CronEventEndpoint;
-use Pina\App;
 use Pina\CSRF;
 use Pina\Html;
 
@@ -30,6 +28,14 @@ class HtmlTest extends TestCase
         $expectedHtml = '<a class="pina-action" href="#" data-method="post" data-resource="products" data-params="category_id=1" data-csrf-token="'.CSRF::token().'">Link</a>';
         $html = Html::a('Link', '#', ['class' => 'pina-action'] + Html::getActionAttributes('post', 'products', ['category_id' => 1]));
         $this->assertEquals($expectedHtml, $html);
+    }
+
+    public function testChain()
+    {
+        $r = Html::chain('div/table/tr/td', 'hello!');
+        $this->assertEquals('<div><table><tr><td>hello!</td></tr></table></div>', $r);
+        $r = Html::chain('div/table#some-id sss.my-class other_class/tr/td', 'hello!');
+        $this->assertEquals('<div><table id="some-id sss" class="my-class other_class"><tr><td>hello!</td></tr></table></div>', $r);
     }
 
 }

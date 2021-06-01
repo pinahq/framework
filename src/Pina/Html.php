@@ -5,6 +5,29 @@ namespace Pina;
 class Html extends BaseHtml
 {
 
+    public static function chain($path, $content)
+    {
+        $parts = array_reverse(explode('/', $path));
+        foreach ($parts as $p) {
+            $options = [];
+            $left = strlen($p);
+            if (preg_match_all('/([#.])([\w-_ ]+)/si', $p, $matches)) {
+                foreach ($matches[0] as $k => $full) {
+                    $left = min($left, strpos($p, $full));
+                    $prefix = $matches[1][$k];
+                    $value = $matches[2][$k];
+                    switch ($prefix) {
+                        case '#': $options['id'] = $value; break;
+                        case '.': $options['class'] = $value; break;
+                    }
+                }
+                $p = substr($p, 0, $left);
+            }
+            $content = Html::tag($p, $content, $options);
+        }
+        return $content;
+    }
+
     public static function getActionAttributes($method, $pattern, $params)
     {
         $availableMethods = array('get', 'post', 'put', 'delete');
