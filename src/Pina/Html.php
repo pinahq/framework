@@ -16,9 +16,17 @@ class Html extends BaseHtml
                     $left = min($left, strpos($p, $full));
                     $prefix = $matches[1][$k];
                     $value = $matches[2][$k];
+                    $prop = '';
                     switch ($prefix) {
-                        case '#': $options['id'] = $value; break;
-                        case '.': $options['class'] = $value; break;
+                        case '#':
+                            $prop = 'id';
+                            break;
+                        case '.':
+                            $prop = 'class';
+                            break;
+                    }
+                    if ($prop) {
+                        $options[$prop] = (isset($options[$prop]) ? $options[$prop] . ' ' : '') . $value;
                     }
                 }
                 $p = substr($p, 0, $left);
