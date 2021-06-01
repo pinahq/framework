@@ -30,11 +30,11 @@ class HtmlTest extends TestCase
         $this->assertEquals($expectedHtml, $html);
     }
 
-    public function testChain()
+    public function testNest()
     {
-        $r = Html::chain('div/table/tr/td', 'hello!');
+        $r = Html::nest('div/table/tr/td', 'hello!');
         $this->assertEquals('<div><table><tr><td>hello!</td></tr></table></div>', $r);
-        $r = Html::chain('div/table#some-id sss.my-class other_class/tr/td', 'hello!');
+        $r = Html::nest('div/table#some-id sss.my-class other_class/tr/td', 'hello!');
         $this->assertEquals('<div><table id="some-id sss" class="my-class other_class"><tr><td>hello!</td></tr></table></div>', $r);
     }
 

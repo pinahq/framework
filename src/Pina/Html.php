@@ -5,7 +5,7 @@ namespace Pina;
 class Html extends BaseHtml
 {
 
-    public static function chain($path, $content)
+    public static function nest($path, $content)
     {
         $parts = array_reverse(explode('/', $path));
         foreach ($parts as $p) {
