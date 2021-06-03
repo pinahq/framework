@@ -203,20 +203,18 @@ abstract class Control extends AttributedBlock
             $r .= $c->drawWithWrappers();
         }
 
-        $inner = $this->draw();
-        foreach ($this->wrappers as $w) {
-            $raw = new RawHtml();
-            $raw->setText($inner);
-            array_push($w->controls, $raw);
-            $inner = $w->draw();
-            array_pop($w->controls);
-        }
-
-        $r .= $inner;
-
+        $r .= $this->draw();
         foreach ($this->after as $c) {
             $r .= $c->drawWithWrappers();
         }
+        foreach ($this->wrappers as $w) {
+            $raw = new RawHtml();
+            $raw->setText($r);
+            array_push($w->controls, $raw);
+            $r = $w->drawWithWrappers();
+            array_pop($w->controls);
+        }
+
         return $r;
     }
 

@@ -7,7 +7,6 @@ class ControlTest extends TestCase
 
     public function testControl()
     {
-        
         $link = new Pina\Controls\LinkedButton;
         $link->setTitle('Title');
         $link->setLink('http://mywebsite.com/some-page');
@@ -23,7 +22,22 @@ class ControlTest extends TestCase
         $link->before($anotherLink);
         $this->assertEquals($anotherLink->draw() . $expected . $anotherLink->draw(), $link->drawWithWrappers());
 
+        $card = new \Pina\Controls\Card();
+        $link->wrap($card);
 
+        $expected2 = '<div class="card"><div class="card-body">'
+            . $anotherLink->draw() . $expected . $anotherLink->draw()
+            . '</div></div>';
+
+        $this->assertEquals($expected2, $link->drawWithWrappers());
+
+        $card->after($anotherLink);
+        $expected3 = '<div class="card"><div class="card-body">'
+            . $anotherLink->draw() . $expected . $anotherLink->draw()
+            . '</div></div>'
+            . $anotherLink->draw();
+
+        $this->assertEquals($expected3, $link->drawWithWrappers());
     }
-    
+
 }
