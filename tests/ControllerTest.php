@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\Components\RecordFormComponent;
+use Pina\Components\Schema;
 use Pina\Controls\Form;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
@@ -175,6 +176,25 @@ class ControllerTest extends TestCase
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('200 OK', $prop->getValue($r));
+    }
+
+    public function testHidden()
+    {
+        $schema = new Schema();
+        $schema->add('mode', 'title', 'hidden');
+        $form = new RecordFormComponent();
+        $form->load(['mode' => 'test'], $schema);
+        $r = $form->drawWithWrappers();
+
+        $cl = $form->getFormClass();
+
+        $expected = '<form class="' . $cl . ' form pina-form" action="" method="get">'
+            . '<div class="card"><div class="card-body">'
+            . '<input type="hidden" name="mode" value="test">'
+            . '</div></div>'
+            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '</form>';
+        $this->assertEquals($expected, $r);
     }
 
 }
