@@ -3,6 +3,7 @@
 namespace Pina;
 
 use RuntimeException;
+use Exception;
 
 class DatabaseDriver implements DatabaseDriverInterface
 {
@@ -183,11 +184,10 @@ class DatabaseDriver implements DatabaseDriverInterface
     public function transaction($closure)
     {
         $this->startTransaction();
-
         try {
             $closure();
             $this->commit();
-        } catch (RuntimeException $e) {
+        } catch (Exception $e) {
             $this->rollback();
             throw $e;
         }
