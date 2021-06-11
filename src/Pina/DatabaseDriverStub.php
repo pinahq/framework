@@ -2,10 +2,8 @@
 
 namespace Pina;
 
-use Pina\Config;
-use Pina\Log;
 
-class DatabaseDriverStub implements \Pina\DatabaseDriverInterface
+class DatabaseDriverStub implements DatabaseDriverInterface
 {
 
     public function __construct()
@@ -68,6 +66,23 @@ class DatabaseDriverStub implements \Pina\DatabaseDriverInterface
     public function error()
     {
         return '';
+    }
+
+    public function transaction($closure)
+    {
+        $closure();
+    }
+
+    public function startTransaction()
+    {
+    }
+
+    public function commit()
+    {
+    }
+
+    public function rollback()
+    {
     }
 
 }

@@ -2,10 +2,9 @@
 
 namespace Pina;
 
-use Pina\Config;
-use Pina\Log;
+use RuntimeException;
 
-class DatabaseDriver implements \Pina\DatabaseDriverInterface
+class DatabaseDriver implements DatabaseDriverInterface
 {
 
     private $conn = null;
@@ -24,7 +23,7 @@ class DatabaseDriver implements \Pina\DatabaseDriverInterface
         );
 
         if (empty($this->conn)) {
-            throw new \RuntimeException('Can`t connect to database');
+            throw new RuntimeException('Can`t connect to database');
         }
 
         if ($config['charset']) {
@@ -61,7 +60,7 @@ class DatabaseDriver implements \Pina\DatabaseDriverInterface
         Log::debug('mysql', round($totalTime, 4) . ' ' . $sql);
 
         if ($this->errno()) {
-            throw new \RuntimeException($this->error() . '; Failed query: ' . $sql, $this->errno());
+            throw new RuntimeException($this->error() . '; Failed query: ' . $sql, $this->errno());
         }
 
         return $rc;
@@ -179,6 +178,34 @@ class DatabaseDriver implements \Pina\DatabaseDriverInterface
     public function error()
     {
         return mysqli_error($this->conn);
+    }
+
+    public function transaction($closure)
+    {
+        $this->startTransaction();
+
+        try {
+            $closure();
+            $this->commit();
+        } catch (RuntimeException $e) {
+            $this->rollback();
+            throw $e;
+        }
+    }
+
+    public function startTransaction()
+    {
+        $this->query("START TRANSACTION");
+    }
+
+    public function commit()
+    {
+        $this->query("COMMIT");
+    }
+
+    public function rollback()
+    {
+        $this->query("ROLLBACK");
     }
 
 }

@@ -2,7 +2,7 @@
 
 namespace Pina;
 
-use Pina\Request;
+use Closure;
 
 interface DatabaseDriverInterface
 {
@@ -30,5 +30,30 @@ interface DatabaseDriverInterface
     public function errno();
 
     public function error();
+
+    /**
+     * Выполнение функции в рамках одной транзакции
+     * @param Closure $closure
+     * @return void
+     */
+    public function transaction($closure);
+
+    /**
+     * Начать выполнение транзакции
+     * @return void
+     */
+    public function startTransaction();
+
+    /**
+     * Завершить транзакцию
+     * @return void
+     */
+    public function commit();
+
+    /**
+     * Откатить транзакцию
+     * @return void
+     */
+    public function rollback();
 
 }
