@@ -109,18 +109,22 @@ abstract class Control extends AttributedBlock
 
     /**
      * @param Control $control
+     * @return $this
      */
     public function after($control)
     {
         $this->after[] = $control;
+        return $this;
     }
 
     /**
      * @param Control $control
+     * @return $this
      */
     public function before($control)
     {
         $this->before[] = $control;
+        return $this;
     }
 
     /**
