@@ -3,6 +3,7 @@
 
 namespace Pina;
 
+use GO\FailedJob;
 use GO\Job;
 use GO\Scheduler as GoScheduler;
 
@@ -30,6 +31,12 @@ class Scheduler
                 'output' => $job->getOutput(),
             ];
             Log::info('scheduler', 'Done', $context);
+        }
+        $failed = $this->handler->getFailedJobs();
+        foreach ($failed as $job) {
+            /** @var FailedJob $job */
+            $e = $job->getException();
+            \Pina\Log::error('system', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
         }
     }
 
