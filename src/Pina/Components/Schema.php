@@ -502,6 +502,23 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * @param string[] $fieldKeys
+     */
+    public function only($fieldKeys)
+    {
+        $schema = new Schema();
+        foreach ($fieldKeys as $fieldKey) {
+            foreach ($this->getIterator() as $field)
+            {
+                if ($field->getKey() == $fieldKey) {
+                    $schema->add(clone $field);
+                }
+            }
+        }
+        return $schema;
+    }
+
+    /**
      *
      * @param array $data
      * @return array

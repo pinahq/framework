@@ -30,11 +30,28 @@ class EnumType implements TypeInterface
     public function makeControl(Field $field, $value)
     {
         $star = $field->isMandatory() ? ' *' : '';
+
+        $variants = $this->variants;
+        if ($this->isPlaceholderNeeded()) {
+            array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
+        }
+
         return App::make(FormSelect::class)
             ->setName($field->getKey())
             ->setTitle($field->getTitle() . $star)
             ->setValue($value)
-            ->setVariants($this->variants);
+            ->setVariants($variants);
+    }
+
+    protected function isPlaceholderNeeded()
+    {
+        $ids = array_column($this->variants, 'id');
+        return !in_array('', $ids);
+    }
+
+    protected function getPlaceholder()
+    {
+        return '';
     }
 
     public function format($value)
