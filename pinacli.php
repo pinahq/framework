@@ -5,7 +5,11 @@ use Pina\App;
 use Pina\Command;
 use Pina\Log;
 
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+$configDir = __DIR__ . '/config';
+if (file_exists(__DIR__ . '/../../autoload.php')) {
+    require __DIR__ . '/../../autoload.php';
+    $configDir = __DIR__ . '/../../../config';
+} elseif (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require __DIR__ . '/../vendor/autoload.php';
 } elseif (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
@@ -13,7 +17,7 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     throw new RuntimeException('Unable to locate autoload.php file.');
 }
 
-App::init('cli', __DIR__ . '/config');
+App::init('cli', $configDir);
 
 while ($cmd = array_shift($argv)) {
     if (!empty($cmd) && class_exists($cmd) && is_subclass_of($cmd, Command::class)) {
