@@ -43,7 +43,7 @@ while ($cmd = array_shift($argv)) {
                 'time' => $totalTime,
             ];
             Log::info('command', $command->__toString() . ": " . $output, $context);
-
+            echo $output . "\n";
             echo $command->__toString() . ' ' . round($totalTime, 4) . 's done.' . "\n";
         } catch (Exception $e) {
             Log::error('system', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
@@ -54,4 +54,4 @@ while ($cmd = array_shift($argv)) {
     }
 }
 
-echo 'Command not found...'."\n";
+echo 'Command not found...' . "\n";
