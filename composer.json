@@ -17,6 +17,9 @@
       "email": "alex@alex-yashin.com"
     }
   ],
+  "bin": [
+    "pinacli.php"
+  ],
   "require": {
     "php": ">=5.6",
     "psr/container": "^1.0",
