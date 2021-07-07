@@ -19,6 +19,9 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 
 App::init('cli', $configDir);
 
+$modules = App::modules();
+$modules->boot('cli');
+
 while ($cmd = array_shift($argv)) {
     if (!empty($cmd) && class_exists($cmd) && is_subclass_of($cmd, Command::class)) {
         $input = array_shift($argv);
