@@ -2,6 +2,8 @@
 
 namespace Pina\DB;
 
+use iamcal\SQLParser;
+
 class StructureParser
 {
 
@@ -10,15 +12,22 @@ class StructureParser
 
     public function __construct()
     {
-        $this->parser = new \iamcal\SQLParser();
+        $this->parser = new SQLParser();
     }
 
+    /**
+     * @param string $tableCondition
+     */
     public function parse($tableCondition)
     {
         $parsed = $this->parser->parse($tableCondition);
         $this->meta = array_pop($parsed);
     }
 
+    /**
+     * @param array $fields
+     * @return array
+     */
     public function parseGatewayFields($fields)
     {
         $r = array();
@@ -28,6 +37,10 @@ class StructureParser
         return $r;
     }
 
+    /**
+     * @param array $indexes
+     * @return array
+     */
     public function parseGatewayIndexes($indexes)
     {
         $r = array();
@@ -45,6 +58,10 @@ class StructureParser
         return $r;
     }
 
+    /**
+     * @param string $fieldCondition
+     * @return Field|null
+     */
     public function parseField($fieldCondition)
     {
         $tokens = $this->parser->lex($fieldCondition);
@@ -52,6 +69,10 @@ class StructureParser
         return $this->makeField($f);
     }
 
+    /**
+     * @param string $condition
+     * @return Index|null
+     */
     public function parseIndex($condition)
     {
         $tokens = $this->parser->lex($condition);
@@ -61,15 +82,23 @@ class StructureParser
         return $this->makeIndex(array_pop($keys));
     }
 
+    /**
+     * @return Structure
+     */
     public function getStructure()
     {
         $structure = new Structure();
         $structure->setFields($this->getFields());
         $structure->setIndexes($this->getIndexes());
         $structure->setForeignKeys($this->getForeignKeys());
+        $structure->setEngine($this->getEngine());
+        $structure->setCharset($this->getCharset());
         return $structure;
     }
 
+    /**
+     * @return array
+     */
     public function getIndexes()
     {
         if (empty($this->meta['indexes'])) {
@@ -93,6 +122,9 @@ class StructureParser
         return $indexes;
     }
 
+    /**
+     * @return array
+     */
     public function getForeignKeys()
     {
         if (empty($this->meta['indexes'])) {
@@ -118,6 +150,25 @@ class StructureParser
         return $contraints;
     }
 
+    /**
+     * @return string
+     */
+    public function getEngine()
+    {
+        return isset($this->meta['props']['ENGINE']) ? $this->meta['props']['ENGINE'] : '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getCharset()
+    {
+        return isset($this->meta['props']['CHARSET']) ? $this->meta['props']['CHARSET'] : '';
+    }
+
+    /**
+     * @return array
+     */
     public function getFields()
     {
         $fields = array();
@@ -134,6 +185,10 @@ class StructureParser
         return $fields;
     }
 
+    /**
+     * @param array $f
+     * @return Field|null
+     */
     protected function makeField($f)
     {
         if (empty($f['name']) || empty($f['type'])) {
@@ -176,6 +231,10 @@ class StructureParser
         return $field;
     }
 
+    /**
+     * @param array $index
+     * @return Index|null
+     */
     protected function makeIndex($index)
     {
         if (

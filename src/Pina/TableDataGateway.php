@@ -23,7 +23,8 @@ class TableDataGateway extends SQL
     protected static $table = "";
     protected static $fields = [];
     protected static $indexes = [];
-    protected static $engine = "ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    protected static $engine = "InnoDB";
+    protected static $charset = "utf8";
     protected $context = array();
 
     /**
@@ -94,8 +95,13 @@ class TableDataGateway extends SQL
         return static::$engine;
     }
 
+    public function getCharset()
+    {
+        return static::$charset;
+    }
+
     /**
-     * Генерирует массив запросов на обновление структуры таблицы, 
+     * Генерирует массив запросов на обновление структуры таблицы,
      * которые необходимо выполнить, чтобы привести состояние таблицы к описанному
      * в классе модели
      * @return array
@@ -115,6 +121,8 @@ class TableDataGateway extends SQL
         } else {
             $first[] = $this->getStructure()->makeAlterTable($this->getTable(), $this->getExistedStructure());
             $last[] = $this->getStructure()->makeAlterTableForeignKeys($this->getTable(), $this->getExistedStructure());
+            $first[] = $this->getStructure()->makeAlterTableCharset($this->getTable(), $this->getExistedStructure());
+            $first[] = $this->getStructure()->makeAlterTableEngine($this->getTable(), $this->getExistedStructure());
         }
         return array(array_filter($first), array_filter($last));
     }
@@ -131,6 +139,8 @@ class TableDataGateway extends SQL
         $structure->setFields($parser->parseGatewayFields($this->getFields()));
         $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
         $structure->setForeignKeys($this->getForeignKeys());
+        $structure->setEngine($this->getEngine());
+        $structure->setCharset($this->getCharset());
         return $structure;
     }
 
@@ -184,7 +194,7 @@ class TableDataGateway extends SQL
 
     /**
      * Добавляет контекст выполнения запроса.
-     * Контекст используется как в выборке, так и при вставке 
+     * Контекст используется как в выборке, так и при вставке
      * @param string $field
      * @param mixed $value
      * @return $this
@@ -272,7 +282,7 @@ class TableDataGateway extends SQL
 
     /**
      * Возвращает названия поля первичного ключа
-     * Если первичный ключ составной, возвращает название первого поля 
+     * Если первичный ключ составной, возвращает название первого поля
      * первичого ключа
      * @return string
      */
@@ -445,8 +455,8 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * Выполняет запрос на изменение порядка данных в таблице, 
-     * основываясь на порядке идентификаторов первичного ключа в массиве $ids 
+     * Выполняет запрос на изменение порядка данных в таблице,
+     * основываясь на порядке идентификаторов первичного ключа в массиве $ids
      * и имени поля $field, отвечающего за сортировку
      * @param array $ids
      * @param string $field
@@ -538,7 +548,7 @@ class TableDataGateway extends SQL
     /**
      * Загружает данные из объекта читателя согласно схеме
      * $schema = array("file_field" => "table_field");
-     * 
+     *
      * @param array $schema
      * @param object $reader
      * @return int

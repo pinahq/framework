@@ -8,44 +8,110 @@ class Structure
     protected $fields = array();
     protected $indexes = array();
     protected $foreignKeys = array();
+    protected $engine = 'InnoDB';
+    protected $charset = 'utf8';
 
+    /**
+     * @param array $fields
+     */
     public function setFields($fields)
     {
         $this->fields = $fields;
     }
 
+    /**
+     * @return array
+     */
     public function getFields()
     {
         return $this->fields;
     }
 
+    /**
+     * @param array $indexes
+     */
     public function setIndexes($indexes)
     {
         $this->indexes = $indexes;
     }
 
+    /**
+     * @return array
+     */
     public function getIndexes()
     {
         return $this->indexes;
     }
 
+    /**
+     * @param array $foreignKeys
+     */
     public function setForeignKeys($foreignKeys)
     {
         $this->foreignKeys = $foreignKeys;
     }
 
+    /**
+     * @return array
+     */
     public function getForeignKeys()
     {
         return $this->foreignKeys;
     }
 
-    public function makeCreateTable($name, $extra = 'ENGINE=InnoDB DEFAULT CHARSET=utf8')
+    /**
+     * @param string $engine
+     */
+    public function setEngine($engine)
+    {
+        $this->engine = $engine;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEngine()
+    {
+        return $this->engine;
+    }
+
+    /**
+     * @param string $charset
+     */
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCharset()
+    {
+        return $this->charset;
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function makeCreateTable($name)
     {
         $schema = array_merge($this->getFields(), $this->getIndexes());
         $strings = array_map(array($this, 'callMake'), $schema);
-        return 'CREATE TABLE IF NOT EXISTS `' . $name . '` (' . "\n  " . implode(",\n  ", $strings) . "\n" . ') ' . $extra;
+        $engine = 'ENGINE=' . $this->getEngine();
+        $charset = 'DEFAULT CHARSET=' . $this->getCharset();
+
+        $query = 'CREATE TABLE IF NOT EXISTS `' . $name . '`';
+        $query .= ' (' . "\n  " . implode(",\n  ", $strings) . "\n" . ') ';
+        $query .= $engine . ' ' . $charset;
+        return $query;
     }
 
+    /**
+     * @param string $table
+     * @return string
+     */
     public function makeCreateForeignKeys($table)
     {
         $conditions = $this->makeIndexPath(array(), $this->foreignKeys);
@@ -55,6 +121,11 @@ class Structure
         return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
     }
 
+    /**
+     * @param string $table
+     * @param Structure $existedStructure
+     * @return string
+     */
     public function makeAlterTable($table, $existedStructure)
     {
         $conditions = $this->makePathTo($existedStructure);
@@ -64,6 +135,11 @@ class Structure
         return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
     }
 
+    /**
+     * @param string $table
+     * @param Structure $existedStructure
+     * @return string
+     */
     public function makeAlterTableForeignKeys($table, $existedStructure)
     {
         $conditions = $this->makeIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
@@ -73,13 +149,49 @@ class Structure
         return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
     }
 
+    /**
+     * @param string $table
+     * @param Structure $existedStructure
+     * @return string
+     */
+    public function makeAlterTableCharset($table, $existedStructure)
+    {
+        if ($this->getCharset() != $existedStructure->getCharset()) {
+            return 'ALTER TABLE `' . $table . '` CONVERT TO CHARACTER SET '.$this->getCharset();
+        }
+        return '';
+    }
+
+    /**
+     * @param string $table
+     * @param Structure $existedStructure
+     * @return string
+     */
+    public function makeAlterTableEngine($table, $existedStructure)
+    {
+        if ($this->getEngine() != $existedStructure->getEngine()) {
+            return 'ALTER TABLE `' . $table . '` ENGINE '.$this->getEngine();
+        }
+        return '';
+    }
+
+    /**
+     * @param Structure $existedStructure
+     * @return array
+     */
     public function makePathTo($existedStructure)
     {
         $fields = $this->makeFieldPath($existedStructure->getFields(), $this->fields);
-        $indexes = $this->makeIndexPath($existedStructure->getIndexes(), array_merge($this->indexes, $this->getConstraintIndexes()));
+        $indexes = $this->makeIndexPath(
+            $existedStructure->getIndexes(),
+            array_merge($this->indexes, $this->getConstraintIndexes())
+        );
         return array_merge($fields, $indexes);
     }
 
+    /**
+     * @return array
+     */
     protected function getConstraintIndexes()
     {
         $indexes = array();
@@ -89,6 +201,11 @@ class Structure
         return $indexes;
     }
 
+    /**
+     * @param StructureItemInterface[] $from
+     * @param StructureItemInterface[] $to
+     * @return array
+     */
     public function makeFieldPath($from, $to)
     {
         $conditions = array();
@@ -116,6 +233,11 @@ class Structure
         return $conditions;
     }
 
+    /**
+     * @param StructureItemInterface[] $from
+     * @param StructureItemInterface[] $to
+     * @return array
+     */
     public function makeIndexPath($from, $to)
     {
         $conditions = array();
@@ -133,12 +255,21 @@ class Structure
         return $conditions;
     }
 
+    /**
+     * @param StructureItemInterface $key
+     * @return string
+     */
     public function callMake(StructureItemInterface $key)
     {
         return $key->make();
     }
 
-    public function reduceFields($carry, Field $field)
+    /**
+     * @param array $carry
+     * @param StructureItemInterface $field
+     * @return array
+     */
+    public function reduceFields($carry, StructureItemInterface $field)
     {
         $carry[$field->getName()] = $field->make();
         return $carry;
