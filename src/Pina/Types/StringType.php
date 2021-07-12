@@ -54,9 +54,14 @@ class StringType implements TypeInterface
         return [];
     }
 
-    public function normalize($value)
+    public function normalize($value, $isMandatory)
     {
         $value = trim($value);
+
+        if (empty($value) && $isMandatory) {
+            throw new ValidateException(__("Укажите значение"));
+        }
+
         if (empty($value) && $this->isNullable()) {
             return null;
         }

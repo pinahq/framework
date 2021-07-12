@@ -56,8 +56,12 @@ abstract class ConfigurableType implements TypeInterface
         return $this->variants;
     }
 
-    public function normalize($value)
+    public function normalize($value, $isMandatory)
     {
+        if (empty($value) && $isMandatory) {
+            throw new ValidateException(__("Укажите значение"));
+        }
+
         if (!empty($this->variants)) {
             if (!in_array($value, array_column($this->variants, 'id'))) {
                 throw new ValidateException(__("Выберите вариант"));

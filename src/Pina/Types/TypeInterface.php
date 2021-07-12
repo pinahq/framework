@@ -51,10 +51,11 @@ interface TypeInterface
      * Проверяет значение на предмет наличия ошибок и нормализует его
      * Возвращает нормализованное значение
      * @param mixed $value
+     * @param bool $isMandatory
      * @return mixed
      */
 
-    public function normalize($value);
+    public function normalize($value, $isMandatory);
 
     /**
      * @return string

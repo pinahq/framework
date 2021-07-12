@@ -5,6 +5,8 @@ namespace Pina\Types;
 use Closure;
 use Pina\Components\Field;
 
+use function Pina\__;
+
 class CallbackType implements TypeInterface
 {
 
@@ -57,8 +59,11 @@ class CallbackType implements TypeInterface
         return [];
     }
 
-    public function normalize($value)
+    public function normalize($value, $isMandatory)
     {
+        if (empty($value) && $isMandatory) {
+            throw new ValidateException(__("Укажите значение"));
+        }
         return $value;
     }
 

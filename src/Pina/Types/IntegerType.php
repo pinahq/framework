@@ -51,7 +51,7 @@ class IntegerType implements TypeInterface
         return [];
     }
 
-    public function normalize($value)
+    public function normalize($value, $isMandatory)
     {
         if (strval(intval($value)) != strval($value)) {
             throw new ValidateException(__("Укажите целое число"));

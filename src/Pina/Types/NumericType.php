@@ -19,7 +19,7 @@ class NumericType extends IntegerType
         return parent::makeControl($field, $value)->setType('text');
     }
 
-    public function normalize($value)
+    public function normalize($value, $isMandatory)
     {
         if (!is_numeric($value)) {
             throw new ValidateException(__("Укажите число"));

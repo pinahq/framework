@@ -11,8 +11,6 @@ use Pina\App;
 use Pina\Arr;
 use Pina\Types\ValidateException;
 
-use function Pina\__;
-
 class Schema implements IteratorAggregate
 {
 
@@ -532,12 +530,8 @@ class Schema implements IteratorAggregate
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
 
-            if (empty($value) && $field->isMandatory()) {
-                $errors[] = [__('Укажите значение'), $field->getKey()];
-            }
-
             try {
-                $value = App::type($field->getType())->setContext($data)->normalize($value);
+                $value = App::type($field->getType())->setContext($data)->normalize($value, $field->isMandatory());
             } catch (ValidateException $e) {
                 $errors[] = [$e->getMessage(), $field->getKey()];
             }
