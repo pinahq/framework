@@ -12,6 +12,7 @@ class Language
      * @var string[]
      */
     private static $availableLanguages = [];
+    private static $fallbackLanguages = [];
 
     /**
      * @param string[] $availableLanguages
@@ -102,5 +103,19 @@ class Language
         }
 
         return static::$data[static::$code][$moduleKey][$string] ?? $string;
+    }
+
+    /**
+     * Пары ключ-значение, какие языки являются альтернативой
+     * @param array $fallbackLanguages
+     */
+    public static function setFallbackLanguages(array $fallbackLanguages): void
+    {
+        self::$fallbackLanguages = $fallbackLanguages;
+    }
+
+    public static function getFallbackLanguage(string $language): string
+    {
+        return static::$fallbackLanguages[$language] ?? $language;
     }
 }
