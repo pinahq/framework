@@ -36,7 +36,7 @@ class EnumType implements TypeInterface
             array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
         }
 
-        return App::make(FormSelect::class)
+        return $this->makeSelect()
             ->setName($field->getKey())
             ->setTitle($field->getTitle() . $star)
             ->setValue($value)
@@ -105,6 +105,14 @@ class EnumType implements TypeInterface
     {
         $variants = array_column($this->variants, 'id');
         return "enum('" . implode("','", $variants) . "')";
+    }
+
+    /**
+     * @return FormSelect
+     */
+    protected function makeSelect()
+    {
+        return App::make(FormSelect::class);
     }
 
 }

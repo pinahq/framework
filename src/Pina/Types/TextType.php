@@ -4,22 +4,9 @@ namespace Pina\Types;
 
 use Pina\App;
 use Pina\Controls\FormTextarea;
-use Pina\Components\Field;
 
 class TextType extends StringType
 {
-
-    public function makeControl(Field $field, $value)
-    {
-        /** @var FormTextarea $input */
-        $input = App::make(FormTextarea::class);
-        $input->setType('text');
-        $input->setName($field->getKey());
-        $star = $field->isMandatory() ? ' *' : '';
-        $input->setTitle($field->getTitle() . $star);
-        $input->setValue($value);
-        return $input;
-    }
 
     public function getSize()
     {
@@ -46,6 +33,11 @@ class TextType extends StringType
             return "mediumtext";
         }
         return "longtext";
+    }
+
+    protected function makeInput()
+    {
+        return App::make(FormTextarea::class);
     }
 
 }

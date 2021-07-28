@@ -19,7 +19,7 @@ class IntegerType implements TypeInterface
     public function makeControl(Field $field, $value)
     {
         $star = $field->isMandatory() ? ' *' : '';
-        return App::make(FormInput::class)
+        return $this->makeInput()
             ->setName($field->getKey())
             ->setTitle($field->getTitle() . $star)
             ->setValue($value)
@@ -63,6 +63,14 @@ class IntegerType implements TypeInterface
     public function getSQLType()
     {
         return "int(" . $this->getSize() . ")";
+    }
+
+    /**
+     * @return FormInput
+     */
+    protected function makeInput()
+    {
+        return App::make(FormInput::class);
     }
 
 }

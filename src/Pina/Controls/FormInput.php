@@ -77,11 +77,16 @@ class FormInput extends Control
 
     protected function drawControl()
     {
+        return Html::tag('input', '', $this->makeInputOptions());
+    }
+
+    protected function makeInputOptions()
+    {
         $options = ['type' => $this->type, 'value' => $this->value, 'class' => 'form-control'];
         if ($this->name) {
             $options['name'] = $this->name;
         }
-        return Html::tag('input', '', $options);
+        return $options;
     }
 
 }

@@ -19,8 +19,7 @@ class StringType implements TypeInterface
 
     public function makeControl(Field $field, $value)
     {
-        /** @var FormInput $input */
-        $input = App::make(FormInput::class);
+        $input = $this->makeInput();
         $input->setType('text');
         $input->setName($field->getKey());
         $star = $field->isMandatory() ? ' *' : '';
@@ -77,6 +76,14 @@ class StringType implements TypeInterface
     public function getSQLType()
     {
         return "varchar(" . $this->getSize() . ")";
+    }
+
+    /**
+     * @return FormInput
+     */
+    protected function makeInput()
+    {
+        return App::make(FormInput::class);
     }
 
 }
