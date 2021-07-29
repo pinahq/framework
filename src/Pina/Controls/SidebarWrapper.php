@@ -37,7 +37,7 @@ class SidebarWrapper extends Control
         if (empty($this->sidebar)) {
             return '';
         }
-        return Html::tag('div', $this->sidebar->draw(), ['class' => 'col-lg-' . (12 - $this->width)]);
+        return Html::tag('div', $this->sidebar->drawWithWrappers(), ['class' => 'col-lg-' . (12 - $this->width)]);
     }
 
 }

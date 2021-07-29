@@ -198,12 +198,12 @@ class RequestHandler
 
             $content = new TemplateLayoutContent;
             if (Request::isExternalRequest()) {
-                //$content->drawLayout($data->draw());
+                //$content->drawLayout($data->drawWithWrappers());
                 $layout = $data->getLayout();
-                $r = App::load($layout ? $layout : DefaultLayout::class)->append($data)->draw();
+                $r = App::load($layout ? $layout : DefaultLayout::class)->append($data)->drawWithWrappers();
                 $content->setContent($r);
             } else {
-                $content->setContent($data->draw());
+                $content->setContent($data->drawWithWrappers());
             }
             return Response::ok()->setContent($content);
         }

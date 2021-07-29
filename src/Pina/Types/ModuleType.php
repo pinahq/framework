@@ -66,10 +66,11 @@ class ModuleType extends ConfigurableType
         parse_str($parsed['query'], $params);
 
         if (App::router()->exists($parsed['path'], 'get')) {
+            /** @var SelectedTextComponent $input */
             $input = App::make(SelectedTextComponent::class);
             $input->basedOn(App::router()->run($parsed['path'], 'get'));
             $input->setValue($value);
-            return $input->draw();
+            return $input->drawWithWrappers();
         }
 
         $params = array_merge(['value' => $value, 'display' => 'text'], $params);
@@ -84,7 +85,7 @@ class ModuleType extends ConfigurableType
         return $content;
 
 
-//        return $this->makeControlByMode(new Field(), $value, false)->draw();
+//        return $this->makeControlByMode(new Field(), $value, false)->drawWithWrappers();
     }
 
     protected function makeControlByMode(Field $field, $value, $isEditable)

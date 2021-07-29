@@ -76,7 +76,7 @@ abstract class CollectionEndpoint extends Endpoint
         }
 
         Request::setPlace('page_header', $this->getCollectionTitle());
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->draw());
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
 
         $paging = $this->applyPaging($query, $filters);
         return $this->makeIndexComponent()
@@ -92,7 +92,7 @@ abstract class CollectionEndpoint extends Endpoint
 
         $title = $this->getItemTitle($item);
         Request::setPlace('page_header', $title);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle(), $title)->draw());
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle(), $title)->drawWithWrappers());
 
         return $this->makeShowComponent()
             ->wrap($this->makeSidebarWrapper())
@@ -105,7 +105,7 @@ abstract class CollectionEndpoint extends Endpoint
         Request::setPlace('page_header', $this->getCreationTitle());
         Request::setPlace(
             'breadcrumb',
-            $this->getBreadcrumb($this->getCollectionTitle(), $this->getCreationTitle())->draw()
+            $this->getBreadcrumb($this->getCollectionTitle(), $this->getCreationTitle())->drawWithWrappers()
         );
 
         return $this->makeCreateForm()
