@@ -35,7 +35,7 @@ class Form extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $csrf = CSRF::formField($this->method);
 

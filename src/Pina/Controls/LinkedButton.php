@@ -23,7 +23,7 @@ class LinkedButton extends Button
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return Html::a($this->title . $this->compile(), $this->link, $this->makeAttributes(['class' => 'btn btn-' . $this->style]));
     }

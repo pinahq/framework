@@ -11,7 +11,7 @@ use Pina\Components\Data;
 class DefaultLayout extends Control
 {
 
-    public function draw()
+    protected function draw()
     {
         $head = Html::tag('head', $this->makeMeta() . $this->makeCss());
         $html = Html::tag('html', $head . Html::tag('body', $this->makeBody() . $this->makeJs()));

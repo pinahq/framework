@@ -25,7 +25,7 @@ class PagingControl extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $items = [];
 

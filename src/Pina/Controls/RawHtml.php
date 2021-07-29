@@ -21,7 +21,7 @@ class RawHtml extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return $this->text . $this->compile();
     }

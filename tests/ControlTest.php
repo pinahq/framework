@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\Controls\Card;
 
 class ControlTest extends TestCase
 {
@@ -17,25 +18,25 @@ class ControlTest extends TestCase
 
         $anotherLink = clone $link;
         $link->after($anotherLink);
-        $this->assertEquals($expected . $anotherLink->draw(), $link->drawWithWrappers());
+        $this->assertEquals($expected . $anotherLink, $link->drawWithWrappers());
 
         $link->before($anotherLink);
-        $this->assertEquals($anotherLink->draw() . $expected . $anotherLink->draw(), $link->drawWithWrappers());
+        $this->assertEquals($anotherLink . $expected . $anotherLink, $link->drawWithWrappers());
 
-        $card = new \Pina\Controls\Card();
+        $card = new Card();
         $link->wrap($card);
 
         $expected2 = '<div class="card"><div class="card-body">'
-            . $anotherLink->draw() . $expected . $anotherLink->draw()
+            . $anotherLink . $expected . $anotherLink
             . '</div></div>';
 
         $this->assertEquals($expected2, $link->drawWithWrappers());
 
         $card->after($anotherLink);
         $expected3 = '<div class="card"><div class="card-body">'
-            . $anotherLink->draw() . $expected . $anotherLink->draw()
+            . $anotherLink . $expected . $anotherLink
             . '</div></div>'
-            . $anotherLink->draw();
+            . $anotherLink;
 
         $this->assertEquals($expected3, $link->drawWithWrappers());
     }

@@ -23,7 +23,7 @@ class Paragraph extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return Html::tag('p', $this->text . $this->compile(), $this->makeAttributes());
     }

@@ -25,14 +25,14 @@ class SidebarWrapper extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $left = Html::tag('div', $this->compile(), ['class' => 'col-lg-' . $this->width]);
 
         return Html::tag('div', $left . $this->drawSidebar(), ['class' => 'row']);
     }
 
-    public function drawSidebar()
+    protected function drawSidebar()
     {
         if (empty($this->sidebar)) {
             return '';

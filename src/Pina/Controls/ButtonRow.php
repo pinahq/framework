@@ -24,7 +24,7 @@ class ButtonRow extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $compiled = $this->compile();
         if ($compiled) {
@@ -41,7 +41,7 @@ class ButtonRow extends Control
         return $this->drawMain();
     }
 
-    public function drawMain()
+    protected function drawMain()
     {
         if (is_null($this->main)) {
             return '';

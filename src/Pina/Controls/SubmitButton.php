@@ -13,7 +13,7 @@ class SubmitButton extends Button
 
     protected $style = 'primary';
 
-    public function draw()
+    protected function draw()
     {
         return Html::button(
             $this->title . $this->compile(),

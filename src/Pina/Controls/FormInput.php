@@ -67,7 +67,7 @@ class FormInput extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
         $r .= $this->drawControl();

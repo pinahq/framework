@@ -23,7 +23,7 @@ class ListItem extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return Html::tag('li', $this->text . $this->compile(), $this->makeAttributes());
     }

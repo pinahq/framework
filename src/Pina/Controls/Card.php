@@ -24,7 +24,7 @@ class Card extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         $header = '';
         if ($this->title) {

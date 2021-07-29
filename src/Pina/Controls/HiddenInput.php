@@ -13,7 +13,7 @@ class HiddenInput extends FormInput
         $this->type = 'hidden';
     }
 
-    public function draw()
+    protected function draw()
     {
         $options = ['type' => $this->type, 'value' => $this->value];
         if ($this->name) {

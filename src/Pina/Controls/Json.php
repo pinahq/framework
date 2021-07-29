@@ -15,7 +15,7 @@ class Json extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
     }

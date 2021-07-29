@@ -33,10 +33,10 @@ class DataTest extends TestCase
 
         $list = new ListData();
         $list->load($data, $schema);
-        $html = (new TableComponent)->basedOn($list)->draw();
+        $html = (new TableComponent)->basedOn($list)->drawWithWrappers();
         $this->assertEquals($expectedHtml, $html);
 
-        $html = (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->draw();
+        $html = (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->drawWithWrappers();
         $this->assertEquals(
             '<ul>'
             . '<li>order.paid</li>'
@@ -46,15 +46,15 @@ class DataTest extends TestCase
             $html
         );
         $this->assertEquals(
-            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->draw(),
-            (new ListComponent)->basedOn($list)->select('event')->draw()
+            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('event')->drawWithWrappers(),
+            (new ListComponent)->basedOn($list)->select('event')->drawWithWrappers()
         );
         $this->assertEquals(
-            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('id')->draw(),
-            (new ListComponent)->basedOn($list)->select('id')->draw()
+            (new ListComponent)->basedOn((new TableComponent)->basedOn($list))->select('id')->drawWithWrappers(),
+            (new ListComponent)->basedOn($list)->select('id')->drawWithWrappers()
         );
 
-        $html = $list->turnTo("table")->draw();
+        $html = $list->turnTo("table")->drawWithWrappers();
         $this->assertEquals($expectedHtml, $html);
     }
 

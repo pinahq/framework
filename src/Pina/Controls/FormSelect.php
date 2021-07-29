@@ -34,7 +34,7 @@ class FormSelect extends FormInput
         return $this;
     }
 
-    public function drawControl()
+    protected function drawControl()
     {
         $options = '';
         

@@ -66,7 +66,7 @@ abstract class Data extends Control implements ResponseInterface
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         if (!$this->isBuildStarted()) {
             $this->startBuild();

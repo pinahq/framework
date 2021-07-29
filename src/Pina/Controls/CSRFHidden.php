@@ -24,7 +24,7 @@ class CSRFHidden extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return CSRF::formField($this->method);
     }

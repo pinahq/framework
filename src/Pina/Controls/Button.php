@@ -26,7 +26,7 @@ class Button extends Control
         return $this;
     }
 
-    public function draw()
+    protected function draw()
     {
         return Html::button($this->title . $this->compile(), $this->makeAttributes(['class' => 'btn btn-' . $this->style]));
     }
