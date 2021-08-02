@@ -26,6 +26,8 @@ abstract class Command
 
     public function __invoke($input = '')
     {
+        Log::info('command', 'Started', ['class' => get_class($this), 'input' => $input]);
+
         $this->input = $input;
 
         foreach ($this->before as $cmd) {
@@ -38,6 +40,7 @@ abstract class Command
             $cmd($output);
         }
 
+        Log::info('command', 'Done', ['class' => get_class($this), 'input' => $input, 'output' => $output]);
         return $output;
     }
 
