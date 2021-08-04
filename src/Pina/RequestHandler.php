@@ -200,7 +200,7 @@ class RequestHandler
             if (Request::isExternalRequest()) {
                 //$content->drawLayout($data->drawWithWrappers());
                 $layout = $data->getLayout();
-                $r = App::load($layout ? $layout : DefaultLayout::class)->append($data)->drawWithWrappers();
+                $r = $layout->append($data)->drawWithWrappers();
                 $content->setContent($r);
             } else {
                 $content->setContent($data->drawWithWrappers());

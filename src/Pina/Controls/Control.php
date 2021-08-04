@@ -2,6 +2,9 @@
 
 namespace Pina\Controls;
 
+use Pina\App;
+use Pina\Layouts\DefaultLayout;
+
 abstract class Control extends AttributedBlock
 {
 
@@ -62,7 +65,7 @@ abstract class Control extends AttributedBlock
      */
     public function getLayout()
     {
-        return $this->layout;
+        return is_null($this->layout) ? App::make(DefaultLayout::class) : $this->layout;
     }
 
     /**
