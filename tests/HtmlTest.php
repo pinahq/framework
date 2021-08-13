@@ -32,6 +32,10 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r = Html::nest('div/span[data-name=test]', 'hello!');
+        $this->assertEquals('<div><span data-name="test">hello!</span></div>', $r);
+        $r = Html::nest('div/span[disabled]', 'hello!');
+        $this->assertEquals('<div><span disabled="disabled">hello!</span></div>', $r);
         $r = Html::nest('div/table/tr/td', 'hello!');
         $this->assertEquals('<div><table><tr><td>hello!</td></tr></table></div>', $r);
         $r = Html::nest('div/table#some-id sss.my-class other_class/tr/td', 'hello!');
@@ -40,6 +44,8 @@ class HtmlTest extends TestCase
         $this->assertEquals('<div><table id="some-id sss" class="my-class other_class"><tr><td>hello!</td></tr></table></div>', $r);
         $r = Html::nest('div#first/table#some-id#sss.my-class.other_class/tr/td.last', 'hello!');
         $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class"><tr><td class="last">hello!</td></tr></table></div>', $r);
+        $r = Html::nest('div#first/table#some-id#sss.my-class.other_class[disabled][data-id=8]/tr/td.last', 'hello!');
+        $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class" disabled="disabled" data-id="8"><tr><td class="last">hello!</td></tr></table></div>', $r);
     }
 
 }

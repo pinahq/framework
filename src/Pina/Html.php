@@ -11,7 +11,7 @@ class Html extends BaseHtml
         foreach ($parts as $p) {
             $options = [];
             $left = strlen($p);
-            if (preg_match_all('/([#.])([\w-_ ]+)/si', $p, $matches)) {
+            if (preg_match_all('/([#.\[])([\w-_ =]+)/si', $p, $matches)) {
                 foreach ($matches[0] as $k => $full) {
                     $left = min($left, strpos($p, $full));
                     $prefix = $matches[1][$k];
@@ -23,6 +23,11 @@ class Html extends BaseHtml
                             break;
                         case '.':
                             $prop = 'class';
+                            break;
+                        case '[':
+                            $parts = explode('=', $value);
+                            $prop = $parts[0];
+                            $value = isset($parts[1]) ? $parts[1] : $prop;
                             break;
                     }
                     if ($prop) {
