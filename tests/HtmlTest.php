@@ -32,6 +32,10 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r = Html::nest('div.step/div.circle+p', 10);
+        $this->assertEquals('<div class="step"><div class="circle"></div><p>10</p></div>', $r);
+        $r = Html::nest('div.step/div.circle+p/span.before+%', 10);
+        $this->assertEquals('<div class="step"><div class="circle"></div><p><span class="before"></span>10</p></div>', $r);
         $r = Html::nest('div/span[data-name=test]', 'hello!');
         $this->assertEquals('<div><span data-name="test">hello!</span></div>', $r);
         $r = Html::nest('div/span[disabled]', 'hello!');

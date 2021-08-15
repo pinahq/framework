@@ -7,36 +7,45 @@ class Html extends BaseHtml
 
     public static function nest($path, $content)
     {
-        $parts = array_reverse(explode('/', $path));
-        foreach ($parts as $p) {
-            $options = [];
-            $left = strlen($p);
-            if (preg_match_all('/([#.\[])([\w-_ =]+)/si', $p, $matches)) {
-                foreach ($matches[0] as $k => $full) {
-                    $left = min($left, strpos($p, $full));
-                    $prefix = $matches[1][$k];
-                    $value = $matches[2][$k];
-                    $prop = '';
-                    switch ($prefix) {
-                        case '#':
-                            $prop = 'id';
-                            break;
-                        case '.':
-                            $prop = 'class';
-                            break;
-                        case '[':
-                            $parts = explode('=', $value);
-                            $prop = $parts[0];
-                            $value = isset($parts[1]) ? $parts[1] : $prop;
-                            break;
+        $pathParts = explode('/', $path);
+        while ($p = array_pop($pathParts)) {
+            $siblings = explode('+', $p);
+            $siblingContent = '';
+            while ($s = array_shift($siblings)) {
+                $options = [];
+                $left = strlen($s);
+                if (preg_match_all('/([#.\[])([\w-_ =]+)/si', $s, $matches)) {
+                    foreach ($matches[0] as $k => $full) {
+                        $left = min($left, strpos($s, $full));
+                        $prefix = $matches[1][$k];
+                        $value = $matches[2][$k];
+                        $prop = '';
+                        switch ($prefix) {
+                            case '#':
+                                $prop = 'id';
+                                break;
+                            case '.':
+                                $prop = 'class';
+                                break;
+                            case '[':
+                                $parts = explode('=', $value);
+                                $prop = $parts[0];
+                                $value = isset($parts[1]) ? $parts[1] : $prop;
+                                break;
+                        }
+                        if ($prop) {
+                            $options[$prop] = (isset($options[$prop]) ? $options[$prop] . ' ' : '') . $value;
+                        }
                     }
-                    if ($prop) {
-                        $options[$prop] = (isset($options[$prop]) ? $options[$prop] . ' ' : '') . $value;
-                    }
+                    $s = substr($s, 0, $left);
                 }
-                $p = substr($p, 0, $left);
+
+                if (empty($siblings)) {
+                    $content = $siblingContent . ($s == '%' ? $content : Html::tag($s, $content, $options));
+                } else {
+                    $siblingContent .= Html::tag($s, '', $options);
+                }
             }
-            $content = Html::tag($p, $content, $options);
         }
         return $content;
     }
