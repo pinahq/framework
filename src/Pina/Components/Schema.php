@@ -572,6 +572,14 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * @return string[]
+     */
+    public function getPrimaryKey()
+    {
+        return $this->primaryKey;
+    }
+
+    /**
      * @param array|string $fields
      */
     public function addUniqueKey($fields)
