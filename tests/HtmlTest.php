@@ -32,6 +32,9 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r = Html::zz('.circle([data-name=%]+.round%+p)+span%', 'step', 10, 20);
+        $this->assertEquals('<div class="circle"><div data-name="step"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
+
         $r = Html::zz('.%(.circle+.round%+p)+span%', 'step', 10, 20);
         $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
         $r = Html::zz('div.%(div.circle+div.round%+p)+span%', 'step', 10, 20);

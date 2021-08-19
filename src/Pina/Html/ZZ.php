@@ -33,10 +33,10 @@ class ZZ
                     $this->options['id'] = $this->resolve($this->next());
                     break;
                 case '[':
-                    $name = $value = $this->next();
+                    $name = $value = $this->resolve($this->next());
                     if ($this->expected('=')) {
                         $this->next();
-                        $value = $this->next();
+                        $value = $this->resolve($this->next());
                         $ending = $this->next();
                         if ($ending != ']') {
                             throw new Exception("Ожидается символ ]");
