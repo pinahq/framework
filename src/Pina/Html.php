@@ -2,6 +2,9 @@
 
 namespace Pina;
 
+use Pina\Html\BaseHtml;
+use Pina\Html\ZZ;
+
 class Html extends BaseHtml
 {
 
@@ -48,6 +51,14 @@ class Html extends BaseHtml
             }
         }
         return $content;
+    }
+
+    public static function zz($template, $item = '')
+    {
+        $zz = new ZZ($template);
+        $args = func_get_args();
+        array_shift($args);
+        return $zz->run($args);
     }
 
     public static function getActionAttributes($method, $pattern, $params)

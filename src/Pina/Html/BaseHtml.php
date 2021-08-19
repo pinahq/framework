@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina;
+namespace Pina\Html;
 
 /**
  * @link http://www.yiiframework.com/
