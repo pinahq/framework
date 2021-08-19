@@ -53,6 +53,9 @@ class Html extends BaseHtml
                         }
                     }
                     $s = substr($s, 0, $left);
+                    if (empty($s)) {
+                        $s = 'div';
+                    }
                 }
 
                 if (empty($siblings)) {
