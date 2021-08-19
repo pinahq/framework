@@ -32,6 +32,8 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r = Html::zz('div.card card-primary(a[href=%]%)', 'http://github.com/', 'link');
+        $this->assertEquals('<div class="card card-primary"><a href="http://github.com/">link</a></div>', $r);
         $r = Html::zz('.circle([data-name=%]+.round%+p)+span%', 'step', 10, 20);
         $this->assertEquals('<div class="circle"><div data-name="step"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
 
