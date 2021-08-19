@@ -5,7 +5,22 @@ namespace Pina;
 class Html extends BaseHtml
 {
 
-    public static function nest($path, $content)
+    public static function br()
+    {
+        return static::tag('br');
+    }
+
+    public static function li($content = '', $options = [])
+    {
+        return static::tag('li', $content, $options);
+    }
+
+    public static function p($content = '', $options = [])
+    {
+        return static::tag('p', $content, $options);
+    }
+
+    public static function nest($path, $content = '')
     {
         $pathParts = explode('/', $path);
         while ($p = array_pop($pathParts)) {
