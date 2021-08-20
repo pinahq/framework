@@ -32,6 +32,9 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r= Html::zz('input.quantity-field[type=number][name=quantity][step=1][readonly][data-sku=%]', 'SKU');
+        $this->assertEquals('<input type="number" class="quantity-field" name="quantity" readonly="readonly" step="1" data-sku="SKU">', $r);
+
         $r = Html::zz('div.card card-primary(a[href=%]%)', 'http://github.com/', 'link');
         $this->assertEquals('<div class="card card-primary"><a href="http://github.com/">link</a></div>', $r);
         $r = Html::zz('.circle([data-name=%]+.round%+p)+span%', 'step', 10, 20);

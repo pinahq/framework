@@ -37,10 +37,10 @@ class ZZ
                     if ($this->expected('=')) {
                         $this->next();
                         $value = $this->resolve($this->next());
-                        $ending = $this->next();
-                        if ($ending != ']') {
-                            throw new Exception("Ожидается символ ]");
-                        }
+                    }
+                    $ending = $this->next();
+                    if ($ending != ']') {
+                        throw new Exception("Ожидается символ ]");
                     }
                     $this->options[$name] = $value;
                     break;
