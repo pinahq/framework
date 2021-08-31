@@ -56,4 +56,11 @@ class ControlTest extends TestCase
         $this->assertEquals($expected, $link->drawWithWrappers());
     }
 
+    public function testAttribute()
+    {
+        $icon = new Wrapper('.icon');
+        $icon->setAttribute('title', 'Display');
+        $this->assertEquals('<div class="icon" title="Display"></div>', $icon->__toString());
+    }
+
 }

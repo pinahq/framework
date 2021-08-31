@@ -60,6 +60,17 @@ class AttributedBlock
      * @param string $value
      * @return $this
      */
+    public function setAttribute($key, $value)
+    {
+        $this->attributes[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @return $this
+     */
     public function setDataAttribute($key, $value)
     {
         $this->attributes['data-' . $key] = $value;
