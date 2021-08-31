@@ -32,6 +32,18 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r= Html::zz('input.quantity-field[type=number][name=quantity][step=1][readonly][data-sku=%]', 'SKU');
+        $this->assertEquals('<input type="number" class="quantity-field" name="quantity" readonly="readonly" step="1" data-sku="SKU">', $r);
+
+        $r = Html::zz('div.card card-primary(a[href=%]%)', 'http://github.com/', 'link');
+        $this->assertEquals('<div class="card card-primary"><a href="http://github.com/">link</a></div>', $r);
+        $r = Html::zz('.circle([data-name=%]+.round%+p)+span%', 'step', 10, 20);
+        $this->assertEquals('<div class="circle"><div data-name="step"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
+
+        $r = Html::zz('.%(.circle+.round%+p)+span%', 'step', 10, 20);
+        $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
+        $r = Html::zz('div.%(div.circle+div.round%+p)+span%', 'step', 10, 20);
+        $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
         $r = Html::nest('.step/.circle+p', 10);
         $this->assertEquals('<div class="step"><div class="circle"></div><p>10</p></div>', $r);
         $r = Html::nest('div.step/div.circle+p', 10);
