@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\Controls\Card;
+use Pina\Controls\Wrapper;
 
 class ControlTest extends TestCase
 {
@@ -39,6 +40,18 @@ class ControlTest extends TestCase
             . $anotherLink;
 
         $this->assertEquals($expected3, $link->drawWithWrappers());
+    }
+
+    public function testWrapper()
+    {
+        $link = new Pina\Controls\LinkedButton;
+        $link->setTitle('Title');
+        $link->setLink('http://mywebsite.com/some-page');
+        $expected = '<div id="my" class="card"><div class="card-body">'
+            . $link->drawWithWrappers()
+            . '</div></div>';
+        $link->wrap(new Wrapper('.card#my/.card-body'));
+        $this->assertEquals($expected, $link->drawWithWrappers());
     }
 
 }
