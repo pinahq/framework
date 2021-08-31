@@ -32,6 +32,9 @@ class HtmlTest extends TestCase
 
     public function testNest()
     {
+        $r = Html::nest('div#wrapper/a#my.link[href=#][title=my link]');
+        $this->assertEquals('<div id="wrapper"><a id="my" class="link" href="#" title="my link"></a></div>', $r);
+
         $r= Html::zz('input.quantity-field[type=number][name=quantity][step=1][readonly][data-sku=%]', 'SKU');
         $this->assertEquals('<input type="number" class="quantity-field" name="quantity" readonly="readonly" step="1" data-sku="SKU">', $r);
 
@@ -64,6 +67,7 @@ class HtmlTest extends TestCase
         $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class"><tr><td class="last">hello!</td></tr></table></div>', $r);
         $r = Html::nest('div#first/table#some-id#sss.my-class.other_class[disabled][data-id=8]/tr/td.last', 'hello!');
         $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class" disabled="disabled" data-id="8"><tr><td class="last">hello!</td></tr></table></div>', $r);
+
     }
 
 }

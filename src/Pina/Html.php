@@ -32,11 +32,11 @@ class Html extends BaseHtml
             while ($s = array_shift($siblings)) {
                 $options = [];
                 $left = strlen($s);
-                if (preg_match_all('/([#.\[])([\w-_ =]+)/si', $s, $matches)) {
+                if (preg_match_all('/(([#.])([\w-_ =]+))|(\[([#\w-_ =]+)\])/si', $s, $matches)) {
                     foreach ($matches[0] as $k => $full) {
                         $left = min($left, strpos($s, $full));
-                        $prefix = $matches[1][$k];
-                        $value = $matches[2][$k];
+                        $prefix = !empty($matches[2][$k]) ? $matches[2][$k] : '[';
+                        $value = $matches[3][$k];
                         $prop = '';
                         switch ($prefix) {
                             case '#':
@@ -46,7 +46,7 @@ class Html extends BaseHtml
                                 $prop = 'class';
                                 break;
                             case '[':
-                                $parts = explode('=', $value);
+                                $parts = explode('=', $matches[5][$k]);
                                 $prop = $parts[0];
                                 $value = isset($parts[1]) ? $parts[1] : $prop;
                                 break;
