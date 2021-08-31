@@ -17,7 +17,7 @@ class Wrapper extends Control
 
     protected function draw()
     {
-        return Html::nest($this->path, $this->compile());
+        return Html::nest($this->path, $this->compile(), $this->makeAttributes());
     }
 
 }

@@ -23,7 +23,7 @@ class Html extends BaseHtml
         return static::tag('p', $content, $options);
     }
 
-    public static function nest($path, $content = '')
+    public static function nest($path, $content = '', $rootOptions = [])
     {
         $pathParts = explode('/', $path);
         while ($p = array_pop($pathParts)) {
@@ -59,6 +59,13 @@ class Html extends BaseHtml
                     if (empty($s)) {
                         $s = 'div';
                     }
+                }
+
+                if (empty($pathParts) && empty($siblings)) {
+                    if (!empty($options['class']) && !empty($rootOptions['class'])) {
+                        $rootOptions['class'] = $options['class'] . ' ' . $rootOptions['class'];
+                    }
+                    $options = array_merge($options, $rootOptions);
                 }
 
                 if (empty($siblings)) {

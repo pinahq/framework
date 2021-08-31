@@ -47,10 +47,12 @@ class ControlTest extends TestCase
         $link = new Pina\Controls\LinkedButton;
         $link->setTitle('Title');
         $link->setLink('http://mywebsite.com/some-page');
-        $expected = '<div id="my" class="card"><div class="card-body">'
+        $expected = '<div id="my" class="card card-primary"><div class="card-body">'
             . $link->drawWithWrappers()
             . '</div></div>';
-        $link->wrap(new Wrapper('.card#my/.card-body'));
+        $wrapper = new Wrapper('.card#my/.card-body');
+        $wrapper->addClass('card-primary');
+        $link->wrap($wrapper);
         $this->assertEquals($expected, $link->drawWithWrappers());
     }
 
