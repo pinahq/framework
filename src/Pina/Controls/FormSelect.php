@@ -36,19 +36,33 @@ class FormSelect extends FormInput
 
     protected function drawControl()
     {
+        return Html::tag('select', $this->drawOptions(), $this->makeInputOptions());
+    }
+
+    protected function drawOptions()
+    {
         $options = '';
-        
+
         if ($this->placeholder) {
             $options .= Html::tag('option', $this->placeholder, ['value' => '']);
         }
-        
+
         foreach ($this->variants as $variant) {
             $title = isset($variant['title']) ? $variant['title'] : '';
             $id = isset($variant['id']) ? $variant['id'] : $title;
             $options .= Html::tag('option', $title, ['value' => $id, 'selected' => $this->value == $id ? 'selected' : null]);
         }
 
-        return Html::tag('select', $options, array_filter(['name' => $this->name . ($this->multiple ? '[]' : ''), 'value' => $this->value, 'multiple' => $this->multiple, 'class' => 'form-control']));
+        return $options;
+    }
+
+    protected function makeInputOptions()
+    {
+        $options = ['multiple' => $this->multiple, 'class' => 'form-control'];
+        if ($this->name) {
+            $options['name'] = $this->name . ($this->multiple ? '[]' : '');
+        }
+        return array_filter($options);
     }
 
 }
