@@ -4,8 +4,9 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Layouts\DefaultLayout;
+use Pina\ResponseInterface;
 
-abstract class Control extends AttributedBlock
+abstract class Control extends AttributedBlock implements ResponseInterface
 {
 
     protected $isBuildStarted = false;
@@ -185,7 +186,7 @@ abstract class Control extends AttributedBlock
     /**
      * @return string
      */
-    public function compile()
+    protected function compile()
     {
         $r = '';
         foreach ($this->innerBefore as $c) {
@@ -231,6 +232,13 @@ abstract class Control extends AttributedBlock
     public function __toString()
     {
         return $this->drawWithWrappers();
+    }
+
+    public function send()
+    {
+        header('HTTP/1.1 200 OK');
+        header('Content-Type: text/html');
+        echo $this->__toString();
     }
 
 

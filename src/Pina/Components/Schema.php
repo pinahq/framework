@@ -25,6 +25,11 @@ class Schema implements IteratorAggregate
     /**
      * @var callable[]
      */
+    protected $metaProcessors = [];
+
+    /**
+     * @var callable[]
+     */
     protected $dataProcessors = [];
 
     /**
@@ -331,6 +336,24 @@ class Schema implements IteratorAggregate
     public function getHtmlProcessors()
     {
         return $this->htmlProcessors;
+    }
+
+
+    /**
+     *
+     * @param mixed $line
+     * @return mixed
+     */
+    public function processLineAsMeta($line)
+    {
+        $meta = [];
+        foreach ($this->metaProcessors as $p) {
+            $meta = array_merge($meta, $p($line));
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $meta = array_merge($meta, $group->processLineAsMeta($line));
+        }
+        return $meta;
     }
 
     /**

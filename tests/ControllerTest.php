@@ -7,6 +7,8 @@ use Pina\Controls\Form;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\Paragraph;
+use Pina\Controls\RecordForm;
+use Pina\Controls\RecordView;
 use Pina\CronEventEndpoint;
 use Pina\App;
 use Pina\CSRF;
@@ -43,20 +45,26 @@ class ControllerTest extends TestCase
 
         Pina\CronEventGateway::instance()->truncate();
         Pina\CronEventGateway::instance()->insert($data);
-
+        $tableContent = '';
+        foreach ($data as $k => $v) {
+            $data[$k]['id'] = Pina\CronEventGateway::instance()->whereBy('created', $v['created'])->id();
+            $tableContent .= '<tr>' . implode(
+                    array_map(function ($a) {
+                        return '<td>' . $a . '</td>';
+                    }, $data[$k])
+                ) . '</tr>';
+        }
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>Event</th><th>Data</th><th>Priority</th><th>Created at</th></tr>'
-            . '<tr><td>order.paid</td><td>123</td><td>1</td><td>2020-01-02 03:04:05</td></tr>'
-            . '<tr><td>order.canceled</td><td>124</td><td>0</td><td>2020-01-02 04:05:06</td></tr>'
-            . '<tr><td>order.returned</td><td>125</td><td>1</td><td>2020-01-02 05:06:07</td></tr>'
+            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Created at</th></tr>'
+            . $tableContent
             . '</table>'
             . '</div></div>';
 
         $endpoint = new CronEventEndpoint();
-        $html = $endpoint->index()->forgetField('id')->drawWithWrappers();
-        $this->assertEquals($expectedHtml, $html);
+        $r = $endpoint->index();
+        $this->assertEquals($expectedHtml, (string)$r);
 
         $id = Pina\CronEventGateway::instance()->id();
 
@@ -67,23 +75,25 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             . '</div></div>';
 
-        $html = $endpoint->show($id)->drawWithWrappers();
-        $this->assertEquals($expectedRowHtml, $html);
+        $r = $endpoint->show($id);
+        $this->assertEquals($expectedRowHtml, (string)$r);
 
         $router = App::router();
         $router->register('cron-events', CronEventEndpoint::class);
         $router->register('lk/:profile_id/cron-events', CronEventEndpoint::class);
 
-        $html = $router->run("cron-events", 'get')->forgetField('id')->drawWithWrappers();
+        $html = $router->run("cron-events", 'get')->drawWithWrappers();
         $this->assertEquals($expectedHtml, $html);
-        $html = $router->run("lk/1/cron-events", 'get')->forgetField('id')->drawWithWrappers();
+        $html = $router->run("lk/1/cron-events", 'get')->drawWithWrappers();
         $this->assertEquals($expectedHtml, $html);
         $this->assertEmpty($router->run("lk/1/cron-events/2/active-triggers", 'get')->drawWithWrappers());
 
 
-        $form = (new RecordFormComponent)
-            ->basedOn($router->run("lk/1/cron-events/" . $id, 'get'))
-            ->forgetField('id')
+        /** @var RecordView $r */
+        $r = $router->run("lk/1/cron-events/" . $id, 'get');
+
+        $form = (new RecordForm)
+            ->load($r->getPayload())
             ->setMethod('PUT')
             ->setAction("lk/1/cron-events/" . $id);
 
@@ -102,17 +112,16 @@ class ControllerTest extends TestCase
             . '</form>';
 
 
-        $this->assertEquals($expectedRowEditHtml, $form->drawWithWrappers());
+        $this->assertEquals($expectedRowEditHtml, (string) $form);
 
-
-        /** @var RecordFormComponent $component */
-        $component = $router->run("lk/1/cron-events/" . $id, 'get')
-            ->forgetField('id')
-            ->turnTo('form')
+        /** @var RecordView $view */
+        $view = $router->run("lk/1/cron-events/" . $id, 'get');
+        $form = new RecordForm();
+        $form->load($view->getPayload())
             ->setMethod("PUT")
             ->setAction("lk/1/cron-events/" . $id);
 
-        $cl = $component->getFormClass();
+        $cl = $form->getFormClass();
 
         $expectedWrapHtml = ''
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
@@ -127,17 +136,17 @@ class ControllerTest extends TestCase
             . '</form>';
 
         App::container()->set(FormStatic::class, FormInput::class);
-        $this->assertEquals($expectedWrapHtml, $component->drawWithWrappers());
+        $this->assertEquals($expectedWrapHtml, (string) $form);
         App::container()->set(FormStatic::class, FormStatic::class);
 
-        $component = $router->run("lk/1/cron-events/" . $id, 'get')->forgetField('id');
-        $component->wrap(new Pina\Controls\TableCell);
-        $component->wrap(new Pina\Controls\TableRow);
-        $component->wrap(new Pina\Controls\Table);
+        $r = $router->run("lk/1/cron-events/" . $id, 'get');
+        $r->wrap(new Pina\Controls\TableCell);
+        $r->wrap(new Pina\Controls\TableRow);
+        $r->wrap(new Pina\Controls\Table);
         $note = (new Paragraph)->setText('note');
         $form = (new Form)->setAction('/')->setMethod('delete');
         $form->append($note);
-        $component->wrap($form);
+        $r->wrap($form);
 
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
@@ -152,7 +161,7 @@ class ControllerTest extends TestCase
             . '<p>note</p>'
             . '</form>';
 
-        $this->assertEquals($expectedWrapHtml, $component->drawWithWrappers());
+        $this->assertEquals($expectedWrapHtml, (string) $r);
 
         $expectedWrapHtml = '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
@@ -163,7 +172,7 @@ class ControllerTest extends TestCase
             . '</div></div>'
             . '</td></tr></table>';
 
-        $this->assertEquals($expectedWrapHtml, $component->unwrap()->drawWithWrappers());
+        $this->assertEquals($expectedWrapHtml, (string) $r->unwrap());
 
         $r = $router->run("lk/1/cron-events", 'delete');
         $class = new ReflectionClass($r);

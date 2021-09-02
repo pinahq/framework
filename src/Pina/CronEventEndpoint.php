@@ -3,10 +3,14 @@
 namespace Pina;
 
 use Pina\Components\BreadcrumbComponent;
-use Pina\Components\Schema;
+use Pina\Data\Schema;
 use Pina\Components\TableComponent;
 use Pina\Components\ListComponent;
 use Pina\Components\RecordViewComponent;
+use Pina\Controls\RecordView;
+use Pina\Controls\TableView;
+use Pina\Data\DataRecord;
+use Pina\Data\DataTable;
 use Pina\Http\Endpoint;
 
 class CronEventEndpoint extends Endpoint
@@ -33,21 +37,24 @@ class CronEventEndpoint extends Endpoint
     {
         $data = CronEventGateway::instance()->get();
 
-        return (new TableComponent())
-                ->load($data, $this->schema)
-                ->setMeta('title', 'Events')
-                ->setMeta('breadcrumb', $this->getBreadcrumb())
+        return (new TableView)
+                ->load(new DataTable($data, $this->schema))
+//                ->setMeta('title', 'Events')
+//                ->setMeta('breadcrumb', $this->getBreadcrumb())
         ;
     }
 
     public function show($id)
     {
         $data = CronEventGateway::instance()->find($id);
-        
-        return (new RecordViewComponent())
-                ->load($data, $this->schema)
-                ->setMeta('title', $data['event'])
-                ->setMeta('breadcrumb', $this->getBreadcrumb()->push(['title' => 'Event ' . $data['event'], 'link' => $this->location->link('@')]))
+
+        $schema = clone($this->schema);
+        $schema->forgetField('id');
+
+        return (new RecordView)
+                ->load(new DataRecord($data, $schema))
+//                ->setMeta('title', $data['event'])
+//                ->setMeta('breadcrumb', $this->getBreadcrumb()->push(['title' => 'Event ' . $data['event'], 'link' => $this->location->link('@')]))
         ;
     }
     
