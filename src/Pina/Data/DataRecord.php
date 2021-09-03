@@ -47,12 +47,11 @@ class DataRecord
         return $this->schema->processLineAsMeta($this->data);
     }
 
+
     public function getMeta($prop)
     {
         $meta = $this->getMetaData();
-        return isset($meta[$prop]) ? $meta[$prop] : null;
+        return isset($meta[$prop]) ? $meta[$prop] : (isset($this->data[$prop]) ? $this->data[$prop] : null);
     }
-
-
 
 }

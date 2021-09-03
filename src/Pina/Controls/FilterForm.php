@@ -12,6 +12,14 @@ use function Pina\__;
 class FilterForm extends RecordForm
 {
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->classes = [];
+        $this->addClass($this->formClass);
+        $this->addClass('form');
+    }
+
     protected function draw()
     {
         if ($this->record->getSchema()->isEmpty()) {

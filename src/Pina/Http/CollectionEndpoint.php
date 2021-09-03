@@ -7,16 +7,18 @@ use Pina\App;
 use Pina\Arr;
 use Pina\Components\BreadcrumbComponent;
 use Pina\Components\DefaultExport;
-use Pina\Components\RecordFormComponent;
-use Pina\Components\RecordViewComponent;
 use Pina\Components\Schema;
 use Pina\Components\SelectComponent;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\LinkedButton;
 use Pina\Components\SearchFormComponent;
-use Pina\Components\TableComponent;
 use Pina\Controls\PagingControl;
+use Pina\Controls\RecordForm;
+use Pina\Controls\RecordView;
 use Pina\Controls\SidebarWrapper;
+use Pina\Controls\TableView;
+use Pina\Data\DataRecord;
+use Pina\Data\DataTable;
 use Pina\NotFoundException;
 use Pina\Paging;
 use Pina\Request;
@@ -63,6 +65,10 @@ abstract class CollectionEndpoint extends Endpoint
      */
     abstract function trigger($event, $id);
 
+    /**
+     * @return TableView
+     * @throws \Exception
+     */
     public function index()
     {
         $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getKeys());
@@ -79,11 +85,11 @@ abstract class CollectionEndpoint extends Endpoint
         Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
 
         $paging = $this->applyPaging($query, $filters);
-        return $this->makeIndexComponent()
-            ->append($paging)
-            ->append($this->makeIndexButtons())
+        return $this->makeCollectionView()
+            ->after($paging)
+            ->after($this->makeIndexButtons())
             ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()))
-            ->load($query->get(), $this->getListSchema());
+            ->load(new DataTable($query->get(), $this->getListSchema()));
     }
 
     public function show($id)
@@ -94,9 +100,9 @@ abstract class CollectionEndpoint extends Endpoint
         Request::setPlace('page_header', $title);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle(), $title)->drawWithWrappers());
 
-        return $this->makeShowComponent()
+        return $this->makeRecordView()
             ->wrap($this->makeSidebarWrapper())
-            ->load($item, $this->getSchema());
+            ->load(new DataRecord($item, $this->getSchema()));
     }
 
 
@@ -110,7 +116,7 @@ abstract class CollectionEndpoint extends Endpoint
 
         return $this->makeCreateForm()
             ->wrap($this->makeSidebarWrapper())
-            ->load([], $this->getCreationSchema());
+            ->load(new DataRecord([], $this->getCreationSchema()));
     }
 
     public function store()
@@ -133,9 +139,13 @@ abstract class CollectionEndpoint extends Endpoint
 
         $this->makeQuery()->reorder($ids);
 
-        return Response::ok();
+        return Response::ok()->emptyContent();
     }
 
+    /**
+     * @param array $filters
+     * @throws \Exception
+     */
     protected function exportIfNeeded($filters)
     {
         $extension = pathinfo($this->location->link('@'), PATHINFO_EXTENSION);
@@ -155,6 +165,11 @@ abstract class CollectionEndpoint extends Endpoint
         exit;
     }
 
+    /**
+     * @param TableDataGateway $query
+     * @return SelectComponent
+     * @throws \Exception
+     */
     protected function drawIndexAsSelect(TableDataGateway $query)
     {
         $placeholder = $this->attributes()->get('placeholder');
@@ -194,38 +209,38 @@ abstract class CollectionEndpoint extends Endpoint
     }
 
     /**
-     * @return TableComponent
+     * @return TableView
      */
-    protected function makeIndexComponent()
+    protected function makeCollectionView()
     {
-        return App::make(TableComponent::class);
+        return App::make(TableView::class);
     }
 
-    protected function makeShowComponent()
+    protected function makeRecordView()
     {
         $display = $this->query()->get('display');
-        $component = $display == 'edit' ? $this->makeEditForm() : $this->makeView();
+        $component = $display == 'edit' ? $this->makeEditForm() : $this->makeViewForm();
         return $component;
     }
 
     protected function makeEditForm()
     {
-        /** @var RecordFormComponent $form */
-        $form = App::make(RecordFormComponent::class);
+        /** @var RecordForm $form */
+        $form = App::make(RecordForm::class);
         $form->setMethod('put')->setAction($this->location->link('@'));
         $form->getButtonRow()->append($this->makeCancelButton());
         return $form;
     }
 
-    protected function makeView()
+    protected function makeViewForm()
     {
-        return App::make(RecordViewComponent::class)->append($this->makeViewButtonRow());
+        return App::make(RecordView::class)->after($this->makeViewButtonRow());
     }
 
     protected function makeCreateForm()
     {
-        /** @var RecordFormComponent $form */
-        $form = App::make(RecordFormComponent::class);
+        /** @var RecordForm $form */
+        $form = App::make(RecordForm::class);
         $form->setMethod('post')->setAction($this->base->link('@'));
         return $form;
     }

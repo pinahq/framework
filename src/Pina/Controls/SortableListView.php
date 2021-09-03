@@ -3,70 +3,109 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\Controls\Interfaces\LinkedListItemInterface;
+use Pina\CSRF;
+use Pina\Data\DataRecord;
+use Pina\Data\DataTable;
 use Pina\Html;
+use Pina\ResourceManagerInterface;
+use Pina\StaticResource\Script;
 
-class SortableListView extends UnorderedList
+/**
+ * Class SortableListView
+ * @package Pina\Controls
+ * TODO: унаследовать все-таки от UnorderedList, а не от карточки. Для этого переделать логику работы after/before, они должны вставлять контент после враппера
+ */
+class SortableListView extends Card
 {
-    /**
-     * @var LinkedListItemInterface[]
-     */
-    protected $data;
+
+    protected $method = '';
+    protected $resource = '';
+    protected $params = '';
 
     /**
-     * @param LinkedListItemInterface[] $data
+     * @var DataTable
+     */
+    protected $dataTable;
+
+    /**
+     * @param DataTable $dataTable
      */
     public function load($data)
     {
-        $this->data = $data;
+        $this->dataTable = $data;
         return $this;
     }
 
     public function __construct()
     {
-        $this
-            ->addClass('feeds')
-            ->addClass('ui-sortable')
-            ->addClass('pina-sortable');
+        $this->resources()->append((new Script())->setSrc('/static/default/js/pina.sortable.js'));
     }
 
     public function setHandler($resource, $method, $params)
     {
-        $this->setDataAttribute('method', $method);
-        $this->setDataAttribute('resource', ltrim($resource, '/'));
-        $this->setDataAttribute('params', htmlspecialchars(http_build_query($params), ENT_COMPAT));
+        $this->method = $method;
+        $this->resource = ltrim($resource, '/');
+        $this->params = htmlspecialchars(http_build_query($params), ENT_COMPAT);
         return $this;
     }
 
     protected function compile()
     {
-        $content = '';
-        foreach ($this->data as $item) {
-            $content .= $this->makeListItem($item);
+        $list = $this->makeList();
+        $list->setDataAttribute('method', $this->method);
+        $list->setDataAttribute('resource', $this->resource);
+        $list->setDataAttribute('params', $this->params);
+        $csrfAttributes = CSRF::tagAttributeArray($this->method);
+        if (!empty($csrfAttributes['data-csrf-token'])) {
+            $list->setDataAttribute('csrf-token', $csrfAttributes['data-csrf-token']);
         }
-        return $content . parent::compile();
+        foreach ($this->dataTable as $record) {
+            /** @var DataRecord $record */
+            $list->append($this->makeListItem($record));
+        }
+        return $list . parent::compile();
     }
 
     /**
-     * @param LinkedListItemInterface $item
+     * @return UnorderedList
+     */
+    protected function makeList()
+    {
+        return App::make(UnorderedList::class)
+            ->addClass('feeds')
+            ->addClass('ui-sortable')
+            ->addClass('pina-sortable');
+    }
+
+    /**
+     * @param DataRecord $record
      * @return ListItem
      */
-    protected function makeListItem($item)
+    protected function makeListItem($record)
     {
         /** @var ListItem $li */
         $li = App::make(ListItem::class);
         $li->addClass('draggable')->addClass('ui-sortable-handle');
-        $li->addClass($item->getHtmlClass());
-        $li->setDataAttribute('id', $item->getId());
+        $li->addClass($record->getMeta('class'));
+        $li->setDataAttribute('id', $record->getMeta('id'));
 
-        $subtitle = $item->getText();
+        $subtitle = $record->getMeta('subtitle');
         $muted = '';
         if (!empty($subtitle)) {
             $muted = Html::tag('span', $subtitle, ['class' => 'text-muted']);
         }
-        $li->setText($item->getIconHtml() . $muted . Html::a($item->getTitle(), $item->getLink()));
+        $li->setText($record->getMeta('icon') . $muted . Html::a($record->getMeta('title'), $record->getMeta('link')));
         return $li;
     }
 
+
+    /**
+     *
+     * @return ResourceManagerInterface
+     */
+    protected function resources()
+    {
+        return App::container()->get(ResourceManagerInterface::class);
+    }
 
 }

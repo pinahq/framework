@@ -3,7 +3,6 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\Data\DataRecord;
 use Pina\ResourceManagerInterface;
 use Pina\StaticResource\Script;
 
@@ -28,6 +27,11 @@ class RecordForm extends Form
         $this->formClass = uniqid('fm');
         $this->addClass($this->formClass);
         $this->addClass('form pina-form');
+    }
+
+    public function getButtonRow()
+    {
+        return $this->buttonRow;
     }
 
     /**

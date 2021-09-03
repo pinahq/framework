@@ -4,11 +4,11 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Controls\RawHtml;
-use Pina\Components\SortableListComponent;
+use Pina\Controls\SortableListView;
 
 abstract class SortableCollectionEndpoint extends CollectionEndpoint
 {
-    protected function makeIndexComponent()
+    protected function makeCollectionView()
     {
         return $this->makeSortableList()->setHandler(
             $this->base->resource('@/all/sortable'),
@@ -18,11 +18,11 @@ abstract class SortableCollectionEndpoint extends CollectionEndpoint
     }
 
     /**
-     * @return SortableListComponent
+     * @return SortableListView
      */
     protected function makeSortableList()
     {
-        return App::make(SortableListComponent::class);
+        return App::make(SortableListView::class);
     }
 
     protected function makeFilteredQuery($filters)

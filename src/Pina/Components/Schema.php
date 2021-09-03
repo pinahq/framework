@@ -214,6 +214,42 @@ class Schema implements IteratorAggregate
      * @param callable $callback
      * @return $this
      */
+    public function pushMetaProcessor($callback)
+    {
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException(
+                'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
+                    $callback,
+                    true
+                ) . ' given'
+            );
+        }
+        array_push($this->metaProcessors, $callback);
+
+        return $this;
+    }
+
+    /**
+     * Removes the processor on top of the stack and returns it.
+     *
+     * @return callable
+     */
+    public function popMetaProcessor()
+    {
+        if (!$this->metaProcessors) {
+            throw new LogicException('You tried to pop from an empty processor stack.');
+        }
+
+        return array_pop($this->metaProcessors);
+    }
+
+
+    /**
+     * Adds a processor on to the stack.
+     *
+     * @param callable $callback
+     * @return $this
+     */
     public function pushDataProcessor($callback)
     {
         if (!is_callable($callback)) {
