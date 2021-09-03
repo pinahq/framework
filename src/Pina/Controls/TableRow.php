@@ -10,7 +10,6 @@ use Pina\Html;
  */
 class TableRow extends Control
 {
-    use ContainerTrait;
 
     public function draw()
     {
@@ -19,11 +18,6 @@ class TableRow extends Control
             $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
             $this->makeAttributes()
         );
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
 }

@@ -11,8 +11,6 @@ use Pina\Html;
 class Card extends Control
 {
 
-    use ContainerTrait;
-
     protected $title = '';
 
     /**
@@ -41,11 +39,6 @@ class Card extends Control
             ),
             $this->makeAttributes(['class' => 'card'])
         );
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
 }

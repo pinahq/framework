@@ -10,8 +10,6 @@ use Pina\Html;
  */
 class Button extends Control
 {
-    use ContainerTrait;
-
     protected $title = '';
     protected $style = 'default';
 

@@ -3,7 +3,6 @@
 namespace Pina\Layouts;
 
 use Pina\App;
-use Pina\Controls\ContainerTrait;
 use Pina\Controls\Control;
 use Pina\Html;
 use Pina\Components\Data;
@@ -11,7 +10,6 @@ use Pina\ResourceManagerInterface;
 
 class DefaultLayout extends Control
 {
-    use ContainerTrait;
 
     protected function draw()
     {
@@ -23,17 +21,6 @@ class DefaultLayout extends Control
     protected function makeBody()
     {
         return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
-    }
-
-    protected function drawInner()
-    {
-        return '';
-    }
-
-    protected function place($name, $default = '')
-    {
-        return isset($this->controls[0]) && $this->controls[0] instanceof Data ? $this->controls[0]->getMeta($name)
-            : (isset($this->after[0]) && $this->after[0] instanceof Data ? $this->after[0]->getMeta($name) : '');
     }
 
     protected function makeCss()

@@ -11,8 +11,6 @@ use Pina\Html;
 class Table extends Control
 {
 
-    use ContainerTrait;
-
     public function draw()
     {
         return Html::tag(
@@ -20,11 +18,6 @@ class Table extends Control
             $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
             $this->makeAttributes()
         );
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
 }

@@ -12,8 +12,6 @@ use Pina\Html;
 class Form extends Control
 {
 
-    use ContainerTrait;
-
     protected $action = '';
     protected $method = 'get';
 
@@ -42,11 +40,6 @@ class Form extends Control
         $csrf = CSRF::formField($this->method);
 
         return Html::tag('form', $csrf . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(), $this->makeAttributes());
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
     /**

@@ -2,8 +2,6 @@
 
 namespace Pina\Controls;
 
-use Pina\Html;
-
 class Json extends Control
 {
 
@@ -17,7 +15,11 @@ class Json extends Control
 
     protected function draw()
     {
-        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
     }
 
+    protected function drawInner()
+    {
+        return \json_encode($this->data, JSON_UNESCAPED_UNICODE);
+    }
 }

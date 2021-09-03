@@ -26,6 +26,11 @@ class CSRFHidden extends Control
 
     protected function draw()
     {
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+    }
+
+    protected function drawInner()
+    {
         return CSRF::formField($this->method);
     }
 

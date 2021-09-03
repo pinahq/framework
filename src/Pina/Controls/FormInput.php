@@ -10,8 +10,6 @@ use Pina\Html;
  */
 class FormInput extends Control
 {
-    use ContainerTrait;
-
     protected $title = '';
     protected $name = '';
     protected $value = '';

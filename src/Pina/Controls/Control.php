@@ -10,19 +10,34 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 {
 
     /**
+     * Обёртки контрола
      * @var Control[]
      */
     protected $wrappers = [];
 
     /**
+     * Элементы, располагающиеся за данным контролом
      * @var Control[]
      */
     protected $after = [];
 
     /**
+     * Элементы, располагающиеся перед данным контролом
      * @var Control[]
      */
     protected $before = [];
+
+    /**
+     * Элементы, располагающиеся внутри контейнера данного контрола после внутреннего контента
+     * @var Control[]
+     */
+    protected $innerAfter = [];
+
+    /**
+     * Элементы, располагающиеся внутри контейнера данного контрола до внутреннего контента
+     * @var Control[]
+     */
+    protected $innerBefore = [];
 
     /**
      * @var Control|null
@@ -30,6 +45,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     protected $layout = null;
 
     /**
+     * Логика отрисовки контрола
      * @return string
      */
     abstract protected function draw();
@@ -53,6 +69,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Добавить элемент после
      * @param Control $control
      * @return $this
      */
@@ -63,6 +80,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Добавить элемент до
      * @param Control $control
      * @return $this
      */
@@ -73,6 +91,30 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Добавить элемент внутри контейнера после основного контента
+     * @param Control $control
+     * @return $this
+     */
+    public function append($control)
+    {
+        $this->innerAfter[] = $control;
+        return $this;
+    }
+
+    /**
+     * Добавить элемент внутри контейна до основного контента
+     * @param Control $control
+     * @return $this
+     */
+    public function prepend($control)
+    {
+        array_unshift($this->innerBefore, $control);
+        return $this;
+    }
+
+
+    /**
+     * Обернуть контрол оберткой
      * @param Control $wrapper
      * @return $this
      */
@@ -82,6 +124,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Снять внешнюю обертку с контрола
      * @return $this
      */
     public function unwrap()
@@ -91,6 +134,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Обернуть контрол оберткой
      * @param Control $wrapper
      * @return $this
      */
@@ -101,6 +145,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Снять внешнюю обертку с контрола и получить ее
      * @return Control|null
      */
     public function popWrapper()
@@ -109,6 +154,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Проверить, есть ли еще обертки у контрола
      * @return bool
      */
     public function hasWrapper()
@@ -117,6 +163,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Отрисовать контрол вместе с обертками и связанными элементами
      * @return string
      */
     public function drawWithWrappers()
@@ -142,6 +189,42 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
+     * Отрисовать связанные элементы внутри контейнера до основного контента
+     * @return string
+     */
+    protected function drawInnerBefore()
+    {
+        $r = '';
+        foreach ($this->innerBefore as $c) {
+            $r .= $c->drawWithWrappers();
+        }
+        return $r;
+    }
+
+    /**
+     * Отрисовать основной контент
+     * @return string
+     */
+    protected function drawInner()
+    {
+        return '';
+    }
+
+    /**
+     * Отрисовать связанные элементы внутри контейнера после основного контента
+     * @return string
+     */
+    protected function drawInnerAfter()
+    {
+        $r = '';
+        foreach ($this->innerAfter as $c) {
+            $r .= $c->drawWithWrappers();
+        }
+        return $r;
+    }
+
+    /**
+     * Преобразовать в строку путем отрисовки контрола вместе с обертками и связанными элементами
      * @return string
      */
     public function __toString()

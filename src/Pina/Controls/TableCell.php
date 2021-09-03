@@ -10,7 +10,6 @@ use Pina\Html;
  */
 class TableCell extends Control
 {
-    use ContainerTrait;
 
     protected $text = '';
 

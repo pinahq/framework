@@ -8,7 +8,6 @@ use Pina\Html;
 
 class Wrapper extends Control
 {
-    use ContainerTrait;
 
     protected $path = '';
 
@@ -24,11 +23,6 @@ class Wrapper extends Control
             $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
             $this->makeAttributes()
         );
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
 }

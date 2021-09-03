@@ -7,7 +7,6 @@ use Pina\App;
 class RecordView extends Control
 {
     use RecordTrait;
-    use ContainerTrait;
 
     protected function draw()
     {

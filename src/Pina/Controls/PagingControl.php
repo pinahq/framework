@@ -27,34 +27,55 @@ class PagingControl extends Control
 
     protected function draw()
     {
+        return Html::tag(
+            'ul',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes(['class' => 'pagination'])
+        );
+    }
+
+    protected function drawInner()
+    {
         $items = [];
 
         $current = $this->paging->getCurrent();
         $total = $this->paging->getPagesCount();
-        
+
         if ($total <= 1) {
             return '';
         }
 
-        for ($i = 1; $i <= $this->paging->getPagesCount(); $i ++) {
-
+        for ($i = 1; $i <= $this->paging->getPagesCount(); $i++) {
             $digits = ($i <= $current && $i >= $current - 1)
                 || ($i >= $current && $i <= $current + 1)
-                || ($i <= 5 &&  $current <= 4)
-                || ($i >= $total - 4 &&  $current >= $total - 3)
+                || ($i <= 5 && $current <= 4)
+                || ($i >= $total - 4 && $current >= $total - 3)
                 || $i == 1
                 || $i == $total;
 
             $dotted = ($i < $current && $i == 2) || ($i > $current && $i == $total - 1);
 
             if ($digits) {
-                $items [] = Html::tag('li', Html::a($i, App::link(App::resource(), array_merge($this->linkContext, ['page' => $i])), ['class' => 'page-link']), ['class' => 'page-item' . ($i == $current ? ' active' : '')]);
+                $items [] = Html::tag(
+                    'li',
+                    Html::a(
+                        $i,
+                        App::link(App::resource(), array_merge($this->linkContext, ['page' => $i])),
+                        ['class' => 'page-link']
+                    ),
+                    ['class' => 'page-item' . ($i == $current ? ' active' : '')]
+                );
             } elseif ($dotted) {
-                $items [] = Html::tag('li', Html::a('...', '', ['class' => 'page-link']), ['class' => 'page-item disabled']);
+                $items [] = Html::tag(
+                    'li',
+                    Html::a('...', '', ['class' => 'page-link']),
+                    ['class' => 'page-item disabled']
+                );
             }
         }
 
         return Html::tag('ul', implode('', $items), ['class' => 'pagination']);
     }
+
 
 }

@@ -11,8 +11,6 @@ use Pina\Html;
 class ListItem extends Control
 {
 
-    use ContainerTrait;
-
     protected $text = '';
 
     /**

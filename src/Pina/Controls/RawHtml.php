@@ -8,7 +8,6 @@ namespace Pina\Controls;
  */
 class RawHtml extends Control
 {
-    use ContainerTrait;
 
     protected $text = '';
 

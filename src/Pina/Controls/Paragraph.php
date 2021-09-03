@@ -10,7 +10,6 @@ use Pina\Html;
  */
 class Paragraph extends Control
 {
-    use ContainerTrait;
 
     protected $text = '';
 

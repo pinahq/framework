@@ -12,8 +12,6 @@ use Pina\Html;
  */
 class ButtonRow extends Control
 {
-    use ContainerTrait;
-
     /** @var Button */
     protected $main = null;
 
@@ -49,11 +47,6 @@ class ButtonRow extends Control
         }
 
         return $this->drawMain();
-    }
-
-    protected function drawInner()
-    {
-        return '';
     }
 
     protected function drawMain()
