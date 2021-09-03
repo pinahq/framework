@@ -10,6 +10,7 @@ use Pina\Html;
  */
 class FormInput extends Control
 {
+    use ContainerTrait;
 
     protected $title = '';
     protected $name = '';
@@ -69,9 +70,18 @@ class FormInput extends Control
 
     protected function draw()
     {
+        return Html::tag(
+            'div',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes(['class' => 'form-group'])
+        );
+    }
+
+    protected function drawInner()
+    {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
         $r .= $this->drawControl();
-        return Html::tag('div', $r, $this->makeAttributes(['class' => 'form-group']));
+        return $r;
     }
 
     protected function drawControl()

@@ -2,14 +2,19 @@
 
 namespace Pina\Controls;
 
-use Pina\Data\DataRecord;
 use Pina\App;
 
 class RecordView extends Control
 {
     use RecordTrait;
+    use ContainerTrait;
 
     protected function draw()
+    {
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+    }
+
+    protected function drawInner()
     {
         $data = $this->record->getHtmlData();
 

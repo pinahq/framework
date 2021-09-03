@@ -15,6 +15,11 @@ class HiddenInput extends FormInput
 
     protected function draw()
     {
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+    }
+
+    protected function drawInner()
+    {
         $options = ['type' => $this->type, 'value' => $this->value];
         if ($this->name) {
             $options['name'] = $this->name;
