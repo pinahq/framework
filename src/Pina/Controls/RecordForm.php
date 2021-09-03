@@ -7,6 +7,11 @@ use Pina\Data\DataRecord;
 use Pina\ResourceManagerInterface;
 use Pina\StaticResource\Script;
 
+use function Pina\__;
+
+/**
+ * Форма редактирования
+ */
 class RecordForm extends Form
 {
     use RecordTrait;
@@ -19,13 +24,16 @@ class RecordForm extends Form
     public function __construct()
     {
         $this->buttonRow = App::make(ButtonRow::class);
-        $mainButton = $this->makeSubmit()->setTitle('Сохранить');
-        $this->buttonRow->setMain($mainButton);
+        $this->buttonRow->setMain($this->makeSubmit());
         $this->formClass = uniqid('fm');
         $this->addClass($this->formClass);
         $this->addClass('form pina-form');
     }
 
+    /**
+     * Получить уникальное имя класса тега формы, которое используется для javascript-обработчика
+     * @return string
+     */
     public function getFormClass()
     {
         return $this->formClass;
@@ -77,7 +85,7 @@ class RecordForm extends Form
      */
     protected function makeSubmit()
     {
-        return App::make(SubmitButton::class);
+        return App::make(SubmitButton::class)->setTitle(__('Сохранить'));
     }
 
     /**

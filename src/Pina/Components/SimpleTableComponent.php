@@ -7,6 +7,9 @@ use Pina\Controls\Table;
 use Pina\Controls\TableHeaderCell;
 use Pina\Controls\TableRow;
 
+/**
+ * @deprecated see \Pina\Controls\TableView
+ */
 class SimpleTableComponent extends ListData //implements ComponentInterface
 {
 

@@ -4,6 +4,9 @@ namespace Pina\Components;
 
 use Pina\Controls\Json;
 
+/**
+ * @deprecated see \Pina\Data\DataRecord
+ */
 class RecordData extends Data
 {
 

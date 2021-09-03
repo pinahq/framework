@@ -5,6 +5,9 @@ namespace Pina\Components;
 use Iterator;
 use Pina\Controls\Json;
 
+/**
+ * @deprecated see \Pina\Data\DataTable
+ */
 class ListData extends Data implements Iterator
 {
 

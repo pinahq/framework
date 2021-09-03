@@ -4,6 +4,9 @@ namespace Pina\Components;
 
 use Pina\Controls\RawHtml;
 
+/**
+ * @deprecated see \Pina\Controls\RecordTitle
+ */
 class TitleComponent extends RecordData
 {
 

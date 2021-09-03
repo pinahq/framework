@@ -12,6 +12,9 @@ use Pina\Controls\RawHtml;
 use Pina\Request;
 use Pina\RequestHandler;
 
+/**
+ * @deprecated
+ */
 class ModuleType extends ConfigurableType
 {
 

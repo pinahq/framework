@@ -11,7 +11,7 @@ use Pina\ResourceManagerInterface;
 use Pina\StaticResource\Script;
 
 /**
- * Форма для редактирования записи
+ * @deprecated see \Pina\Controls\RecordForm
  */
 class RecordFormComponent extends RecordData
 {

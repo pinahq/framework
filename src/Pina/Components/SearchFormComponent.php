@@ -4,6 +4,9 @@ namespace Pina\Components;
 
 use function Pina\__;
 
+/**
+ * @deprecated см \Pina\Controls\FilterForm
+ */
 class SearchFormComponent extends RecordFormComponent
 {
 

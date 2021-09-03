@@ -5,6 +5,9 @@ namespace Pina\Components;
 use Pina\Controls\TableCell;
 use Pina\Controls\TableRow;
 
+/**
+ * @deprecated see \Pina\Controls\RecordRow
+ */
 class RowComponent extends RecordData //implements ComponentInterface
 {
 

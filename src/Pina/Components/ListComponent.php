@@ -5,6 +5,9 @@ namespace Pina\Components;
 use Pina\Controls\UnorderedList;
 use Pina\Controls\ListItem;
 
+/**
+ * @deprecated to delete
+ */
 class ListComponent extends ListData //implements ComponentInterface
 {
 
@@ -12,7 +15,7 @@ class ListComponent extends ListData //implements ComponentInterface
 
     /**
      * 
-     * @param \Pina\ListData $list
+     * @param ListData $list
      * @return $this
      */
     public function basedOn(ListData $list)

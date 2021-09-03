@@ -5,6 +5,9 @@ namespace Pina\Components;
 use Pina\Controls\Card;
 use Pina\Controls\FormStatic;
 
+/**
+ * @deprecated см \Pina\Controls\RecordView
+ */
 class RecordViewComponent extends RecordData //implements ComponentInterface
 {
 

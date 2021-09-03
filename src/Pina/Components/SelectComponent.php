@@ -6,6 +6,7 @@ use Pina\Controls\FormSelect;
 
 /**
  * Выпадающий список
+ * @deprecated
  */
 class SelectComponent extends ListData
 {

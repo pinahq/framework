@@ -4,6 +4,9 @@ namespace Pina\Components;
 
 use Pina\Controls\Card;
 
+/**
+ * @deprecated see \Pina\Controls\TableView
+ */
 class TableComponent extends SimpleTableComponent //implements ComponentInterface
 {
 

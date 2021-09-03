@@ -13,6 +13,9 @@ use Pina\StaticResource\Script;
 
 use function Pina\__;
 
+/**
+ * @deprecated see \Pina\Controls\SortableListView
+ */
 class SortableListComponent extends ListData
 {
 

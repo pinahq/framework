@@ -4,6 +4,9 @@ namespace Pina\Components;
 
 use Pina\Controls\RawHtml;
 
+/**
+ * @deprecated see \Pina\Controls\RecordHeader
+ */
 class HeaderComponent extends RecordData
 {
 
