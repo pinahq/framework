@@ -67,7 +67,7 @@ class Router
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
-        $request = new Request($_GET, Input::getData(), $data, $_COOKIE, $_FILES, $_SERVER);
+        $request = new Request($_GET, Input::getData(), array_merge($data, $parsed), $_COOKIE, $_FILES, $_SERVER);
         $inst->setRequest($request);
 
         $location = new Http\Location($resource);
