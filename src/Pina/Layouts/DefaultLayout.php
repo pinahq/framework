@@ -2,14 +2,16 @@
 
 namespace Pina\Layouts;
 
+use Pina\App;
+use Pina\Controls\ContainerTrait;
 use Pina\Controls\Control;
 use Pina\Html;
-use Pina\StaticResource\Script;
-use Pina\StaticResource\Style;
 use Pina\Components\Data;
+use Pina\ResourceManagerInterface;
 
 class DefaultLayout extends Control
 {
+    use ContainerTrait;
 
     protected function draw()
     {
@@ -17,15 +19,20 @@ class DefaultLayout extends Control
         $html = Html::tag('html', $head . Html::tag('body', $this->makeBody() . $this->makeJs()));
         return '<!DOCTYPE html>' . "\n" . $html;
     }
-    
+
     protected function makeBody()
     {
-        return  $this->compile();
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
     }
-    
+
+    protected function drawInner()
+    {
+        return '';
+    }
+
     protected function place($name, $default = '')
     {
-        return isset($this->controls[0]) && $this->controls[0] instanceof Data ? $this->controls[0]->getMeta($name) 
+        return isset($this->controls[0]) && $this->controls[0] instanceof Data ? $this->controls[0]->getMeta($name)
             : (isset($this->after[0]) && $this->after[0] instanceof Data ? $this->after[0]->getMeta($name) : '');
     }
 
@@ -33,19 +40,19 @@ class DefaultLayout extends Control
     {
         return $this->resources()->fetch('css');
     }
-    
+
     protected function makeJs()
     {
         return $this->resources()->fetch('js');
     }
-    
+
     /**
-     * 
-     * @return \Pina\ResourceManagerInterface
+     *
+     * @return ResourceManagerInterface
      */
     protected function resources()
     {
-        return \Pina\App::container()->get(\Pina\ResourceManagerInterface::class);
+        return App::container()->get(ResourceManagerInterface::class);
     }
 
     protected function makeMeta()
