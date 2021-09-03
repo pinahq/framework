@@ -10,6 +10,7 @@ use Pina\Html;
  */
 class TableCell extends Control
 {
+    use ContainerTrait;
 
     protected $text = '';
 
@@ -25,7 +26,16 @@ class TableCell extends Control
 
     public function draw()
     {
-        return Html::tag('td', $this->text . $this->compile(), $this->makeAttributes());
+        return Html::tag(
+            'td',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes()
+        );
+    }
+
+    protected function drawInner()
+    {
+        return $this->text;
     }
 
 }

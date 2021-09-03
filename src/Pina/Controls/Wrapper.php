@@ -8,6 +8,8 @@ use Pina\Html;
 
 class Wrapper extends Control
 {
+    use ContainerTrait;
+
     protected $path = '';
 
     public function __construct($path)
@@ -17,7 +19,16 @@ class Wrapper extends Control
 
     protected function draw()
     {
-        return Html::nest($this->path, $this->compile(), $this->makeAttributes());
+        return Html::nest(
+            $this->path,
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes()
+        );
+    }
+
+    protected function drawInner()
+    {
+        return '';
     }
 
 }

@@ -11,6 +11,8 @@ use Pina\Html;
 class ListItem extends Control
 {
 
+    use ContainerTrait;
+
     protected $text = '';
 
     /**
@@ -25,7 +27,16 @@ class ListItem extends Control
 
     protected function draw()
     {
-        return Html::tag('li', $this->text . $this->compile(), $this->makeAttributes());
+        return Html::tag(
+            'li',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes()
+        );
+    }
+
+    protected function drawInner()
+    {
+        return $this->text;
     }
 
 }

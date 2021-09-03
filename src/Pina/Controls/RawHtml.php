@@ -8,6 +8,7 @@ namespace Pina\Controls;
  */
 class RawHtml extends Control
 {
+    use ContainerTrait;
 
     protected $text = '';
 
@@ -23,7 +24,12 @@ class RawHtml extends Control
 
     protected function draw()
     {
-        return $this->text . $this->compile();
+        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+    }
+
+    protected function drawInner()
+    {
+        return $this->text;
     }
 
 }

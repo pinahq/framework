@@ -71,7 +71,6 @@ class FormInput extends Control
     {
         $r = Html::tag('label', $this->title, ['class' => 'control-label']);
         $r .= $this->drawControl();
-        $r .= $this->compile();
         return Html::tag('div', $r, $this->makeAttributes(['class' => 'form-group']));
     }
 

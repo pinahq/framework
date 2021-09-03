@@ -6,6 +6,7 @@ use Pina\Html;
 
 class SidebarWrapper extends Control
 {
+    use ContainerTrait;
 
     /**
      * @var Control
@@ -27,9 +28,18 @@ class SidebarWrapper extends Control
 
     protected function draw()
     {
-        $left = Html::tag('div', $this->compile(), ['class' => 'col-lg-' . $this->width]);
+        $left = Html::tag(
+            'div',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            ['class' => 'col-lg-' . $this->width]
+        );
 
         return Html::tag('div', $left . $this->drawSidebar(), ['class' => 'row']);
+    }
+
+    protected function drawInner()
+    {
+        return '';
     }
 
     protected function drawSidebar()

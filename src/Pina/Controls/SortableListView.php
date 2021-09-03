@@ -49,7 +49,7 @@ class SortableListView extends Card
         return $this;
     }
 
-    protected function compile()
+    protected function drawInner()
     {
         $list = $this->makeList();
         $list->setDataAttribute('method', $this->method);
@@ -63,7 +63,7 @@ class SortableListView extends Card
             /** @var DataRecord $record */
             $list->append($this->makeListItem($record));
         }
-        return $list . parent::compile();
+        return $list;
     }
 
     /**

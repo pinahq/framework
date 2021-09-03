@@ -25,7 +25,11 @@ class LinkedButton extends Button
 
     protected function draw()
     {
-        return Html::a($this->title . $this->compile(), $this->link, $this->makeAttributes(['class' => 'btn btn-' . $this->style]));
+        return Html::a(
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->link,
+            $this->makeAttributes(['class' => 'btn btn-' . $this->style])
+        );
     }
 
 }

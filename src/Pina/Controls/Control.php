@@ -9,23 +9,6 @@ use Pina\ResponseInterface;
 abstract class Control extends AttributedBlock implements ResponseInterface
 {
 
-    protected $isBuildStarted = false;
-
-    /**
-     * @var Control[]
-     */
-    protected $controls = [];
-
-    /**
-     * @var Control[]
-     */
-    protected $innerAfter = [];
-
-    /**
-     * @var Control[]
-     */
-    protected $innerBefore = [];
-
     /**
      * @var Control[]
      */
@@ -67,48 +50,6 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     public function getLayout()
     {
         return is_null($this->layout) ? App::make(DefaultLayout::class) : $this->layout;
-    }
-
-    /**
-     * @return void
-     */
-    public function startBuild()
-    {
-        $this->isBuildStarted = true;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isBuildStarted()
-    {
-        return $this->isBuildStarted;
-    }
-
-    /**
-     * @param Control $control
-     * @return $this
-     */
-    public function append($control)
-    {
-        if ($this->isBuildStarted) {
-            //пошла сборка контролов по запросу отрисовки
-            $this->controls[] = $control;
-        } else {
-            //запоминаем, какие контролы хотят отрисоваться после основного блока
-            $this->innerAfter[] = $control;
-        }
-        return $this;
-    }
-
-    /**
-     * @param Control $control
-     * @return $this
-     */
-    public function prepend($control)
-    {
-        array_unshift($this->innerBefore, $control);
-        return $this;
     }
 
     /**
@@ -176,32 +117,6 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->innerBefore) + count($this->controls) + count($this->innerAfter);
-    }
-
-    /**
-     * @return string
-     */
-    protected function compile()
-    {
-        $r = '';
-        foreach ($this->innerBefore as $c) {
-            $r .= $c->drawWithWrappers();
-        }
-        foreach ($this->controls as $c) {
-            $r .= $c->drawWithWrappers();
-        }
-        foreach ($this->innerAfter as $c) {
-            $r .= $c->drawWithWrappers();
-        }
-        return $r;
-    }
-
-    /**
      * @return string
      */
     public function drawWithWrappers()
@@ -218,9 +133,9 @@ abstract class Control extends AttributedBlock implements ResponseInterface
         foreach ($this->wrappers as $w) {
             $raw = new RawHtml();
             $raw->setText($r);
-            array_push($w->controls, $raw);
+            array_push($w->innerAfter, $raw);
             $r = $w->drawWithWrappers();
-            array_pop($w->controls);
+            array_pop($w->innerAfter);
         }
 
         return $r;

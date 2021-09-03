@@ -10,6 +10,7 @@ use Pina\Html;
  */
 class Button extends Control
 {
+    use ContainerTrait;
 
     protected $title = '';
     protected $style = 'default';
@@ -28,7 +29,15 @@ class Button extends Control
 
     protected function draw()
     {
-        return Html::button($this->title . $this->compile(), $this->makeAttributes(['class' => 'btn btn-' . $this->style]));
+        return Html::button(
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes(['class' => 'btn btn-' . $this->style])
+        );
+    }
+
+    protected function drawInner()
+    {
+        return $this->title;
     }
 
 }

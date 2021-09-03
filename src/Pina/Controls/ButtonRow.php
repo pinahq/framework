@@ -12,6 +12,8 @@ use Pina\Html;
  */
 class ButtonRow extends Control
 {
+    use ContainerTrait;
+
     /** @var Button */
     protected $main = null;
 
@@ -24,12 +26,20 @@ class ButtonRow extends Control
         return $this;
     }
 
+    /**
+     * @return Button
+     */
+    public function getMain()
+    {
+        return $this->main;
+    }
+
     protected function draw()
     {
-        $compiled = $this->compile();
-        if ($compiled) {
+        $inner = $this->drawInnerBefore() . $this->drawInner(). $this->drawInnerAfter();
+        if ($inner) {
             $left = Html::tag('div', $this->drawMain(), ['class' => 'col-sm-4']);
-            $right = Html::tag('div', $this->compile(), ['class' => 'col-sm-8 text-right']);
+            $right = Html::tag('div', $inner, ['class' => 'col-sm-8 text-right']);
             return Html::tag('div', $left . $right, $this->makeAttributes(['class' => 'row']));
         }
 
@@ -39,6 +49,11 @@ class ButtonRow extends Control
         }
 
         return $this->drawMain();
+    }
+
+    protected function drawInner()
+    {
+        return '';
     }
 
     protected function drawMain()

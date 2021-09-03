@@ -150,6 +150,7 @@ class ControllerTest extends TestCase
 
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
+            . '<p>note</p>'
             . '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
@@ -158,7 +159,6 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             . '</div></div>'
             . '</td></tr></table>'
-            . '<p>note</p>'
             . '</form>';
 
         $this->assertEquals($expectedWrapHtml, (string) $r);

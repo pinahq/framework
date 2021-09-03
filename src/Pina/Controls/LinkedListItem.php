@@ -35,7 +35,15 @@ class LinkedListItem extends ListItem
 
     protected function draw()
     {
-        return Html::tag('li', Html::a($this->text . $this->compile(), $this->link, ['class' => $this->linkClass]), $this->makeAttributes());
+        return Html::tag(
+            'li',
+            Html::a(
+                $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+                $this->link,
+                ['class' => $this->linkClass]
+            ),
+            $this->makeAttributes()
+        );
     }
 
 }

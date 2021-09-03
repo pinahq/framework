@@ -43,9 +43,9 @@ class RecordForm extends Form
         return $this->formClass;
     }
 
-    protected function compile()
+    protected function drawInner()
     {
-        $content = parent::compile();
+        $content = '';
 
         $data = $this->record->getData();
         foreach ($this->record->getSchema()->getGroupIterator() as $schema) {

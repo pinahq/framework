@@ -10,6 +10,7 @@ use Pina\Html;
  */
 class Paragraph extends Control
 {
+    use ContainerTrait;
 
     protected $text = '';
 
@@ -25,7 +26,16 @@ class Paragraph extends Control
 
     protected function draw()
     {
-        return Html::tag('p', $this->text . $this->compile(), $this->makeAttributes());
+        return Html::tag(
+            'p',
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->makeAttributes()
+        );
+    }
+
+    protected function drawInner()
+    {
+        return $this->text;
     }
 
 }

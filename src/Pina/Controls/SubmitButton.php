@@ -16,7 +16,7 @@ class SubmitButton extends Button
     protected function draw()
     {
         return Html::button(
-            $this->title . $this->compile(),
+            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
             $this->makeAttributes(['class' => 'btn btn-' . $this->style, 'type' => 'submit'])
         );
     }

@@ -13,7 +13,7 @@ class FormStatic extends FormInput
 
     protected function drawControl()
     {
-        return Html::tag('p', $this->value . $this->compile(), ['class' => 'form-control-static']);
+        return Html::tag('p', $this->value, ['class' => 'form-control-static']);
     }
 
 }

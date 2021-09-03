@@ -11,6 +11,8 @@ use Pina\Html;
 class Card extends Control
 {
 
+    use ContainerTrait;
+
     protected $title = '';
 
     /**
@@ -30,7 +32,20 @@ class Card extends Control
         if ($this->title) {
             $header = Html::tag('h5', $this->title, ['class' => 'card-title']);
         }
-        return Html::tag('div', Html::tag('div', $header . $this->compile(), ['class' => 'card-body']), $this->makeAttributes(['class' => 'card']));
+        return Html::tag(
+            'div',
+            Html::tag(
+                'div',
+                $header . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+                ['class' => 'card-body']
+            ),
+            $this->makeAttributes(['class' => 'card'])
+        );
+    }
+
+    protected function drawInner()
+    {
+        return '';
     }
 
 }

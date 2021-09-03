@@ -3,10 +3,8 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\Components\RowComponent;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\Html;
 
 class TableView extends Card
 {
@@ -32,7 +30,7 @@ class TableView extends Card
         return $this->dataTable->getSchema();
     }
 
-    protected function compile()
+    protected function drawInner()
     {
         $table = $this->makeTable();
         $table->append($this->buildHeader($this->dataTable->getSchema()->getTitles()));
@@ -41,7 +39,7 @@ class TableView extends Card
             /** @var DataRecord $record */
             $table->append($this->makeRow()->load($record));
         }
-        return parent::compile() . $table;
+        return $table;
     }
 
     protected function buildHeader($data)

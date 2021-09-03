@@ -10,11 +10,17 @@ use Pina\Html;
  */
 class UnorderedList extends Control
 {
+    use ContainerTrait;
 
     protected function draw()
     {
-        $compiled = $this->compile();
-        return $compiled ? Html::tag('ul', $compiled, $this->makeAttributes()) : '';
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        return $inner ? Html::tag('ul', $inner, $this->makeAttributes()) : '';
+    }
+
+    protected function drawInner()
+    {
+        return '';
     }
 
 }
