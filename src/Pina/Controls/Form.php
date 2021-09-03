@@ -13,7 +13,7 @@ class Form extends Control
 {
 
     protected $action = '';
-    protected $method = '';
+    protected $method = 'get';
 
     /**
      * @param string $action
@@ -61,7 +61,7 @@ class Form extends Control
         $action = $this->buildParsed($parsed);
 
         $attributes = array_merge(['method' => $method, 'action' => $action], $attributes);
-        
+
         return parent::makeAttributes($attributes);
     }
 
