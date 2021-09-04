@@ -8,6 +8,24 @@ use Pina\App;
 class UrlTest extends TestCase
 {
 
+    public function testLocation()
+    {
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $location = new \Pina\Http\Location('my-resource');
+        $this->assertEquals(
+            'http://test.local/my-resource?category_id=5',
+            $location->link('@?category_id=:id', ['id' => 5, 'title' => 'test'])
+        );
+        $this->assertEquals(
+            'http://test.local/my-resource?category_id=5&ref=my',
+            $location->link('@?category_id=:id&ref=:ref', ['id' => 5, 'title' => 'test', 'ref' => 'my'])
+        );
+        $this->assertEquals(
+            'http://test.local/test?category_id=5&ref=my',
+            $location->link(':title?category_id=:id&ref=:ref', ['id' => 5, 'title' => 'test', 'ref' => 'my'])
+        );
+    }
+
     /**
      * @dataProvider trimProvider
      */
@@ -90,7 +108,11 @@ class UrlTest extends TestCase
             array('menus/5/items/10.admin', 'get', array('menus/items', 'show', array('id' => 10, 'pid' => 5))),
             array('menus/5/items.admin', 'put', array('menus/items', 'update', array('id' => null, 'pid' => 5))),
             array('menus/5/items/10.admin', 'get', array('menus/items', 'show', array('id' => 10, 'pid' => 5))),
-            array('menus/5/items/dzen/relations.admin', 'get', array('menus/items/relations', 'index', array('pid' => 'dzen', 'ppid' => 5))),
+            array(
+                'menus/5/items/dzen/relations.admin',
+                'get',
+                array('menus/items/relations', 'index', array('pid' => 'dzen', 'ppid' => 5))
+            ),
             array('settings/demo-pane', 'get', array('settings', 'show', array('id' => 'demo-pane'))),
         );
     }
@@ -106,7 +128,10 @@ class UrlTest extends TestCase
     public function pregProvider()
     {
         return array(
-            array('menus/:menu_id/items/:menu_id_item_id', array('menus\/([^\/]*)\/items\/([^\/]*)', array('menu_id', 'menu_id_item_id'))),
+            array(
+                'menus/:menu_id/items/:menu_id_item_id',
+                array('menus\/([^\/]*)\/items\/([^\/]*)', array('menu_id', 'menu_id_item_id'))
+            ),
             array('menus/:menu_id/items', array('menus\/([^\/]*)\/items', array(0 => 'menu_id'))),
             array('menus/:menu_id', array('menus\/([^\/]*)', array(0 => 'menu_id'))),
             array('menus', array('menus', array())),
@@ -126,7 +151,11 @@ class UrlTest extends TestCase
     public function parseProvider()
     {
         return array(
-            array('menus/5/items/10', 'menus/:menu_id/items/:menu_id_item_id', array('menu_id' => 5, 'menu_id_item_id' => 10)),
+            array(
+                'menus/5/items/10',
+                'menus/:menu_id/items/:menu_id_item_id',
+                array('menu_id' => 5, 'menu_id_item_id' => 10)
+            ),
         );
     }
 
@@ -141,15 +170,22 @@ class UrlTest extends TestCase
     public function resourceProvider()
     {
         return array(
-            array('menus/:menu_id/items/:menu_id_item_id', array('menu_id' => 5, 'menu_id_item_id' => 10), 'menus/5/items/10',),
+            array(
+                'menus/:menu_id/items/:menu_id_item_id',
+                array('menu_id' => 5, 'menu_id_item_id' => 10),
+                'menus/5/items/10',
+            ),
             array('menus/:menu_id/items/:menu_id', array('menu_id' => 5), 'menus/5/items/5',),
         );
     }
-    
+
     public function testParent()
     {
         $parent = 'warehouses/2/deposit-activities/create';
-        $this->assertEquals('warehouses/2/deposit-activities/create', Url::resource('$', array('param' => '123'), $parent));
+        $this->assertEquals(
+            'warehouses/2/deposit-activities/create',
+            Url::resource('$', array('param' => '123'), $parent)
+        );
         $this->assertEquals('warehouses/2/addresses', Url::resource('$$$/addresses', array('param' => '123'), $parent));
     }
 
