@@ -20,6 +20,7 @@ class Location
         $url = App::baseUrl();
 
         $parts = explode('?', $pattern);
+        $query = '';
         if (isset($parts[1])) {
             $pattern = $parts[0];
             $query = $this->query($parts[1], $params);
