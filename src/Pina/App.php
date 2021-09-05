@@ -3,10 +3,6 @@
 namespace Pina;
 
 use Closure;
-use Pina\Components\ListComponent;
-use Pina\Components\RecordFormComponent;
-use Pina\Components\RowComponent;
-use Pina\Components\TableComponent;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Events\EventManager;
@@ -58,13 +54,6 @@ class App
             }
         }
 
-        $components = new Container;
-        $components->set('table', TableComponent::class);
-        $components->set('row', RowComponent::class);
-        $components->set('list', ListComponent::class);
-        $components->set('form', RecordFormComponent::class);
-        static::$container->share('components', $components);
-
         $types = new Container;
         $types->share('string', Types\StringType::class);
         $types->share('boolean', Types\BooleanType::class);
@@ -73,6 +62,7 @@ class App
         $types->share('float', Types\NumericType::class);
         $types->share('numeric', Types\NumericType::class);
         $types->share('int', Types\IntegerType::class);
+        $types->share('nint', Types\NullableIntegerType::class);
         $types->share('text', Types\TextType::class);
         $types->share('timestamp', Types\TimestampType::class);
         $types->share('uuid', Types\UUIDType::class);
@@ -194,7 +184,7 @@ class App
     }
 
     /**
-     * Запускает приложение: анализирует параметры, 
+     * Запускает приложение: анализирует параметры,
      * выбирает и выполняет цепочку контроллеров
      * отрисовывает результат
      */
@@ -544,12 +534,15 @@ class App
         $firstUpgrades = array();
         $lastUpgrades = array();
         $triggers = array();
-        App::walkClasses('Gateway', function(TableDataGateway $gw) use (&$firstUpgrades, &$lastUpgrades, &$triggers) {
-            list($first, $last) = $gw->getUpgrades();
-            $firstUpgrades = array_merge($firstUpgrades, $first);
-            $lastUpgrades = array_merge($lastUpgrades, $last);
-            $triggers = array_merge($triggers, $gw->getTriggers());
-        });
+        App::walkModuleClasses(
+            'Gateway',
+            function (TableDataGateway $gw) use (&$firstUpgrades, &$lastUpgrades, &$triggers) {
+                list($first, $last) = $gw->getUpgrades();
+                $firstUpgrades = array_merge($firstUpgrades, $first);
+                $lastUpgrades = array_merge($lastUpgrades, $last);
+                $triggers = array_merge($triggers, $gw->getTriggers());
+            }
+        );
 
         $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers));
 
@@ -557,18 +550,18 @@ class App
     }
 
     /**
-     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную 
+     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
      * функцию-обработчик
      * @param string $type Суффикс имени класса
      * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
      */
-    public static function walkClasses($type, $callback)
+    public static function walkModuleRootClasses($type, $callback)
     {
         $paths = self::modules()->getPaths();
         $suffix = $type . '.php';
         $suffixLength = strlen($suffix);
         foreach ($paths as $ns => $path) {
-            $files = array_filter(scandir($path), function($s) use ($suffix, $suffixLength) {
+            $files = array_filter(scandir($path), function ($s) use ($suffix, $suffixLength) {
                 return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
             });
 
@@ -577,6 +570,49 @@ class App
                 $c = new $className;
                 $callback($c);
             }
+        }
+    }
+
+    public static function walkModuleClasses($type, $callback)
+    {
+        $paths = self::modules()->getPaths();
+        foreach ($paths as $ns => $path) {
+            static::walkClassesInPath($ns, $path, $type, $callback);
+        }
+    }
+
+    /**
+     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
+    public static function walkClassesInPath($ns, $path, $type, $callback)
+    {
+        $suffix = $type . '.php';
+        $suffixLength = strlen($suffix);
+        $allFiles = scandir($path);
+        $toWalk = array_filter($allFiles, function ($s) use ($suffix, $suffixLength) {
+            return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
+        });
+
+        foreach ($toWalk as $file) {
+            $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
+            $c = new $className;
+            $callback($c);
+        }
+
+        $paths = array_filter($allFiles, function ($s) use ($path) {
+            return $s[0] >= 'A' && $s[0] <= 'Z' && is_dir($path . '/' . $s);
+        });
+
+        foreach ($paths as $file) {
+            static::walkClassesInPath(
+                $ns . '\\' . pathinfo($file, PATHINFO_FILENAME),
+                $path . '/' . $file,
+                $type,
+                $callback
+            );
         }
     }
 

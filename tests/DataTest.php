@@ -54,8 +54,6 @@ class DataTest extends TestCase
             (new ListComponent)->basedOn($list)->select('id')->drawWithWrappers()
         );
 
-        $html = $list->turnTo("table")->drawWithWrappers();
-        $this->assertEquals($expectedHtml, $html);
     }
 
 }

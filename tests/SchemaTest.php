@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
 use Pina\Components\Schema;
-use Pina\CronEventGateway;
+use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
 
 class SchemaTest extends TestCase
@@ -128,7 +128,11 @@ class SchemaTest extends TestCase
             'event' => "varchar(512) NOT NULL DEFAULT ''",
             'data' => "mediumblob DEFAULT NULL",
             'priority' => "int(11) NOT NULL DEFAULT 0",
-            'created' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+            'delay' => "int(11) NOT NULL DEFAULT 0",
+            'worker_id' => "int(11) DEFAULT NULL",
+            'created_at' => "timestamp DEFAULT CURRENT_TIMESTAMP",
+            'scheduled_at' => "timestamp DEFAULT NULL",
+            'started_at' => "timestamp DEFAULT NULL",
         ];
         $schema = CronEventGateway::instance()->getSchema();
         $fields = $schema->makeSQLFields();

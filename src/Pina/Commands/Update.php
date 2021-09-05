@@ -11,14 +11,14 @@ class Update extends Command
 
     protected function execute($input = '')
     {
-        App::walkClasses('Installation', function($cl) {
+        App::walkModuleRootClasses('Installation', function($cl) {
             $cl->prepare();
         });
 
         $upgrades = App::getUpgrades();
         App::db()->batch($upgrades);
 
-        App::walkClasses('Installation', function($cl) {
+        App::walkModuleRootClasses('Installation', function($cl) {
             $cl->install();
         });
 

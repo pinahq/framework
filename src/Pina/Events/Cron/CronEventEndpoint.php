@@ -1,17 +1,16 @@
 <?php
 
-namespace Pina;
+namespace Pina\Events\Cron;
 
 use Pina\Components\BreadcrumbComponent;
+use Pina\Controls\UnorderedList;
 use Pina\Data\Schema;
-use Pina\Components\TableComponent;
-use Pina\Components\ListComponent;
-use Pina\Components\RecordViewComponent;
 use Pina\Controls\RecordView;
 use Pina\Controls\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Http\Endpoint;
+use Pina\Response;
 
 class CronEventEndpoint extends Endpoint
 {
@@ -26,7 +25,7 @@ class CronEventEndpoint extends Endpoint
         $this->schema->add('event', 'Event', 'string');
         $this->schema->add('data', 'Data', 'text');
         $this->schema->add('priority', 'Priority', 'int');
-        $this->schema->add('created', 'Created at', 'date');
+        $this->schema->add('created_at', 'Created at', 'date');
         
         parent::__construct();
         
@@ -75,10 +74,10 @@ class CronEventEndpoint extends Endpoint
         $list->push(['title' => 'Events', 'link' => $this->base->link('@')]);
         return $list;
     }
-    
+
     public function indexActiveTriggers()
     {
-        return (new ListComponent());
+        return (new UnorderedList());
     }
 
 }

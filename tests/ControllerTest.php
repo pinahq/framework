@@ -9,7 +9,7 @@ use Pina\Controls\FormStatic;
 use Pina\Controls\Paragraph;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
-use Pina\CronEventEndpoint;
+use Pina\Events\Cron\CronEventEndpoint;
 use Pina\App;
 use Pina\CSRF;
 
@@ -25,29 +25,29 @@ class ControllerTest extends TestCase
                 'event' => 'order.paid',
                 'data' => '123',
                 'priority' => '1',
-                'created' => '2020-01-02 03:04:05'
+                'created_at' => '2020-01-02 03:04:05'
             ],
             [
                 'id' => 2,
                 'event' => 'order.canceled',
                 'data' => '124',
-                'priority' => '0',
-                'created' => '2020-01-02 04:05:06'
+                'priority' => '2',
+                'created_at' => '2020-01-02 04:05:06'
             ],
             [
                 'id' => 3,
                 'event' => 'order.returned',
                 'data' => '125',
                 'priority' => '1',
-                'created' => '2020-01-02 05:06:07'
+                'created_at' => '2020-01-02 05:06:07'
             ],
         ];
 
-        Pina\CronEventGateway::instance()->truncate();
-        Pina\CronEventGateway::instance()->insert($data);
+        Pina\Events\Cron\CronEventGateway::instance()->truncate();
+        Pina\Events\Cron\CronEventGateway::instance()->insert($data);
         $tableContent = '';
         foreach ($data as $k => $v) {
-            $data[$k]['id'] = Pina\CronEventGateway::instance()->whereBy('created', $v['created'])->id();
+            $data[$k]['id'] = Pina\Events\Cron\CronEventGateway::instance()->whereBy('created_at', $v['created_at'])->id();
             $tableContent .= '<tr>' . implode(
                     array_map(function ($a) {
                         return '<td>' . $a . '</td>';
@@ -66,7 +66,7 @@ class ControllerTest extends TestCase
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 
-        $id = Pina\CronEventGateway::instance()->id();
+        $id = Pina\Events\Cron\CronEventGateway::instance()->id();
 
         $expectedRowHtml = '<div class="card"><div class="card-body">'
             . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
@@ -106,7 +106,7 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';
@@ -130,7 +130,7 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';

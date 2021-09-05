@@ -15,4 +15,14 @@ class TimestampType extends StringType
     {
         return 'timestamp';
     }
+
+    public function isNullable()
+    {
+        return true;
+    }
+
+    public function getDefault()
+    {
+        return null;
+    }
 }

@@ -7,7 +7,7 @@ class TestEventQueue implements EventQueueInterface
     
     protected $data = [];
 
-    public function push($handler, $data, $priority)
+    public function push($handler, $data, $priority, $delay)
     {
         $this->data[] = [$handler, $data, $priority];
         usort($this->data, [$this, 'sort']);

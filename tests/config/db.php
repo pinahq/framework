@@ -5,7 +5,7 @@ return array(
     'port' => '3306',
     'user' => 'root',
     'pass' => 'root',
-    'base' => 'agenyz_crm',
+    'base' => 'test',
     'charset' => 'utf8',
     'engine' => 'InnoDB',
 );
