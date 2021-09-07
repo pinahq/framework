@@ -9,6 +9,9 @@ use Pina\Controls\UnorderedList;
 
 use function Pina\__;
 
+/**
+ * @deprecated see \Pina\Controls\LinkedListView
+ */
 class MenuComponent extends ListData //implements ComponentInterface
 {
 

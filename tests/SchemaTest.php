@@ -109,6 +109,8 @@ class SchemaTest extends TestCase
         $schema->add('price', 'Price', 'numeric');
         $schema->add('description', 'Description', 'text');
         $schema->add('enabled', 'Enabled', 'bool');
+        $schema->add('filter', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']]);
+        $schema->add('filter2', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']], true,'new');
 
         $fields = $schema->makeSQLFields(['title' => "varchar(255) NOT NULL DEFAULT ''"]);
         $expected = [
@@ -116,7 +118,9 @@ class SchemaTest extends TestCase
             'title' => "varchar(255) NOT NULL DEFAULT ''",
             'price' => "decimal(12,2) NOT NULL DEFAULT 0",
             'description' => "mediumtext DEFAULT NULL",
-            'enabled' => "enum('Y','N') NOT NULL DEFAULT 'Y'",
+            'enabled' => "enum('Y','N') NOT NULL DEFAULT 'N'",
+            'filter' => "enum('new','old') NOT NULL",
+            'filter2' => "enum('new','old') NOT NULL DEFAULT 'new'",
         ];
         $this->assertEquals($expected, $fields);
     }

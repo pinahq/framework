@@ -72,7 +72,7 @@ class EnumType implements TypeInterface
 
     public function getDefault()
     {
-        return isset($this->variants[0]['id']) ? $this->variants[0]['id'] : '';
+        return null;
     }
 
     public function isNullable()

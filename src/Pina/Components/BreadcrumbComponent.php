@@ -6,6 +6,9 @@ use Pina\Controls\LinkedListItem;
 use Pina\Controls\ListItem;
 use Pina\Controls\UnorderedList;
 
+/**
+ * @deprecated see \Pina\Controls\BreadcrumbView
+ */
 class BreadcrumbComponent extends MenuComponent
 {
 

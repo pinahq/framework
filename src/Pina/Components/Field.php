@@ -3,6 +3,7 @@
 namespace Pina\Components;
 
 use Pina\App;
+use Pina\Types\TypeInterface;
 
 class Field
 {
@@ -96,27 +97,38 @@ class Field
     public function makeSQLDeclaration()
     {
         $type = App::type($this->type);
-        return $type->getSQLType()
-            . ($type->isNullable() ? "" : " NOT NULL")
-            . " DEFAULT " . $this->getFormattedDefault();
+        return \implode(
+            ' ',
+            \array_filter(
+                [$type->getSQLType(), $type->isNullable() ? "" : "NOT NULL", $this->getFormattedDefault($type)]
+            )
+        );
     }
 
-    private function getFormattedDefault()
+    /**
+     * @param TypeInterface $type
+     * @return mixed|string|null
+     */
+    private function getFormattedDefault($type)
     {
         $default = $this->getDefault();
         if (is_null($default)) {
-            return 'NULL';
+            if ($type->isNullable()) {
+                return 'DEFAULT NULL';
+            } else {
+                return '';
+            }
         }
 
         if ($default == 'CURRENT_TIMESTAMP') {
-            return $default;
+            return 'DEFAULT ' . $default;
         }
 
         if (is_string($default)) {
-            return "'" . $default . "'";
+            return "DEFAULT '" . $default . "'";
         }
 
-        return $default;
+        return 'DEFAULT ' . $default;
     }
 
 }

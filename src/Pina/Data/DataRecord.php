@@ -7,6 +7,8 @@ class DataRecord
 
     protected $data = [];
 
+    protected $meta = null;
+
     /**
      * @var Schema
      */
@@ -44,7 +46,10 @@ class DataRecord
 
     public function getMetaData()
     {
-        return $this->schema->processLineAsMeta($this->data);
+        if (!is_null($this->meta)) {
+            return $this->meta;
+        }
+        return $this->meta = $this->schema->processLineAsMeta($this->data);
     }
 
 

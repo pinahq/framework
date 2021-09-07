@@ -16,4 +16,14 @@ class BooleanType extends EnumType
         ];
     }
 
+    public function isNullable()
+    {
+        return false;
+    }
+
+    public function getDefault()
+    {
+        return 'N';
+    }
+
 }

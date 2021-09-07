@@ -5,25 +5,25 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Arr;
-use Pina\Components\BreadcrumbComponent;
-use Pina\Components\DefaultExport;
-use Pina\Components\Schema;
-use Pina\Components\SelectComponent;
+use Pina\Controls\BreadcrumbView;
+use Pina\Paging;
+use Pina\Request;
+use Pina\Response;
+use Pina\NotFoundException;
+use Pina\TableDataGateway;
+use Pina\Data\Schema;
+use Pina\Data\DataRecord;
+use Pina\Data\DataTable;
 use Pina\Controls\ButtonRow;
+use Pina\Controls\FilterForm;
 use Pina\Controls\LinkedButton;
-use Pina\Components\SearchFormComponent;
 use Pina\Controls\PagingControl;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
 use Pina\Controls\SidebarWrapper;
 use Pina\Controls\TableView;
-use Pina\Data\DataRecord;
-use Pina\Data\DataTable;
-use Pina\NotFoundException;
-use Pina\Paging;
-use Pina\Request;
-use Pina\Response;
-use Pina\TableDataGateway;
+use Pina\Components\DefaultExport;
+use Pina\Components\SelectComponent;
 
 use function Pina\__;
 
@@ -247,9 +247,11 @@ abstract class CollectionEndpoint extends Endpoint
 
     protected function makeFilterForm()
     {
-        /** @var SearchFormComponent $form */
-        $form = App::make(SearchFormComponent::class);
-        $form->load($this->query()->all(), $this->getFilterSchema());
+        /** @var FilterForm $form */
+        $form = App::make(FilterForm::class);
+        $schema = $this->getFilterSchema();
+        $normalized = $schema->normalize($this->query()->all());
+        $form->load(new DataRecord($normalized, $schema));
         $form->getButtonRow()->append($this->makeCreateButton());
         return $form;
     }
@@ -334,13 +336,15 @@ abstract class CollectionEndpoint extends Endpoint
 
     protected function getBreadcrumb($baseTitle = '', $title = null)
     {
-        $list = new BreadcrumbComponent();
-        $list->push(['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')]);
-        $list->push(['title' => $baseTitle, 'link' => $this->base->link('@')]);
+        $path = [];
+        $path[] = [['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')]];
+        $path[] = [['title' => $baseTitle, 'link' => $this->base->link('@')]];
         if ($title) {
-            $list->push(['title' => $title, 'link' => $this->location->link('@')]);
+            $path[] = ['title' => $title, 'link' => $this->location->link('@')];
         }
-        return $list;
+        $view = App::make(BreadcrumbView::class);
+        $view->load(new DataTable($path, new Schema()));
+        return $view;
     }
 
     /**

@@ -24,7 +24,7 @@ class ListData extends Data implements Iterator
         return $this->load($list->data, $list->schema, $list->meta);
     }
 
-    public function load($data, Schema $schema, $meta = [])
+    public function load($data, \Pina\Data\Schema $schema, $meta = [])
     {
         $this->data = $data;
         $this->schema = $schema;
