@@ -62,7 +62,7 @@ class LinkedListView extends Control
 
         /** @var ListItem $item */
         $item = App::make(ListItem::class);
-        $item->setText($item);
+        $item->setText($title);
         return $this->addActiveClass($item, $record);
     }
 

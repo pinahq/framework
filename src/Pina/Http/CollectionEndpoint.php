@@ -337,10 +337,10 @@ abstract class CollectionEndpoint extends Endpoint
     protected function getBreadcrumb($baseTitle = '', $title = null)
     {
         $path = [];
-        $path[] = [['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')]];
-        $path[] = [['title' => $baseTitle, 'link' => $this->base->link('@')]];
+        $path[] = ['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')];
+        $path[] = ['title' => $baseTitle, 'link' => $this->base->link('@')];
         if ($title) {
-            $path[] = ['title' => $title, 'link' => $this->location->link('@')];
+            $path[] = ['title' => $title, 'is_active' => true];
         }
         $view = App::make(BreadcrumbView::class);
         $view->load(new DataTable($path, new Schema()));

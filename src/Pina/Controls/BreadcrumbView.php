@@ -9,7 +9,6 @@ class BreadcrumbView extends LinkedListView
 
     public function __construct()
     {
-        parent::__construct();
         $this->addClass('breadcrumb');
     }
 
