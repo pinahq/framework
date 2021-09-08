@@ -435,7 +435,7 @@ class Schema implements \IteratorAggregate
         $formatted = [];
         foreach ($this->getIterator() as $field) {
             $key = $field->getKey();
-            $value = $field->draw($processed);
+            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());
             $formatted[$key] = $type->format($value);
         }

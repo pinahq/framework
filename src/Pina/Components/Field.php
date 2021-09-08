@@ -80,20 +80,6 @@ class Field
         return App::type($this->type)->getDefault();
     }
 
-    /**
-     * Отрисовать данные в поле в соответствие с настройками поля
-     * @param array $line
-     * @return string
-     */
-    public function draw($line)
-    {
-        if (!isset($line[$this->key]) || $line[$this->key] === '') {
-            return $this->getDefault();
-        }
-
-        return $line[$this->key];
-    }
-
     public function makeSQLDeclaration()
     {
         $type = App::type($this->type);
