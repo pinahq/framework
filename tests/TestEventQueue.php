@@ -1,5 +1,6 @@
 <?php
 
+use Pina\App;
 use Pina\EventQueueInterface;
 
 class TestEventQueue implements EventQueueInterface
@@ -20,9 +21,14 @@ class TestEventQueue implements EventQueueInterface
     
     public function work()
     {
-        foreach ($this->data as $line) {
+        while ($line = array_shift($this->data)) {
             list($handler, $data, $priority) = $line;
-            $handler->handle($data);
+            if (is_string($handler)) {
+                $cmd = App::load($handler);
+                $cmd($data);
+            } else {
+                $handler->handle($data);
+            }
         }
     }
 

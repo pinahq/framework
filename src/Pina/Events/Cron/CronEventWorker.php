@@ -2,6 +2,9 @@
 
 namespace Pina\Events\Cron;
 
+use Exception;
+use Pina\App;
+use Pina\Command;
 use Pina\Log;
 
 class CronEventWorker
@@ -18,9 +21,15 @@ class CronEventWorker
                     Log::info('event', 'Worker ' . $workerId . ' has started ' . $task['event']);
                     $this->startTask($task['id']);
                     try {
-                        \Pina\App::events()->getHandler($task['event'])->handle($task['data']);
+                        if (class_exists($task['event']) && in_array(Command::class, class_parents($task['event']))) {
+                            $cmd = App::load($task['event']);
+                            $cmd();
+                        } else {
+                            //@deprecated
+                            App::events()->getHandler($task['event'])->handle($task['data']);
+                        }
                         $this->deleteTask($task['id']);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('event', $e->getMessage(), $task);
                         //откладываем задачу на час
                         $this->pushOff($task['id'], $pushOffSeconds);

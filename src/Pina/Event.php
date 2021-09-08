@@ -28,9 +28,12 @@ class Event extends Request
         App::events()->subscribeSync($event, $handler, $priority);
     }
 
-    public static function trigger($event, $data = '')
+    public static function trigger($event, $data = '', $delay = 0)
     {
-        App::events()->trigger($event, $data);
+        //триггерим старые события для совместимости
+        App::events()->trigger($event, $data, $delay);
+        //триггерим новые события
+        App::event($event)->trigger($data, $delay);
     }
 
 }

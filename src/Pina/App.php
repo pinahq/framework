@@ -70,6 +70,9 @@ class App
         $types->share('hidden', Types\HiddenType::class);
         $types->share('static', Types\StaticType::class);
         static::$container->share('types', $types);
+
+        $events = new Container();
+        static::$container->share('events', $events);
     }
 
     /**
@@ -106,6 +109,17 @@ class App
     public static function events()
     {
         return static::load(EventManager::class);
+    }
+
+    public static function event($name)
+    {
+        /** @var Container $events */
+        $events = static::container()->get('events');
+        if ($events->has($name)) {
+            return $events->get($name);
+        }
+        $events->share($name, $e = new \Pina\Events\Event());
+        return $e;
     }
 
     /**

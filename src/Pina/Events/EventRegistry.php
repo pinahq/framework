@@ -2,19 +2,21 @@
 
 namespace Pina\Events;
 
-class EventRegistry implements \Iterator
+use Iterator;
+
+class EventRegistry implements Iterator
 {
     protected $cursor = 0;
     protected $data = [];
 
-    public function push($event)
+    public function push($handler)
     {
-        array_push($this->data, $event);
+        array_push($this->data, $handler);
     }
     
     /**
      * 
-     * @return \Pina\Events\EventHandlerInterface
+     * @return \Pina\Events\EventHandlerInterface|string
      */
     public function current()
     {
