@@ -24,6 +24,7 @@ class Event
             throw new Exception();
         }
         $this->handlers[$priority][] = $handler;
+        return $this;
     }
 
     public function trigger($data)
@@ -33,6 +34,7 @@ class Event
                 $handler($data);
             }
         }
+        return $this;
     }
 
 }
