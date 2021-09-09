@@ -15,15 +15,21 @@ class CronEventWorker
         Log::info('event', 'start worker ' . $workerId);
         $i = 0;
         while (1) {
+            //Если при старте воркера обнаружились незавершенные задачи,
+            //скорее всего старый воркер выпал по какой-то ошибке
+            //и мы отложим их на более поздний срок, чтобы не блокировать новые задачи
+            while ($task = $this->getNextTask($workerId)) {
+                $this->pushOff($task['id'], $pushOffSeconds);
+            }
+
             while ($this->assignTask($workerId)) {
-                //пытаемся завершить ранее начатые задачи
                 while ($task = $this->getNextTask($workerId)) {
                     Log::info('event', 'Worker ' . $workerId . ' has started ' . $task['event']);
                     $this->startTask($task['id']);
                     try {
                         if (class_exists($task['event']) && in_array(Command::class, class_parents($task['event']))) {
                             $cmd = App::load($task['event']);
-                            $cmd();
+                            $cmd($task['data']);
                         } else {
                             //@deprecated
                             App::events()->getHandler($task['event'])->handle($task['data']);

@@ -26,15 +26,11 @@ class Event
         $this->handlers[$priority][] = $handler;
     }
 
-    public function trigger($data, $delay = 0)
+    public function trigger($data)
     {
         foreach ($this->handlers as $priority => $hs) {
             foreach ($hs as $handler) {
-                if ($delay > 0 && $handler instanceof QueueableCommand) {
-                    $handler->setDelay($delay);
-                }
                 $handler($data);
-
             }
         }
     }

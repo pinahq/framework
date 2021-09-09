@@ -10,7 +10,7 @@ class GearmanEventQueue implements EventQueueInterface
 
     private $client = null;
 
-    public function push($handler, $data, $priority, $delay)
+    public function push($handler, $data, $priority)
     {
         switch ($priority) {
             case \Pina\Event::PRIORITY_HIGH:

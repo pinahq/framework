@@ -13,7 +13,6 @@ class QueueableCommand extends Command
 {
     protected $cmd;
     protected $priority;
-    protected $delay = 0;
 
     /**
      * QueueableCommand constructor.
@@ -33,11 +32,6 @@ class QueueableCommand extends Command
         $this->priority = $priority;
     }
 
-    public function setDelay($delay)
-    {
-        $this->delay = $delay;
-    }
-
     protected function execute($data = '')
     {
         if (!App::container()->has(EventQueueInterface::class)) {
@@ -48,7 +42,7 @@ class QueueableCommand extends Command
 
         /** @var EventQueueInterface $queue */
         $queue = App::container()->get(EventQueueInterface::class);
-        $queue->push($this->cmd, $data, $this->priority, $this->delay);
+        $queue->push($this->cmd, $data, $this->priority);
 
         return '';
     }

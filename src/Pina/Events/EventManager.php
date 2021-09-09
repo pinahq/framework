@@ -89,14 +89,14 @@ class EventManager
      * @param string $eventKey
      * @param string $payload
      */
-    public function trigger($eventKey, $payload = '', $delay = 0)
+    public function trigger($eventKey, $payload = '')
     {
-        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_HIGH, $delay);
-        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_NORMAL, $delay);
-        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_LOW, $delay);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_HIGH);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_NORMAL);
+        $this->triggerWithPriority($eventKey, $payload, Event::PRIORITY_LOW);
     }
 
-    protected function triggerWithPriority($eventKey, $payload, $priority, $delay)
+    protected function triggerWithPriority($eventKey, $payload, $priority)
     {
         //sync
         $registry = $this->getRegistry($eventKey, \Pina\Event::MODE_SYNC, $priority);
@@ -111,7 +111,7 @@ class EventManager
         $registry = $this->getRegistry($eventKey, \Pina\Event::MODE_ASYNC, $priority);
         $queue = App::container()->get(\Pina\EventQueueInterface::class);
         foreach ($registry as $handler) {
-            $queue->push($handler, $payload, $priority, $delay);
+            $queue->push($handler, $payload, $priority);
         }
     }
 
