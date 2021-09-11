@@ -562,8 +562,7 @@ class Schema implements \IteratorAggregate
     {
         $schema = new Schema();
         foreach ($fieldKeys as $fieldKey) {
-            foreach ($this->getIterator() as $field)
-            {
+            foreach ($this->getIterator() as $field) {
                 if ($field->getKey() == $fieldKey) {
                     $schema->add(clone $field);
                 }
@@ -614,9 +613,26 @@ class Schema implements \IteratorAggregate
             if (isset($fields[$key])) {
                 continue;
             }
-            $fields[$key] = $field->makeSQLDeclaration();
+            $fields[$key] = $field->makeSQLDeclaration($this->definitions[$key] ?? []);
         }
         return $fields;
+    }
+
+    public function makeSQLIndexes($indexes = [])
+    {
+        if ($this->primaryKey) {
+            $indexes['PRIMARY KEY'] = $this->primaryKey;
+        }
+        foreach ($this->uniqueKeys as $key) {
+            $name = 'unique_' . implode('_', $key);
+            $indexes['UNIQUE KEY ' . $name] = $key;
+        }
+        foreach ($this->keys as $key) {
+            $name = 'key_' . implode('_', $key);
+            $indexes['KEY ' . $name] = $key;
+        }
+
+        return $indexes;
     }
 
     /**

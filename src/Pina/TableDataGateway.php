@@ -83,7 +83,7 @@ class TableDataGateway extends SQL
      */
     public function getIndexes()
     {
-        return static::$indexes;
+        return $this->getSchema()->makeSQLIndexes(static::$indexes);
     }
 
     /**
@@ -115,7 +115,7 @@ class TableDataGateway extends SQL
 
         $first = array();
         $last = array();
-        if (!in_array(static::$table, $this->db->col("SHOW TABLES"))) {
+        if (!in_array($this->getTable(), $this->db->col("SHOW TABLES"))) {
             $first[] = $this->getStructure()->makeCreateTable($this->getTable());
             $last[] = $this->getStructure()->makeCreateForeignKeys($this->getTable());
         } else {

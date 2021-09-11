@@ -80,13 +80,17 @@ class Field
         return App::type($this->type)->getDefault();
     }
 
-    public function makeSQLDeclaration()
+    public function makeSQLDeclaration($definitions)
     {
         $type = App::type($this->type);
+        $default = $this->getFormattedDefault($type);
+        if (in_array('AUTO_INCREMENT', $definitions)) {
+            $default = 'AUTO_INCREMENT';
+        }
         return \implode(
             ' ',
             \array_filter(
-                [$type->getSQLType(), $type->isNullable() ? "" : "NOT NULL", $this->getFormattedDefault($type)]
+                [$type->getSQLType(), $type->isNullable() ? "" : "NOT NULL", $default]
             )
         );
     }

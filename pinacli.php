@@ -3,6 +3,7 @@
 
 use Pina\App;
 use Pina\Command;
+use Pina\Config;
 use Pina\Log;
 
 $configDir = __DIR__ . '/config';
@@ -20,6 +21,7 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 App::init('cli', $configDir);
 
 $modules = App::modules();
+$modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
 $modules->boot('cli');
 
 while ($cmd = array_shift($argv)) {
