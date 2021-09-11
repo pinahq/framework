@@ -621,15 +621,21 @@ class Schema implements \IteratorAggregate
     public function makeSQLIndexes($indexes = [])
     {
         if ($this->primaryKey) {
-            $indexes['PRIMARY KEY'] = $this->primaryKey;
+            if (!isset($indexes['PRIMARY KEY'])) {
+                $indexes['PRIMARY KEY'] = $this->primaryKey;
+            }
         }
         foreach ($this->uniqueKeys as $key) {
-            $name = 'unique_' . implode('_', $key);
-            $indexes['UNIQUE KEY ' . $name] = $key;
+            $name = 'UNIQUE KEY unique_' . implode('_', $key);
+            if (!isset($indexes[$name])) {
+                $indexes[$name] = $key;
+            }
         }
         foreach ($this->keys as $key) {
-            $name = 'key_' . implode('_', $key);
-            $indexes['KEY ' . $name] = $key;
+            $name = 'KEY key_' . implode('_', $key);
+            if (!isset($indexes[$name])) {
+                $indexes[$name] = $key;
+            }
         }
 
         return $indexes;
