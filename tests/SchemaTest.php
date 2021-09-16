@@ -134,8 +134,8 @@ class SchemaTest extends TestCase
             'priority' => "int(11) NOT NULL DEFAULT 0",
             'delay' => "int(11) NOT NULL DEFAULT 0",
             'worker_id' => "int(11) DEFAULT NULL",
-            'created_at' => "timestamp DEFAULT CURRENT_TIMESTAMP",
-            'scheduled_at' => "timestamp DEFAULT NULL",
+            'created_at' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+            'scheduled_at' => "timestamp NOT NULL",
             'started_at' => "timestamp DEFAULT NULL",
         ];
         $schema = CronEventGateway::instance()->getSchema();

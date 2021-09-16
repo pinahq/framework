@@ -26,7 +26,7 @@ class CronEventGateway extends TableDataGateway
         $schema->add('worker_id', 'Worker ID', 'int')->setNullable();
         $schema->add('created_at', 'Created at', 'timestamp')->setDefault('CURRENT_TIMESTAMP');
         $schema->add('scheduled_at', 'Scheduled at', 'timestamp');
-        $schema->add('started_at', 'Started at', 'timestamp');
+        $schema->add('started_at', 'Started at', 'timestamp')->setNullable();
         $schema->setPrimaryKey('id');
         $schema->addKey('created_at');
         return $schema;

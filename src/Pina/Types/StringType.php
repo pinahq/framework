@@ -61,10 +61,6 @@ class StringType implements TypeInterface
             throw new ValidateException(__("Укажите значение"));
         }
 
-        if (empty($value) && $this->isNullable()) {
-            return null;
-        }
-
         $size = $this->getSize();
         if (strlen($value) > $size) {
             throw new ValidateException(sprintf(__("Укажите значение короче. Максимальная длина %s символов"), $size));

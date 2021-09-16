@@ -87,15 +87,9 @@ class EnumType implements TypeInterface
 
     public function normalize($value, $isMandatory)
     {
-        if ($value || $isMandatory) {
-            $ids = array_column($this->variants, 'id');
-            if (!in_array($value, $ids)) {
-                throw new ValidateException(__("Выберите значение"));
-            }
-        } elseif ($this->isNullable()) {
-            $value = null;
-        } else {
-            $value = $this->getDefault();
+        $ids = array_column($this->variants, 'id');
+        if (!in_array($value, $ids)) {
+            throw new ValidateException(__("Выберите значение"));
         }
 
         return $value;

@@ -18,7 +18,7 @@ class TimestampType extends StringType
 
     public function isNullable()
     {
-        return true;
+        return false;
     }
 
     public function getDefault()

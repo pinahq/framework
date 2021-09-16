@@ -2,12 +2,16 @@
 
 namespace Pina\Data;
 
+use ArrayIterator;
+use InvalidArgumentException;
+use IteratorAggregate;
+use LogicException;
 use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
 use Pina\Types\ValidateException;
 
-class Schema implements \IteratorAggregate
+class Schema implements IteratorAggregate
 {
 
     protected $title = '';
@@ -215,7 +219,7 @@ class Schema implements \IteratorAggregate
     public function pushMetaProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
                     $callback,
                     true
@@ -235,7 +239,7 @@ class Schema implements \IteratorAggregate
     public function popMetaProcessor()
     {
         if (!$this->metaProcessors) {
-            throw new \LogicException('You tried to pop from an empty processor stack.');
+            throw new LogicException('You tried to pop from an empty processor stack.');
         }
 
         return array_pop($this->metaProcessors);
@@ -251,7 +255,7 @@ class Schema implements \IteratorAggregate
     public function pushDataProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
                     $callback,
                     true
@@ -271,7 +275,7 @@ class Schema implements \IteratorAggregate
     public function popDataProcessor()
     {
         if (!$this->dataProcessors) {
-            throw new \LogicException('You tried to pop from an empty processor stack.');
+            throw new LogicException('You tried to pop from an empty processor stack.');
         }
 
         return array_pop($this->dataProcessors);
@@ -294,7 +298,7 @@ class Schema implements \IteratorAggregate
     public function pushTextProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
                     $callback,
                     true
@@ -314,7 +318,7 @@ class Schema implements \IteratorAggregate
     public function popTextProcessor()
     {
         if (!$this->textProcessors) {
-            throw new \LogicException('You tried to pop from an empty text processor stack.');
+            throw new LogicException('You tried to pop from an empty text processor stack.');
         }
 
         return array_pop($this->textProcessors);
@@ -338,7 +342,7 @@ class Schema implements \IteratorAggregate
     public function pushHtmlProcessor($callback)
     {
         if (!is_callable($callback)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Processors must be valid callables (callback or object with an __invoke method), ' . var_export(
                     $callback,
                     true
@@ -358,7 +362,7 @@ class Schema implements \IteratorAggregate
     public function popHtmlProcessor()
     {
         if (!$this->htmlProcessors) {
-            throw new \LogicException('You tried to pop from an empty html processor stack.');
+            throw new LogicException('You tried to pop from an empty html processor stack.');
         }
 
         return array_pop($this->htmlProcessors);
@@ -519,7 +523,7 @@ class Schema implements \IteratorAggregate
         foreach ($this->getInnerSchemas() as $group) {
             $fields = array_merge($fields, $group->fields);
         }
-        return new \ArrayIterator($fields);
+        return new ArrayIterator($fields);
     }
 
     /**
@@ -529,7 +533,7 @@ class Schema implements \IteratorAggregate
     public function getGroupIterator()
     {
         $schemas = array_merge([$this->getMainSchema()], $this->getInnerSchemas());
-        return new \ArrayIterator($schemas);
+        return new ArrayIterator($schemas);
     }
 
     protected function getMainSchema()
@@ -587,7 +591,11 @@ class Schema implements \IteratorAggregate
             $value = Arr::get($data, $path, null);
 
             try {
-                $value = App::type($field->getType())->setContext($data)->normalize($value, $field->isMandatory());
+                if ($value == '' && $field->isNullable() && !$field->isMandatory()) {
+                    $value = null;
+                } else {
+                    $value = App::type($field->getType())->setContext($data)->normalize($value, $field->isMandatory());
+                }
             } catch (ValidateException $e) {
                 $errors[] = [$e->getMessage(), $field->getKey()];
             }
