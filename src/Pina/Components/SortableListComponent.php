@@ -10,6 +10,7 @@ use Pina\Html;
 use Pina\Controls\Card;
 use Pina\ResourceManagerInterface;
 use Pina\StaticResource\Script;
+use Pina\Data\Schema;
 
 use function Pina\__;
 

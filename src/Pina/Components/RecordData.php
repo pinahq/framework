@@ -3,6 +3,7 @@
 namespace Pina\Components;
 
 use Pina\Controls\Json;
+use Pina\Data\Schema;
 
 /**
  * @deprecated see \Pina\Data\DataRecord
@@ -25,7 +26,7 @@ class RecordData extends Data
     /**
      *
      * @param array $data
-     * @param \Pina\Components\Schema $schema
+     * @param \Pina\Data\Schema $schema
      * @return $this
      */
     public function load($data, Schema $schema, $meta = [])

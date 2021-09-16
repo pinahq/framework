@@ -3,6 +3,7 @@
 
 namespace Pina\Components;
 
+use Pina\Data\Schema;
 
 class DefaultExport extends ExportableListData
 {

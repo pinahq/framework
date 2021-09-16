@@ -5,6 +5,7 @@ namespace Pina\Components;
 use Pina\App;
 use Pina\Controls\Control;
 use Pina\ResponseInterface;
+use Pina\Data\Schema;
 
 abstract class Data extends Control implements ResponseInterface
 {

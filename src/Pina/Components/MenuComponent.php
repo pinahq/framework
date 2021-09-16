@@ -8,6 +8,7 @@ use Pina\Controls\ListItem;
 use Pina\Controls\UnorderedList;
 
 use function Pina\__;
+use Pina\Data\Schema;
 
 /**
  * @deprecated see \Pina\Controls\LinkedListView
