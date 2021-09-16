@@ -3,7 +3,7 @@
 namespace Pina\Types;
 
 use Pina\App;
-use Pina\Components\Field;
+use Pina\Data\Field;
 use Pina\Controls\FormStatic;
 
 class StaticType extends StringType

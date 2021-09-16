@@ -7,7 +7,7 @@ use Pina\Components\SelectedTextComponent;
 use Pina\Components\SelectComponent;
 use Pina\Controls\FormContentControl;
 use Pina\App;
-use Pina\Components\Field;
+use Pina\Data\Field;
 use Pina\Controls\RawHtml;
 use Pina\Request;
 use Pina\RequestHandler;

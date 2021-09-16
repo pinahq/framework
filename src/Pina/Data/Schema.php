@@ -5,7 +5,6 @@ namespace Pina\Data;
 use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
-use Pina\Components\Field;
 use Pina\Types\ValidateException;
 
 class Schema implements \IteratorAggregate
@@ -87,16 +86,18 @@ class Schema implements \IteratorAggregate
      * @param string $type
      * @param bool $isMandatory
      * @param mixed $default
-     * @return void
+     * @return Field
      */
     public function add($field, $title = '', $type = '', $isMandatory = false, $default = null)
     {
         if (is_string($field)) {
-            $this->fields[] = Field::make($field, $title, $type, $isMandatory, $default);
-            return;
+            $f = Field::make($field, $title, $type, $isMandatory, $default);
+            $this->fields[] = $f;
+            return $f;
         }
 
         $this->fields[] = $field;
+        return $field;
     }
 
     public function addGroup(Schema $schema)

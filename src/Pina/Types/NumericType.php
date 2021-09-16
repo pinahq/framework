@@ -2,7 +2,7 @@
 
 namespace Pina\Types;
 
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 use function Pina\__;
 

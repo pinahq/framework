@@ -3,7 +3,7 @@
 namespace Pina\Types;
 
 use Pina\Controls\Control;
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 interface TypeInterface
 {
@@ -38,6 +38,8 @@ interface TypeInterface
     public function getDefault();
 
     /**
+     * Определяет, является ли тип принципиально nullable (как text и blob)
+     * Даже если тип возвращает здесь true, nullable может быть задано на уровне типа
      * @return bool
      */
     public function isNullable();

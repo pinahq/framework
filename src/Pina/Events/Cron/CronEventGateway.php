@@ -18,15 +18,15 @@ class CronEventGateway extends TableDataGateway
     public function getSchema()
     {
         $schema = new Schema();
-        $schema->add('id', 'ID', 'uuid', true, '');
-        $schema->add('event', 'Event', 'string', true, '');
-        $schema->add('data', 'Data', 'blob', false, null);
-        $schema->add('priority', 'Priority', 'int', false, 0);
-        $schema->add('delay', 'Delay', 'int', false, 0);
-        $schema->add('worker_id', 'Worker ID', 'nint', false, null);
-        $schema->add('created_at', 'Created at', 'timestamp', true, 'CURRENT_TIMESTAMP');
-        $schema->add('scheduled_at', 'Scheduled at', 'timestamp', false);
-        $schema->add('started_at', 'Started at', 'timestamp', false);
+        $schema->add('id', 'ID', 'uuid')->setMandatory();
+        $schema->add('event', 'Event', 'string')->setMandatory();
+        $schema->add('data', 'Data', 'blob');
+        $schema->add('priority', 'Priority', 'int');
+        $schema->add('delay', 'Delay', 'int');
+        $schema->add('worker_id', 'Worker ID', 'int')->setNullable();
+        $schema->add('created_at', 'Created at', 'timestamp')->setDefault('CURRENT_TIMESTAMP');
+        $schema->add('scheduled_at', 'Scheduled at', 'timestamp');
+        $schema->add('started_at', 'Started at', 'timestamp');
         $schema->setPrimaryKey('id');
         $schema->addKey('created_at');
         return $schema;

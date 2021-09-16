@@ -4,9 +4,11 @@
 namespace Pina\Types;
 
 
-use Pina\Components\Field;
-use Pina\Types\IntegerType;
+use Pina\Data\Field;
 
+/**
+ * @deprecated
+ */
 class NullableIntegerType extends IntegerType
 {
 

@@ -221,8 +221,8 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
-            . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id" value=""></div>'
-            . '<div class="form-group"><label class="control-label">Created at *</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Started at</label><input type="text" class="form-control" name="started_at"></div>';
     }

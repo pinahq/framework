@@ -5,7 +5,7 @@ namespace Pina\Types;
 use Pina\Controls\FormInput;
 use Pina\Controls\HiddenInput;
 use Pina\App;
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 class HiddenType extends StringType
 {

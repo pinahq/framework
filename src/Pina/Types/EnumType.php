@@ -4,7 +4,7 @@ namespace Pina\Types;
 
 use Pina\App;
 use Pina\Controls\FormSelect;
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 use function Pina\__;
 

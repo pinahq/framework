@@ -4,7 +4,7 @@ namespace Pina\Types;
 
 use Pina\App;
 use Pina\Controls\FormInput;
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 use function Pina\__;
 
@@ -28,7 +28,7 @@ class IntegerType implements TypeInterface
 
     public function format($value)
     {
-        return $value;
+        return is_null($value) ? '-' : $value;
     }
 
     public function getSize()

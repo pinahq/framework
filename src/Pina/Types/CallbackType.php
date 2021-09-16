@@ -3,7 +3,7 @@
 namespace Pina\Types;
 
 use Closure;
-use Pina\Components\Field;
+use Pina\Data\Field;
 
 use function Pina\__;
 
