@@ -25,6 +25,8 @@ class ControllerTest extends TestCase
                 'event' => 'order.paid',
                 'data' => '123',
                 'priority' => '1',
+                'delay' => '0',
+                'worker_id' => null,
                 'created_at' => '2020-01-02 03:04:05'
             ],
             [
@@ -32,6 +34,8 @@ class ControllerTest extends TestCase
                 'event' => 'order.canceled',
                 'data' => '124',
                 'priority' => '2',
+                'delay' => '0',
+                'worker_id' => null,
                 'created_at' => '2020-01-02 04:05:06'
             ],
             [
@@ -39,6 +43,8 @@ class ControllerTest extends TestCase
                 'event' => 'order.returned',
                 'data' => '125',
                 'priority' => '1',
+                'delay' => '0',
+                'worker_id' => null,
                 'created_at' => '2020-01-02 05:06:07'
             ],
         ];
@@ -47,7 +53,13 @@ class ControllerTest extends TestCase
         Pina\Events\Cron\CronEventGateway::instance()->insert($data);
         $tableContent = '';
         foreach ($data as $k => $v) {
-            $data[$k]['id'] = Pina\Events\Cron\CronEventGateway::instance()->whereBy('created_at', $v['created_at'])->id();
+            $data[$k]['id'] = Pina\Events\Cron\CronEventGateway::instance()
+                ->whereBy('created_at', $v['created_at'])
+                ->id();
+
+            $data[$k]['scheduled_at'] = $data[$k]['created_at'];
+            $data[$k]['started_at'] = '';
+            $data[$k]['worker_id'] = '-';
             $tableContent .= '<tr>' . implode(
                     array_map(function ($a) {
                         return '<td>' . $a . '</td>';
@@ -57,7 +69,7 @@ class ControllerTest extends TestCase
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Created at</th></tr>'
+            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
             . $tableContent
             . '</table>'
             . '</div></div>';
@@ -69,10 +81,7 @@ class ControllerTest extends TestCase
         $id = Pina\Events\Cron\CronEventGateway::instance()->id();
 
         $expectedRowHtml = '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . $this->getStaticFormInner()
             . '</div></div>';
 
         $r = $endpoint->show($id);
@@ -103,16 +112,13 @@ class ControllerTest extends TestCase
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
+            . $this->getEditFormInner()
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';
 
 
-        $this->assertEquals($expectedRowEditHtml, (string) $form);
+        $this->assertEquals($expectedRowEditHtml, (string)$form);
 
         /** @var RecordView $view */
         $view = $router->run("lk/1/cron-events/" . $id, 'get');
@@ -127,16 +133,13 @@ class ControllerTest extends TestCase
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
+            . $this->getEditFormInner()
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';
 
         App::container()->set(FormStatic::class, FormInput::class);
-        $this->assertEquals($expectedWrapHtml, (string) $form);
+        $this->assertEquals($expectedWrapHtml, (string)$form);
         App::container()->set(FormStatic::class, FormStatic::class);
 
         $r = $router->run("lk/1/cron-events/" . $id, 'get');
@@ -153,26 +156,20 @@ class ControllerTest extends TestCase
             . '<p>note</p>'
             . '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . $this->getStaticFormInner()
             . '</div></div>'
             . '</td></tr></table>'
             . '</form>';
 
-        $this->assertEquals($expectedWrapHtml, (string) $r);
+        $this->assertEquals($expectedWrapHtml, (string)$r);
 
         $expectedWrapHtml = '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
-            . '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . $this->getStaticFormInner()
             . '</div></div>'
             . '</td></tr></table>';
 
-        $this->assertEquals($expectedWrapHtml, (string) $r->unwrap());
+        $this->assertEquals($expectedWrapHtml, (string)$r->unwrap());
 
         $r = $router->run("lk/1/cron-events", 'delete');
         $class = new ReflectionClass($r);
@@ -204,6 +201,30 @@ class ControllerTest extends TestCase
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';
         $this->assertEquals($expected, $r);
+    }
+
+    private function getStaticFormInner()
+    {
+        return '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
+            . '<div class="form-group"><label class="control-label">Delay</label><p class="form-control-static">0</p></div>'
+            . '<div class="form-group"><label class="control-label">Worker ID</label><p class="form-control-static">-</p></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '<div class="form-group"><label class="control-label">Scheduled at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '<div class="form-group"><label class="control-label">Started at</label><p class="form-control-static"></p></div>';
+    }
+
+    private function getEditFormInner()
+    {
+        return '<div class="form-group"><label class="control-label">Event *</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
+            . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
+            . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id" value=""></div>'
+            . '<div class="form-group"><label class="control-label">Created at *</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Started at</label><input type="text" class="form-control" name="started_at"></div>';
     }
 
 }

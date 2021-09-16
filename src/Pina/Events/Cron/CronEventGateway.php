@@ -23,7 +23,7 @@ class CronEventGateway extends TableDataGateway
         $schema->add('data', 'Data', 'blob', false, null);
         $schema->add('priority', 'Priority', 'int', false, 0);
         $schema->add('delay', 'Delay', 'int', false, 0);
-        $schema->add('worker_id', 'Worked ID', 'nint', false, null);
+        $schema->add('worker_id', 'Worker ID', 'nint', false, null);
         $schema->add('created_at', 'Created at', 'timestamp', true, 'CURRENT_TIMESTAMP');
         $schema->add('scheduled_at', 'Scheduled at', 'timestamp', false);
         $schema->add('started_at', 'Started at', 'timestamp', false);
