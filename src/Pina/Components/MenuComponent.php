@@ -31,7 +31,7 @@ class MenuComponent extends ListData //implements ComponentInterface
     public function build()
     {
         $list = $this->makeList();
-        $keys = $this->schema->getKeys();
+        $keys = $this->schema->getFieldKeys();
         $data = $this->getTextData();
         foreach ($data as $idx => $line) {
             $title = isset($line[$keys[0]]) ? $line[$keys[0]] : '';

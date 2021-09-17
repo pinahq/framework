@@ -71,7 +71,7 @@ abstract class CollectionEndpoint extends Endpoint
      */
     public function index()
     {
-        $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getKeys());
+        $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getFieldKeys());
 
         $this->exportIfNeeded($filters);
 

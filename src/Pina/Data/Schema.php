@@ -17,7 +17,6 @@ class Schema implements IteratorAggregate
     protected $title = '';
 
     /**
-     *
      * @var Field[]
      */
     protected $fields = [];
@@ -92,10 +91,10 @@ class Schema implements IteratorAggregate
      * @param mixed $default
      * @return Field
      */
-    public function add($field, $title = '', $type = '', $isMandatory = false, $default = null)
+    public function add($field, $title = '', $type = '')
     {
         if (is_string($field)) {
-            $f = Field::make($field, $title, $type, $isMandatory, $default);
+            $f = Field::make($field, $title, $type);
             $this->fields[] = $f;
             return $f;
         }
@@ -104,11 +103,20 @@ class Schema implements IteratorAggregate
         return $field;
     }
 
+    /**
+     * Добавить вложенную схему
+     * @param Schema $schema
+     */
     public function addGroup(Schema $schema)
     {
         $this->groups[] = $schema;
     }
 
+    /**
+     * Объединить (слить поля и процессоры) с другой схемой
+     * TODO: выработать стратегию слияния индексов, уникальных и главных ключей
+     * @param Schema $schema
+     */
     public function merge(Schema $schema)
     {
         $this->fields = array_merge($this->fields, $schema->fields);
@@ -156,40 +164,31 @@ class Schema implements IteratorAggregate
      * Возвращяет все ключи полей схемы
      * @return array
      */
-    public function getKeys()
+    public function getFieldKeys()
     {
         $keys = array();
         foreach ($this->fields as $field) {
             $keys[] = $field->getKey();
         }
         foreach ($this->getInnerSchemas() as $group) {
-            $keys = array_merge($keys, $group->getKeys());
+            $keys = array_merge($keys, $group->getFieldKeys());
         }
         return $keys;
     }
 
-    /**
-     * Возвращает все ключи полей схемы
-     * @return array
-     * @deprecated
-     */
-    public function getFields()
-    {
-        return $this->getKeys();
-    }
 
     /**
      * Возвращает все наименования полей схемы
      * @return array
      */
-    public function getTitles()
+    public function getFieldTitles()
     {
         $titles = [];
         foreach ($this->fields as $field) {
             $titles[] = $field->getTitle();
         }
         foreach ($this->getInnerSchemas() as $group) {
-            $titles = array_merge($titles, $group->getTitles());
+            $titles = array_merge($titles, $group->getFieldTitles());
         }
         return $titles;
     }
@@ -198,20 +197,24 @@ class Schema implements IteratorAggregate
      * Возвращает все типы полей схемы
      * @return array
      */
-    public function getTypes()
+    public function getFieldTypes()
     {
         $types = [];
         foreach ($this->fields as $field) {
             $types[] = $field->getType();
         }
         foreach ($this->getInnerSchemas() as $group) {
-            $types = array_merge($types, $group->getTypes());
+            $types = array_merge($types, $group->getFieldTypes());
         }
         return $types;
     }
 
     /**
-     * Adds a processor on to the stack.
+     * Добавляет мета-процессор в стек процессоров.
+     * Мета-процессор должен быть функцией с двумя параметрами:
+     * 1. Ассоциативный массив с meta-данными, полученными с прошлого этапа процессинга
+     * 2. Ассоциативный массив с оригинальной выборкой для анализа
+     * Мета-процессор должен дополнить и вернуть массив с метаданными
      *
      * @param callable $callback
      * @return $this
@@ -232,7 +235,7 @@ class Schema implements IteratorAggregate
     }
 
     /**
-     * Removes the processor on top of the stack and returns it.
+     * Удаляет очередной мета-процессор из стека процессоров
      *
      * @return callable
      */
@@ -245,9 +248,21 @@ class Schema implements IteratorAggregate
         return array_pop($this->metaProcessors);
     }
 
+    /**
+     * Возвращает список мета-процессоров
+     * @return callable[]
+     */
+    public function getMetaProcessors()
+    {
+        return $this->metaProcessors;
+    }
+
 
     /**
-     * Adds a processor on to the stack.
+     * Добавляет процессор данных в стек процессоров.
+     * Дата-процессор должен быть функцией с одним параметром:
+     * 1. Ассоциативный массив с данными, полученными с прошлого этапа процессинга
+     * Мета-процессор должен дополнить и вернуть массив с данными
      *
      * @param callable $callback
      * @return $this
@@ -268,7 +283,7 @@ class Schema implements IteratorAggregate
     }
 
     /**
-     * Removes the processor on top of the stack and returns it.
+     * Удаляет очередной процессор данных из стека процессоров
      *
      * @return callable
      */
@@ -282,6 +297,7 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * Возвращает список процессоров данных
      * @return callable[]
      */
     public function getDataProcessors()
@@ -290,7 +306,12 @@ class Schema implements IteratorAggregate
     }
 
     /**
-     * Adds a formatter on to the stack.
+     * Добавляет текстовый процессор в стек процессоров.
+     * Текстовый процессор форматирует данные для отрисовки в тексте
+     * и должен быть функцией с двумя параметрами:
+     * 1. Ассоциативный массив с текстовыми-данными, полученными с прошлого этапа процессинга
+     * 2. Ассоциативный массив с оригинальной выборкой для анализа
+     * Текстовый процессор должен дополнить и вернуть массив с текстовыми данными
      *
      * @param callable $callback
      * @return $this
@@ -311,7 +332,7 @@ class Schema implements IteratorAggregate
     }
 
     /**
-     * Removes the formatter on top of the stack and returns it.
+     * Удаляет очередной текстовый процессор из стека процессоров
      *
      * @return callable
      */
@@ -325,6 +346,7 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * Возвращает список текстовых процессоров
      * @return callable[]
      */
     public function getTextProcessors()
@@ -384,14 +406,7 @@ class Schema implements IteratorAggregate
      */
     public function processLineAsMeta($line)
     {
-        $meta = [];
-        foreach ($this->metaProcessors as $p) {
-            $meta = array_merge($meta, $p($line));
-        }
-        foreach ($this->getInnerSchemas() as $group) {
-            $meta = array_merge($meta, $group->processLineAsMeta($line));
-        }
-        return $meta;
+        return $this->callMetaProcessors([], $line);
     }
 
     /**
@@ -423,16 +438,6 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    public function callTextProcessors($processed, $raw)
-    {
-        foreach ($this->textProcessors as $f) {
-            $processed = $f($processed, $raw);
-        }
-        foreach ($this->getInnerSchemas() as $group) {
-            $processed = $group->callTextProcessors($processed, $raw);
-        }
-        return $processed;
-    }
 
     public function processLineAsText($line)
     {
@@ -444,7 +449,7 @@ class Schema implements IteratorAggregate
             $type = App::type($field->getType());
             $formatted[$key] = $type->format($value);
         }
-        return $this->callTextProcessors($formatted, $line);
+        return $this->makeLine($this->callTextProcessors($formatted, $line));
     }
 
     public function processListAsText($data)
@@ -458,7 +463,7 @@ class Schema implements IteratorAggregate
     public function processLineAsHtml($line)
     {
         $processed = $this->processLineAsText($line);
-        return $this->callHtmlProcessors($processed, $line);
+        return $this->makeLine($this->callHtmlProcessors($processed, $line));
     }
 
     public function processListAsHtml($data)
@@ -469,15 +474,15 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    public function callHtmlProcessors($processed, $raw)
+
+    public function makeLine($line)
     {
-        foreach ($this->htmlProcessors as $f) {
-            $processed = $f($processed, $raw);
+        $newLine = [];
+        foreach ($this->getIterator() as $field) {
+            $key = $field->getKey();
+            $newLine[$key] = isset($line[$key]) ? $line[$key] : '';
         }
-        foreach ($this->getInnerSchemas() as $group) {
-            $processed = $group->callHtmlProcessors($processed, $raw);
-        }
-        return $processed;
+        return $newLine;
     }
 
     /**
@@ -683,15 +688,49 @@ class Schema implements IteratorAggregate
     }
 
     /**
-     * @param string $field
+     * @param string $fieldKey
      * @param string $definition
      */
-    public function addFieldDefinition($field, $definition)
+    public function addFieldDefinition($fieldKey, $definition)
     {
-        if (!isset($this->definitions[$field])) {
-            $this->definitions[$field] = [];
+        if (!isset($this->definitions[$fieldKey])) {
+            $this->definitions[$fieldKey] = [];
         }
-        $this->definitions[$field][] = $definition;
+        $this->definitions[$fieldKey][] = $definition;
+    }
+
+
+    protected function callMetaProcessors($processed, $raw)
+    {
+        foreach ($this->metaProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $processed = $group->callMetaProcessors($processed, $raw);
+        }
+        return $processed;
+    }
+
+    protected function callTextProcessors($processed, $raw)
+    {
+        foreach ($this->textProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $processed = $group->callTextProcessors($processed, $raw);
+        }
+        return $processed;
+    }
+
+    protected function callHtmlProcessors($processed, $raw)
+    {
+        foreach ($this->htmlProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $processed = $group->callHtmlProcessors($processed, $raw);
+        }
+        return $processed;
     }
 
 }

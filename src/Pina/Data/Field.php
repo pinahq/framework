@@ -5,6 +5,9 @@ namespace Pina\Data;
 use Pina\App;
 use Pina\Types\TypeInterface;
 
+use function array_filter;
+use function implode;
+
 class Field
 {
 
@@ -25,14 +28,12 @@ class Field
      * @param mixed $default @deprecated
      * @return \static
      */
-    public static function make($key, $title, $type = 'string', $isMandatory = false, $default = null)
+    public static function make($key, $title, $type = 'string')
     {
         $field = new static;
         $field->key = $key;
         $field->title = $title;
         $field->type = $type;
-        $field->isMandatory = $isMandatory;
-        $field->default = $default;
         return $field;
     }
 
@@ -74,12 +75,14 @@ class Field
     public function setMandatory($mandatory = true)
     {
         $this->isMandatory = $mandatory;
+        return $this;
     }
 
     public function setNullable($nullable = true, $default = null)
     {
         $this->isNullable = $nullable;
         $this->default = $default;
+        return $this;
     }
 
     public function isNullable()
@@ -110,6 +113,7 @@ class Field
     public function setDefault($default)
     {
         $this->default = $default;
+        return $this;
     }
 
     public function makeSQLDeclaration($definitions)
@@ -119,9 +123,9 @@ class Field
         if (in_array('AUTO_INCREMENT', $definitions)) {
             $default = 'AUTO_INCREMENT';
         }
-        return \implode(
+        return implode(
             ' ',
-            \array_filter(
+            array_filter(
                 [$type->getSQLType(), $this->isNullable() ? "" : "NOT NULL", $default]
             )
         );

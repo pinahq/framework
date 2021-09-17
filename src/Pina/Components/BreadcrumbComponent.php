@@ -15,7 +15,7 @@ class BreadcrumbComponent extends MenuComponent
     public function build()
     {
         $list = $this->makeList();
-        $keys = $this->schema->getKeys();
+        $keys = $this->schema->getFieldKeys();
         $data = $this->getTextData();
         $count = count($data);
         foreach ($data as $idx => $line) {

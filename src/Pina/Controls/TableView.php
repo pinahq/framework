@@ -33,7 +33,7 @@ class TableView extends Card
     protected function drawInner()
     {
         $table = $this->makeTable();
-        $table->append($this->buildHeader($this->dataTable->getSchema()->getTitles()));
+        $table->append($this->buildHeader($this->dataTable->getSchema()->getFieldTitles()));
 
         foreach ($this->dataTable as $record) {
             /** @var DataRecord $record */

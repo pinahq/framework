@@ -90,13 +90,13 @@ class SchemaTest extends TestCase
         $schema2->addGroup($schema3);
 
         $expected = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'];
-        $this->assertEquals($expected, $schema->getKeys());
+        $this->assertEquals($expected, $schema->getFieldKeys());
 
         $expected = ['Title1', 'Title2', 'Title3', 'Title4', 'Title5', 'Title6'];
-        $this->assertEquals($expected, $schema->getTitles());
+        $this->assertEquals($expected, $schema->getFieldTitles());
 
         $expected = ['', '', '', '', '', ''];
-        $this->assertEquals($expected, $schema->getTypes());
+        $this->assertEquals($expected, $schema->getFieldTypes());
 
         $this->assertEquals(6, $schema->getVolume());
     }
@@ -110,7 +110,8 @@ class SchemaTest extends TestCase
         $schema->add('description', 'Description', 'text');
         $schema->add('enabled', 'Enabled', 'bool');
         $schema->add('filter', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']]);
-        $schema->add('filter2', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']], true,'new');
+        $schema->add('filter2', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']])
+            ->setMandatory()->setDefault('new');
 
         $fields = $schema->makeSQLFields(['title' => "varchar(255) NOT NULL DEFAULT ''"]);
         $expected = [

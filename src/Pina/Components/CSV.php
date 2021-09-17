@@ -78,7 +78,7 @@ class CSV extends ExportableListData
 
     protected function writeHeader()
     {
-        $this->writeLine($this->schema->getTitles());
+        $this->writeLine($this->schema->getFieldTitles());
     }
 
     protected function writeLine($line)

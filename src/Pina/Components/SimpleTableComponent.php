@@ -21,7 +21,7 @@ class SimpleTableComponent extends ListData //implements ComponentInterface
     protected function buildTable()
     {
         $table = $this->makeTable();
-        $table->append($this->buildHeader($this->schema->getTitles()));
+        $table->append($this->buildHeader($this->schema->getFieldTitles()));
         foreach ($this as $record) {
             $table->append($this->makeRow()->basedOn($record));
         }
