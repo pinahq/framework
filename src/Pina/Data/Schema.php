@@ -125,6 +125,28 @@ class Schema implements IteratorAggregate
         $this->htmlProcessors = array_merge($this->htmlProcessors, $schema->htmlProcessors);
     }
 
+    public function setMandatory($mandatory = true)
+    {
+        foreach ($this->fields as $field) {
+            $field->setMandatory($mandatory);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->setMandatory($mandatory);
+        }
+        return $this;
+    }
+
+    public function setNullable($nullable = true, $default = null)
+    {
+        foreach ($this->fields as $field) {
+            $field->setNullable($nullable, $default);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->setNullable($nullable, $default);
+        }
+        return $this;
+    }
+
     /**
      * Удаляет из схемы все поля с ключом $key
      * @param string $key
