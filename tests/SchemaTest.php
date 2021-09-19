@@ -123,6 +123,13 @@ class SchemaTest extends TestCase
             $schema->processLineAsText($line)
         );
 
+        $schema = $this->makeSchema();
+        $schema->fieldset(['price', 'currency'])->printf('%d - %s', 'test', 'Test');
+        $this->assertEquals(
+            ['id' => 5, 'title' => 'Test', 'price' => 4000, 'currency' => 'RUB', 'test' => '4000 - RUB'],
+            $schema->processLineAsText($line)
+        );
+
         /*
          * проведем эмуляцию постинга формы фильтрации.
          * если проверять с помощью оригинальной схемы, то пустое значение для цены из поисковой формы

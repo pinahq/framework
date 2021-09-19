@@ -21,11 +21,8 @@ class FieldSet
         $this->fields[] = $field;
     }
 
-    public function join($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
+    public function calc($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
     {
-        foreach ($this->fields as $f) {
-            $this->schema->forgetField($f->getKey());
-        }
         $this->schema->pushDataProcessor(function ($item) use ($callable, $fieldKey) {
             $data = [];
             foreach ($this->fields as $f) {
@@ -38,6 +35,21 @@ class FieldSet
             return $item;
         });
         return $this->schema->add($fieldKey, $fieldTitle, $fieldType);
+    }
+
+    public function join($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
+    {
+        foreach ($this->fields as $f) {
+            $this->schema->forgetField($f->getKey());
+        }
+        return $this->calc($callable, $fieldKey, $fieldTitle, $fieldType);
+    }
+
+    public function printf($pattern, $fieldKey, $fieldTitle, $fieltType = 'string')
+    {
+        return $this->calc(function ($a) use ($pattern) {
+            return vsprintf($pattern, $a);
+        }, $fieldKey, $fieldTitle, $fieltType);
     }
 
     public function setNullable($nullable = true, $default = null)
