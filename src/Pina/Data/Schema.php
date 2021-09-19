@@ -604,6 +604,22 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * @param string[] $fieldKeys
+     */
+    public function fieldset($fieldKeys): FieldSet
+    {
+        $fieldset = new FieldSet($this);
+        foreach ($fieldKeys as $fieldKey) {
+            foreach ($this->getIterator() as $field) {
+                if ($field->getKey() == $fieldKey) {
+                    $fieldset->add($field);
+                }
+            }
+        }
+        return $fieldset;
+    }
+
+    /**
      *
      * @param array $data
      * @return array

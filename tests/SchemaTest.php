@@ -101,6 +101,61 @@ class SchemaTest extends TestCase
         $this->assertEquals(6, $schema->getVolume());
     }
 
+    public function testFieldset()
+    {
+        $line = [
+            'id' => 5,
+            'title' => 'Test',
+            'price' => 4000,
+            'currency' => 'RUB'
+        ];
+
+        $schema = $this->makeSchema();
+        $concat = function ($a) {
+            return \implode(' ', $a);
+        };
+        $schema->fieldset(['price', 'currency'])->join($concat, 'price', 'Price');
+
+        $this->assertEquals(['id', 'title', 'price'], $schema->getFieldKeys());
+
+        $this->assertEquals(
+            ['id' => '5', 'title' => 'Test', 'price' => '4000 RUB'],
+            $schema->processLineAsText($line)
+        );
+
+        /*
+         * проведем эмуляцию постинга формы фильтрации.
+         * если проверять с помощью оригинальной схемы, то пустое значение для цены из поисковой формы
+         * спровоцирует ошибку, так как должно быть введено корректное число
+         */
+        $filter = $this->makeSchema()->fieldset(['price', 'currency'])->makeSchema();
+        $errors = [];
+        try {
+            $filter->normalize([]);
+        } catch (\Pina\BadRequestException $e) {
+            $errors = $e->getErrors();
+        }
+        $this->assertEquals('price', $errors[0][1] ?? '');
+
+        /**
+         * а если поле цены может быть nullable, то пустое значение для формы-фильтрации пройдет
+         */
+        $filter = $this->makeSchema()->fieldset(['price', 'currency'])->setNullable()->makeSchema();
+        $normalized = $filter->normalize([]);
+        $this->assertNull($normalized['price']);
+        $this->assertNull($normalized['currency']);
+    }
+
+    private function makeSchema()
+    {
+        $schema = new Schema();
+        $schema->add('id', 'ID', 'int');
+        $schema->add('title', 'Title', 'string');
+        $schema->add('price', 'Price', 'numeric');
+        $schema->add('currency', 'Currency', 'string');
+        return $schema;
+    }
+
     public function testSQL()
     {
         $schema = new Schema();
@@ -142,6 +197,5 @@ class SchemaTest extends TestCase
         $schema = CronEventGateway::instance()->getSchema();
         $fields = $schema->makeSQLFields();
         $this->assertEquals($expected, $fields);
-
     }
 }
