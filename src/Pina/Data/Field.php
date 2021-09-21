@@ -13,7 +13,7 @@ class Field
 
     protected $key = '';
     protected $title = '';
-    protected $note = '';
+    protected $description = '';
     protected $type = '';
     protected $default = null;
     protected $isMandatory = false;
@@ -83,6 +83,17 @@ class Field
         $this->isNullable = $nullable;
         $this->default = $default;
         return $this;
+    }
+
+    public function setDescription($description)
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getDescription()
+    {
+        return $this->description;
     }
 
     public function isNullable()

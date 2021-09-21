@@ -153,6 +153,14 @@ class SchemaTest extends TestCase
         $this->assertNull($normalized['currency']);
     }
 
+    public function testField()
+    {
+        $schema = new Schema();
+        $schema->add('id', 'ID', 'int');
+        $f = $schema->add('title', 'Title', 'string')->setDescription('Please enter description');
+        $this->assertEquals('Please enter description', $f->getDescription());
+    }
+
     private function makeSchema()
     {
         $schema = new Schema();
