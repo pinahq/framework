@@ -37,9 +37,25 @@ class Form extends Control
 
     protected function draw()
     {
-        $csrf = CSRF::formField($this->method);
+        return Html::tag(
+            'form',
+            $this->drawHeader()
+            . $this->drawInnerBefore()
+            . $this->drawInner()
+            . $this->drawInnerAfter()
+            . $this->drawFooter(),
+            $this->makeAttributes()
+        );
+    }
 
-        return Html::tag('form', $csrf . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(), $this->makeAttributes());
+    protected function drawHeader()
+    {
+        return CSRF::formField($this->method);
+    }
+
+    protected function drawFooter()
+    {
+        return '';
     }
 
     /**
