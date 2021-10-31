@@ -62,7 +62,6 @@ class App
         $types->share('float', Types\NumericType::class);
         $types->share('numeric', Types\NumericType::class);
         $types->share('int', Types\IntegerType::class);
-        $types->share('nint', Types\NullableIntegerType::class);
         $types->share('text', Types\TextType::class);
         $types->share('timestamp', Types\TimestampType::class);
         $types->share('uuid', Types\UUIDType::class);
@@ -165,11 +164,12 @@ class App
         }
 
         $container = static::types();
-        if ($container->has($type)) {
-            return $container->get($type);
+        $t = $container->load($type);
+        if ($t instanceof Types\TypeInterface) {
+            return $t;
         }
 
-        return static::load(Types\StringType::class);
+        throw new \Exception("Unable to create unsupported class ".$type." as type");
     }
 
     /**
