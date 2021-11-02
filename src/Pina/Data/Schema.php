@@ -91,7 +91,7 @@ class Schema implements IteratorAggregate
      * @param mixed $default
      * @return Field
      */
-    public function add($field, $title = '', $type = '')
+    public function add($field, $title = '', $type = 'string')
     {
         if (is_string($field)) {
             $f = Field::make($field, $title, $type);
@@ -460,7 +460,11 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-
+    /**
+     * @param array $line
+     * @return array
+     * @throws \Exception
+     */
     public function processLineAsText($line)
     {
         $processed = $this->processLineAsData($line);
@@ -474,6 +478,11 @@ class Schema implements IteratorAggregate
         return $this->makeLine($this->callTextProcessors($formatted, $line));
     }
 
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
     public function processListAsText($data)
     {
         foreach ($data as $k => $line) {
@@ -482,12 +491,22 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
+    /**
+     * @param array $line
+     * @return array
+     * @throws \Exception
+     */
     public function processLineAsHtml($line)
     {
         $processed = $this->processLineAsText($line);
         return $this->makeLine($this->callHtmlProcessors($processed, $line));
     }
 
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
     public function processListAsHtml($data)
     {
         foreach ($data as $k => $line) {
@@ -623,6 +642,7 @@ class Schema implements IteratorAggregate
      *
      * @param array $data
      * @return array
+     * @throws \Exception
      */
     public function normalize($data)
     {
