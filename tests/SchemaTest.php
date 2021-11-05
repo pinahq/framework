@@ -95,7 +95,7 @@ class SchemaTest extends TestCase
         $expected = ['Title1', 'Title2', 'Title3', 'Title4', 'Title5', 'Title6'];
         $this->assertEquals($expected, $schema->getFieldTitles());
 
-        $expected = ['', '', '', '', '', ''];
+        $expected = ['string', 'string', 'string', 'string', 'string', 'string'];
         $this->assertEquals($expected, $schema->getFieldTypes());
 
         $this->assertEquals(6, $schema->getVolume());
@@ -112,7 +112,7 @@ class SchemaTest extends TestCase
 
         $schema = $this->makeSchema();
         $concat = function ($a) {
-            return \implode(' ', $a);
+            return implode(' ', $a);
         };
         $schema->fieldset(['price', 'currency'])->join($concat, 'price', 'Price');
 
@@ -139,7 +139,7 @@ class SchemaTest extends TestCase
         $errors = [];
         try {
             $filter->normalize([]);
-        } catch (\Pina\BadRequestException $e) {
+        } catch (BadRequestExceptionAlias $e) {
             $errors = $e->getErrors();
         }
         $this->assertEquals('price', $errors[0][1] ?? '');
@@ -187,7 +187,7 @@ class SchemaTest extends TestCase
         $expected = [
             'id' => "int(11) NOT NULL DEFAULT 0",
             'title' => "varchar(255) NOT NULL DEFAULT ''",
-            'price' => "decimal(12,2) NOT NULL DEFAULT 0",
+            'price' => "decimal(12,2) NOT NULL DEFAULT '0.00'",
             'description' => "mediumtext DEFAULT NULL",
             'enabled' => "enum('Y','N') NOT NULL DEFAULT 'N'",
             'filter' => "enum('new','old') NOT NULL",

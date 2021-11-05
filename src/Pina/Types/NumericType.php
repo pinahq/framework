@@ -34,8 +34,17 @@ class NumericType extends IntegerType
 
     public function getSQLType()
     {
-        $decimals = 2;
-        return "decimal(" . $this->getSize() . "," . $decimals . ")";
+        return "decimal(" . $this->getSize() . "," . $this->getDecimals() . ")";
+    }
+
+    public function getDefault()
+    {
+        return '0.' . str_repeat('0', $this->getDecimals());
+    }
+
+    protected function getDecimals()
+    {
+        return 2;
     }
 
 }
