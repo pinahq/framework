@@ -3,8 +3,6 @@
 namespace Pina\Types;
 
 use Exception;
-use Pina\Components\SelectedTextComponent;
-use Pina\Components\SelectComponent;
 use Pina\Controls\FormContentControl;
 use Pina\App;
 use Pina\Data\Field;
@@ -39,13 +37,7 @@ class ModuleType extends ConfigurableType
         parse_str($query, $params);
 
         if (App::router()->exists($parsed['path'], 'get')) {
-            $input = App::make(SelectComponent::class);
-            $input->basedOn(App::router()->run($this->resource, 'get'));
-            $input->setName($field->getKey());
-            $star = $field->isMandatory() ? ' *' : '';
-            $input->setTitle($field->getTitle() . $star);
-            $input->setValue($value);
-            return $input;
+            throw new \Exception("Module type is deprecated");
         }
 
         $params = array_merge(['name' => $field->getKey(), 'value' => $value, 'display' => 'select'], $params);
@@ -69,11 +61,7 @@ class ModuleType extends ConfigurableType
         parse_str($parsed['query'], $params);
 
         if (App::router()->exists($parsed['path'], 'get')) {
-            /** @var SelectedTextComponent $input */
-            $input = App::make(SelectedTextComponent::class);
-            $input->basedOn(App::router()->run($parsed['path'], 'get'));
-            $input->setValue($value);
-            return $input->drawWithWrappers();
+            throw new \Exception("Module type is deprecated");
         }
 
         $params = array_merge(['value' => $value, 'display' => 'text'], $params);

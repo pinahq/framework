@@ -2,8 +2,6 @@
 
 namespace Pina\Data;
 
-use Pina\Components\RecordData;
-
 class DataTable implements \Iterator
 {
     /** @var array */

@@ -1,8 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Components\RecordFormComponent;
-use Pina\Components\Schema;
+use Pina\Data\Schema;
 use Pina\Controls\Form;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
@@ -188,8 +187,8 @@ class ControllerTest extends TestCase
     {
         $schema = new Schema();
         $schema->add('mode', 'title', 'hidden');
-        $form = new RecordFormComponent();
-        $form->load(['mode' => 'test'], $schema);
+        $form = new RecordForm();
+        $form->load(new \Pina\Data\DataRecord(['mode' => 'test'], $schema));
         $r = $form->drawWithWrappers();
 
         $cl = $form->getFormClass();

@@ -125,15 +125,6 @@ class App
      * Возвращает DI контейнер
      * @return Container
      */
-    public static function components()
-    {
-        return static::container()->get('components');
-    }
-
-    /**
-     * Возвращает DI контейнер
-     * @return Container
-     */
     public static function types()
     {
         return static::container()->get('types');

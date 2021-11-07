@@ -6,6 +6,7 @@ namespace Pina\Http;
 use Pina\App;
 use Pina\Arr;
 use Pina\Controls\BreadcrumbView;
+use Pina\Controls\FormSelect;
 use Pina\Paging;
 use Pina\Request;
 use Pina\Response;
@@ -22,8 +23,7 @@ use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
 use Pina\Controls\SidebarWrapper;
 use Pina\Controls\TableView;
-use Pina\Components\DefaultExport;
-use Pina\Components\SelectComponent;
+use Pina\Export\DefaultExport;
 
 use function Pina\__;
 
@@ -66,7 +66,7 @@ abstract class CollectionEndpoint extends Endpoint
     abstract function trigger($event, $id);
 
     /**
-     * @return TableView
+     * @return mixed
      * @throws \Exception
      */
     public function index()
@@ -160,14 +160,14 @@ abstract class CollectionEndpoint extends Endpoint
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
         $export->setFilename($this->getCollectionTitle());
-        $export->load($this->makeExportQuery($filters)->get(), $this->getExportSchema());
+        $export->load(new DataTable($this->makeExportQuery($filters)->get(), $this->getExportSchema()));
         $export->download();
         exit;
     }
 
     /**
      * @param TableDataGateway $query
-     * @return SelectComponent
+     * @return FormSelect
      * @throws \Exception
      */
     protected function drawIndexAsSelect(TableDataGateway $query)
@@ -178,7 +178,7 @@ abstract class CollectionEndpoint extends Endpoint
             ->setName($name)
             ->setPlaceholder($placeholder ? $placeholder : __('Выберите'))
             ->setValue($this->query()->get($name))
-            ->load($query->get(), $this->getListSchema());
+            ->setVariants($query->get());
     }
 
     protected function normalizeAndStore($data, $schema)
@@ -327,11 +327,11 @@ abstract class CollectionEndpoint extends Endpoint
     }
 
     /**
-     * @return SelectComponent
+     * @return FormSelect
      */
     protected function makeSelect()
     {
-        return App::make(SelectComponent::class);
+        return App::make(FormSelect::class);
     }
 
     protected function getBreadcrumb($baseTitle = '', $title = null)

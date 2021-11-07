@@ -47,7 +47,7 @@ class Router
      * @param string $resource
      * @param string $method
      * @param array $data
-     * @return Components\Data
+     * @return mixed
      * @throws Container\NotFoundException
      */
     public function run($resource, $method, $data = [])

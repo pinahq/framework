@@ -5,7 +5,6 @@ namespace Pina\Layouts;
 use Pina\App;
 use Pina\Controls\Control;
 use Pina\Html;
-use Pina\Components\Data;
 use Pina\ResourceManagerInterface;
 
 class DefaultLayout extends Control

@@ -3,7 +3,7 @@
 namespace Pina;
 
 use League\Csv\Reader;
-use Pina\Components\Schema;
+use Pina\Data\Schema;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
 

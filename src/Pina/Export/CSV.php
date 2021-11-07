@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Pina\Components;
+namespace Pina\Export;
 
 
-class CSV extends ExportableListData
+class CSV extends ExportableDataTable
 {
     protected $delimiter = ',';
     protected $enclosure = '"';
@@ -70,15 +70,15 @@ class CSV extends ExportableListData
     protected function write()
     {
         $this->writeHeader();
-        $data = $this->getTextData();
+        $data = $this->data->getTextData();
         foreach ($data as $line) {
-            $this->writeLine($this->schema->makeFlatLine($line));
+            $this->writeLine($this->data->getSchema()->makeFlatLine($line));
         }
     }
 
     protected function writeHeader()
     {
-        $this->writeLine($this->schema->getFieldTitles());
+        $this->writeLine($this->data->getSchema()->getFieldTitles());
     }
 
     protected function writeLine($line)

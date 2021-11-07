@@ -43,7 +43,7 @@ class Schema implements IteratorAggregate
 
     /**
      *
-     * @var \Pina\Components\Schema[]
+     * @var \Pina\Data\Schema[]
      */
     protected $groups = [];
 

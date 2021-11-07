@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
-use Pina\Components\Schema;
+use Pina\Data\Schema;
 use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
 

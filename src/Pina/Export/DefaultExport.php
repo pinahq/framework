@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Pina\Components;
+namespace Pina\Export;
 
-use Pina\Data\Schema;
+use Pina\Data\DataTable;
 
-class DefaultExport extends ExportableListData
+class DefaultExport extends ExportableDataTable
 {
     protected $export = null;
 
@@ -14,14 +14,15 @@ class DefaultExport extends ExportableListData
         $this->export = new CSV();
     }
 
-    public function load($data, Schema $schema, $meta = [])
+    public function load(DataTable $data)
     {
-        $this->export->load($data, $schema, $meta);
+        $this->export->load($data);
+
     }
 
     public function download()
     {
-        return $this->export->download();
+        $this->export->download();
     }
 
     public function getMimeType()

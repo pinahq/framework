@@ -2,7 +2,7 @@
 
 namespace Pina\Events\Cron;
 
-use Pina\Components\Schema;
+use Pina\Data\Schema;
 use Pina\TableDataGateway;
 
 class CronEventGateway extends TableDataGateway
