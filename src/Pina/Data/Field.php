@@ -19,6 +19,9 @@ class Field
     protected $isMandatory = false;
     protected $isNullable = false;
 
+    //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
+    protected $isMultiple = false;
+
     /**
      * Создает экземпляр поля
      * @param string $key
@@ -94,6 +97,24 @@ class Field
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @return boolean
+     * TODO: временный метод, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
+     */
+    public function isMultiple()
+    {
+        return $this->isMultiple;
+    }
+
+    /**
+     * TODO: временный метод, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
+     */
+    public function setMultiple($multiple = true)
+    {
+        $this->isMultiple = $multiple;
+        return $this;
     }
 
     public function isNullable()
