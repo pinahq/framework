@@ -288,15 +288,12 @@ class TableDataGateway extends SQL
      */
     protected function primaryKey()
     {
-        if (empty(static::$indexes['PRIMARY KEY'])) {
-            return '';
+        $schema = $this->getSchema();
+        $primaryKey = $schema->getPrimaryKey();
+        if (empty($primaryKey)) {
+            $primaryKey = static::$indexes['PRIMARY KEY'] ?? '';
         }
-
-        if (is_array(static::$indexes['PRIMARY KEY'])) {
-            return static::$indexes['PRIMARY KEY'][0];
-        }
-
-        return static::$indexes['PRIMARY KEY'];
+        return is_array($primaryKey) ? $primaryKey[0] : $primaryKey;
     }
 
     /**
