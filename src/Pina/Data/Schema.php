@@ -738,6 +738,14 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * @return \string[][]
+     */
+    public function getUniqueKeys()
+    {
+        return $this->uniqueKeys;
+    }
+
+    /**
      * @param array|string $fields
      */
     public function addKey($fields)

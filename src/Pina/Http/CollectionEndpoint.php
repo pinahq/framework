@@ -5,6 +5,7 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Arr;
+use Pina\BadRequestException;
 use Pina\Controls\BreadcrumbView;
 use Pina\Controls\FormSelect;
 use Pina\Paging;
@@ -77,10 +78,6 @@ abstract class CollectionEndpoint extends Endpoint
 
         $query = $this->makeIndexQuery($filters);
 
-        if ($this->attributes()->get('display')) {
-            return $this->drawIndexAsSelect($query);
-        }
-
         Request::setPlace('page_header', $this->getCollectionTitle());
         Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
 
@@ -123,14 +120,22 @@ abstract class CollectionEndpoint extends Endpoint
     {
         $data = $this->request()->all();
 
-        return $this->normalizeAndStore($data, $this->getCreationSchema());
+        $id = $this->normalizeAndStore($data, $this->getCreationSchema());
+
+        $this->trigger('created', $id);
+
+        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
 
     public function update($id)
     {
         $data = $this->request()->all();
 
-        return $this->normalizeAndUpdate($data, $this->getSchema(), $id);
+        $this->normalizeAndUpdate($data, $this->getSchema(), $id);
+
+        $this->trigger('updated', $id);
+
+        return Response::ok();
     }
 
     public function updateSortable()
@@ -165,31 +170,20 @@ abstract class CollectionEndpoint extends Endpoint
         exit;
     }
 
-    /**
-     * @param TableDataGateway $query
-     * @return FormSelect
-     * @throws \Exception
-     */
-    protected function drawIndexAsSelect(TableDataGateway $query)
-    {
-        $placeholder = $this->attributes()->get('placeholder');
-        $name = $this->attributes()->get('name');
-        return $this->makeSelect()
-            ->setName($name)
-            ->setPlaceholder($placeholder ? $placeholder : __('Выберите'))
-            ->setValue($this->query()->get($name))
-            ->setVariants($query->get());
-    }
-
     protected function normalizeAndStore($data, $schema)
     {
         $normalized = $this->normalize($data, $schema);
 
         $id = $this->makeQuery()->insertGetId($normalized);
 
-        $this->trigger('created', $id);
+        if (empty($id)) {
+            $primaryKey = $this->getPrimaryKey($schema);
+            if ($primaryKey) {
+                $id = $normalized[$primaryKey] ?? null;
+            }
+        }
 
-        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
+        return $id;
     }
 
     protected function normalizeAndUpdate($data, $schema, $id)
@@ -197,15 +191,45 @@ abstract class CollectionEndpoint extends Endpoint
         $normalized = $this->normalize($data, $schema, $id);
 
         $this->makeQuery()->whereId($id)->update($normalized);
-
-        $this->trigger('updated', $id);
-
-        return Response::ok();
     }
 
     protected function normalize($data, Schema $schema, $id = null)
     {
-        return $schema->normalize($data);
+        $normalized = $schema->normalize($data);
+
+        $uniqueKeys = $schema->getUniqueKeys();
+        foreach ($uniqueKeys as $fields) {
+            $query = $this->makeQuery();
+            if ($id) {
+                $query->whereNotId($id);
+            }
+            foreach ($fields as $field) {
+                $query->whereBy($field, $normalized[$field] ?? '');
+            }
+            if ($query->exists()) {
+                $ex = new BadRequestException();
+                $ex->setErrors([[__("Данное значение уже используется"), $field]]);
+                throw $ex;
+            }
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param Schema $schema
+     * @return mixed|null
+     */
+    protected function getPrimaryKey($schema)
+    {
+        $primaryKey = $schema->getPrimaryKey();
+        if (empty($primaryKey)) {
+            return null;
+        }
+        if (count($primaryKey) > 1) {
+            return null;
+        }
+        return array_shift($primaryKey);
     }
 
     /**
