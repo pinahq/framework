@@ -82,11 +82,10 @@ abstract class CollectionEndpoint extends Endpoint
         Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
 
         $paging = $this->applyPaging($query, $filters);
-        return $this->makeCollectionView()
+        return $this->makeCollectionView(new DataTable($query->get(), $this->getListSchema()))
             ->after($paging)
             ->after($this->makeIndexButtons())
-            ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()))
-            ->load(new DataTable($query->get(), $this->getListSchema()));
+            ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
     }
 
     public function show($id)
@@ -97,9 +96,8 @@ abstract class CollectionEndpoint extends Endpoint
         Request::setPlace('page_header', $title);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle(), $title)->drawWithWrappers());
 
-        return $this->makeRecordView()
-            ->wrap($this->makeSidebarWrapper())
-            ->load(new DataRecord($item, $this->getSchema()));
+        return $this->makeRecordView(new DataRecord($item, $this->getSchema()))
+            ->wrap($this->makeSidebarWrapper());
     }
 
 
@@ -111,11 +109,14 @@ abstract class CollectionEndpoint extends Endpoint
             $this->getBreadcrumb($this->getCollectionTitle(), $this->getCreationTitle())->drawWithWrappers()
         );
 
-        return $this->makeCreateForm()
-            ->wrap($this->makeSidebarWrapper())
-            ->load(new DataRecord([], $this->getCreationSchema()));
+        return $this->makeCreateForm(new DataRecord([], $this->getCreationSchema()))
+            ->wrap($this->makeSidebarWrapper());
     }
 
+    /**
+     * @return Response
+     * @throws \Exception
+     */
     public function store()
     {
         $data = $this->request()->all();
@@ -127,6 +128,11 @@ abstract class CollectionEndpoint extends Endpoint
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
 
+    /**
+     * @param string $id
+     * @return Response
+     * @throws \Exception
+     */
     public function update($id)
     {
         $data = $this->request()->all();
@@ -170,6 +176,12 @@ abstract class CollectionEndpoint extends Endpoint
         exit;
     }
 
+    /**
+     * @param array $data
+     * @param Schema $schema
+     * @return mixed|string|null
+     * @throws \Exception
+     */
     protected function normalizeAndStore($data, $schema)
     {
         $normalized = $this->normalize($data, $schema);
@@ -186,6 +198,12 @@ abstract class CollectionEndpoint extends Endpoint
         return $id;
     }
 
+    /**
+     * @param array $data
+     * @param Schema $schema
+     * @param string $id
+     * @throws \Exception
+     */
     protected function normalizeAndUpdate($data, $schema, $id)
     {
         $normalized = $this->normalize($data, $schema, $id);
@@ -193,6 +211,13 @@ abstract class CollectionEndpoint extends Endpoint
         $this->makeQuery()->whereId($id)->update($normalized);
     }
 
+    /**
+     * @param array $data
+     * @param Schema $schema
+     * @param string|null $id
+     * @return array
+     * @throws \Exception
+     */
     protected function normalize($data, Schema $schema, $id = null)
     {
         $normalized = $schema->normalize($data);
@@ -235,40 +260,46 @@ abstract class CollectionEndpoint extends Endpoint
     /**
      * @return TableView
      */
-    protected function makeCollectionView()
+    protected function makeCollectionView(DataTable $data)
     {
-        return App::make(TableView::class);
+        return App::make(TableView::class)->load($data);
     }
 
-    protected function makeRecordView()
+    protected function makeRecordView(DataRecord $data)
     {
         $display = $this->query()->get('display');
-        $component = $display == 'edit' ? $this->makeEditForm() : $this->makeViewForm();
+        $component = $display == 'edit' ? $this->makeEditForm($data) : $this->makeViewForm($data);
         return $component;
     }
 
-    protected function makeEditForm()
+    protected function makeEditForm(DataRecord $data)
     {
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
         $form->setMethod('put')->setAction($this->location->link('@'));
         $form->getButtonRow()->append($this->makeCancelButton());
+        $form->load($data);
         return $form;
     }
 
-    protected function makeViewForm()
+    protected function makeViewForm(DataRecord $data)
     {
-        return App::make(RecordView::class)->after($this->makeViewButtonRow());
+        return App::make(RecordView::class)->load($data)->after($this->makeViewButtonRow());
     }
 
-    protected function makeCreateForm()
+    protected function makeCreateForm(DataRecord $data)
     {
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
         $form->setMethod('post')->setAction($this->base->link('@'));
+        $form->load($data);
         return $form;
     }
 
+    /**
+     * @return FilterForm
+     * @throws \Exception
+     */
     protected function makeFilterForm()
     {
         /** @var FilterForm $form */
