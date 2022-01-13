@@ -426,6 +426,7 @@ abstract class CollectionEndpoint extends Endpoint
     /**
      * @param array $filters
      * @return TableDataGateway
+     * @throws \Exception
      */
     protected function makeIndexQuery($filters)
     {
@@ -435,6 +436,7 @@ abstract class CollectionEndpoint extends Endpoint
     /**
      * @param array $filters
      * @return TableDataGateway
+     * @throws \Exception
      */
     protected function makeExportQuery($filters)
     {
@@ -485,28 +487,16 @@ abstract class CollectionEndpoint extends Endpoint
         return $query;
     }
 
+
+    /**
+     * @param array $filters
+     * @return TableDataGateway
+     * @throws \Exception
+     */
     protected function makeFilteredQuery($filters)
     {
         $schema = $this->getFilterSchema();
-        $gw = $this->makeQuery();
-        $availableFields = array_keys($gw->getFields());
-        foreach ($schema->getIterator() as $field) {
-            if (!in_array($field->getKey(), $availableFields)) {
-                continue;
-            }
-            $value = isset($filters[$field->getKey()]) ? $filters[$field->getKey()] : '';
-            if (empty($value)) {
-                continue;
-            }
-            $type = $field->getType();
-            if ($type == 'string') {
-                $gw->whereLike($field->getKey(), '%' . $value . '%');
-            } else {
-                $gw->whereBy($field->getKey(), $value);
-            }
-        }
-
-        return $gw;
+        return $this->makeQuery()->whereFilters($filters, $schema);
     }
 
 

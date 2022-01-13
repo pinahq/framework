@@ -6,11 +6,12 @@ use League\Csv\Reader;
 use Pina\Data\Schema;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
+use Pina\Types\TypeInterface;
 
 /*
- * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах 
+ * Базовый класс для работы с таблицами, содержит мета-информацию о таблицах
  * и базовые методы, наследуется от конструктора запросов
- * 
+ *
  * @author Alex Yashin
  * @copyright 2015
  */
@@ -176,9 +177,12 @@ class TableDataGateway extends SQL
         }
 
         $fields = explode(',', $matches[1]);
-        array_walk($fields, function(&$s) {
-            $s = trim(trim($s, "'\""));
-        });
+        array_walk(
+            $fields,
+            function (&$s) {
+                $s = trim(trim($s, "'\""));
+            }
+        );
         return $fields;
     }
 
@@ -391,8 +395,8 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * @deprecated
      * @return $this
+     * @deprecated
      */
     public function enabled()
     {
@@ -408,7 +412,6 @@ class TableDataGateway extends SQL
      */
     public function getSorting($s)
     {
-
         if (empty($this->sorts) || empty($s)) {
             return '';
         }
@@ -477,8 +480,8 @@ class TableDataGateway extends SQL
         foreach ($orders as $k => $v) {
             $orders[$k] = intval($v + $diff);
             if ($last !== null && $orders[$k] == $last) {
-                $diff ++;
-                $orders[$k] ++;
+                $diff++;
+                $orders[$k]++;
             }
             $last = $orders[$k];
         }
@@ -528,14 +531,16 @@ class TableDataGateway extends SQL
                     $maxLength,
                     $length,
                 ];
-            } else if ($variants = $this->getEnumVariants($k)) {
-                if (!in_array($v, $variants)) {
-                    $errors[] = [
-                        'enum',
-                        $k,
-                        $variants,
-                        $v,
-                    ];
+            } else {
+                if ($variants = $this->getEnumVariants($k)) {
+                    if (!in_array($v, $variants)) {
+                        $errors[] = [
+                            'enum',
+                            $k,
+                            $variants,
+                            $v,
+                        ];
+                    }
                 }
             }
         }
@@ -586,6 +591,31 @@ class TableDataGateway extends SQL
     {
         $csv = Reader::createFromPath($path);
         return $this->load($schema, $csv);
+    }
+
+    /**
+     * @param array $filters
+     * @param Schema $schema
+     * @return $this
+     * @throws \Exception
+     */
+    public function whereFilters($filters, Schema $schema)
+    {
+        $availableFields = array_keys($this->getFields());
+        foreach ($schema->getIterator() as $field) {
+            if (!in_array($field->getKey(), $availableFields)) {
+                continue;
+            }
+            $value = isset($filters[$field->getKey()]) ? $filters[$field->getKey()] : '';
+            if (empty($value)) {
+                continue;
+            }
+            /** @var TypeInterface $type */
+            $type = App::type($field->getType());
+            $type->filter($this, $field->getKey(), $value);
+        }
+
+        return $this;
     }
 
 }

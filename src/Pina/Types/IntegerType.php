@@ -6,6 +6,8 @@ use Pina\App;
 use Pina\Controls\FormInput;
 use Pina\Data\Field;
 
+use Pina\TableDataGateway;
+
 use function Pina\__;
 
 class IntegerType implements TypeInterface
@@ -63,6 +65,11 @@ class IntegerType implements TypeInterface
     public function getSQLType()
     {
         return "int(" . $this->getSize() . ")";
+    }
+
+    public function filter(TableDataGateway $query, $key, $value)
+    {
+        return $query->whereBy($key, $value);
     }
 
     /**

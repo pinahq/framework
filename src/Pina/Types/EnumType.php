@@ -6,6 +6,8 @@ use Pina\App;
 use Pina\Controls\FormSelect;
 use Pina\Data\Field;
 
+use Pina\TableDataGateway;
+
 use function Pina\__;
 
 class EnumType implements TypeInterface
@@ -99,6 +101,11 @@ class EnumType implements TypeInterface
     {
         $variants = array_column($this->variants, 'id');
         return "enum('" . implode("','", $variants) . "')";
+    }
+
+    public function filter(TableDataGateway $query, $key, $value)
+    {
+        return $query->whereBy($key, $value);
     }
 
     /**

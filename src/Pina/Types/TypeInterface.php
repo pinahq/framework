@@ -4,6 +4,7 @@ namespace Pina\Types;
 
 use Pina\Controls\Control;
 use Pina\Data\Field;
+use Pina\TableDataGateway;
 
 interface TypeInterface
 {
@@ -16,6 +17,8 @@ interface TypeInterface
     public function setContext($context);
 
     /**
+     * @param Field $field
+     * @param mixed $value
      * @return Control
      */
     public function makeControl(Field $field, $value);
@@ -63,4 +66,7 @@ interface TypeInterface
      * @return string
      */
     public function getSQLType();
+
+
+    public function filter(TableDataGateway $query, string $key, $value);
 }
