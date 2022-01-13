@@ -7,7 +7,7 @@ use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
 use Pina\Controls\BreadcrumbView;
-use Pina\Controls\FormSelect;
+use Pina\Controls\Control;
 use Pina\Paging;
 use Pina\Request;
 use Pina\Response;
@@ -258,13 +258,16 @@ abstract class CollectionEndpoint extends Endpoint
     }
 
     /**
-     * @return TableView
+     * @return Control
      */
     protected function makeCollectionView(DataTable $data)
     {
         return App::make(TableView::class)->load($data);
     }
 
+    /**
+     * @return Control
+     */
     protected function makeRecordView(DataRecord $data)
     {
         $display = $this->query()->get('display');
@@ -272,6 +275,9 @@ abstract class CollectionEndpoint extends Endpoint
         return $component;
     }
 
+    /**
+     * @return Control
+     */
     protected function makeEditForm(DataRecord $data)
     {
         /** @var RecordForm $form */
@@ -282,11 +288,17 @@ abstract class CollectionEndpoint extends Endpoint
         return $form;
     }
 
+    /**
+     * @return Control
+     */
     protected function makeViewForm(DataRecord $data)
     {
         return App::make(RecordView::class)->load($data)->after($this->makeViewButtonRow());
     }
 
+    /**
+     * @return Control
+     */
     protected function makeCreateForm(DataRecord $data)
     {
         /** @var RecordForm $form */
@@ -297,7 +309,7 @@ abstract class CollectionEndpoint extends Endpoint
     }
 
     /**
-     * @return FilterForm
+     * @return Control
      * @throws \Exception
      */
     protected function makeFilterForm()
@@ -379,14 +391,6 @@ abstract class CollectionEndpoint extends Endpoint
         $button->setStyle('primary');
         $button->setTitle(__('Редактировать'));
         return $button;
-    }
-
-    /**
-     * @return FormSelect
-     */
-    protected function makeSelect()
-    {
-        return App::make(FormSelect::class);
     }
 
     protected function getBreadcrumb($baseTitle = '', $title = null)
