@@ -151,11 +151,11 @@ abstract class CollectionEndpoint extends Endpoint
     {
         $data = $this->request()->all();
 
-        $this->normalizeAndUpdate($data, $this->getSchema(), $id);
+        $id = $this->normalizeAndUpdate($data, $this->getSchema(), $id);
 
         $this->trigger('updated', $id);
 
-        return Response::ok();
+        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
 
     public function updateSortable()
@@ -223,6 +223,13 @@ abstract class CollectionEndpoint extends Endpoint
         $normalized = $this->normalize($data, $schema, $id);
 
         $this->makeQuery()->whereId($id)->update($normalized);
+
+        $primaryKey = $this->getPrimaryKey($schema);
+        if ($primaryKey) {
+            $id = $normalized[$primaryKey] ?? $id;
+        }
+
+        return $id;
     }
 
     /**
@@ -237,6 +244,7 @@ abstract class CollectionEndpoint extends Endpoint
         $normalized = $schema->normalize($data);
 
         $uniqueKeys = $schema->getUniqueKeys();
+        $uniqueKeys[] = $schema->getPrimaryKey();
         foreach ($uniqueKeys as $fields) {
             $query = $this->makeQuery();
             if ($id) {
