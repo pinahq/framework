@@ -9,6 +9,7 @@ use LogicException;
 use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
+use Pina\Types\IntegerType;
 use Pina\Types\ValidateException;
 
 class Schema implements IteratorAggregate
@@ -719,6 +720,13 @@ class Schema implements IteratorAggregate
     public function setPrimaryKey($fields)
     {
         $this->primaryKey = is_array($fields) ? $fields : func_get_args();
+    }
+
+    public function addAutoincrementPrimaryKey($field, $title)
+    {
+        $this->add($field, $title, IntegerType::class)->setMandatory();
+        $this->setPrimaryKey([$field]);
+        $this->addFieldDefinition($field, 'AUTO_INCREMENT');
     }
 
     /**
