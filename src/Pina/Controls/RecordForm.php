@@ -4,15 +4,13 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Html;
-use Pina\ResourceManagerInterface;
-use Pina\StaticResource\Script;
 
 use function Pina\__;
 
 /**
  * Форма редактирования
  */
-class RecordForm extends Form
+class RecordForm extends HandledForm
 {
     use RecordTrait;
 
@@ -23,11 +21,9 @@ class RecordForm extends Form
 
     public function __construct()
     {
+        parent::__construct();
         $this->buttonRow = App::make(ButtonRow::class);
         $this->buttonRow->setMain($this->makeSubmit());
-        $this->formClass = uniqid('fm');
-        $this->addClass($this->formClass);
-        $this->addClass('form pina-form');
     }
 
     public function getButtonRow()
@@ -36,17 +32,12 @@ class RecordForm extends Form
     }
 
     /**
-     * Получить уникальное имя класса тега формы, которое используется для javascript-обработчика
      * @return string
+     * @throws \Exception
      */
-    public function getFormClass()
-    {
-        return $this->formClass;
-    }
-
     protected function drawInner()
     {
-        $content = '';
+        $content = parent::drawInner();
 
         $data = $this->record->getData();
         foreach ($this->record->getSchema()->getGroupIterator() as $schema) {
@@ -72,12 +63,6 @@ class RecordForm extends Form
             $content .= $card;
         }
 
-        $this->resources()->append(
-            (new Script())->setContent(
-                '<script>$(".' . $this->formClass . '").on("success", function(event, packet, status, xhr) {if (!PinaRequest.handleRedirect(xhr)) {var target = $(this).attr("data-success") ? $(this).attr("data-success") : document.location.pathname; document.location = target + "?changed=" + Math.random(); }});</script>'
-            )
-        );
-
         return $content;
     }
 
@@ -102,13 +87,5 @@ class RecordForm extends Form
         return App::make(SubmitButton::class)->setTitle(__('Сохранить'));
     }
 
-    /**
-     *
-     * @return ResourceManagerInterface
-     */
-    protected function resources()
-    {
-        return App::container()->get(ResourceManagerInterface::class);
-    }
 
 }

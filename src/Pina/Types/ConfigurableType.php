@@ -2,6 +2,8 @@
 
 namespace Pina\Types;
 
+use Pina\TableDataGateway;
+
 use function Pina\__;
 
 abstract class ConfigurableType implements TypeInterface
@@ -79,5 +81,11 @@ abstract class ConfigurableType implements TypeInterface
     {
         return 'varchar(128)';
     }
+
+    public function filter(TableDataGateway $query, $key, $value)
+    {
+        return $query->whereBy($key, $value);
+    }
+
 
 }

@@ -37,7 +37,7 @@ class TableView extends Card
 
         foreach ($this->dataTable as $record) {
             /** @var DataRecord $record */
-            $table->append($this->makeRow()->load($record));
+            $table->append($this->makeRow($record));
         }
         return $table;
     }
@@ -54,9 +54,9 @@ class TableView extends Card
     /**
      * @return RecordRow
      */
-    protected function makeRow()
+    protected function makeRow(DataRecord $record)
     {
-        return App::make(RecordRow::class);
+        return App::make(RecordRow::class)->load($record);
     }
 
     /**

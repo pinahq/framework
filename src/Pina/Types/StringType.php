@@ -6,6 +6,8 @@ use Pina\App;
 use Pina\Controls\FormInput;
 use Pina\Data\Field;
 
+use Pina\TableDataGateway;
+
 use function Pina\__;
 use function sprintf;
 
@@ -72,6 +74,11 @@ class StringType implements TypeInterface
     public function getSQLType()
     {
         return "varchar(" . $this->getSize() . ")";
+    }
+
+    public function filter(TableDataGateway $query, string $key, $value)
+    {
+        return $query->whereLike($key, '%' . $value . '%');
     }
 
     /**

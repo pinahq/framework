@@ -5,6 +5,8 @@ namespace Pina\Types;
 use Closure;
 use Pina\Data\Field;
 
+use Pina\TableDataGateway;
+
 use function Pina\__;
 
 class CallbackType implements TypeInterface
@@ -70,6 +72,11 @@ class CallbackType implements TypeInterface
     public function getSQLType()
     {
         return 'varchar(128)';
+    }
+
+    public function filter(TableDataGateway $query, $key, $value)
+    {
+        return $query->whereBy($key, $value);
     }
 
 }

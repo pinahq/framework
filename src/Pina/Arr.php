@@ -368,4 +368,58 @@ class Arr
         return $value;
     }
 
+    public static function mineKeyData(&$data, $keys)
+    {
+        /*
+            ВХОД
+
+            $data = [
+                "ua" => [
+                    "RUB" => 1,
+                    "KZT" => 1,
+                ],
+                "ru" => [
+                    "RUB" => 1,
+                    "KZT" => 1,
+                ],
+            ]
+            $keys = ["country_key", "currency"];
+
+
+            ВЫХОД
+
+            $result = [
+                ["country_key" => "ua", "currency" => "RUB"],
+                ["country_key" => "ua", "currency" => "KZT"],
+                ["country_key" => "ru", "currency" => "RUB"],
+                ["country_key" => "ru", "currency" => "KZT"],
+            ];
+         *
+         */
+
+        $key = array_shift($keys);
+
+        $result = [];
+
+        if (!is_array($data) || empty($data)) {
+            return $result;
+        }
+
+        foreach ($data as $item => $nest) {
+            if (is_array($nest)) {
+                $lines = static::mineKeyData($nest, $keys);
+                foreach ($lines as $k => $line) {
+                    $result[] = array_merge([$key => $item], $line);
+                }
+            } else {
+                $line = [
+                    $key => $item,
+                ];
+                $result[] = $line;
+            }
+        }
+
+        return $result;
+    }
+
 }
