@@ -32,18 +32,6 @@ abstract class CollectionEndpoint extends Endpoint
 {
     protected $exportAllowed = false;
 
-    /** @return Schema */
-    abstract function getFilterSchema();
-
-    /** @return Schema */
-    abstract function getListSchema();
-
-    /** @return Schema */
-    abstract function getSchema();
-
-    /** @return Schema */
-    abstract function getCreationSchema();
-
     /** @return TableDataGateway */
     abstract function makeQuery();
 
@@ -59,12 +47,38 @@ abstract class CollectionEndpoint extends Endpoint
     /** @return string */
     abstract function getCreationTitle();
 
+    public function getSchema()
+    {
+        return $this->makeQuery()->getSchema()->forgetField('id');
+    }
+
+    /** @return Schema */
+    public function getListSchema()
+    {
+        return $this->getSchema();
+    }
+
+    /** @return Schema */
+    public function getCreationSchema()
+    {
+        return $this->getSchema();
+    }
+
+    /** @return Schema */
+    public function getFilterSchema()
+    {
+        //по умолчанию фильтры не доступны
+        return new Schema();
+    }
+
 
     /**
      * @param string $event
      * @param int $id
      */
-    abstract function trigger($event, $id);
+    protected function trigger($event, $id)
+    {
+    }
 
     /**
      * @return mixed
