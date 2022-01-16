@@ -5,12 +5,13 @@ namespace Pina\Http;
 use Pina\App;
 use Pina\Controls\RawHtml;
 use Pina\Controls\SortableListView;
+use Pina\Data\DataTable;
 
 abstract class SortableCollectionEndpoint extends CollectionEndpoint
 {
-    protected function makeCollectionView()
+    protected function makeCollectionView(DataTable $data)
     {
-        return $this->makeSortableList()->setHandler(
+        return $this->makeSortableList($data)->setHandler(
             $this->base->resource('@/all/sortable'),
             'put',
             []
@@ -20,9 +21,9 @@ abstract class SortableCollectionEndpoint extends CollectionEndpoint
     /**
      * @return SortableListView
      */
-    protected function makeSortableList()
+    protected function makeSortableList(DataTable $data)
     {
-        return App::make(SortableListView::class);
+        return App::make(SortableListView::class)->load($data);
     }
 
     protected function makeFilteredQuery($filters)
