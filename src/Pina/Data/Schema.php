@@ -148,6 +148,17 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    public function setStatic($static = true)
+    {
+        foreach ($this->fields as $field) {
+            $field->setStatic($static);
+        }
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->setStatic($static);
+        }
+        return $this;
+    }
+
     /**
      * Удаляет из схемы все поля с ключом $key
      * @param string $key
