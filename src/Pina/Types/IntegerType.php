@@ -4,6 +4,7 @@ namespace Pina\Types;
 
 use Pina\App;
 use Pina\Controls\FormInput;
+use Pina\Controls\FormStatic;
 use Pina\Data\Field;
 
 use Pina\TableDataGateway;
@@ -21,7 +22,10 @@ class IntegerType implements TypeInterface
     public function makeControl(Field $field, $value)
     {
         $star = $field->isMandatory() ? ' *' : '';
-        return $this->makeInput()
+
+        $control = $field->isStatic() ? $this->makeStatic() : $this->makeInput();
+
+        return $control
             ->setName($field->getKey())
             ->setTitle($field->getTitle() . $star)
             ->setValue($value)
@@ -78,6 +82,14 @@ class IntegerType implements TypeInterface
     protected function makeInput()
     {
         return App::make(FormInput::class);
+    }
+
+    /**
+     * @return FormStatic
+     */
+    protected function makeStatic()
+    {
+        return App::make(FormStatic::class);
     }
 
 }

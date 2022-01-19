@@ -68,6 +68,14 @@ class FieldSet
         return $this;
     }
 
+    public function setStatic($static = true)
+    {
+        foreach ($this->fields as $f) {
+            $f->setStatic($static);
+        }
+        return $this;
+    }
+
     public function makeSchema()
     {
         $schema = new Schema();

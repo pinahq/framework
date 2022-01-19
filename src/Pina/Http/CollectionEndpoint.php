@@ -28,16 +28,8 @@ use Pina\Export\DefaultExport;
 
 use function Pina\__;
 
-abstract class CollectionEndpoint extends Endpoint
+abstract class CollectionEndpoint extends FixedCollectionEndpoint
 {
-    protected $exportAllowed = false;
-
-    /** @return TableDataGateway */
-    abstract function makeQuery();
-
-    /** @return string */
-    abstract function getCollectionTitle();
-
     /**
      * @param array $item
      * @return string
@@ -53,24 +45,10 @@ abstract class CollectionEndpoint extends Endpoint
     }
 
     /** @return Schema */
-    public function getListSchema()
-    {
-        return $this->getSchema();
-    }
-
-    /** @return Schema */
     public function getCreationSchema()
     {
         return $this->getSchema();
     }
-
-    /** @return Schema */
-    public function getFilterSchema()
-    {
-        //по умолчанию фильтры не доступны
-        return new Schema();
-    }
-
 
     /**
      * @param string $event
@@ -80,27 +58,6 @@ abstract class CollectionEndpoint extends Endpoint
     {
     }
 
-    /**
-     * @return mixed
-     * @throws \Exception
-     */
-    public function index()
-    {
-        $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getFieldKeys());
-
-        $this->exportIfNeeded($filters);
-
-        $query = $this->makeIndexQuery($filters);
-
-        Request::setPlace('page_header', $this->getCollectionTitle());
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
-
-        $paging = $this->applyPaging($query, $filters);
-        return $this->makeCollectionView(new DataTable($query->get(), $this->getListSchema()))
-            ->after($paging)
-            ->after($this->makeIndexButtons())
-            ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
-    }
 
     public function show($id)
     {
@@ -167,28 +124,6 @@ abstract class CollectionEndpoint extends Endpoint
         return Response::ok()->emptyContent();
     }
 
-    /**
-     * @param array $filters
-     * @throws \Exception
-     */
-    protected function exportIfNeeded($filters)
-    {
-        $extension = pathinfo($this->location->link('@'), PATHINFO_EXTENSION);
-        if (empty($extension)) {
-            return;
-        }
-
-        if (!$this->exportAllowed) {
-            throw new NotFoundException();
-        }
-
-        /** @var DefaultExport $export */
-        $export = App::load(DefaultExport::class);
-        $export->setFilename($this->getCollectionTitle());
-        $export->load(new DataTable($this->makeExportQuery($filters)->get(), $this->getExportSchema()));
-        $export->download();
-        exit;
-    }
 
     /**
      * @param array $data
@@ -244,7 +179,10 @@ abstract class CollectionEndpoint extends Endpoint
         $normalized = $schema->normalize($data);
 
         $uniqueKeys = $schema->getUniqueKeys();
-        $uniqueKeys[] = $schema->getPrimaryKey();
+        $pk = $schema->getPrimaryKey();
+        if ($pk) {
+            $uniqueKeys[] = $schema->getPrimaryKey();
+        }
         foreach ($uniqueKeys as $fields) {
             $query = $this->makeQuery();
             if ($id) {
@@ -281,10 +219,13 @@ abstract class CollectionEndpoint extends Endpoint
 
     /**
      * @return Control
+     * @throws \Exception
      */
-    protected function makeCollectionView(DataTable $data)
+    protected function makeFilterForm()
     {
-        return App::make(TableView::class)->load($data);
+        $form = parent::makeFilterForm();
+        $form->getButtonRow()->append($this->makeCreateButton());
+        return $form;
     }
 
     /**
@@ -330,51 +271,11 @@ abstract class CollectionEndpoint extends Endpoint
         return $form;
     }
 
-    /**
-     * @return Control
-     * @throws \Exception
-     */
-    protected function makeFilterForm()
-    {
-        /** @var FilterForm $form */
-        $form = App::make(FilterForm::class);
-        $schema = $this->getFilterSchema();
-        $normalized = $schema->normalize($this->query()->all());
-        $form->load(new DataRecord($normalized, $schema));
-        $form->getButtonRow()->append($this->makeCreateButton());
-        return $form;
-    }
-
-    /**
-     *
-     * @return SidebarWrapper
-     */
-    protected function makeSidebarWrapper()
-    {
-        return App::make(SidebarWrapper::class);
-    }
-
     protected function makeIndexButtons()
     {
-        /** @var ButtonRow $buttons */
-        $buttons = App::make(ButtonRow::class);
+        $buttons = parent::makeIndexButtons();
         $buttons->setMain($this->makeCreateButton()->setStyle('primary'));
-        if ($this->exportAllowed) {
-            $buttons->append($this->makeExportButton());
-        }
         return $buttons;
-    }
-
-    protected function makeExportButton()
-    {
-        /** @var DefaultExport $export */
-        $export = App::load(DefaultExport::class);
-        /** @var LinkedButton $buttons */
-        $btn = App::make(LinkedButton::class);
-        $btn->setLink($this->base->link('@.' . $export->getExtension(), $this->query()->all()));
-        $btn->setTitle(__('Скачать'));
-
-        return $btn;
     }
 
     protected function makeCancelButton()
@@ -415,55 +316,6 @@ abstract class CollectionEndpoint extends Endpoint
         return $button;
     }
 
-    protected function getBreadcrumb($baseTitle = '', $title = null)
-    {
-        $path = [];
-        $path[] = ['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')];
-        $path[] = ['title' => $baseTitle, 'link' => $this->base->link('@')];
-        if ($title) {
-            $path[] = ['title' => $title, 'is_active' => true];
-        }
-        $view = App::make(BreadcrumbView::class);
-        $view->load(new DataTable($path, new Schema()));
-        return $view;
-    }
-
-    /**
-     * @param TableDataGateway $query
-     * @param array $filters
-     * @return PagingControl
-     */
-    protected function applyPaging($query, $filters)
-    {
-        $paging = new Paging($this->request()->get('page'), $this->request()->get("paging", 25));
-        $query->paging($paging);
-
-        $pagingControl = new PagingControl();
-        $pagingControl->init($paging);
-        $pagingControl->setLinkContext($filters);
-
-        return $pagingControl;
-    }
-
-    /**
-     * @param array $filters
-     * @return TableDataGateway
-     * @throws \Exception
-     */
-    protected function makeIndexQuery($filters)
-    {
-        return $this->addIndexQueryColumns($this->makeFilteredQuery($filters));
-    }
-
-    /**
-     * @param array $filters
-     * @return TableDataGateway
-     * @throws \Exception
-     */
-    protected function makeExportQuery($filters)
-    {
-        return $this->addExportQueryColumns($this->makeFilteredQuery($filters));
-    }
 
     /**
      * @return TableDataGateway
@@ -473,23 +325,6 @@ abstract class CollectionEndpoint extends Endpoint
         return $this->addShowQueryColumns($this->makeQuery());
     }
 
-    /**
-     * @param TableDataGateway $query
-     * @return TableDataGateway
-     */
-    protected function addIndexQueryColumns($query)
-    {
-        return $this->addDefaultQueryColumns($query);
-    }
-
-    /**
-     * @param TableDataGateway $query
-     * @return TableDataGateway
-     */
-    protected function addExportQueryColumns($query)
-    {
-        return $this->addIndexQueryColumns($query);
-    }
 
     /**
      * @param TableDataGateway $query
@@ -500,31 +335,5 @@ abstract class CollectionEndpoint extends Endpoint
         return $this->addDefaultQueryColumns($query);
     }
 
-    /**
-     * @param TableDataGateway $query
-     * @return TableDataGateway
-     */
-    protected function addDefaultQueryColumns($query)
-    {
-        return $query;
-    }
-
-
-    /**
-     * @param array $filters
-     * @return TableDataGateway
-     * @throws \Exception
-     */
-    protected function makeFilteredQuery($filters)
-    {
-        $schema = $this->getFilterSchema();
-        return $this->makeQuery()->whereFilters($filters, $schema);
-    }
-
-
-    protected function getExportSchema()
-    {
-        return $this->getListSchema();
-    }
 
 }

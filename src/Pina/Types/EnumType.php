@@ -4,6 +4,7 @@ namespace Pina\Types;
 
 use Pina\App;
 use Pina\Controls\FormSelect;
+use Pina\Controls\FormStatic;
 use Pina\Data\Field;
 
 use Pina\TableDataGateway;
@@ -38,11 +39,13 @@ class EnumType implements TypeInterface
             array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
         }
 
-        return $this->makeSelect()
+        $control = $field->isStatic()
+            ? $this->makeStatic()->setValue($this->format($value))
+            : $this->makeSelect()->setVariants($variants)->setValue($value);
+
+        return $control
             ->setName($field->getKey())
-            ->setTitle($field->getTitle() . $star)
-            ->setValue($value)
-            ->setVariants($variants);
+            ->setTitle($field->getTitle() . $star);
     }
 
     protected function isPlaceholderNeeded()
@@ -114,6 +117,14 @@ class EnumType implements TypeInterface
     protected function makeSelect()
     {
         return App::make(FormSelect::class);
+    }
+
+    /**
+     * @return FormStatic
+     */
+    protected function makeStatic()
+    {
+        return App::make(FormStatic::class);
     }
 
 }

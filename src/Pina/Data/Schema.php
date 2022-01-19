@@ -651,6 +651,10 @@ class Schema implements IteratorAggregate
         $record = [];
 
         foreach ($this->getIterator() as $field) {
+            if ($field->isStatic()) {
+                continue;
+            }
+
             $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
             $value = Arr::get($data, $path, null);
 

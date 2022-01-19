@@ -18,6 +18,7 @@ class Field
     protected $default = null;
     protected $isMandatory = false;
     protected $isNullable = false;
+    protected $isStatic = false;
 
     //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
     protected $isMultiple = false;
@@ -86,6 +87,17 @@ class Field
         $this->isNullable = $nullable;
         $this->default = $default;
         return $this;
+    }
+
+    public function setStatic($static = true)
+    {
+        $this->isStatic = $static;
+        return $this;
+    }
+
+    public function isStatic()
+    {
+        return $this->isStatic;
     }
 
     public function setDescription($description)
