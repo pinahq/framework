@@ -37,7 +37,7 @@ abstract class Command
         $output = $this->execute($input);
 
         foreach ($this->after as $cmd) {
-            $cmd($output);
+            $cmd($input);
         }
 
         Log::info('command', 'Done', ['class' => get_class($this), 'input' => $input, 'output' => $output]);
