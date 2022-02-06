@@ -739,9 +739,10 @@ class Schema implements IteratorAggregate
 
     public function addAutoincrementPrimaryKey($field, $title)
     {
-        $this->add($field, $title, IntegerType::class)->setMandatory();
+        $r = $this->add($field, $title, IntegerType::class)->setMandatory();
         $this->setPrimaryKey([$field]);
         $this->addFieldDefinition($field, 'AUTO_INCREMENT');
+        return $r;
     }
 
     /**

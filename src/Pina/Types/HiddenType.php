@@ -7,6 +7,9 @@ use Pina\Controls\HiddenInput;
 use Pina\App;
 use Pina\Data\Field;
 
+/**
+ * @deprecated в пользу Field::setHidden()
+ */
 class HiddenType extends StringType
 {
 

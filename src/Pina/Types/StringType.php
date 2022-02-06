@@ -5,6 +5,7 @@ namespace Pina\Types;
 use Pina\App;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
+use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
 
 use Pina\TableDataGateway;
@@ -22,7 +23,10 @@ class StringType implements TypeInterface
 
     public function makeControl(Field $field, $value)
     {
-        $input = $field->isStatic() ? $this->makeStatic() : $this->makeInput();
+        $input = $field->isStatic()
+            ? $this->makeStatic()
+            : ($field->isHidden() ? $this->makeHidden() : $this->makeInput());
+
         $input->setType('text');
         $input->setName($field->getKey());
         $star = $field->isMandatory() ? ' *' : '';
@@ -96,6 +100,14 @@ class StringType implements TypeInterface
     protected function makeStatic()
     {
         return App::make(FormStatic::class);
+    }
+
+    /**
+     * @return HiddenInput
+     */
+    protected function makeHidden()
+    {
+        return App::make(HiddenInput::class);
     }
 
 }

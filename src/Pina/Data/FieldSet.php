@@ -76,6 +76,14 @@ class FieldSet
         return $this;
     }
 
+    public function setHidden($hidden = true)
+    {
+        foreach ($this->fields as $f) {
+            $f->setHidden($hidden);
+        }
+        return $this;
+    }
+
     public function makeSchema()
     {
         $schema = new Schema();

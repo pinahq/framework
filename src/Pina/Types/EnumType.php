@@ -5,6 +5,7 @@ namespace Pina\Types;
 use Pina\App;
 use Pina\Controls\FormSelect;
 use Pina\Controls\FormStatic;
+use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
 
 use Pina\TableDataGateway;
@@ -41,7 +42,11 @@ class EnumType implements TypeInterface
 
         $control = $field->isStatic()
             ? $this->makeStatic()->setValue($this->format($value))
-            : $this->makeSelect()->setVariants($variants)->setValue($value);
+            : (
+            $field->isHidden()
+                ? $this->makeHidden()->setValue($value)
+                : $this->makeSelect()->setVariants($variants)->setValue($value)
+            );
 
         return $control
             ->setName($field->getKey())
@@ -126,5 +131,14 @@ class EnumType implements TypeInterface
     {
         return App::make(FormStatic::class);
     }
+
+    /**
+     * @return HiddenInput
+     */
+    protected function makeHidden()
+    {
+        return App::make(HiddenInput::class);
+    }
+
 
 }
