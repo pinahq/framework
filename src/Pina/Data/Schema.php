@@ -596,12 +596,8 @@ class Schema implements IteratorAggregate
 
     protected function getMainSchema()
     {
-        $schema = new Schema();
-        $schema->title = $this->title;
-        $schema->fields = $this->fields;
-        $schema->dataProcessors = $this->dataProcessors;
-        $schema->textProcessors = $this->textProcessors;
-        $schema->htmlProcessors = $this->htmlProcessors;
+        $schema = clone $this;
+        $schema->groups = [];
         return $schema;
     }
 
