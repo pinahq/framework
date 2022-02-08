@@ -762,7 +762,11 @@ class Schema implements IteratorAggregate
      */
     public function getUniqueKeys()
     {
-        return $this->uniqueKeys;
+        $keys = $this->uniqueKeys;
+        foreach ($this->getInnerSchemas() as $group) {
+            $keys = array_merge($keys, $group->getUniqueKeys());
+        }
+        return $keys;
     }
 
     /**
