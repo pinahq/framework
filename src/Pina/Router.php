@@ -22,6 +22,11 @@ class Router
         $this->patterns[$controller] = $pattern;
     }
 
+    public function getPatterns()
+    {
+        return array_values($this->patterns);
+    }
+
     /**
      * @param string $resource
      * @param string $method
