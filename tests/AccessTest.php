@@ -84,6 +84,11 @@ class AccessTest extends TestCase
         Access::permit('accounts/:account_id/items', 'root;admin');
         Access::addGroup('admin');
         $this->assertTrue(Access::isPermitted('accounts/5/items'));
+
+        Access::reset();
+        Access::permit('accounts/:account_id/items', 'root;admin');
+        Access::addGroup('admin');
+        $this->assertFalse(Access::isHandlerPermitted('users'));
     }
 
 }

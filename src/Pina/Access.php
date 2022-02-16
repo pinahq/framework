@@ -122,10 +122,6 @@ class Access
 
     public static function isHandlerPermitted($resource)
     {
-        if (!Access::isPrivate($resource)) {
-            return true;
-        }
-
         return Access::isPermitted($resource);
     }
 
