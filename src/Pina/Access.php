@@ -46,6 +46,14 @@ class Access
             $map,
             $groups,
         );
+
+        foreach (self::$data as $k => $existed) {
+            if ($existed[self::ACCESS_FIELD_PREG] == $line[self::ACCESS_FIELD_PREG]
+                && $existed[self::ACCESS_FIELD_PRIORITY] == $line[self::ACCESS_FIELD_PRIORITY]) {
+                self::$data[$k][self::ACCESS_FIELD_GROUPS] = array_merge(self::$data[$k][self::ACCESS_FIELD_GROUPS], $line[self::ACCESS_FIELD_GROUPS]);
+            }
+        }
+
         self::$data[] = $line;
         self::$sorted = false;
     }

@@ -67,6 +67,23 @@ class AccessTest extends TestCase
         $this->assertFalse(Access::isPermitted('users/5'));
         //TODO:
         //$this->assertTrue(Access::isPermitted('users/create'));
+
+        Access::reset();
+        Access::permit('accounts/:account_id/items', 'root');
+        Access::permit('accounts/:id/items', 'admin');
+        Access::addGroup('admin');
+        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+
+        Access::reset();
+        Access::permit('accounts/:account_id/items', 'root');
+        Access::permit('accounts/:id/items', 'admin');
+        Access::addGroup('root');
+        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+
+        Access::reset();
+        Access::permit('accounts/:account_id/items', 'root;admin');
+        Access::addGroup('admin');
+        $this->assertTrue(Access::isPermitted('accounts/5/items'));
     }
 
 }
