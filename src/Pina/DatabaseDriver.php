@@ -8,7 +8,7 @@ use Exception;
 class DatabaseDriver implements DatabaseDriverInterface
 {
 
-    private $conn = null;
+    protected $conn = null;
 
     public function __construct()
     {
