@@ -119,11 +119,7 @@ class DatabaseDriver implements DatabaseDriverInterface
 
         mysqli_free_result($rc);
 
-        if (!isset($row[0])) {
-            return false;
-        }
-
-        return $row[0];
+        return $row[0] ?? null;
     }
 
     public function batch($queries)
