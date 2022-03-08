@@ -25,7 +25,6 @@
     "psr/container": "^1.0",
     "smarty/smarty": "2.6.*",
     "monolog/monolog": "1.23.*",
-    "phpmailer/phpmailer": "5.2.*",
     "symfony/http-foundation": "^5.0",
     "league/climate": "3.2.*",
     "league/csv": "^8.1",
