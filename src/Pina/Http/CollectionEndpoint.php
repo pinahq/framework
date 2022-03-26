@@ -47,7 +47,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /** @return Schema */
     public function getCreationSchema()
     {
-        return $this->getSchema();
+        return $this->getSchema()->forgetStatic();
     }
 
     /**

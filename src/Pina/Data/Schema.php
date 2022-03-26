@@ -180,6 +180,26 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    /**
+     * Удаляет из схемы все статические поля
+     * @return $this
+     */
+    public function forgetStatic()
+    {
+        foreach ($this->fields as $k => $field) {
+            if ($field->isStatic()) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->forgetStatic();
+        }
+
+        return $this;
+    }
+
     public function getVolume()
     {
         $count = count($this->fields);
@@ -735,7 +755,7 @@ class Schema implements IteratorAggregate
 
     public function addAutoincrementPrimaryKey($field, $title)
     {
-        $r = $this->add($field, $title, IntegerType::class)->setMandatory();
+        $r = $this->add($field, $title, IntegerType::class)->setStatic();
         $this->setPrimaryKey([$field]);
         $this->addFieldDefinition($field, 'AUTO_INCREMENT');
         return $r;
