@@ -23,7 +23,13 @@ class AttributedBlock
     public function addClass($c)
     {
         $this->classes[] = $c;
+        $this->classes = array_unique($this->classes);
         return $this;
+    }
+
+    public function removeClass($c)
+    {
+        $this->classes = array_values(array_diff($this->classes, [$c]));
     }
 
     /**
