@@ -70,6 +70,13 @@ class ControlTest extends TestCase
 
         $icon->removeClass('test');
         $this->assertEquals('<div class="icon test2"></div>', $icon->__toString());
+
+        $icon = new Wrapper('.icon');
+        $icon->addClass('test   test2');
+        $this->assertEquals('<div class="icon test test2"></div>', $icon->__toString());
+
+        $icon->removeClass('test');
+        $this->assertEquals('<div class="icon test2"></div>', $icon->__toString());
     }
 
 }

@@ -22,8 +22,11 @@ class AttributedBlock
      */
     public function addClass($c)
     {
-        $this->classes[] = $c;
-        $this->classes = array_unique($this->classes);
+        $classes = \explode(' ', $c);
+        foreach ($classes as $cl) {
+            $this->classes[] = trim($cl);
+        }
+        $this->classes = array_unique(array_filter($this->classes));
         return $this;
     }
 
