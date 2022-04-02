@@ -66,8 +66,6 @@ class App
         $types->share('timestamp', Types\TimestampType::class);
         $types->share('uuid', Types\UUIDType::class);
         $types->share('blob', Types\BlobType::class);
-        $types->share('hidden', Types\HiddenType::class);
-        $types->share('static', Types\StaticType::class);
         static::$container->share('types', $types);
 
         $events = new Container();
