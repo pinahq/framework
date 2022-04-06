@@ -186,7 +186,7 @@ class ControllerTest extends TestCase
     public function testHidden()
     {
         $schema = new Schema();
-        $schema->add('mode', 'title', 'hidden');
+        $schema->add('mode', 'title', 'string')->setHidden();
         $form = new RecordForm();
         $form->load(new \Pina\Data\DataRecord(['mode' => 'test'], $schema));
         $r = $form->drawWithWrappers();

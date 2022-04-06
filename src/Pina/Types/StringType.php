@@ -25,9 +25,8 @@ class StringType implements TypeInterface
     {
         $input = $field->isStatic()
             ? $this->makeStatic()
-            : ($field->isHidden() ? $this->makeHidden() : $this->makeInput());
+            : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
-        $input->setType('text');
         $input->setName($field->getKey());
         $star = $field->isMandatory() ? ' *' : '';
         $input->setTitle($field->getTitle() . $star);
