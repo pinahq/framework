@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
+use Pina\Controls\TableView;
+use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
@@ -212,5 +214,39 @@ class SchemaTest extends TestCase
         $schema = CronEventGateway::instance()->getSchema();
         $fields = $schema->makeSQLFields();
         $this->assertEquals($expected, $fields);
+
+        $schema = CronEventGateway::instance()
+            ->select('*')
+            ->getQuerySchema();
+
+        $this->assertEquals(array_keys($expected), $schema->getFieldKeys());
+
+
+        $schema = CronEventGateway::instance()
+            ->select('event')
+            ->select('worker_id')
+            ->innerJoin(
+                CronEventGateway::instance()->on('worker_id', 'worker_id')->alias('worker_tasks')
+                    ->selectAs('event', 'worker_event')
+                    ->select('data')
+                    ->calculate('CONCAT(event, worker_id)', 'calculated', 'Some title')
+            )
+            ->getQuerySchema();
+
+        $keys = ['event', 'worker_id', 'worker_event', 'data', 'calculated'];
+        $values = range(1, count($keys));
+
+        $this->assertEquals($keys, $schema->getFieldKeys());
+
+
+        $data = new DataTable([array_combine($keys, $values)], $schema);
+        $view = new TableView();
+        $view->load($data);
+
+        $header = '<tr><th>Event</th><th>Worker ID</th><th>Event</th><th>Data</th><th>Some title</th></tr>';
+        $body = '<tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>';
+        $html = '<div class="card"><div class="card-body"><table class="table table-hover">' . $header . $body . '</table></div></div>';
+
+        $this->assertEquals($html, $view->__toString());
     }
 }

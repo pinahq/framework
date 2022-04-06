@@ -60,14 +60,6 @@ class TableDataGateway extends SQL
         return static::$table;
     }
 
-    /**
-     * Возвращает схему таблицы
-     * @return Schema
-     */
-    public function getSchema()
-    {
-        return new Schema();
-    }
 
     /**
      * Возвращает список полей

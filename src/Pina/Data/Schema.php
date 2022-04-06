@@ -88,8 +88,6 @@ class Schema implements IteratorAggregate
      * @param mixed $field
      * @param string $title
      * @param string $type
-     * @param bool $isMandatory
-     * @param mixed $default
      * @return Field
      */
     public function add($field, $title = '', $type = 'string')
@@ -100,6 +98,12 @@ class Schema implements IteratorAggregate
             return $f;
         }
 
+        $this->fields[] = $field;
+        return $field;
+    }
+
+    public function addField(Field $field)
+    {
         $this->fields[] = $field;
         return $field;
     }

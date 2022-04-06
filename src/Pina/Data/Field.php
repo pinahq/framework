@@ -3,7 +3,6 @@
 namespace Pina\Data;
 
 use Pina\App;
-use Pina\Types\TypeInterface;
 
 use function array_filter;
 use function implode;
@@ -12,6 +11,7 @@ class Field
 {
 
     protected $key = '';
+    protected $alias = null;
     protected $title = '';
     protected $description = '';
     protected $type = '';
@@ -48,7 +48,13 @@ class Field
      */
     public function getKey()
     {
-        return $this->key;
+        return $this->alias ?? $this->key;
+    }
+
+    public function setAlias(string $alias)
+    {
+        $this->alias = $alias;
+        return $this;
     }
 
     /**
@@ -141,11 +147,19 @@ class Field
         return $this;
     }
 
+    /**
+     * @return bool
+     * @throws \Exception
+     */
     public function isNullable()
     {
         return $this->isNullable || App::type($this->type)->isNullable();
     }
 
+    /**
+     * @return bool
+     * @throws \Exception
+     */
     private function isNullableForced()
     {
         return $this->isNullable && !App::type($this->type)->isNullable();
@@ -153,6 +167,7 @@ class Field
 
     /**
      * @return mixed
+     * @throws \Exception
      */
     public function getDefault()
     {
@@ -172,10 +187,15 @@ class Field
         return $this;
     }
 
+    /**
+     * @param $definitions
+     * @return string
+     * @throws \Exception
+     */
     public function makeSQLDeclaration($definitions)
     {
         $type = App::type($this->type);
-        $default = $this->getFormattedDefault($type);
+        $default = $this->getFormattedDefault();
         if (in_array('AUTO_INCREMENT', $definitions)) {
             $default = 'AUTO_INCREMENT';
         }
@@ -188,10 +208,10 @@ class Field
     }
 
     /**
-     * @param TypeInterface $type
      * @return mixed|string|null
+     * @throws \Exception
      */
-    private function getFormattedDefault($type)
+    private function getFormattedDefault()
     {
         $default = $this->getDefault();
         if (is_null($default)) {

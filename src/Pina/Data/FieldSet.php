@@ -2,8 +2,6 @@
 
 namespace Pina\Data;
 
-use Pina\App;
-
 class FieldSet
 {
     /** @var Schema */
@@ -19,6 +17,11 @@ class FieldSet
     public function add(Field $field)
     {
         $this->fields[] = $field;
+    }
+
+    public function count()
+    {
+        return count($this->fields);
     }
 
     public function calc($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
@@ -80,6 +83,15 @@ class FieldSet
     {
         foreach ($this->fields as $f) {
             $f->setHidden($hidden);
+        }
+        return $this;
+    }
+
+    public function setAlias($key, $alias) {
+        foreach ($this->fields as $f) {
+            if ($f->getKey() == $key) {
+                $f->setAlias($alias);
+            }
         }
         return $this;
     }

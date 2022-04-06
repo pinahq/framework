@@ -11,6 +11,8 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Data\Schema;
+use Pina\Types\StringType;
 
 class SQL
 {
@@ -99,6 +101,59 @@ class SQL
     {
         $this->db = $db ? $db : App::container()->get(DatabaseDriverInterface::class);
         $this->from = $table;
+    }
+
+    /**
+     * Возвращает схему таблицы
+     * @return Schema
+     */
+    public function getSchema()
+    {
+        return new Schema();
+    }
+
+    /**
+     * Возвращает схему на основании выбранных полей задействованных в запросе таблиц
+     * @return Schema
+     */
+    public function getQuerySchema()
+    {
+        $tableSchema = $this->getSchema();
+        if (empty($this->select)) {
+            return $tableSchema;
+        }
+
+        $schema = new Schema();
+        foreach ($this->select as $s) {
+            $field = $s[1];
+            $alias = $s[2] ?? $field;
+            $title = $s[3] ?? $field;
+
+            if ($field == '*') {
+                $schema->merge($tableSchema);
+                continue;
+            }
+
+            $selected = $tableSchema->fieldset([$field]);
+            if ($selected->count() == 0) {
+                $schema->add($field, $title, StringType::class)->setAlias($alias);
+                continue;
+            }
+
+            if ($alias) {
+                $selected->setAlias($field, $alias);
+            }
+            $schema->merge($selected->makeSchema());
+        }
+
+        foreach ($this->joins as $line) {
+            list($type, $table) = $line;
+
+            /** @var SQL $table */
+            $schema->merge($table->getQuerySchema());
+        }
+
+        return $schema;
     }
 
     /**
@@ -218,9 +273,9 @@ class SQL
      * @param string $alias
      * @return $this
      */
-    public function calculate($field, $alias = null)
+    public function calculate($field, $alias = null, $title = '')
     {
-        $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias);
+        $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias, $title);
         return $this;
     }
 
