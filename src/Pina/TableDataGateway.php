@@ -390,18 +390,18 @@ class TableDataGateway extends SQL
      * @param string $alias
      * @return $this
      */
-    public function selectId($alias)
+    public function selectId()
     {
-        return $this->selectAs($this->primaryKey(), $alias);
+        return $this->selectAsIfNotSelected($this->primaryKey(), 'id');
     }
 
     /**
      * @param string $alias
      * @return $this
      */
-    public function selectTitle($alias)
+    public function selectTitle()
     {
-        return $this->selectAs('title', $alias);
+        return $this->selectIfNotSelected('title');
     }
 
     /**

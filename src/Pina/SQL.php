@@ -230,6 +230,21 @@ class SQL
     }
 
     /**
+     * Добавляет в запрос выбор поля, если алиас еще не занят
+     * @param string $field
+     * @return $this
+     */
+    public function selectAsIfNotSelected($field, $alias)
+    {
+        foreach ($this->select as $item) {
+            if (isset($item[2]) && $item[2] == $alias) {
+                return $this;
+            }
+        }
+        return $this->selectAs($field, $alias);
+    }
+
+    /**
      * Добавляет в запрос выбор поля
      * @param string $field
      * @return $this
@@ -527,7 +542,7 @@ class SQL
     }
 
     /**
-     * Добавляет в запрос набор условий выборки, 
+     * Добавляет в запрос набор условий выборки,
      * основанных на равенстве полей, указанных в ключах входного ассоциативного массива,
      * значениям, указанным в значениях входного массива
      * @param array $ps
@@ -662,7 +677,7 @@ class SQL
 
     /**
      * Добавляет в запрос набор условий, связанных с постраничной навигацией
-     * 
+     *
      * @param \Pina\Paging $paging
      * @param string $field название поля, по которому будет считаться COUNT()
      * @param bool $useJoin указывает, необходимо ли подключать другие таблицы через JOIN
@@ -794,7 +809,7 @@ class SQL
      */
     public function makeHaving()
     {
-        
+
         $sql = join(' AND ', $this->getHavingArray());
 
         if ($sql != '') {
@@ -1064,7 +1079,7 @@ class SQL
      * Если задан второй параметр $key, то значения из этого поля станут ключами
      * выходного массива.
      * @param string $name
-     * @param string $key 
+     * @param string $key
      * @return array
      */
     public function column($name, $key = null)
@@ -1173,7 +1188,7 @@ class SQL
     }
 
     /**
-     * Собирает, выполняет и возвращает результат запроса 
+     * Собирает, выполняет и возвращает результат запроса
      * с заданной агрегатной функцией
      * @param string $func
      * @param string $what

@@ -18,7 +18,7 @@ abstract class QueryDirectoryType extends DirectoryType
      */
     public function getVariants()
     {
-        return $this->makeQuery()->selectId('id')->selectTitle('title')->get();
+        return $this->makeQuery()->selectId()->selectTitle()->get();
     }
 
     /**
@@ -27,7 +27,7 @@ abstract class QueryDirectoryType extends DirectoryType
      */
     public function format($value)
     {
-        return $this->makeQuery()->whereId($value)->selectTitle('title')->value('title');
+        return $this->makeQuery()->whereId($value)->selectTitle()->value('title');
     }
 
     public function normalize($value, $isMandatory)
