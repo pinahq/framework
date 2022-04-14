@@ -387,6 +387,24 @@ class TableDataGateway extends SQL
     }
 
     /**
+     * @param string $alias
+     * @return $this
+     */
+    public function selectId($alias)
+    {
+        return $this->selectAs($this->primaryKey(), $alias);
+    }
+
+    /**
+     * @param string $alias
+     * @return $this
+     */
+    public function selectTitle($alias)
+    {
+        return $this->selectAs('title', $alias);
+    }
+
+    /**
      * @return $this
      * @deprecated
      */
