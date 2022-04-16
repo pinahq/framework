@@ -12,12 +12,13 @@ class CLI
     public static function handle($argv, $scriptName)
     {
         self::$driver = new CLImate;
-        
+
         CLI::info('Hello from Pina framework shell');
 
         list($cmd, $data) = self::parseParams($argv, $scriptName);
-        
+
         $modules = App::modules();
+        $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
         $modules->boot('cli');
 
         $parts = explode(".", $cmd);
@@ -27,28 +28,27 @@ class CLI
         }
 
         list($group, $action) = $parts;
-        
+
         $owner = Route::owner($group);
         if (empty($owner)) {
             CLI::error("Such command has not been found");
             exit;
         }
-        
-        CLI::info("Affected module: ".$owner->getTitle());
+
+        CLI::info("Affected module: " . $owner->getTitle());
 
         $path = $owner->getPath();
 
-        if (!file_exists($path."/cli/".$group."/".$action.".php")) {
-            CLI::error("Command '".$cmd."' does not exist");
+        if (!file_exists($path . "/cli/" . $group . "/" . $action . ".php")) {
+            CLI::error("Command '" . $cmd . "' does not exist");
             exit;
         }
         CLI::border('-');
 
-        include $path."/cli/".$group."/".$action.".php";
+        include $path . "/cli/" . $group . "/" . $action . ".php";
 
         CLI::border('-');
-        CLI::info("Memory Usage: ".round(memory_get_peak_usage()/1024/1024, 3)."M");
-
+        CLI::info("Memory Usage: " . round(memory_get_peak_usage() / 1024 / 1024, 3) . "M");
     }
 
     private static function parseParams($argv, $scriptName)
@@ -74,7 +74,7 @@ class CLI
                 $data[$param[0]] = $param[1];
             }
         }
-        
+
         return array($cmd, $data);
     }
 
