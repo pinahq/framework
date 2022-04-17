@@ -218,15 +218,48 @@ class SQL
      */
     public function selectIfNotSelected($field)
     {
+        if ($this->isSelected($field)) {
+            return $this;
+        }
+
+        return $this->select($field);
+    }
+
+    public function isSelected($field)
+    {
         foreach ($this->select as $item) {
             if (isset($item[1]) && $item[1] == $field) {
-                return $this;
+                return true;
             }
             if (isset($item[2]) && $item[2] == $field) {
-                return $this;
+                return true;
             }
         }
-        return $this->select($field);
+
+        foreach ($this->joins as $k => $v) {
+            if ($this->joins[$k][1]->isSelected($field)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isSelectedAs($alias)
+    {
+        foreach ($this->select as $item) {
+            if (isset($item[2]) && $item[2] == $alias) {
+                return true;
+            }
+        }
+
+        foreach ($this->joins as $k => $v) {
+            if ($this->joins[$k][1]->isSelectedAs($field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -236,11 +269,6 @@ class SQL
      */
     public function selectAsIfNotSelected($field, $alias)
     {
-        foreach ($this->select as $item) {
-            if (isset($item[2]) && $item[2] == $alias) {
-                return $this;
-            }
-        }
         return $this->selectAs($field, $alias);
     }
 
