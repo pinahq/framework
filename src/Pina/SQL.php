@@ -225,6 +225,20 @@ class SQL
         return $this->select($field);
     }
 
+    /**
+     * Добавляет в запрос выбор поля, если алиас еще не занят
+     * @param string $field
+     * @return $this
+     */
+    public function selectAsIfNotSelected($field, $alias)
+    {
+        if ($this->isSelectedAs($field, $alias)) {
+            return $this;
+        }
+
+        return $this->selectAs($field, $alias);
+    }
+
     public function isSelected($field)
     {
         foreach ($this->select as $item) {
@@ -254,7 +268,7 @@ class SQL
         }
 
         foreach ($this->joins as $k => $v) {
-            if ($this->joins[$k][1]->isSelectedAs($field)) {
+            if ($this->joins[$k][1]->isSelectedAs($alias)) {
                 return true;
             }
         }
@@ -262,15 +276,6 @@ class SQL
         return false;
     }
 
-    /**
-     * Добавляет в запрос выбор поля, если алиас еще не занят
-     * @param string $field
-     * @return $this
-     */
-    public function selectAsIfNotSelected($field, $alias)
-    {
-        return $this->selectAs($field, $alias);
-    }
 
     /**
      * Добавляет в запрос выбор поля
