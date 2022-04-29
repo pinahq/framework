@@ -8,6 +8,8 @@ use Pina\Controls\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Http\Endpoint;
+use Pina\Http\Location;
+use Pina\Http\Request;
 use Pina\Response;
 
 class CronEventEndpoint extends Endpoint
@@ -15,11 +17,6 @@ class CronEventEndpoint extends Endpoint
 
     protected $schema = null;
     protected $parent = null;
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     public function index()
     {

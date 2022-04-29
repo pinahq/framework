@@ -11,6 +11,8 @@ use Pina\Controls\RecordView;
 use Pina\Events\Cron\CronEventEndpoint;
 use Pina\App;
 use Pina\CSRF;
+use Pina\Http\Request;
+use Pina\Input;
 
 class ControllerTest extends TestCase
 {
@@ -73,7 +75,10 @@ class ControllerTest extends TestCase
             . '</table>'
             . '</div></div>';
 
-        $endpoint = new CronEventEndpoint();
+
+        $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
+
+        $endpoint = new CronEventEndpoint($request, new \Pina\Http\Location('/'), new \Pina\Http\Location('/'));
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 
