@@ -75,8 +75,13 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
             $this->getBreadcrumb($this->getCollectionTitle(), $this->getCreationTitle())->drawWithWrappers()
         );
 
-        return $this->makeCreateForm(new DataRecord([], $this->getCreationSchema()))
+        return $this->makeCreateForm($this->getNewDataRecord())
             ->wrap($this->makeSidebarWrapper());
+    }
+
+    protected function getNewDataRecord(): DataRecord
+    {
+        return new DataRecord([], $this->getCreationSchema());
     }
 
     /**
