@@ -4,41 +4,21 @@
 namespace Pina\Http;
 
 use Pina\App;
-use Pina\Arr;
 use Pina\BadRequestException;
-use Pina\Controls\BreadcrumbView;
 use Pina\Controls\Control;
-use Pina\Paging;
-use Pina\Request;
 use Pina\Response;
-use Pina\NotFoundException;
 use Pina\TableDataGateway;
 use Pina\Data\Schema;
 use Pina\Data\DataRecord;
-use Pina\Data\DataTable;
 use Pina\Controls\ButtonRow;
-use Pina\Controls\FilterForm;
 use Pina\Controls\LinkedButton;
-use Pina\Controls\PagingControl;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
-use Pina\Controls\SidebarWrapper;
-use Pina\Controls\TableView;
-use Pina\Export\DefaultExport;
 
 use function Pina\__;
 
 abstract class CollectionEndpoint extends FixedCollectionEndpoint
 {
-    /**
-     * @param array $item
-     * @return string
-     */
-    abstract function getItemTitle($item);
-
-    /** @return string */
-    abstract function getCreationTitle();
-
     public function getSchema()
     {
         return $this->makeQuery()->getSchema()->forgetField('id');
@@ -61,27 +41,31 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
     public function show($id)
     {
-        $item = $this->makeShowQuery()->findOrFail($id);
+        $record = $this->getDataRecord($id);
 
-        $title = $this->getItemTitle($item);
-        Request::setPlace('page_header', $title);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle(), $title)->drawWithWrappers());
+        $this->composer->show($this->base, $record);
 
-        return $this->makeRecordView(new DataRecord($item, $this->getSchema()))
+        return $this->makeRecordView($record)
             ->wrap($this->makeSidebarWrapper());
     }
 
+    protected function getDataRecord($id): DataRecord
+    {
+        $item = $this->makeShowQuery()->findOrFail($id);
+        return new DataRecord($item, $this->getSchema());
+    }
 
     public function create()
     {
-        Request::setPlace('page_header', $this->getCreationTitle());
-        Request::setPlace(
-            'breadcrumb',
-            $this->getBreadcrumb($this->getCollectionTitle(), $this->getCreationTitle())->drawWithWrappers()
-        );
+        $this->composer->create($this->base);
 
-        return $this->makeCreateForm(new DataRecord([], $this->getCreationSchema()))
+        return $this->makeCreateForm($this->getNewDataRecord())
             ->wrap($this->makeSidebarWrapper());
+    }
+
+    protected function getNewDataRecord(): DataRecord
+    {
+        return new DataRecord([], $this->getCreationSchema());
     }
 
     /**
@@ -223,6 +207,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
      */
     protected function makeFilterForm()
     {
+        /** @var RecordForm $form */
         $form = parent::makeFilterForm();
         $form->getButtonRow()->append($this->makeCreateButton());
         return $form;

@@ -4,7 +4,6 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Arr;
-use Pina\Controls\BreadcrumbView;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
@@ -18,21 +17,27 @@ use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\NotFoundException;
 use Pina\Paging;
-use Pina\Request;
 use Pina\TableDataGateway;
+use Pina\Composers\CollectionComposer;
 
 use function Pina\__;
 
 abstract class FixedCollectionEndpoint extends Endpoint
 {
 
+    protected $composer;
     protected $exportAllowed = false;
 
     /** @return TableDataGateway */
     abstract function makeQuery();
 
-    /** @return string */
-    abstract function getCollectionTitle();
+    public function __construct(\Pina\Http\Request $request, Location $location, Location $base)
+    {
+        parent::__construct($request, $location, $base);
+        /** @var CollectionComposer composer */
+        $this->composer = App::make(CollectionComposer::class);
+        $this->composer->configure(__('Перечень'), '', __('Создать'));
+    }
 
     public function getListSchema()
     {
@@ -61,16 +66,27 @@ abstract class FixedCollectionEndpoint extends Endpoint
 
         $this->exportIfNeeded($filters);
 
-        $query = $this->makeIndexQuery($filters);
+        $data = $this->getDataTable($filters);
 
-        Request::setPlace('page_header', $this->getCollectionTitle());
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($this->getCollectionTitle())->drawWithWrappers());
+        $this->composer->index($this->base, $data);
 
-        $paging = $this->applyPaging($query, $filters);
-        return $this->makeCollectionView(new DataTable($query->get(), $this->getListSchema()))
-            ->after($paging)
+        return $this->makeCollectionView($data)
+            ->after($this->makePagingControl($data->getPaging(), $filters))
             ->after($this->makeIndexButtons())
             ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
+    }
+
+    /**
+     * @param array $filters
+     * @return DataTable
+     * @throws \Exception
+     */
+    protected function getDataTable($filters): DataTable
+    {
+        $query = $this->makeIndexQuery($filters);
+        $paging = new Paging($this->request()->get('page'), $this->request()->get("paging", 25));
+        $query->paging($paging);
+        return new DataTable($query->get(), $this->getListSchema(), $paging);
     }
 
     /**
@@ -90,7 +106,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
 
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
-        $export->setFilename($this->getCollectionTitle());
+        $export->setFilename('export');
         $export->load(new DataTable($this->makeExportQuery($filters)->get(), $this->getExportSchema()));
         $export->download();
         exit;
@@ -149,20 +165,8 @@ abstract class FixedCollectionEndpoint extends Endpoint
         return $btn;
     }
 
-    protected function getBreadcrumb($baseTitle = '', $title = null)
-    {
-        $path = [];
-        $path[] = ['title' => '<i class="mdi mdi-home"></i>', 'link' => $this->base->link('/')];
-        $path[] = ['title' => $baseTitle, 'link' => $this->base->link('@')];
-        if ($title) {
-            $path[] = ['title' => $title, 'is_active' => true];
-        }
-        $view = App::make(BreadcrumbView::class);
-        $view->load(new DataTable($path, new Schema()));
-        return $view;
-    }
-
     /**
+     * @deprecated в пользу инкапсуляции paging в DataTable и отдельного метода на создание контрола makePagingControl
      * @param TableDataGateway $query
      * @param array $filters
      * @return PagingControl
@@ -171,7 +175,11 @@ abstract class FixedCollectionEndpoint extends Endpoint
     {
         $paging = new Paging($this->request()->get('page'), $this->request()->get("paging", 25));
         $query->paging($paging);
+        return $this->makePagingControl($paging, $filters);
+    }
 
+    protected function makePagingControl($paging, $filters)
+    {
         $pagingControl = new PagingControl();
         $pagingControl->init($paging);
         $pagingControl->setLinkContext($filters);

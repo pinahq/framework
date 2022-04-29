@@ -64,26 +64,24 @@ class Router
             throw new Container\NotFoundException;
         }
 
-        $cl = $this->endpoints[$c];
-        /** @var Endpoint $inst */
-        $inst = new $cl;
 
         $pattern = $this->patterns[$c];
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
         $request = new Request($_GET, Input::getData(), array_merge($data, $parsed), $_COOKIE, $_FILES, $_SERVER);
-        $inst->setRequest($request);
 
         $location = new Http\Location($resource);
-        $inst->setLocation($location);
 
         $controllerCount = count(explode('/', $c));
         $amount = floor($controllerCount / 2) + $controllerCount;
         $baseResource = implode('/', array_slice(explode('/', trim($resource, '/')), 0, $amount));
 
         $base = new Http\Location($baseResource);
-        $inst->setBase($base);
+
+        $cl = $this->endpoints[$c];
+        /** @var Endpoint $inst */
+        $inst = new $cl($request, $location, $base);
 
         $action .= $this->calcDeeperAction($resource, $pattern);
 

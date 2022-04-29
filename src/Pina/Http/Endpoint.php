@@ -29,26 +29,11 @@ class Endpoint
      */
     protected $base;
 
-    public function __construct()
-    {
-        $this->request = new Request();
-        $this->location = new Location('');
-        $this->base = new Location('');
-    }
-
-    public function setLocation(Location $location)
-    {
-        $this->location = $location;
-    }
-
-    public function setBase(Location $location)
-    {
-        $this->base = $location;
-    }
-
-    public function setRequest(Request $request)
+    public function __construct(Request $request, Location $location, Location $base)
     {
         $this->request = $request;
+        $this->location = $location;
+        $this->base = $base;
     }
 
     /**
