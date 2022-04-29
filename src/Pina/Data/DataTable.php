@@ -2,7 +2,10 @@
 
 namespace Pina\Data;
 
-class DataTable implements \Iterator
+use Iterator;
+use Pina\Paging;
+
+class DataTable implements Iterator
 {
     /** @var array */
     protected $data = [];
@@ -12,19 +15,33 @@ class DataTable implements \Iterator
 
     protected $cursor = 0;
 
+    protected $paging;
+
     /**
      * @param array $data
      * @param Schema $schema
      */
-    public function __construct($data, $schema)
+    public function __construct($data, $schema, ?Paging $paging = null)
     {
         $this->data = $data;
         $this->schema = $schema;
+
+        if (is_null($paging)) {
+            $this->paging = new Paging(0, count($this->data));
+            $this->paging->setTotal(count($this->data));
+        } else {
+            $this->paging = $paging;
+        }
     }
 
-    public function getSchema()
+    public function getSchema(): Schema
     {
         return $this->schema;
+    }
+
+    public function getPaging(): Paging
+    {
+        return $this->paging;
     }
 
     public function getData()
@@ -32,11 +49,19 @@ class DataTable implements \Iterator
         return $this->schema->processListAsData($this->data);
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getTextData()
     {
         return $this->schema->processListAsText($this->data);
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getHtmlData()
     {
         return $this->schema->processListAsHtml($this->data);

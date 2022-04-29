@@ -26,6 +26,9 @@ class RecordForm extends HandledForm
         $this->buttonRow->setMain($this->makeSubmit());
     }
 
+    /**
+     * @return ButtonRow
+     */
     public function getButtonRow()
     {
         return $this->buttonRow;
