@@ -31,7 +31,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
     /** @return TableDataGateway */
     abstract function makeQuery();
 
-    public function __construct(\Pina\Http\Request $request, Location $location, Location $base)
+    public function __construct(Request $request, Location $location, Location $base)
     {
         parent::__construct($request, $location, $base);
         /** @var CollectionComposer composer */
