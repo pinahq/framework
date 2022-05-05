@@ -61,6 +61,9 @@ class CollectionComposer
             return $title = $fn($record);
         }
         $title = $record->getMeta('title');
+        if (empty($title)) {
+            $title = $record->getMeta('id');
+        }
         return trim($title);
     }
 
