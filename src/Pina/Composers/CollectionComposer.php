@@ -15,21 +15,24 @@ use function \Pina\__;
 class CollectionComposer
 {
     protected $collection;
-    protected $item;
     protected $creation;
+    protected $itemCallback;
 
     public function __construct()
     {
         $this->collection = __('Перечень');
-        $this->item = '';
         $this->creation = __('Создать');
     }
 
-    public function configure(string $collection, string $item, string $creation)
+    public function configure(string $collection, string $creation)
     {
         $this->collection = $collection;
-        $this->item = $item;
         $this->creation = $creation;
+    }
+
+    public function setItemCallback(Callable $callback)
+    {
+        $this->itemCallback = $callback;
     }
 
     public function index(Location $base, DataTable $data)
@@ -53,8 +56,12 @@ class CollectionComposer
 
     protected function getItemTitle(DataRecord $record)
     {
+        if ($this->itemCallback) {
+            $fn = $this->itemCallback;
+            return $title = $fn($record);
+        }
         $title = $record->getMeta('title');
-        return trim($this->item . ' "' . $title . '"');
+        return trim($title);
     }
 
     protected function getBreadcrumb(Location $base, $title = null)

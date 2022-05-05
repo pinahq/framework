@@ -25,6 +25,7 @@ use function Pina\__;
 abstract class FixedCollectionEndpoint extends Endpoint
 {
 
+    /** @var CollectionComposer  */
     protected $composer;
     protected $exportAllowed = false;
 
@@ -36,7 +37,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
         parent::__construct($request, $location, $base);
         /** @var CollectionComposer composer */
         $this->composer = App::make(CollectionComposer::class);
-        $this->composer->configure(__('Перечень'), '', __('Создать'));
+        $this->composer->configure(__('Список'), __('Создать'));
     }
 
     public function getListSchema()

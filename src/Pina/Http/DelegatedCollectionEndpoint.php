@@ -17,13 +17,10 @@ use Pina\Controls\TableView;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\NotFoundException;
-use Pina\Paging;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
-use Pina\TableDataGateway;
 
 use function Pina\__;
 
@@ -34,6 +31,7 @@ use function Pina\__;
  */
 class DelegatedCollectionEndpoint extends Endpoint
 {
+    /** @var CollectionComposer  */
     protected $composer;
 
     /** @var DataCollection */
@@ -47,7 +45,7 @@ class DelegatedCollectionEndpoint extends Endpoint
         parent::__construct($request, $location, $base);
         /** @var CollectionComposer composer */
         $this->composer = App::make(CollectionComposer::class);
-        $this->composer->configure(__('Перечень'), '', __('Создать'));
+        $this->composer->configure(__('Перечень'), __('Создать'));
     }
 
     /**
