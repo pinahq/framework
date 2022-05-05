@@ -30,7 +30,8 @@ class RunWorker extends Command
             $this->workerId,
             isset($this->config['max_tasks']) ? $this->config['max_tasks'] : 10,
             isset($this->config['rest_seconds']) ? $this->config['rest_seconds'] : 10,
-            isset($this->config['push_off_seconds']) ? $this->config['push_off_seconds'] : 300
+            isset($this->config['push_off_seconds']) ? $this->config['push_off_seconds'] : 300,
+            $this->calcPriority($this->workerId)
         );
 
         $this->unlockWorkedId();
@@ -38,8 +39,8 @@ class RunWorker extends Command
 
     protected function lockFreeWorkedId()
     {
-        $maxWorkers = isset($this->config['max_workers']) ? $this->config['max_workers'] : 1;
-        for ($number = 1; $number <= $maxWorkers; $number ++) {
+        $maxWorkers = $this->getMaxWorkers();
+        for ($number = 1; $number <= $maxWorkers; $number++) {
             $fp = fopen($this->getLockFile($number), "w+");
             if (flock($fp, LOCK_EX | LOCK_NB)) {
                 $this->workerId = $number;
@@ -49,6 +50,11 @@ class RunWorker extends Command
             fclose($fp);
         }
         return false;
+    }
+
+    protected function getMaxWorkers()
+    {
+        return isset($this->config['max_workers']) ? $this->config['max_workers'] : 1;
     }
 
     protected function unlockWorkedId()
@@ -69,6 +75,12 @@ class RunWorker extends Command
             throw new \Exception('Please specify lock file path: cronLockFile in config/app.php');
         }
         return $base . $number;
+    }
+
+    protected function calcPriority($number)
+    {
+        $margin = $this->getMaxWorkers() - \Pina\Event::PRIORITY_LOW;
+        return  $number < $margin ? \Pina\Event::PRIORITY_LOW : $number - $margin;
     }
 
 }

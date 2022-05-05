@@ -10,7 +10,7 @@ use Pina\Log;
 class CronEventWorker
 {
 
-    public function work($workerId, $taskLimit, $restSeconds, $pushOffSeconds)
+    public function work($workerId, $taskLimit, $restSeconds, $pushOffSeconds, $priority)
     {
         Log::info('event', 'start worker ' . $workerId);
         $i = 0;
@@ -22,7 +22,7 @@ class CronEventWorker
                 $this->pushOff($task['id'], $pushOffSeconds);
             }
 
-            while ($this->assignTask($workerId)) {
+            while ($this->assignTask($workerId, $priority)) {
                 while ($task = $this->getNextTask($workerId)) {
                     Log::info('event', 'Worker ' . $workerId . ' has started ' . $task['event']);
                     $this->startTask($task['id']);
@@ -49,11 +49,13 @@ class CronEventWorker
         }
     }
 
-    protected function assignTask($workerId)
+    protected function assignTask($workerId, $priority)
     {
         return CronEventGateway::instance()
             ->whereNull('worker_id')
             ->whereScheduled()
+            //выбираем задачи с приоритетом не меньше воркера
+            ->where('priority <= '.intval($priority))
             ->limit(1)
             ->orderBy('priority', 'asc')
             ->orderBy('scheduled_at', 'asc')
