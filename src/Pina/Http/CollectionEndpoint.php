@@ -58,7 +58,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     public function create()
     {
         $record = $this->getNewDataRecord();
-        $this->composer->create($this->base, $record);
+        $this->composer->create($this->base);
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }
 

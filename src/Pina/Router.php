@@ -79,9 +79,11 @@ class Router
 
         $base = new Http\Location($baseResource);
 
+        $request->setLocation($base, $location);
+
         $cl = $this->endpoints[$c];
         /** @var Endpoint $inst */
-        $inst = new $cl($request, $location, $base);
+        $inst = new $cl($request);
 
         $action .= $this->calcDeeperAction($resource, $pattern);
 

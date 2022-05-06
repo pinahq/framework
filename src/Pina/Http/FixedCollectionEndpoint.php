@@ -32,9 +32,9 @@ abstract class FixedCollectionEndpoint extends Endpoint
     /** @return TableDataGateway */
     abstract function makeQuery();
 
-    public function __construct(Request $request, Location $location, Location $base)
+    public function __construct(Request $request)
     {
-        parent::__construct($request, $location, $base);
+        parent::__construct($request);
         /** @var CollectionComposer composer */
         $this->composer = App::make(CollectionComposer::class);
         $this->composer->configure(__('Список'), __('Создать'));
@@ -69,7 +69,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
 
         $data = $this->getDataTable($filters);
 
-        $this->composer->index($this->base, $data);
+        $this->composer->index($this->base);
 
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))

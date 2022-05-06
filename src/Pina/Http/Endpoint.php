@@ -29,11 +29,11 @@ class Endpoint
      */
     protected $base;
 
-    public function __construct(Request $request, Location $location, Location $base)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->location = $location;
-        $this->base = $base;
+        $this->location = $request->getLocation();
+        $this->base = $request->getBaseLocation();
     }
 
     /**

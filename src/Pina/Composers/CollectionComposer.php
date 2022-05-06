@@ -35,7 +35,7 @@ class CollectionComposer
         $this->itemCallback = $callback;
     }
 
-    public function index(Location $base, DataTable $data)
+    public function index(Location $base)
     {
         Request::setPlace('page_header', $this->collection);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($base));
@@ -48,7 +48,7 @@ class CollectionComposer
         Request::setPlace('breadcrumb', $this->getBreadcrumb($base, $title));
     }
 
-    public function create(Location $base, DataRecord $record)
+    public function create(Location $base)
     {
         Request::setPlace('page_header', $this->creation);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($base, $this->creation));
