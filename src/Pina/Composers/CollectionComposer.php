@@ -20,8 +20,8 @@ class CollectionComposer
 
     public function __construct()
     {
-        $this->collection = __('Перечень');
-        $this->creation = __('Создать');
+        $this->collection = __('Список');
+        $this->creation = __('Новый элемент');
     }
 
     public function configure(string $collection, string $creation)

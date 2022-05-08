@@ -40,9 +40,9 @@ class DelegatedCollectionEndpoint extends Endpoint
     /** @var DataCollection */
     protected $export;
 
-    public function __construct(Request $request, Location $location, Location $base)
+    public function __construct(Request $request)
     {
-        parent::__construct($request, $location, $base);
+        parent::__construct($request);
         /** @var CollectionComposer composer */
         $this->composer = App::make(CollectionComposer::class);
         $this->composer->configure(__('Перечень'), __('Создать'));
@@ -59,11 +59,11 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $this->exportIfNeeded($filters);
 
-        $data = $this->collection->getList($this->query()->all(), $this->request()->get('page'), $this->request()->get("paging", 25));
+        $data = $this->collection->getList($this->query()->all(), $this->request()->get('page', 0), $this->request()->get("paging", 25));
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
 
-        $this->composer->index($this->base, $data);
+        $this->composer->index($this->base);
 
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))
@@ -108,7 +108,7 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         $record = $this->collection->getNewRecord($this->query()->all());
 
-        $this->composer->create($this->base, $record);
+        $this->composer->create($this->base);
 
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }

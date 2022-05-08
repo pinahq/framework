@@ -98,7 +98,7 @@ abstract class DataCollection
      * @return string|null
      * @throws \Exception
      */
-    public function add(array $data): ?string
+    public function add(array $data): string
     {
         $schema = $this->getCreationSchema();
 
@@ -108,9 +108,11 @@ abstract class DataCollection
 
         if (empty($id)) {
             $primaryKey = $this->getPrimaryKey($schema);
-            if ($primaryKey) {
-                $id = $normalized[$primaryKey] ?? null;
+            if (!$primaryKey || !isset($normalized[$primaryKey])) {
+                throw new \Exception("Wrong primary key");
             }
+
+            $id = $normalized[$primaryKey];
         }
 
         return $id;
