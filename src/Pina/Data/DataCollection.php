@@ -50,7 +50,7 @@ abstract class DataCollection
      */
     public function getFilterSchema(): Schema
     {
-        return $this->getSchema()->forgetStatic();
+        return $this->getSchema()->forgetStatic()->setNullable()->setMandatory(false);
     }
 
     /**
