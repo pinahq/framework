@@ -35,23 +35,30 @@ class CollectionComposer
         $this->itemCallback = $callback;
     }
 
-    public function index(Location $base)
+    public function index(Location $location)
     {
         Request::setPlace('page_header', $this->collection);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($base));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($location));
     }
 
-    public function show(Location $base, DataRecord $record)
+    public function show(Location $location, DataRecord $record)
     {
         $title = $this->getItemTitle($record);
         Request::setPlace('page_header', $title);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($base, $title));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $title));
     }
 
-    public function create(Location $base)
+    public function create(Location $location)
     {
         Request::setPlace('page_header', $this->creation);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($base, $this->creation));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $this->creation));
+    }
+
+    public function section(Location $location, DataRecord $record, string $section)
+    {
+        $title = $this->getItemTitle($record);
+        Request::setPlace('page_header', $section);
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $title, $section));
     }
 
     protected function getItemTitle(DataRecord $record)
@@ -67,14 +74,22 @@ class CollectionComposer
         return trim($title);
     }
 
-    protected function getBreadcrumb(Location $base, $title = null)
+    protected function getBreadcrumb(Location $location, $title = null, $section = null)
     {
         $path = [];
-        $path[] = ['title' => '<i class="mdi mdi-home"></i>', 'link' => $base->link('/')];
-        $path[] = ['title' => $this->collection, 'link' => $base->link('@')];
-        if ($title) {
-            $path[] = ['title' => $title, 'is_active' => true];
+
+        $parts = array_filter([$section, $title, $this->collection]);
+        $l = '@';
+        foreach ($parts as $item) {
+            array_unshift($path, [
+                'title' => $item,
+                'link' => $l == '@' ? null : $location->link($l),
+                'is_active' => $l == '@' ? true : false
+            ]);
+            $l .= '@';
         }
+        array_unshift($path, ['title' => '<i class="mdi mdi-home"></i>', 'link' => $location->link('/')]);
+
         $view = App::make(BreadcrumbView::class);
         $view->load(new DataTable($path, new Schema()));
         return $view;

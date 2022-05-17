@@ -63,7 +63,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
 
-        $this->composer->index($this->base);
+        $this->composer->index($this->location);
 
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))
@@ -99,7 +99,7 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         $record = $this->collection->getRecord($id);
 
-        $this->composer->show($this->base, $record);
+        $this->composer->show($this->location, $record);
 
         return $this->makeRecordView($record)->wrap($this->makeSidebarWrapper());
     }
@@ -108,7 +108,7 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         $record = $this->collection->getNewRecord($this->query()->all());
 
-        $this->composer->create($this->base);
+        $this->composer->create($this->location);
 
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }

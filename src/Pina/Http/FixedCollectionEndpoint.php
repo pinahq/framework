@@ -69,7 +69,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
 
         $data = $this->getDataTable($filters);
 
-        $this->composer->index($this->base);
+        $this->composer->index($this->location);
 
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))
