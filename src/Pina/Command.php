@@ -13,13 +13,13 @@ abstract class Command
 
     abstract protected function execute($input = '');
 
-    public function before($command)
+    public function before(Command $command)
     {
         $this->before[] = $command;
         return $this;
     }
 
-    public function then($command)
+    public function then(Command $command)
     {
         $this->after[] = $command;
     }

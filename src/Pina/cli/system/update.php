@@ -4,5 +4,6 @@ namespace Pina;
 
 use Pina\Commands\Update;
 
-$command = new Update();
+/** @var Update $command */
+$command = App::load(Update::class);
 echo $command();
