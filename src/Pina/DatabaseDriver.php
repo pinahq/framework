@@ -177,16 +177,22 @@ class DatabaseDriver implements DatabaseDriverInterface
         return mysqli_error($this->conn);
     }
 
+    /**
+     * @param \Closure $closure
+     * @return mixed
+     * @throws Exception
+     */
     public function transaction($closure)
     {
         $this->startTransaction();
         try {
-            $closure();
+            $r = $closure();
             $this->commit();
         } catch (Exception $e) {
             $this->rollback();
             throw $e;
         }
+        return $r;
     }
 
     public function startTransaction()

@@ -34,7 +34,7 @@ interface DatabaseDriverInterface
     /**
      * Выполнение функции в рамках одной транзакции
      * @param Closure $closure
-     * @return void
+     * @return mixed
      */
     public function transaction($closure);
 

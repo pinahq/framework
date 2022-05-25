@@ -70,7 +70,7 @@ class DatabaseDriverStub implements DatabaseDriverInterface
 
     public function transaction($closure)
     {
-        $closure();
+        return $closure();
     }
 
     public function startTransaction()
