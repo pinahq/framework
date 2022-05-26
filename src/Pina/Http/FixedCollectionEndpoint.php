@@ -181,7 +181,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
 
     protected function makePagingControl($paging, $filters)
     {
-        $pagingControl = new PagingControl();
+        $pagingControl = App::make(PagingControl::class);
         $pagingControl->init($paging);
         $pagingControl->setLinkContext($filters);
 
