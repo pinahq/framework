@@ -86,6 +86,11 @@ class Nav extends Control
         }
 
         $max = max($scores);
+        if ($max == 0) {
+            $this->current = '';
+            return;
+        }
+
         foreach ($scores as $k => $score) {
             if ($score == $max) {
                 list($title, $link) = $this->items[$k];
