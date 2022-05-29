@@ -9,6 +9,7 @@ use Pina\Controls\ButtonRow;
 use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
 use Pina\Controls\LinkedButton;
+use Pina\Controls\Nav;
 use Pina\Controls\PagingControl;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
@@ -18,6 +19,7 @@ use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Export\DefaultExport;
+use Pina\Controls\SortableTableView;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
@@ -39,6 +41,9 @@ class DelegatedCollectionEndpoint extends Endpoint
 
     /** @var DataCollection */
     protected $export;
+
+    /** @var bool */
+    protected $sortable = false;
 
     public function __construct(Request $request)
     {
@@ -68,7 +73,17 @@ class DelegatedCollectionEndpoint extends Endpoint
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))
             ->after($this->makeIndexButtons())
+            ->before($this->makeTabs())
             ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
+    }
+
+    protected function makeTabs(): Nav
+    {
+        /** @var Nav $menu */
+        $menu = App::make(Nav::class);
+        $menu->addClass('nav nav-tabs');
+        $menu->setLocation($this->location->link('@', $this->query()->all()));
+        return $menu;
     }
 
 
@@ -154,7 +169,22 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeCollectionView(DataTable $data)
     {
+        if ($this->sortable) {
+            return $this->makeSortableCollectionView($data);
+        }
         return App::make(TableView::class)->load($data);
+    }
+
+    protected function makeSortableCollectionView(DataTable $data)
+    {
+        /** @var SortableTableView $view */
+        $view = App::make(SortableTableView::class);
+        $view->load($data);
+        return $view->setHandler(
+            $this->base->resource('@/all/sortable'),
+            'put',
+            []
+        );
     }
 
     /**

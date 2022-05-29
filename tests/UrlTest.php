@@ -1,9 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\Http\Location;
 use Pina\Url;
-use Pina\Route;
-use Pina\App;
 
 class UrlTest extends TestCase
 {
@@ -11,7 +10,7 @@ class UrlTest extends TestCase
     public function testLocation()
     {
         $_SERVER['HTTP_HOST'] = 'test.local';
-        $location = new \Pina\Http\Location('my-resource');
+        $location = new Location('my-resource');
         $this->assertEquals(
             'http://test.local/my-resource?category_id=5',
             $location->link('@?category_id=:id', ['id' => 5, 'title' => 'test'])
@@ -187,6 +186,31 @@ class UrlTest extends TestCase
             Url::resource('$', array('param' => '123'), $parent)
         );
         $this->assertEquals('warehouses/2/addresses', Url::resource('$$$/addresses', array('param' => '123'), $parent));
+    }
+
+    public function testGetNestedWeight()
+    {
+        //URL сам для себя базовый
+        $this->assertTrue(Url::nestedWeight('http://a.com/products', 'http://a.com/products') > 0);
+        $this->assertTrue(
+            Url::nestedWeight('http://a.com/products?filter=active', 'http://a.com/products?filter=active') > 0
+        );
+
+        //Коллекция - является базовым URL для URL с фильтром
+        $this->assertTrue(Url::nestedWeight('http://a.com/products', 'http://a.com/products?sku=123') > 0);
+
+        //В текущей локации отсутсвует необходимый фильтр
+        $this->assertTrue(
+            Url::nestedWeight('http://a.com/products?filter=active', 'http://a.com/products?sku=123') == 0
+        );
+
+        //В текущей локации необходимый фильтр присутсвует
+        $this->assertTrue(
+            Url::nestedWeight('http://a.com/products?filter=active', 'http://a.com/products?sku=123&filter=active') > 0
+        );
+
+        //разные домены
+        $this->assertTrue(Url::nestedWeight('http://a.com/products', 'http://b.com/products') == 0);
     }
 
 }
