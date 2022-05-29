@@ -2,6 +2,7 @@
 
 namespace Pina\Http;
 
+use Exception;
 use Pina\App;
 use Pina\Arr;
 use Pina\Composers\CollectionComposer;
@@ -18,11 +19,15 @@ use Pina\Controls\TableView;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
+use Pina\Data\Field;
+use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\Controls\SortableTableView;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
+
+use Pina\Types\DirectoryType;
 
 use function Pina\__;
 
@@ -55,7 +60,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
     /**
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function index()
     {
@@ -77,19 +82,46 @@ class DelegatedCollectionEndpoint extends Endpoint
             ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
     }
 
+    protected function getTabSchema(): Schema
+    {
+        return new Schema();
+    }
+
+    /**
+     * @return Nav
+     * @throws Exception
+     */
     protected function makeTabs(): Nav
     {
         /** @var Nav $menu */
         $menu = App::make(Nav::class);
         $menu->addClass('nav nav-tabs');
         $menu->setLocation($this->location->link('@', $this->query()->all()));
+
+        $data = $this->getFilterRecord()->getData();
+
+        $schema = $this->getTabSchema();
+        foreach ($schema as $field) {
+            /** @var Field $field */
+            $type = $field->getType();
+            if (!is_subclass_of($type, DirectoryType::class)) {
+                throw new Exception(sprintf("Для навигации поддерживаются только наследники DirectoryType, класс %s не подходит", $type));
+            }
+
+            $variants = App::type($type)->getVariants();
+            foreach ($variants as $variant) {
+                $menu->push($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']])));
+            }
+            break;
+        }
+
         return $menu;
     }
 
 
     /**
      * @param array $filters
-     * @throws \Exception
+     * @throws Exception
      */
     protected function exportIfNeeded($filters)
     {
@@ -130,7 +162,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
     /**
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function store()
     {
@@ -144,7 +176,7 @@ class DelegatedCollectionEndpoint extends Endpoint
     /**
      * @param string $id
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function update($id)
     {
@@ -189,19 +221,33 @@ class DelegatedCollectionEndpoint extends Endpoint
 
     /**
      * @return Control
-     * @throws \Exception
+     * @throws Exception
      */
     protected function makeFilterForm()
     {
         /** @var FilterForm $form */
         $form = App::make(FilterForm::class);
-        $schema = $this->collection->getFilterSchema();
-        $normalized = $schema->normalize($this->query()->all());
-        $form->load(new DataRecord($normalized, $schema));
+        $form->load($this->getFilterRecord());
         if (!$this->collection->getCreationSchema()->isEmpty()) {
             $form->getButtonRow()->append($this->makeCreateButton());
         }
         return $form;
+    }
+
+    /**
+     * @return DataRecord
+     * @throws Exception
+     */
+    protected function getFilterRecord(): DataRecord
+    {
+        $schema = $this->collection->getFilterSchema()->setNullable()->setMandatory(false);
+        $tabSchema = $this->getTabSchema();
+        foreach ($tabSchema as $tabField) {
+            $schema->forgetField($tabField->getKey());
+            $schema->addField($tabField)->setHidden()->setNullable()->setMandatory(false);
+        }
+        $normalized = $schema->normalize($this->query()->all());
+        return new DataRecord($normalized, $schema);
     }
 
     /**
