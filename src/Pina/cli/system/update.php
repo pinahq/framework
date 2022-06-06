@@ -6,4 +6,4 @@ use Pina\Commands\Update;
 
 /** @var Update $command */
 $command = App::load(Update::class);
-echo $command();
+echo $command($argv[2] ?? '');

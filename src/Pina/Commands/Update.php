@@ -16,6 +16,11 @@ class Update extends Command
         });
 
         $upgrades = App::getUpgrades();
+
+        if ($input == 'test') {
+            return join($upgrades, "\r\n");
+        }
+
         App::db()->batch($upgrades);
 
         App::walkModuleRootClasses('Installation', function($cl) {
