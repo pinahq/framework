@@ -85,7 +85,7 @@ class Nav extends Control
             $scores[$k] = Url::nestedWeight($link, $this->location);
         }
 
-        $max = max($scores);
+        $max = $scores ? max($scores) : 0;
         if ($max == 0) {
             $this->current = '';
             return;
