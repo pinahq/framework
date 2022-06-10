@@ -15,7 +15,7 @@ class SortableTableRow extends RecordRow
     {
         $data = $this->record->getHtmlData();
         $content = '';
-        $content .= Html::zz('td(span.draggable [data-id=%](i.fa fa-arrows-alt-v))', strip_tags($data['id']));
+        $content .= Html::zz('td(span.draggable [data-id=%](i.fa fa-arrows-alt-v))', $this->record->getMeta('id'));
         foreach ($data as $v) {
             $content .= Html::tag('td', $v);
         }
