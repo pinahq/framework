@@ -3,9 +3,13 @@
 namespace Pina;
 
 use Closure;
+use Exception;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Events\EventManager;
+
+use function register_shutdown_function;
+use function set_error_handler;
 
 class App
 {
@@ -28,6 +32,9 @@ class App
      */
     public static function init($env, $configPath)
     {
+        set_error_handler([__CLASS__, 'handleError'], E_ALL);
+        register_shutdown_function([__CLASS__, 'handleFatal']);
+
         self::env($env);
 
         Config::init($configPath);
@@ -131,6 +138,7 @@ class App
     /**
      * @param string $type
      * @return Types\TypeInterface
+     * @throws Exception
      */
     public static function type($type)
     {
@@ -158,7 +166,7 @@ class App
             return $t;
         }
 
-        throw new \Exception("Unable to create unsupported class ".$type." as type");
+        throw new Exception("Unable to create unsupported class ".$type." as type");
     }
 
     /**
@@ -619,6 +627,77 @@ class App
         }
     }
 
+    public static function handleError($errno, $errstr, $errfile, $errline, $backtrace = [])
+    {
+        if (empty($backtrace)) {
+            $trace = debug_backtrace();
+            array_shift($trace);
+
+            if (is_array($trace) && !empty($trace)) {
+                foreach ($trace as $item) {
+                    if (!empty($item['file']))
+                        $backtrace[] = $item['file'] . ':' . $item['line'];
+                }
+            }
+
+            if (empty($backtrace)) {
+                $backtrace[] = '[empty backtrace]';
+            }
+        }
+
+        $errortypes = array(
+            E_ERROR => "Error",
+            E_WARNING => "Warning",
+            E_PARSE => "Parse",
+            E_NOTICE => "Notice",
+            E_CORE_ERROR => "Code Error",
+            E_CORE_WARNING => "Code Warning",
+            E_COMPILE_ERROR => "Compile Error",
+            E_COMPILE_WARNING => "Compile Warning",
+            E_USER_ERROR => "User Error",
+            E_USER_WARNING => "User Warning",
+            E_USER_NOTICE => "User Notice",
+            E_STRICT => "Strict",
+        );
+
+        $errortype = isset($errortypes[$errno]) ? $errortypes[$errno] : "Unknown Error";
+
+        if (ini_get("display_errors") != 0) {
+            echo "$errortype: $errstr in $errfile on line $errline\n";
+            echo "Stack trace:\n";
+            echo trim(implode("\n", $backtrace))."\n";
+        }
+
+        $context = [
+            'errortype' => $errortype,
+            'errstr' => $errstr,
+            'errfile' => $errfile,
+            'errline' => $errline,
+            'backtrace' => trim(implode("; ", $backtrace)),
+        ];
+
+        Log::error('php', $errstr, $context);
+    }
+
+    public static function handleFatal()
+    {
+        $error = error_get_last();
+
+        if ($error !== NULL) {
+            $errno = $error["type"] ?? E_CORE_ERROR;
+            $errfile = $error["file"] ?? "unknown file";
+            $errline = $error["line"] ?? -1;
+            $errstr = $error["message"] ?? "shutdown";
+
+            $backtrace = [];
+            if (preg_match('/Stack trace:\s+(.*)$/si', $errstr, $matches)) {
+                $backtrace = explode("\n", trim($matches[1]));
+                $errstr = trim(str_replace($matches[0], '', $errstr));
+            }
+
+            static::handleError($errno, $errstr, $errfile, $errline, $backtrace);
+        }
+    }
 }
 
 function __($string)
