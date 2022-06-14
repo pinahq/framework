@@ -629,6 +629,19 @@ class App
 
     public static function handleError($errno, $errstr, $errfile, $errline, $backtrace = [])
     {
+        if (!(ini_get("error_reporting") & $errno)) {
+            return;
+        }
+
+        if (ini_get("display_errors") == 0 && ini_get("log_errors") == 0) {
+            return;
+        }
+
+        # If error has been supressed with an @
+        if (error_reporting() == 0) {
+            return;
+        }
+
         if (empty($backtrace)) {
             $trace = debug_backtrace();
             array_shift($trace);
