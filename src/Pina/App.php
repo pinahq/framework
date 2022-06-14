@@ -627,7 +627,7 @@ class App
         }
     }
 
-    public static function handleError($errno, $errstr, $errfile, $errline, $backtrace = [])
+    public static function handleError($errno, $errstr, $errfile, $errline, $errcontext, $backtrace = [])
     {
         if (!(ini_get("error_reporting") & $errno)) {
             return;
@@ -686,6 +686,7 @@ class App
             'errstr' => $errstr,
             'errfile' => $errfile,
             'errline' => $errline,
+            'errcontext' => $errcontext,
             'backtrace' => trim(implode("; ", $backtrace)),
         ];
 
@@ -708,7 +709,7 @@ class App
                 $errstr = trim(str_replace($matches[0], '', $errstr));
             }
 
-            static::handleError($errno, $errstr, $errfile, $errline, $backtrace);
+            static::handleError($errno, $errstr, $errfile, $errline, [], $backtrace);
         }
     }
 }
