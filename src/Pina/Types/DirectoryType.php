@@ -49,6 +49,8 @@ abstract class DirectoryType implements TypeInterface
             ->setTitle($field->getTitle() . $star);
     }
 
+
+
     protected function isPlaceholderNeeded(&$variants)
     {
         $ids = array_column($variants, 'id');
@@ -73,6 +75,16 @@ abstract class DirectoryType implements TypeInterface
     public function isNullable()
     {
         return false;
+    }
+
+    public function getData($id)
+    {
+        return null;
+    }
+
+    public function setData($id, $value)
+    {
+
     }
 
     public function filter(TableDataGateway $query, $key, $value)

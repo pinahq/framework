@@ -38,7 +38,11 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     {
     }
 
-
+    /**
+     * @param $id
+     * @return Control
+     * @throws \Exception
+     */
     public function show($id)
     {
         $record = $this->getDataRecord($id);
@@ -49,12 +53,21 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
             ->wrap($this->makeSidebarWrapper());
     }
 
+    /**
+     * @param $id
+     * @return DataRecord
+     * @throws \Exception
+     */
     protected function getDataRecord($id): DataRecord
     {
         $item = $this->makeShowQuery()->findOrFail($id);
         return new DataRecord($item, $this->getSchema());
     }
 
+    /**
+     * @return Control
+     * @throws \Exception
+     */
     public function create()
     {
         $record = $this->getNewDataRecord();
@@ -62,6 +75,10 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }
 
+    /**
+     * @return DataRecord
+     * @throws \Exception
+     */
     protected function getNewDataRecord(): DataRecord
     {
         return new DataRecord([], $this->getCreationSchema());
@@ -127,6 +144,8 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
             }
         }
 
+        $schema->onUpdate($id, $normalized);
+
         return $id;
     }
 
@@ -146,6 +165,8 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
         if ($primaryKey) {
             $id = $normalized[$primaryKey] ?? $id;
         }
+
+        $schema->onUpdate($id, $normalized);
 
         return $id;
     }

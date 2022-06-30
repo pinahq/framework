@@ -63,6 +63,21 @@ interface TypeInterface
     public function normalize($value, $isMandatory);
 
     /**
+     * Загружает данные из внешнего источника, если таковой подразумевается, иначе возвращает null
+     * @param $id
+     * @return mixed
+     */
+    public function getData($id);
+
+    /**
+     * Сохраняет данные во внешний источник, если таковой подразумевается, иначе ничего не делает
+     * @param $id
+     * @param $value
+     * @return mixed
+     */
+    public function setData($id, $value);
+
+    /**
      * @return string
      */
     public function getSQLType();

@@ -2,6 +2,7 @@
 
 namespace Pina\Data;
 
+use Exception;
 use Pina\BadRequestException;
 use Pina\Paging;
 use Pina\TableDataGateway;
@@ -57,7 +58,7 @@ abstract class DataCollection
      * Делает выборку по указанным фильтрам и возвращает таблицу с данными
      * @param array $filters
      * @return DataTable
-     * @throws \Exception
+     * @throws Exception
      */
     public function getList(array $filters, int $page = 0, int $perPage = 0): DataTable
     {
@@ -74,6 +75,7 @@ abstract class DataCollection
      * Выбирает одну запись по первичному ключу
      * @param string $id
      * @return DataRecord
+     * @throws \Exception
      */
     public function getRecord(string $id): DataRecord
     {
@@ -85,6 +87,7 @@ abstract class DataCollection
      * Инициализирует новую запись со значениями по умолчанию под вставку
      * @param array $context
      * @return DataRecord
+     * @throws \Exception
      */
     public function getNewRecord(array $context): DataRecord
     {
@@ -96,7 +99,7 @@ abstract class DataCollection
      * Если главный ключ составной, вернет первый элемент ключа
      * @param array $data
      * @return string|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function add(array $data): string
     {
@@ -109,11 +112,13 @@ abstract class DataCollection
         if (empty($id)) {
             $primaryKey = $this->getPrimaryKey($schema);
             if (!$primaryKey || !isset($normalized[$primaryKey])) {
-                throw new \Exception("Wrong primary key");
+                throw new Exception("Wrong primary key");
             }
 
             $id = $normalized[$primaryKey];
         }
+
+        $schema->onUpdate($id, $normalized);
 
         return $id;
     }
@@ -124,7 +129,7 @@ abstract class DataCollection
      * @param string $id
      * @param array $data
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function update(string $id, array $data): string
     {
@@ -138,6 +143,8 @@ abstract class DataCollection
         if ($primaryKey) {
             $id = $normalized[$primaryKey] ?? $id;
         }
+
+        $schema->onUpdate($id, $normalized);
 
         return $id;
     }
@@ -159,7 +166,7 @@ abstract class DataCollection
      * @param Schema $schema
      * @param string|null $id
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function normalize(array $data, Schema $schema, ?string $id = null): array
     {
@@ -209,7 +216,7 @@ abstract class DataCollection
      * Формирует типовой запрос на выборку и фильтрацию данных коллекции
      * @param array $filters
      * @return TableDataGateway
-     * @throws \Exception
+     * @throws Exception
      */
     protected function makeListQuery(array $filters): TableDataGateway
     {

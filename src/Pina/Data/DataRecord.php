@@ -17,9 +17,11 @@ class DataRecord
     /**
      * @param array $data
      * @param Schema $schema
+     * @throws \Exception
      */
     public function __construct($data, $schema)
     {
+        $schema->fill($data);
         $this->data = $data;
         $this->schema = $schema;
     }
@@ -34,11 +36,19 @@ class DataRecord
         return $this->schema->processLineAsData($this->data);
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getTextData()
     {
         return $this->schema->processLineAsText($this->data);
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getHtmlData()
     {
         return $this->schema->processLineAsHtml($this->data);
