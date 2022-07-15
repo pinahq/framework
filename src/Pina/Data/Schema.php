@@ -776,7 +776,11 @@ class Schema implements IteratorAggregate
             if (isset($fields[$key])) {
                 continue;
             }
-            $fields[$key] = $field->makeSQLDeclaration($this->definitions[$key] ?? []);
+            $declaration = $field->makeSQLDeclaration($this->definitions[$key] ?? []);
+            if (empty($declaration)) {
+                continue;
+            }
+            $fields[$key] = $declaration;
         }
         return $fields;
     }
