@@ -94,6 +94,9 @@ class CSRF
         if (in_array(Route::base($controller), self::$whitelist)) {
             return true;
         }
+        if (in_array(App::router()->base($controller), self::$whitelist)) {
+            return true;
+        }
         $cookie = isset($_COOKIE['csrf_token']) ? $_COOKIE['csrf_token'] : '';
         $header = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '';
         if (!empty($header)) {
