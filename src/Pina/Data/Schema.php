@@ -713,6 +713,61 @@ class Schema implements IteratorAggregate
         return $record;
     }
 
+    /**
+     * Дополняет данные данными из внешних источников
+     * @param $data
+     * @throws \Exception
+     */
+    public function fill(&$data)
+    {
+        $pk = $this->getPrimaryKey();
+        if (empty($pk)) {
+            return;
+        }
+        if (count($pk) > 1) {
+            return;
+        }
+        $primaryKey = array_shift($pk);
+        if (!isset($data[$primaryKey])) {
+            return;
+        }
+        $id = $data[$primaryKey];
+        foreach ($this->getIterator() as $field) {
+            if ($field->isStatic()) {
+                continue;
+            }
+            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $value = Arr::get($data, $path, null);
+            if (is_null($value)) {
+                Arr::set($data, $path, App::type($field->getType())->getData($id));
+            }
+        }
+    }
+
+    /**
+     * Синхронизирует данные во внешних источниках
+     * @param $id
+     * @param $data
+     * @throws \Exception
+     */
+    public function onUpdate($id, $data)
+    {
+        foreach ($this->getIterator() as $field) {
+            if ($field->isStatic()) {
+                continue;
+            }
+            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $value = Arr::get($data, $path, null);
+
+            App::type($field->getType())->setData($id, $value);
+        }
+    }
+
+    /**
+     * @param array $fields
+     * @return array
+     * @throws \Exception
+     */
     public function makeSQLFields($fields = [])
     {
         foreach ($this->getIterator() as $field) {
@@ -721,7 +776,11 @@ class Schema implements IteratorAggregate
             if (isset($fields[$key])) {
                 continue;
             }
-            $fields[$key] = $field->makeSQLDeclaration($this->definitions[$key] ?? []);
+            $declaration = $field->makeSQLDeclaration($this->definitions[$key] ?? []);
+            if (empty($declaration)) {
+                continue;
+            }
+            $fields[$key] = $declaration;
         }
         return $fields;
     }
@@ -812,7 +871,6 @@ class Schema implements IteratorAggregate
         }
         $this->definitions[$fieldKey][] = $definition;
     }
-
 
     protected function callMetaProcessors($processed, $raw)
     {

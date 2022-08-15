@@ -63,10 +63,15 @@ class Url
     public static function method($action)
     {
         switch ($action) {
-            case 'index': case 'show': return 'get';
-            case 'update': return 'put';
-            case 'destroy': return 'delete';
-            case 'store': return 'post';
+            case 'index':
+            case 'show':
+                return 'get';
+            case 'update':
+                return 'put';
+            case 'destroy':
+                return 'delete';
+            case 'store':
+                return 'post';
         }
         return false;
     }
@@ -103,13 +108,17 @@ class Url
         $isCollection = $i % 2;
         if (empty($a)) {
             switch ($method) {
-                case 'get': $a = $isCollection ? 'index' : 'show';
+                case 'get':
+                    $a = $isCollection ? 'index' : 'show';
                     break;
-                case 'put': $a = 'update';
+                case 'put':
+                    $a = 'update';
                     break;
-                case 'delete': $a = 'destroy';
+                case 'delete':
+                    $a = 'destroy';
                     break;
-                case 'post': $a = 'store';
+                case 'post':
+                    $a = 'store';
                     break;
             }
         }
@@ -181,7 +190,7 @@ class Url
         }
         $level = 0;
         while (isset($resource[$level]) && in_array($resource[$level], ['$', '@'])) {
-            $level ++;
+            $level++;
         }
         if ($level > 0) {
             $parentResource = explode('/', $parent);
@@ -191,6 +200,38 @@ class Url
             $resource = implode('/', $parentResource) . substr($resource, $level);
         }
         return $resource;
+    }
+
+    /**
+     * Проверяет, является ли $nested вложенным в $base URL, чтобы понять, выделить ли $base, как активный пункт или нет
+     * Возвращает вес сходства или 0, если сходтсво отсутствует.
+     * Если в меню присутсвует несколько общих ссылок, то активной стоит пометить ту, у которой выше вес сходства
+     * @param string $base
+     * @param string $nested
+     * @return int
+     */
+    public static function nestedWeight(string $base, string $nested)
+    {
+        $parsedBase = parse_url($base);
+        parse_str($parsedBase['query'] ?? '', $baseQuery);
+
+        $parsedNested = parse_url($nested);
+        parse_str($parsedNested['query'] ?? '', $nestedQuery);
+
+        if ($parsedNested['host'] && $parsedBase['host'] && $parsedNested['host'] != $parsedBase['host']) {
+            return 0;
+        }
+
+        if ($parsedNested['path'] != $parsedBase['path']) {
+            return 0;
+        }
+
+        $intersected = array_intersect($baseQuery, $nestedQuery);
+        if (count($intersected) < count($baseQuery)) {
+            return 0;
+        }
+
+        return count($intersected) + 1;
     }
 
 }

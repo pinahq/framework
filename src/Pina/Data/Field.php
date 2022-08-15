@@ -195,6 +195,10 @@ class Field
     public function makeSQLDeclaration($definitions)
     {
         $type = App::type($this->type);
+        $sqlType = $type->getSQLType();
+        if (empty($sqlType)) {
+            return '';
+        }
         $default = $this->getFormattedDefault();
         if (in_array('AUTO_INCREMENT', $definitions)) {
             $default = 'AUTO_INCREMENT';
@@ -202,7 +206,7 @@ class Field
         return implode(
             ' ',
             array_filter(
-                [$type->getSQLType(), $this->isNullable() ? "" : "NOT NULL", $default]
+                [$sqlType, $this->isNullable() ? "" : "NOT NULL", $default]
             )
         );
     }

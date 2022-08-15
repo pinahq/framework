@@ -68,6 +68,16 @@ class IntegerType implements TypeInterface
         return intval($value);
     }
 
+    public function getData($id)
+    {
+        return null;
+    }
+
+    public function setData($id, $value)
+    {
+
+    }
+
     public function getSQLType()
     {
         return "int(" . $this->getSize() . ")";

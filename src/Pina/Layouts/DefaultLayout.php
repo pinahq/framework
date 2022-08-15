@@ -12,8 +12,10 @@ class DefaultLayout extends Control
 
     protected function draw()
     {
+        //вначале генерируем тег body, чтобы все контролы внутри body смогли зарегистировать css перед генерацией head
+        $body = Html::tag('body', $this->makeBody());
         $head = Html::tag('head', $this->makeMeta() . $this->makeCss());
-        $html = Html::tag('html', $head . Html::tag('body', $this->makeBody() . $this->makeJs()));
+        $html = Html::tag('html', $head . $body . $this->makeJs());
         return '<!DOCTYPE html>' . "\n" . $html;
     }
 
