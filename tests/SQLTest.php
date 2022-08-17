@@ -68,6 +68,18 @@ class SQLTest extends TestCase
         $q = SQL::table('cody_product')->whereLike('product_title', array(1,2,3))->make();
         $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`product_title` LIKE '1' OR `cody_product`.`product_title` LIKE '2' OR `cody_product`.`product_title` LIKE '3')", $q);
 
+        $q = SQL::table('cody_product')->whereGreaterThan('quantity', 1)->make();
+        $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`quantity` > '1')", $q);
+
+        $q = SQL::table('cody_product')->whereGreaterOrEqual('quantity', 1)->make();
+        $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`quantity` >= '1')", $q);
+
+        $q = SQL::table('cody_product')->whereLessThan('quantity', 1)->make();
+        $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`quantity` < '1')", $q);
+
+        $q = SQL::table('cody_product')->whereLessOrEqual('quantity', 1)->make();
+        $this->assertEquals("SELECT * FROM `cody_product` WHERE (`cody_product`.`quantity` <= '1')", $q);
+
         $q = SQL::table('cody_product')
             ->whereBy(array('product_id', 'brand_id'), array(1,2,3))
             ->whereLike(array('product_title', 'brand_title'), 'kuku')

@@ -487,6 +487,50 @@ class SQL
     }
 
     /**
+     * Добавляет в запрос условие выборки "$field больше чем $needle"
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
+    public function whereGreaterThan($field, $needle)
+    {
+        return $this->where($this->makeByCondition(array('>', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
+    }
+
+    /**
+     * Добавляет в запрос условие выборки "$field больше или равно $needle"
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
+    public function whereGreaterOrEqual($field, $needle)
+    {
+        return $this->where($this->makeByCondition(array('>=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
+    }
+
+    /**
+     * Добавляет в запрос условие выборки "$field меньше чем $needle"
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
+    public function whereLessThan($field, $needle)
+    {
+        return $this->where($this->makeByCondition(array('<', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
+    }
+
+    /**
+     * Добавляет в запрос условие выборки "$field меньше или равно $needle"
+     * @param array|string $field
+     * @param array|string $needle
+     * @return $this
+     */
+    public function whereLessOrEqual($field, $needle)
+    {
+        return $this->where($this->makeByCondition(array('<=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
+    }
+
+    /**
      * Добавляет в запрос условие выборки, основанное на неравенстве поля заданному значению
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
      * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция NOT IN

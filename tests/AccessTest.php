@@ -9,7 +9,7 @@ class AccessTest extends TestCase
 
     public function testPermit()
     {
-        App::env('test');
+        App::init('test', __DIR__ . '/config');
 
         Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');
         $this->assertTrue(Access::isPrivate('accounts/5/items'));
@@ -21,7 +21,7 @@ class AccessTest extends TestCase
         Access::addGroup('owner');
         Access::addCondition('self', array('user_id' => 2));
         $this->assertTrue(Access::isPermitted('accounts/5/items'));
-        
+
         $groups = Access::getGroups();
         $this->assertEquals(['enabled', 'provider', 'owner'], $groups);
         $this->assertTrue(Access::hasGroup('enabled'));
@@ -59,7 +59,7 @@ class AccessTest extends TestCase
         Access::addGroup('provider');
         $this->assertTrue(Access::isPermitted('accounts/5/users'));
         $this->assertFalse(Access::isPermitted('accounts/5/users/5/lists'));
-        
+
         Access::reset();
         Access::permit('users/:user_id', 'self');
         Access::addCondition('self', array('user_id' => 1));
