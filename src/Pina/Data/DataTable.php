@@ -27,7 +27,9 @@ class DataTable implements Iterator
         $this->schema = $schema;
 
         if (is_null($paging)) {
-            $this->paging = new Paging(0, count($this->data));
+            //в случае, если постраничная навигация не задана, создаем постраничную навигацию из одной большой страницы
+            //но на странице не может быть 0 элементов, это вызовет деление на 0
+            $this->paging = new Paging(0, max(1, count($this->data)));
             $this->paging->setTotal(count($this->data));
         } else {
             $this->paging = $paging;
