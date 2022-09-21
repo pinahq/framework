@@ -120,6 +120,9 @@ class Url
                 case 'post':
                     $a = 'store';
                     break;
+                case 'options':
+                    $a = 'options';
+                    break;
             }
         }
 

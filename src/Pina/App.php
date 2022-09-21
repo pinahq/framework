@@ -208,7 +208,7 @@ class App
         }
 
         $method = Input::getMethod();
-        if (!in_array($method, array('get', 'put', 'delete', 'post'))) {
+        if (!in_array($method, array('get', 'put', 'delete', 'post', 'options'))) {
             @header("HTTP/1.1 501 Not Implemented");
             exit;
         }
