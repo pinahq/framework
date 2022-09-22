@@ -1076,9 +1076,10 @@ class SQL
 
         $sql .= $this->makeHaving();
         $sql .= $this->makeOrderBy();
-        $sql .= $this->makeLimit();
 
         $sql .= $this->makeUnions();
+
+        $sql .= $this->makeLimit();
 
         return $sql;
     }
