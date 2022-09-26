@@ -12,7 +12,7 @@ use Pina\Html;
  */
 class ButtonRow extends Control
 {
-    /** @var Button */
+    /** @var Button|null */
     protected $main = null;
 
     /**

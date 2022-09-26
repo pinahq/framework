@@ -6,8 +6,9 @@ class CSV
 {
 
     protected $schema = [];
-    protected $delimiter = [];
-    protected $charset = [];
+    protected $delimiter = ',';
+    protected $charset = 'utf8';
+    protected $enclosure = '"';
     protected $handle = null;
 
     public function __construct($delimiter, $enclosure, $charset = 'utf8')

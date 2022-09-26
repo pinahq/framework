@@ -18,7 +18,7 @@ class Update extends Command
         $upgrades = App::getUpgrades();
 
         if ($input == 'test') {
-            return join($upgrades, "\r\n");
+            return join("\r\n", $upgrades);
         }
 
         App::db()->batch($upgrades);
@@ -27,7 +27,7 @@ class Update extends Command
             $cl->install();
         });
 
-        return join($upgrades, "\r\n");
+        return join("\r\n", $upgrades);
     }
 
 }

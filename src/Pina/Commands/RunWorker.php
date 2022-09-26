@@ -13,6 +13,7 @@ class RunWorker extends Command
 
     protected $workerId = null;
     protected $lockFile = null;
+    protected $config = [];
 
     public function __construct()
     {
