@@ -4,30 +4,37 @@
 namespace Pina\Controls;
 
 use Pina\Html;
+use Pina\Model\LinkedItemInterface;
 use Pina\Url;
 
 class Nav extends Control
 {
 
+    /** @var LinkedItemInterface[] */
     protected $items = [];
 
     protected $location = '';
-    protected $current = '';
 
     public function setLocation(string $location)
     {
         $this->location = $location;
     }
 
-    public function push($title, $link)
+    public function addItem(LinkedItemInterface $item)
     {
-        array_push($this->items, [$title, $link]);
+        array_push($this->items, $item);
         return $this;
     }
 
-    public function pop()
+    public function addItemToHead(LinkedItemInterface $item)
     {
-        return array_pop($this->items);
+        array_unshift($this->items, $item);
+        return $this;
+    }
+
+    public function countItems(): int
+    {
+        return count($this->items);
     }
 
     protected function draw()
@@ -41,28 +48,25 @@ class Nav extends Control
 
     protected function drawInner()
     {
-        $this->resolveCurrent();//не очень хорошо, так как работает через изменение состояния, а не через отображение
-
         $c = '';
         foreach ($this->items as $item) {
-            list($title, $link) = $item;
-            $c .= $this->drawItem($title, $link);
+            $c .= $this->drawItem($item);
         }
         return $c;
     }
 
-    protected function drawItem($title, $link)
+    protected function drawItem(LinkedItemInterface $item)
     {
         return Html::li(
-            Html::a($title, $link, $this->makeLinkOptions($link)),
-            $this->makeItemOptions($link)
+            Html::a($item->getTitle(), $item->getLink(), $this->makeLinkOptions($item)),
+            $this->makeItemOptions($item)
         );
     }
 
-    protected function makeLinkOptions($link)
+    protected function makeLinkOptions(LinkedItemInterface $item)
     {
         $options = [];
-        if ($this->isActive($link)) {
+        if ($this->isActive($item)) {
             $options['class'] = 'nav-link active';
         } else {
             $options['class'] = 'nav-link';
@@ -70,39 +74,37 @@ class Nav extends Control
         return $options;
     }
 
-    protected function makeItemOptions($link)
+    protected function makeItemOptions(LinkedItemInterface $item)
     {
         $options = [];
         $options['class'] = 'nav-item';
         return $options;
     }
 
-    protected function resolveCurrent()
+    protected function calculateCurrent(): string
     {
         $scores = [];
         foreach ($this->items as $k => $item) {
-            list($title, $link) = $item;
-            $scores[$k] = Url::nestedWeight($link, $this->location);
+            $scores[$k] = Url::nestedWeight($item->getLink(), $this->location);
         }
 
         $max = $scores ? max($scores) : 0;
         if ($max == 0) {
-            $this->current = '';
-            return;
+            return '';
         }
 
         foreach ($scores as $k => $score) {
             if ($score == $max) {
-                list($title, $link) = $this->items[$k];
-                $this->current = $link;
-                break;
+                return $this->items[$k]->getLink();
             }
         }
+
+        return '';
     }
 
-    protected function isActive($link)
+    protected function isActive(LinkedItemInterface $item)
     {
-        return $this->current == $link;
+        return $this->calculateCurrent() == $item->getLink();
     }
 
 }

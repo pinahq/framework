@@ -23,6 +23,7 @@ use Pina\Data\Field;
 use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\Controls\SortableTableView;
+use Pina\Model\LinkedItem;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
@@ -110,7 +111,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
             $variants = App::type($type)->getVariants();
             foreach ($variants as $variant) {
-                $menu->push($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']])));
+                $menu->addItem(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']]))));
             }
             break;
         }
@@ -142,6 +143,9 @@ class DelegatedCollectionEndpoint extends Endpoint
         exit;
     }
 
+    /**
+     * @throws Exception
+     */
     public function show($id)
     {
         $record = $this->collection->getRecord($id);
@@ -151,6 +155,9 @@ class DelegatedCollectionEndpoint extends Endpoint
         return $this->makeRecordView($record)->wrap($this->makeSidebarWrapper());
     }
 
+    /**
+     * @throws Exception
+     */
     public function create()
     {
         $record = $this->collection->getNewRecord($this->query()->all());
