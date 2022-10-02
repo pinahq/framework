@@ -24,7 +24,7 @@ abstract class DataCollection
      */
     public function getSchema(): Schema
     {
-        return $this->makeQuery()->getSchema()->forgetField('id');
+        return $this->makeQuery()->getSchema();
     }
 
     /**
@@ -33,7 +33,7 @@ abstract class DataCollection
      */
     public function getListSchema(): Schema
     {
-        return $this->makeQuery()->getSchema()->forgetField('id');
+        return $this->makeQuery()->getSchema();
     }
 
     /**
