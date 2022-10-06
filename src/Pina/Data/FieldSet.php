@@ -99,9 +99,26 @@ class FieldSet
     public function makeSchema()
     {
         $schema = new Schema();
+        $keys = [];
         foreach ($this->fields as $f) {
+            $keys[] = $f->getKey();
             $schema->add(clone $f);
         }
+
+        $pk = $this->schema->getPrimaryKey();
+        if ($pk && count(array_intersect($pk, $keys)) == count($pk)) {
+            $schema->setPrimaryKey($pk);
+        }
+
+        $uks = $this->schema->getUniqueKeys();
+        foreach ($uks as $uk) {
+            if ($uk && count(array_intersect($uk, $keys)) == count($uk)) {
+                $schema->addUniqueKey($uk);
+            }
+        }
+
+        //TODO: добавить перенос field definitions
+
         return $schema;
     }
 }
