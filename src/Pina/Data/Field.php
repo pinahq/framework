@@ -205,8 +205,8 @@ class Field
         if (in_array('AUTO_INCREMENT', $definitions)) {
             $default = 'AUTO_INCREMENT';
         }
-        if (in_array('ON UPDATE CURRENT TIMESTAMP', $definitions)) {
-            $default .= ' ON UPDATE CURRENT TIMESTAMP';
+        if (in_array('ON UPDATE CURRENT_TIMESTAMP', $definitions)) {
+            $default .= ' ON UPDATE CURRENT_TIMESTAMP';
         }
         return implode(
             ' ',
