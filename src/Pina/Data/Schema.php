@@ -149,7 +149,7 @@ class Schema implements IteratorAggregate
     public function addUpdatedAt($title = 'Updated')
     {
         $this->add('updated_at', $title, TimestampType::class)->setStatic()->setDefault('CURRENT_TIMESTAMP');
-        $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT TIMESTAMP');
+        $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT_TIMESTAMP');
     }
 
     /**
