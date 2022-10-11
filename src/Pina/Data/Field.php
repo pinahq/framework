@@ -31,6 +31,7 @@ class Field
      * @param mixed $type
      * @param boolean $isMandatory @deprecated
      * @param mixed $default @deprecated
+     * @throws \Exception
      * @return \static
      */
     public static function make($key, $title, $type = 'string')
@@ -39,6 +40,7 @@ class Field
         $field->key = $key;
         $field->title = $title;
         $field->type = $type;
+        $field->isNullable = App::type($type)->isNullable();
         return $field;
     }
 
@@ -153,7 +155,7 @@ class Field
      */
     public function isNullable()
     {
-        return $this->isNullable || App::type($this->type)->isNullable();
+        return $this->isNullable;
     }
 
     /**
@@ -202,6 +204,9 @@ class Field
         $default = $this->getFormattedDefault();
         if (in_array('AUTO_INCREMENT', $definitions)) {
             $default = 'AUTO_INCREMENT';
+        }
+        if (in_array('ON UPDATE CURRENT TIMESTAMP', $definitions)) {
+            $default .= ' ON UPDATE CURRENT TIMESTAMP';
         }
         return implode(
             ' ',

@@ -10,6 +10,7 @@ use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
 use Pina\Types\IntegerType;
+use Pina\Types\TimestampType;
 use Pina\Types\ValidateException;
 
 class Schema implements IteratorAggregate
@@ -88,6 +89,7 @@ class Schema implements IteratorAggregate
      * @param mixed $field
      * @param string $title
      * @param string $type
+     * @throws \Exception
      * @return Field
      */
     public function add($field, $title = '', $type = 'string')
@@ -115,6 +117,39 @@ class Schema implements IteratorAggregate
     public function addGroup(Schema $schema)
     {
         $this->groups[] = $schema;
+    }
+
+    /**
+     * Добавляет в схему поля created_at и updated_at
+     * @param string $createdAtTitle
+     * @param string $updatedAtTitle
+     * @throws \Exception
+     */
+    public function addTimestamps($createdAtTitle = 'Created', $updatedAtTitle = 'Updated')
+    {
+        $this->addCreatedAt($createdAtTitle);
+        $this->addUpdatedAt($updatedAtTitle);
+    }
+
+    /**
+     * Добавляет в схему поле created_at
+     * @param string $title
+     * @throws \Exception
+     */
+    public function addCreatedAt($title = 'Created')
+    {
+        $this->add('created_at', $title, TimestampType::class)->setStatic()->setDefault('CURRENT_TIMESTAMP');
+    }
+
+    /**
+     * Добавляет в схему поле updated_at
+     * @param string $title
+     * @throws \Exception
+     */
+    public function addUpdatedAt($title = 'Updated')
+    {
+        $this->add('updated_at', $title, TimestampType::class)->setStatic()->setDefault('CURRENT_TIMESTAMP');
+        $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT TIMESTAMP');
     }
 
     /**
@@ -640,6 +675,7 @@ class Schema implements IteratorAggregate
 
     /**
      * @param string[] $fieldKeys
+     * @throws \Exception
      */
     public function only($fieldKeys)
     {
@@ -816,6 +852,13 @@ class Schema implements IteratorAggregate
         $this->primaryKey = is_array($fields) ? $fields : func_get_args();
     }
 
+    /**
+     * Добавляет в схему целочисленный PK с автоинкрементом
+     * @param $field
+     * @param $title
+     * @return Field
+     * @throws \Exception
+     */
     public function addAutoincrementPrimaryKey($field, $title)
     {
         $r = $this->add($field, $title, IntegerType::class)->setStatic();
