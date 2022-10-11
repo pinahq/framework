@@ -138,7 +138,10 @@ class Schema implements IteratorAggregate
      */
     public function addCreatedAt($title = 'Created')
     {
-        $this->add('created_at', $title, TimestampType::class)->setStatic()->setDefault('CURRENT_TIMESTAMP');
+        $this->add('created_at', $title, TimestampType::class)
+            ->setStatic()
+            ->setNullable(false)
+            ->setDefault('CURRENT_TIMESTAMP');
     }
 
     /**
@@ -148,7 +151,11 @@ class Schema implements IteratorAggregate
      */
     public function addUpdatedAt($title = 'Updated')
     {
-        $this->add('updated_at', $title, TimestampType::class)->setStatic()->setDefault('CURRENT_TIMESTAMP');
+        $this->add('updated_at', $title, TimestampType::class)
+            ->setStatic()
+            ->setNullable(false)
+            ->setDefault('CURRENT_TIMESTAMP');
+
         $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT_TIMESTAMP');
     }
 
