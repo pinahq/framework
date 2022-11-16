@@ -21,7 +21,12 @@ class ZZ
         $this->tokens = $this->getTokens($template);
     }
 
-    public function run($args)
+    /**
+     * @param string[] $args
+     * @return string
+     * @throws Exception
+     */
+    public function run(array $args)
     {
         $this->args = $args;
         while ($token = $this->next()) {
@@ -36,12 +41,13 @@ class ZZ
                     $name = $value = $this->resolve($this->next());
                     if ($this->expected('=')) {
                         $this->next();
-                        $value = $this->resolve($this->next());
+                        $value = '';
+                        while (!$this->expected(']') && !$this->finished()) {
+                            $value .= $this->next();
+                        }
+                        $value = $this->resolve($value);
                     }
-                    $ending = $this->next();
-                    if ($ending != ']') {
-                        throw new Exception("Ожидается символ ]");
-                    }
+                    $this->readExpected(']');
                     $this->options[$name] = $value;
                     break;
                 case '(':
@@ -69,39 +75,60 @@ class ZZ
         return $this->content;
     }
 
-    private function next()
+    private function next(): ?string
     {
         return array_shift($this->tokens);
     }
 
-    private function resolve($s)
+    private function resolve(string $s): string
     {
         return $s == '%' ? $this->nextArg() : $s;
     }
 
-    private function nextArg()
+    private function nextArg(): string
     {
         return array_shift($this->args);
     }
 
-    private function expected($token)
+    /**
+     * @param string $token
+     * @throws Exception
+     */
+    private function readExpected(string $token): string
     {
-        return $this->tokens[0] == $token;
+        $next = $this->next();
+        if (is_null($next)) {
+            throw new Exception("Ожидается символ " . $token . ', но выражение закончилось');
+        }
+        if ($next != $token) {
+            throw new Exception("Ожидается символ " . $token . ' вместо ' . $next);
+        }
+        return $next;
     }
 
-    private function begin()
+    private function expected(string $token): string
+    {
+        return ($this->tokens[0] ?? '') == $token;
+    }
+
+    private function finished(): bool
+    {
+        return empty($this->tokens);
+    }
+
+    private function begin(): void
     {
         $this->startTag();
         $this->content = '';
     }
 
-    private function startTag()
+    private function startTag(): void
     {
         $this->tag = '';
         $this->options = [];
     }
 
-    private function flush($content = '')
+    private function flush($content = ''): void
     {
         if ($this->tag || $this->options) {
             $this->content .= $this->tag($content);
@@ -111,22 +138,27 @@ class ZZ
         }
     }
 
-    private function tag($content = '')
+    private function tag($content = ''): string
     {
         return Html::tag($this->tag ? $this->tag : 'div', $content, $this->options);
     }
 
-    private function push()
+    private function push(): void
     {
         array_push($this->stack, [$this->content, $this->tag, $this->options]);
     }
 
-    private function pop()
+    private function pop(): void
     {
         list($this->content, $this->tag, $this->options) = array_pop($this->stack);
     }
 
-    private function getTokens($template)
+    /**
+     * Разбивает шаблон на токены
+     * @param string $template
+     * @return string[]
+     */
+    private function getTokens(string $template): array
     {
         $operators = ['.', '#', '[', ']', '(', ')', '%', '+', '='];
         $tokens = [];

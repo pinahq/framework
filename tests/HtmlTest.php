@@ -30,8 +30,14 @@ class HtmlTest extends TestCase
         $this->assertEquals($expectedHtml, $html);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testNest()
     {
+        $r = Html::zz("a.logo[href=/](img[src=/img/logo.gif])");
+        $this->assertEquals('<a class="logo" href="/"><img src="/img/logo.gif"></a>', $r);
+
         $r = Html::nest('div#wrapper/a#my.link[href=#][title=my link]');
         $this->assertEquals('<div id="wrapper"><a id="my" class="link" href="#" title="my link"></a></div>', $r);
 
@@ -50,6 +56,9 @@ class HtmlTest extends TestCase
         $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
         $r = Html::zz('div.%(div.circle+div.round%+p)+span%', 'step', 10, 20);
         $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
+
+
+
         $r = Html::nest('.step/.circle+p', 10);
         $this->assertEquals('<div class="step"><div class="circle"></div><p>10</p></div>', $r);
         $r = Html::nest('div.step/div.circle+p', 10);
@@ -71,6 +80,8 @@ class HtmlTest extends TestCase
         $r = Html::nest('div#first/table#some-id#sss.my-class.other_class[disabled][data-id=8]/tr/td.last', 'hello!');
         $this->assertEquals('<div id="first"><table id="some-id sss" class="my-class other_class" disabled="disabled" data-id="8"><tr><td class="last">hello!</td></tr></table></div>', $r);
 
+        $r = Html::nest("a.icon icon-burger mobile[href=#][data-toggle-modal=nav.side]/span");
+        $this->assertEquals('<a class="icon icon-burger mobile" href="#" data-toggle-modal="nav.side"><span></span></a>', $r);
     }
 
 }
