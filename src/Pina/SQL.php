@@ -156,6 +156,44 @@ class SQL
         return $schema;
     }
 
+
+    /**
+     * @param string $needle
+     * @return $this|null
+     */
+    protected function resolveFieldTable(string $needle)
+    {
+        foreach ($this->select as $s) {
+            $field = $s[1];
+            $alias = $s[2] ?? $field;
+
+            if ($alias == $needle) {
+                return $this;
+            }
+
+            if ($field == '*') {
+                $keys = $this->getSchema()->getFieldKeys();
+                if (in_array($needle, $keys)) {
+                    return $this;
+                }
+            }
+        }
+
+
+        foreach ($this->joins as $line) {
+            list($type, $table) = $line;
+
+            /** @var SQL $table */
+            $r = $table->resolveFieldTable($needle);
+            if (!is_null($r)) {
+                return $r;
+            }
+        }
+
+        return null;
+
+    }
+
     /**
      * Добавляет в запрос alias для таблицы
      * @param string $alias
@@ -1090,7 +1128,7 @@ class SQL
      */
     public function debug()
     {
-        echo $this->make();
+        echo "\n".$this->make()."\n";
         return $this;
     }
 

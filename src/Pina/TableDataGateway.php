@@ -405,17 +405,6 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * @return $this
-     * @deprecated
-     */
-    public function enabled()
-    {
-        $prefix = str_replace("cody_", "", static::$table);
-
-        return $this->whereBy($prefix . "_enabled", 'Y');
-    }
-
-    /**
      * Собирает и возвращает текст запроса, отвечающего за сортировку (для ORDER BY)
      * @param string $s
      * @return string
@@ -612,20 +601,40 @@ class TableDataGateway extends SQL
     public function whereFilters($filters, Schema $schema)
     {
         $availableFields = array_keys($this->getFields());
-        foreach ($schema->getIterator() as $field) {
-            if (!in_array($field->getKey(), $availableFields)) {
-                continue;
-            }
-            $value = isset($filters[$field->getKey()]) ? $filters[$field->getKey()] : '';
+
+        foreach ($filters as $filter => $value) {
             if (empty($value)) {
                 continue;
             }
-            /** @var TypeInterface $type */
-            $type = App::type($field->getType());
-            $type->filter($this, $field->getKey(), $value);
-        }
 
+            foreach ($schema->getIterator() as $field) {
+
+                //ищем совпадающее поле в схеме
+                if ($field->getKey() != $filter) {
+                    continue;
+                }
+
+                //пытаемся выявить таблицу на основе выбранных для текущего запроса полей
+                $table = $this->resolveFieldTable($field->getKey());
+                if ($table) {
+                    /** @var TypeInterface $type */
+                    $type = App::type($field->getType());
+                    $type->filter($table, $field->getKey(), $value);
+                    continue;
+                }
+
+                //если не получилось, то смотрим, есть ли поле среди полей текущей таблицы
+                if (!in_array($field->getKey(), $availableFields)) {
+                    continue;
+                }
+
+                /** @var TypeInterface $type */
+                $type = App::type($field->getType());
+                $type->filter($this, $field->getKey(), $value);
+            }
+        }
         return $this;
+
     }
 
 }
