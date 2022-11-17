@@ -709,6 +709,8 @@ class App
                 $errstr = trim(str_replace($matches[0], '', $errstr));
             }
 
+            @header("HTTP/1.1 500 Internal Server Error");
+
             static::handleError($errno, $errstr, $errfile, $errline, [], $backtrace);
         }
     }
