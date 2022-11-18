@@ -87,7 +87,7 @@ class ZZ
 
     private function nextArg(): string
     {
-        return array_shift($this->args);
+        return array_shift($this->args) ?? '';
     }
 
     /**

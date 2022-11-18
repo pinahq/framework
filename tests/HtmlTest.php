@@ -58,6 +58,11 @@ class HtmlTest extends TestCase
         $this->assertEquals('<div class="step"><div class="circle"></div><div class="round">10</div><p></p></div><span>20</span>', $r);
 
 
+        $r = Html::zz('.buttons(button.link[data-close-modal]%+button.btn btn-primary%)', 'Cancel', 'Save');
+        $this->assertEquals('<div class="buttons"><button class="link" data-close-modal="data-close-modal">Cancel</button><button class="btn btn-primary">Save</button></div>', $r);
+
+        $r = Html::zz('.test%');
+        $this->assertEquals('<div class="test"></div>', $r);
 
         $r = Html::nest('.step/.circle+p', 10);
         $this->assertEquals('<div class="step"><div class="circle"></div><p>10</p></div>', $r);
