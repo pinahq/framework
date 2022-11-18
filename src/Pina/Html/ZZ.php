@@ -80,14 +80,19 @@ class ZZ
         return array_shift($this->tokens);
     }
 
-    private function resolve(string $s): string
+    private function resolve(string $s): ?string
     {
         return $s == '%' ? $this->nextArg() : $s;
     }
 
-    private function nextArg(): string
+    /**
+     * Возвращает значение аргумента, может быть null, если аргумент неопределен
+     * и аттрибут, привязанный к нему не нужно выводить
+     * @return string|null
+     */
+    private function nextArg(): ?string
     {
-        return array_shift($this->args) ?? '';
+        return array_shift($this->args);
     }
 
     /**

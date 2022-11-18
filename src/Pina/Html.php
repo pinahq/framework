@@ -84,7 +84,7 @@ class Html extends BaseHtml
      * @return string
      * @throws \Exception
      */
-    public static function zz(string $template, string $item = ''): string
+    public static function zz(string $template, ?string $item = ''): string
     {
         $zz = new ZZ($template);
         $args = func_get_args();

@@ -24,7 +24,7 @@ class HtmlTest extends TestCase
             'data-params' => 'category_id=5',
             'data-csrf-token' => CSRF::token(),
             ], $attributes);
-        
+
         $expectedHtml = '<a class="pina-action" href="#" data-method="post" data-resource="products" data-params="category_id=1" data-csrf-token="'.CSRF::token().'">Link</a>';
         $html = Html::a('Link', '#', ['class' => 'pina-action'] + Html::getActionAttributes('post', 'products', ['category_id' => 1]));
         $this->assertEquals($expectedHtml, $html);
@@ -63,6 +63,16 @@ class HtmlTest extends TestCase
 
         $r = Html::zz('.test%');
         $this->assertEquals('<div class="test"></div>', $r);
+
+        $r = Html::zz('input[type=checkbox][checked=%]', 'checked');
+        $this->assertEquals('<input type="checkbox" checked="checked">', $r);
+
+        $r = Html::zz('input[type=checkbox][checked=%]', '');
+        $this->assertEquals('<input type="checkbox" checked="">', $r);
+
+        //сбрасываем в принципе аттрибут checked
+        $r = Html::zz('input[type=checkbox][checked=%]', null);
+        $this->assertEquals('<input type="checkbox">', $r);
 
         $r = Html::nest('.step/.circle+p', 10);
         $this->assertEquals('<div class="step"><div class="circle"></div><p>10</p></div>', $r);
