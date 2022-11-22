@@ -221,7 +221,7 @@ class Url
         $parsedNested = parse_url($nested);
         parse_str($parsedNested['query'] ?? '', $nestedQuery);
 
-        if ($parsedNested['host'] && $parsedBase['host'] && $parsedNested['host'] != $parsedBase['host']) {
+        if (!empty($parsedNested['host']) && !empty($parsedBase['host']) && $parsedNested['host'] != $parsedBase['host']) {
             return 0;
         }
 
