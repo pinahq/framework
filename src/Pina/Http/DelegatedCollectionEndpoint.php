@@ -289,7 +289,8 @@ class DelegatedCollectionEndpoint extends Endpoint
 
     protected function makePagingControl($paging, $filters)
     {
-        $pagingControl = new PagingControl();
+        /** @var PagingControl $pagingControl */
+        $pagingControl = App::make(PagingControl::class);
         $pagingControl->init($paging);
         $pagingControl->setLinkContext($filters);
         return $pagingControl;
