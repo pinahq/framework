@@ -13,6 +13,7 @@ class FormInput extends Control
     protected $title = '';
     protected $name = '';
     protected $value = '';
+    protected $description = '';
     protected $type = 'text';
     protected $placeholder = null;
 
@@ -56,6 +57,12 @@ class FormInput extends Control
         return $this;
     }
 
+    public function setDescription($description)
+    {
+        $this->description = $description;
+        return $this;
+    }
+
     /**
      * @param string $placeholder
      * @return $this
@@ -84,7 +91,20 @@ class FormInput extends Control
 
     protected function drawControl()
     {
+        return $this->drawInput() . $this->drawDescription();
+    }
+
+    protected function drawInput()
+    {
         return Html::tag('input', '', $this->makeInputOptions());
+    }
+
+    protected function drawDescription()
+    {
+        if (empty($this->description)) {
+            return '';
+        }
+        return Html::nest('span.help-block text-muted/small', $this->description);
     }
 
     protected function makeInputOptions()

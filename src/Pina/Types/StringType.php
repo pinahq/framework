@@ -31,6 +31,7 @@ class StringType implements TypeInterface
         $star = $field->isMandatory() ? ' *' : '';
         $input->setTitle($field->getTitle() . $star);
         $input->setValue($value);
+        $input->setDescription($field->getDescription());
         return $input;
     }
 

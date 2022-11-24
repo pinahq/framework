@@ -34,7 +34,7 @@ class FormSelect extends FormInput
         return $this;
     }
 
-    protected function drawControl()
+    protected function drawInput()
     {
         return Html::tag('select', $this->drawOptions(), $this->makeInputOptions());
     }

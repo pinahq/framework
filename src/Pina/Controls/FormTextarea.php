@@ -25,7 +25,7 @@ class FormTextarea extends FormInput
         return $this;
     }
 
-    protected function drawControl()
+    protected function drawInput()
     {
         return Html::tag('textarea', $this->value, array_filter(['name' => $this->name, 'class' => 'form-control', 'rows' => $this->rows]));
     }

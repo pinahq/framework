@@ -3,7 +3,6 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\Html;
 
 use function Pina\__;
 
@@ -53,13 +52,6 @@ class RecordForm extends HandledForm
                 $name = $field->getKey();
                 $value = isset($data[$name]) ? $data[$name] : null;
                 $input = App::type($type)->setContext($data)->makeControl($field, $value);
-
-                $description = $field->getDescription();
-                if ($description) {
-                    $help = new RawHtml();
-                    $help->setText(Html::nest('span.help-block text-muted/small', $description));
-                    $input->append($help);
-                }
                 $card->append($input);
             }
 

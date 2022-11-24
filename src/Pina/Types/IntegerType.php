@@ -31,7 +31,8 @@ class IntegerType implements TypeInterface
         return $control
             ->setName($field->getKey())
             ->setTitle($field->getTitle() . $star)
-            ->setValue($value);
+            ->setValue($value)
+            ->setDescription($field->getDescription());
     }
 
     public function format($value)
