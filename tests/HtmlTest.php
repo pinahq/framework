@@ -35,6 +35,9 @@ class HtmlTest extends TestCase
      */
     public function testNest()
     {
+        $r = Html::zz('circle#gray_circle[r=16][cx=19][cy=19][fill=transparent][stroke-dasharray=565.48][stroke-dashoffset=0]');
+        $this->assertEquals('<circle id="gray_circle" r="16" cx="19" cy="19" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>', $r);
+
         $r = Html::zz("a.logo[href=/](img[src=/img/logo.gif])");
         $this->assertEquals('<a class="logo" href="/"><img src="/img/logo.gif"></a>', $r);
 
