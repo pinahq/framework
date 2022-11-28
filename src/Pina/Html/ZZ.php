@@ -172,7 +172,7 @@ class ZZ
         $len = strlen($template);
         while ($pos < $len) {
             if (in_array($template[$pos], $operators)) {
-                if ($token) {
+                if ($token != '') {
                     $tokens[] = $token;
                 }
                 $token = '';
