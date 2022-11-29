@@ -139,6 +139,9 @@ class SQL
                 $schema->add($field, $title, StringType::class)->setAlias($alias);
                 continue;
             }
+            if ($title && $title <> $field) {
+                $selected->setTitle($field, $title);
+            }
 
             if ($alias) {
                 $selected->setAlias($field, $alias);
@@ -335,9 +338,9 @@ class SQL
      * @param string $alias
      * @return $this
      */
-    public function selectAs($field, $alias)
+    public function selectAs($field, $alias, $title = '')
     {
-        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias));
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias), $title);
         return $this;
     }
 

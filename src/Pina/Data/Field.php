@@ -59,6 +59,12 @@ class Field
         return $this;
     }
 
+    public function setTitle(string $title)
+    {
+        $this->title = $title;
+        return $this;
+    }
+
     /**
      * Получить наименование поля
      * @return string

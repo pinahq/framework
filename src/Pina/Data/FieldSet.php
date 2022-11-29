@@ -96,6 +96,15 @@ class FieldSet
         return $this;
     }
 
+    public function setTitle($key, $title) {
+        foreach ($this->fields as $f) {
+            if ($f->getKey() == $key) {
+                $f->setTitle($title);
+            }
+        }
+        return $this;
+    }
+
     public function makeSchema()
     {
         $schema = new Schema();
