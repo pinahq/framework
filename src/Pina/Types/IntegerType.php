@@ -22,17 +22,16 @@ class IntegerType implements TypeInterface
 
     public function makeControl(Field $field, $value)
     {
-        $star = $field->isMandatory() ? ' *' : '';
-
         $control = $field->isStatic()
             ? $this->makeStatic()
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
         return $control
             ->setName($field->getKey())
-            ->setTitle($field->getTitle() . $star)
+            ->setTitle($field->getTitle())
             ->setValue($value)
-            ->setDescription($field->getDescription());
+            ->setDescription($field->getDescription())
+            ->setRequired($field->isMandatory());
     }
 
     public function format($value)

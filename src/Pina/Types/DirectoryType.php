@@ -29,8 +29,6 @@ abstract class DirectoryType implements TypeInterface
 
     public function makeControl(Field $field, $value)
     {
-        $star = $field->isMandatory() ? ' *' : '';
-
         $variants = $this->getVariants();
         if ($this->isPlaceholderNeeded($variants)) {
             array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
@@ -45,8 +43,9 @@ abstract class DirectoryType implements TypeInterface
             );
 
         return $control
+            ->setRequired($field->isMandatory())
             ->setName($field->getKey())
-            ->setTitle($field->getTitle() . $star);
+            ->setTitle($field->getTitle());
     }
 
 

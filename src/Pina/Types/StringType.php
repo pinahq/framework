@@ -28,10 +28,10 @@ class StringType implements TypeInterface
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
         $input->setName($field->getKey());
-        $star = $field->isMandatory() ? ' *' : '';
-        $input->setTitle($field->getTitle() . $star);
+        $input->setTitle($field->getTitle());
         $input->setValue($value);
         $input->setDescription($field->getDescription());
+        $input->setRequired($field->isMandatory());
         return $input;
     }
 

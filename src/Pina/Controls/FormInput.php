@@ -16,6 +16,7 @@ class FormInput extends Control
     protected $description = '';
     protected $type = 'text';
     protected $placeholder = null;
+    protected $required = false;
 
     /**
      * @param string $title
@@ -73,6 +74,12 @@ class FormInput extends Control
         return $this;
     }
 
+    public function setRequired(bool $required = true)
+    {
+        $this->required = $required;
+        return $this;
+    }
+
     protected function draw()
     {
         return Html::tag(
@@ -84,9 +91,14 @@ class FormInput extends Control
 
     protected function drawInner()
     {
-        $r = Html::tag('label', $this->title, ['class' => 'control-label']);
+        $r = Html::tag('label', $this->getLabelContent(), ['class' => 'control-label']);
         $r .= $this->drawControl();
         return $r;
+    }
+
+    protected function getLabelContent()
+    {
+        return $this->title . ($this->required ? ' *' : '');
     }
 
     protected function drawControl()

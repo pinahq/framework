@@ -4,6 +4,11 @@ namespace Pina\Events\Cron;
 
 use Pina\Data\Schema;
 use Pina\TableDataGateway;
+use Pina\Types\BlobType;
+use Pina\Types\IntegerType;
+use Pina\Types\StringType;
+use Pina\Types\TimestampType;
+use Pina\Types\UUIDType;
 
 class CronEventGateway extends TableDataGateway
 {
@@ -15,18 +20,22 @@ class CronEventGateway extends TableDataGateway
         'KEY queue' => ['priority', 'scheduled_at'],
     );
 
+    /**
+     * @return Schema
+     * @throws \Exception
+     */
     public function getSchema()
     {
         $schema = new Schema();
-        $schema->add('id', 'ID', 'uuid')->setMandatory();
-        $schema->add('event', 'Event', 'string')->setMandatory();
-        $schema->add('data', 'Data', 'blob');
-        $schema->add('priority', 'Priority', 'int');
-        $schema->add('delay', 'Delay', 'int');
-        $schema->add('worker_id', 'Worker ID', 'int')->setNullable();
-        $schema->add('created_at', 'Created at', 'timestamp')->setDefault('CURRENT_TIMESTAMP');
-        $schema->add('scheduled_at', 'Scheduled at', 'timestamp')->setNullable();
-        $schema->add('started_at', 'Started at', 'timestamp')->setNullable();
+        $schema->add('id', 'ID', UUIDType::class)->setMandatory();
+        $schema->add('event', 'Event', StringType::class)->setMandatory();
+        $schema->add('data', 'Data', BlobType::class);
+        $schema->add('priority', 'Priority', IntegerType::class);
+        $schema->add('delay', 'Delay', IntegerType::class);
+        $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable();
+        $schema->add('created_at', 'Created at', TimestampType::class)->setDefault('CURRENT_TIMESTAMP');
+        $schema->add('scheduled_at', 'Scheduled at', TimestampType::class)->setNullable();
+        $schema->add('started_at', 'Started at', TimestampType::class)->setNullable();
         $schema->setPrimaryKey('id');
         $schema->addKey('created_at');
         return $schema;
