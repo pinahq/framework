@@ -190,13 +190,18 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 
     /**
      * Отрисовать связанные элементы внутри контейнера до основного контента
+     * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
      * @return string
      */
-    protected function drawInnerBefore()
+    protected function drawInnerBefore(Control $wrapper = null)
     {
         $r = '';
         foreach ($this->innerBefore as $c) {
-            $r .= $c->drawWithWrappers();
+            if ($wrapper) {
+                $r .= (clone $wrapper)->append($c);
+            } else {
+                $r .= $c;
+            }
         }
         return $r;
     }
@@ -212,13 +217,18 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 
     /**
      * Отрисовать связанные элементы внутри контейнера после основного контента
+     * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
      * @return string
      */
-    protected function drawInnerAfter()
+    protected function drawInnerAfter(Control $wrapper = null)
     {
         $r = '';
         foreach ($this->innerAfter as $c) {
-            $r .= $c->drawWithWrappers();
+            if ($wrapper) {
+                $r .=  (clone $wrapper)->append($c);
+            } else {
+                $r .= $c;
+            }
         }
         return $r;
     }

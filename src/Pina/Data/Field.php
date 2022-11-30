@@ -20,6 +20,7 @@ class Field
     protected $isNullable = false;
     protected $isStatic = false;
     protected $isHidden = false;
+    protected $width = 12;
 
     //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
     protected $isMultiple = false;
@@ -59,12 +60,6 @@ class Field
         return $this;
     }
 
-    public function setTitle(string $title)
-    {
-        $this->title = $title;
-        return $this;
-    }
-
     /**
      * Получить наименование поля
      * @return string
@@ -81,6 +76,17 @@ class Field
     public function getType()
     {
         return $this->type;
+    }
+
+    public function setWidth(int $width)
+    {
+        $this->width = $width;
+        return $this;
+    }
+
+    public function getWidth()
+    {
+        return $this->width;
     }
 
     /**
