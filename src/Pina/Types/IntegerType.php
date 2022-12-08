@@ -26,6 +26,10 @@ class IntegerType implements TypeInterface
             ? $this->makeStatic()
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
+        if ($field->isStatic()) {
+            $value = $this->format($value);
+        }
+
         return $control
             ->setName($field->getKey())
             ->setTitle($field->getTitle())

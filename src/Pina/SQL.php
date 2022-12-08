@@ -118,16 +118,24 @@ class SQL
      */
     public function getQuerySchema()
     {
-        $tableSchema = $this->getSchema();
-        if (empty($this->select)) {
-            return $tableSchema;
+        $schema = $this->grabQuerySchema();
+        if ($schema->isEmpty()) {
+            return $this->getSchema();
         }
+        return $schema;
+    }
+
+    protected function grabQuerySchema()
+    {
+        $tableSchema = $this->getSchema();
 
         $schema = new Schema();
         foreach ($this->select as $s) {
+            $selecType = $s[0];
             $field = $s[1];
             $alias = $s[2] ?? $field;
             $title = $s[3] ?? $field;
+            $fieldType = $s[4] ?? StringType::class;
 
             if ($field == '*') {
                 $schema->merge($tableSchema);
@@ -136,7 +144,10 @@ class SQL
 
             $selected = $tableSchema->fieldset([$field]);
             if ($selected->count() == 0) {
-                $schema->add($field, $title, StringType::class)->setAlias($alias);
+                $f = $schema->add($field, $title, $fieldType)->setAlias($alias);
+                if ($selecType == self::SQL_SELECT_CONDITION) {
+                    $f->setStatic();
+                }
                 continue;
             }
             if ($title && $title <> $field) {
@@ -153,7 +164,7 @@ class SQL
             list($type, $table) = $line;
 
             /** @var SQL $table */
-            $schema->merge($table->getQuerySchema());
+            $schema->merge($table->grabQuerySchema());
         }
 
         return $schema;
@@ -362,9 +373,9 @@ class SQL
      * @param string $alias
      * @return $this
      */
-    public function calculate($field, $alias = null, $title = '')
+    public function calculate($field, $alias = null, $title = '', $type = null)
     {
-        $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias, $title);
+        $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias, $title, $type);
         return $this;
     }
 
