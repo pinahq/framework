@@ -8,7 +8,7 @@ use Pina\Html;
  * Текстовое поле ввода
  * @package Pina\Controls
  */
-class FormInput extends Control
+class FormInput extends FormControl
 {
     protected $title = '';
     protected $name = '';
@@ -17,12 +17,13 @@ class FormInput extends Control
     protected $type = 'text';
     protected $placeholder = null;
     protected $required = false;
+    protected $compact = false;
 
     /**
      * @param string $title
      * @return $this
      */
-    public function setTitle($title)
+    public function setTitle(string $title): FormControl
     {
         $this->title = $title;
         return $this;
@@ -32,7 +33,7 @@ class FormInput extends Control
      * @param string $name
      * @return $this
      */
-    public function setName($name)
+    public function setName(string $name): FormControl
     {
         $this->name = $name;
         return $this;
@@ -42,7 +43,7 @@ class FormInput extends Control
      * @param string $value
      * @return $this
      */
-    public function setValue($value)
+    public function setValue(?string $value): FormControl
     {
         $this->value = $value;
         return $this;
@@ -52,13 +53,13 @@ class FormInput extends Control
      * @param string $type
      * @return $this
      */
-    public function setType($type)
+    public function setType(string $type): FormControl
     {
         $this->type = $type;
         return $this;
     }
 
-    public function setDescription($description)
+    public function setDescription(string $description): FormControl
     {
         $this->description = $description;
         return $this;
@@ -68,20 +69,29 @@ class FormInput extends Control
      * @param string $placeholder
      * @return $this
      */
-    public function setPlaceholder($placeholder)
+    public function setPlaceholder(string $placeholder): FormControl
     {
         $this->placeholder = $placeholder;
         return $this;
     }
 
-    public function setRequired(bool $required = true)
+    public function setRequired(bool $required = true): FormControl
     {
         $this->required = $required;
         return $this;
     }
 
+    public function setCompact(bool $compact = true): FormControl
+    {
+        $this->compact = $compact;
+        return $this;
+    }
+
     protected function draw()
     {
+        if ($this->compact) {
+            return $this->drawInnerBefore() . $this->drawInput() . $this->drawInnerAfter();
+        }
         return Html::tag(
             'div',
             $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),

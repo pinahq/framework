@@ -2,6 +2,7 @@
 
 namespace Pina\Types;
 
+use Pina\Controls\FormControl;
 use Pina\Data\Field;
 
 use function Pina\__;
@@ -14,7 +15,7 @@ class NumericType extends IntegerType
         return 12;
     }
 
-    public function makeControl(Field $field, $value)
+    public function makeControl(Field $field, $value): FormControl
     {
         return parent::makeControl($field, $value)->setType('text');
     }

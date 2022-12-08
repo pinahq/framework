@@ -11,7 +11,7 @@ use Pina\Html;
 class FormStatic extends FormInput
 {
 
-    protected function drawControl()
+    protected function drawInput()
     {
         return Html::tag('p', $this->value, ['class' => 'form-control-static']);
     }

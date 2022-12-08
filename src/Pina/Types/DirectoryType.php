@@ -5,6 +5,7 @@ namespace Pina\Types;
 
 
 use Pina\App;
+use Pina\Controls\FormControl;
 use Pina\Controls\FormSelect;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
@@ -27,7 +28,7 @@ abstract class DirectoryType implements TypeInterface
         return $this;
     }
 
-    public function makeControl(Field $field, $value)
+    public function makeControl(Field $field, $value): FormControl
     {
         $variants = $this->getVariants();
         if ($this->isPlaceholderNeeded($variants)) {

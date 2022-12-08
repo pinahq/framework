@@ -3,6 +3,7 @@
 namespace Pina\Types;
 
 use Pina\Controls\Control;
+use Pina\Controls\FormControl;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
 
@@ -21,7 +22,7 @@ interface TypeInterface
      * @param mixed $value
      * @return Control
      */
-    public function makeControl(Field $field, $value);
+    public function makeControl(Field $field, $value): FormControl;
 
     /**
      *

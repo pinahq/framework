@@ -3,6 +3,7 @@
 namespace Pina\Types;
 
 use Pina\App;
+use Pina\Controls\FormControl;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
@@ -21,15 +22,11 @@ class StringType implements TypeInterface
         return $this;
     }
 
-    public function makeControl(Field $field, $value)
+    public function makeControl(Field $field, $value): FormControl
     {
         $input = $field->isStatic()
             ? $this->makeStatic()
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
-
-        if ($field->isStatic()) {
-            $value = $this->format($value);
-        }
 
         $input->setName($field->getKey());
         $input->setTitle($field->getTitle());

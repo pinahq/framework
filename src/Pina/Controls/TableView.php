@@ -5,6 +5,7 @@ namespace Pina\Controls;
 use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
+use Pina\Data\Field;
 
 class TableView extends Card
 {
@@ -33,7 +34,7 @@ class TableView extends Card
     protected function drawInner()
     {
         $table = $this->makeTable();
-        $table->append($this->buildHeader($this->dataTable->getSchema()->getFieldTitles()));
+        $table->append($this->buildHeader());
 
         foreach ($this->dataTable as $record) {
             /** @var DataRecord $record */
@@ -42,11 +43,16 @@ class TableView extends Card
         return $table;
     }
 
-    protected function buildHeader($data)
+    protected function buildHeader()
     {
         $header = $this->makeTableRow();
-        foreach ($data as $k => $v) {
-            $header->append($this->makeTableHeaderCell()->setText($v));
+
+        foreach ($this->dataTable->getSchema()->getIterator() as $field) {
+            /** @var Field $field */
+            if ($field->isHidden()) {
+                continue;
+            }
+            $header->append($this->makeTableHeaderCell()->setText($field->getTitle()));
         }
         return $header;
     }

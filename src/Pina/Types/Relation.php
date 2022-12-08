@@ -4,6 +4,7 @@
 namespace Pina\Types;
 
 
+use Pina\Controls\FormControl;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
 
@@ -55,7 +56,7 @@ class Relation extends DirectoryType
         return $this->makeDirectoryQuery()->selectId()->selectTitle()->get();
     }
 
-    public function makeControl(Field $field, $value)
+    public function makeControl(Field $field, $value): FormControl
     {
         $control = parent::makeControl($field, $value);
         $control->setMultiple(true);

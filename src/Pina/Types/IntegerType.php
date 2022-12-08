@@ -3,6 +3,7 @@
 namespace Pina\Types;
 
 use Pina\App;
+use Pina\Controls\FormControl;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
@@ -20,7 +21,7 @@ class IntegerType implements TypeInterface
         return $this;
     }
 
-    public function makeControl(Field $field, $value)
+    public function makeControl(Field $field, $value): FormControl
     {
         $control = $field->isStatic()
             ? $this->makeStatic()
@@ -32,8 +33,8 @@ class IntegerType implements TypeInterface
 
         return $control
             ->setName($field->getKey())
-            ->setTitle($field->getTitle())
             ->setValue($value)
+            ->setTitle($field->getTitle())
             ->setDescription($field->getDescription())
             ->setRequired($field->isMandatory());
     }

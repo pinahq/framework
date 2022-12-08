@@ -170,6 +170,10 @@ class Schema implements IteratorAggregate
         $this->dataProcessors = array_merge($this->dataProcessors, $schema->dataProcessors);
         $this->textProcessors = array_merge($this->textProcessors, $schema->textProcessors);
         $this->htmlProcessors = array_merge($this->htmlProcessors, $schema->htmlProcessors);
+
+        if (empty($this->primaryKey) && !empty($schema->primaryKey)) {
+            $this->primaryKey = $schema->primaryKey;
+        }
     }
 
     public function setMandatory($mandatory = true)
