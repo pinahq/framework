@@ -61,7 +61,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         Log::debug('mysql', round($totalTime, 4) . ' ' . $sql);
 
         if ($this->errno()) {
-            throw new RuntimeException($this->error() . '; Failed query: ' . $sql, $this->errno());
+            throw new InternalErrorException($this->error() . '; Failed query: ' . $sql, $this->errno());
         }
 
         return $rc;
