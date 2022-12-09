@@ -552,6 +552,9 @@ class Schema implements IteratorAggregate
         $processed = $this->processLineAsData($line);
         $formatted = [];
         foreach ($this->getIterator() as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
             $key = $field->getKey();
             $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());

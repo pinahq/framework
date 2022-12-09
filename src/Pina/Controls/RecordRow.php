@@ -2,8 +2,6 @@
 
 namespace Pina\Controls;
 
-use Pina\App;
-use Pina\Data\Field;
 use Pina\Html;
 
 class RecordRow extends Control
@@ -29,19 +27,10 @@ class RecordRow extends Control
      */
     protected function drawInner()
     {
-        $data = $this->record->getData();
-        $this->record->getHtmlData();
         $content = '';
-        foreach ($this->record->getSchema()->getIterator() as $field) {
-            /** @var Field $field */
-            if ($field->isHidden()) {
-                continue;
-            }
-            $name = $field->getKey();
-            $value = isset($data[$name]) ? $data[$name] : null;
-            $type = $field->getType();
-            $cell = App::type($type)->setContext($data)->format($value);
-            $content .= Html::tag('td', $cell);
+        $data = $this->record->getHtmlData();
+        foreach ($data as $v) {
+            $content .= Html::tag('td', $v);
         }
         return $content;
     }
