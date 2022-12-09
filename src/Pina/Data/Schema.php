@@ -605,6 +605,9 @@ class Schema implements IteratorAggregate
     {
         $newLine = [];
         foreach ($this->getIterator() as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
             $key = $field->getKey();
             $newLine[$key] = isset($line[$key]) ? $line[$key] : '';
         }
@@ -622,6 +625,9 @@ class Schema implements IteratorAggregate
     {
         $newLine = [];
         foreach ($this->getIterator() as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
             $key = $field->getKey();
             $newLine[] = isset($line[$key]) ? $line[$key] : '';
         }
