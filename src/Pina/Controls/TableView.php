@@ -52,7 +52,7 @@ class TableView extends Card
             if ($field->isHidden()) {
                 continue;
             }
-            $header->append($this->makeTableHeaderCell()->setText($field->getTitle()));
+            $header->append($this->makeTableHeaderCell($field)->setText($field->getTitle()));
         }
         return $header;
     }
@@ -84,7 +84,7 @@ class TableView extends Card
     /**
      * @return TableHeaderCell
      */
-    protected function makeTableHeaderCell()
+    protected function makeTableHeaderCell(Field $field)
     {
         return App::make(TableHeaderCell::class);
     }

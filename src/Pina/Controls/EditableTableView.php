@@ -6,6 +6,10 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Data\DataRecord;
+use Pina\Data\Field;
+use Pina\ResourceManagerInterface;
+use Pina\StaticResource\Script;
+use Pina\Types\CheckedEnabledType;
 
 class EditableTableView extends TableView
 {
@@ -15,6 +19,43 @@ class EditableTableView extends TableView
     {
         $this->name = $name;
         return $this;
+    }
+
+    protected function makeTableHeaderCell(Field $field)
+    {
+        $cell = parent::makeTableHeaderCell($field);
+        $type = $field->getType();
+        $t = App::make($type);
+        if ($t instanceof CheckedEnabledType) {
+            $id = uniqid('ch');
+            /** @var Checkbox $checkbox */
+            $checkbox = App::make(Checkbox::class);
+            $checkbox->setId($id);
+            $checkbox->setName('checkbox-all');
+            $checkbox->setValue('Y');
+            $this->generateCheckAll($id, $field->getKey());
+            $cell->append($checkbox);
+        }
+        return $cell;
+    }
+
+    protected function generateCheckAll($id, $name)
+    {
+        $pattern = '/'.$this->name.'\[\d+\]\['.$name.'\]/';
+        $this->resources()->append(
+            (new Script())->setContent(
+                "<script>document.getElementById('$id').addEventListener('click', function() {let es = this.parentNode.parentNode.parentNode.querySelectorAll('input[type=checkbox]'); for (let i=0;i<es.length;i++) {if (es[i].name.match($pattern)){es[i].checked=this.checked;}}});</script>"
+            )
+        );
+    }
+
+    /**
+     *
+     * @return ResourceManagerInterface
+     */
+    protected function resources()
+    {
+        return App::container()->get(ResourceManagerInterface::class);
     }
 
     /**

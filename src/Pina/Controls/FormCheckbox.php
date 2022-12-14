@@ -7,6 +7,7 @@ use Pina\Html;
 class FormCheckbox extends FormInput
 {
     protected $checked = false;
+    protected $type = 'checkbox';
 
     public function setChecked(bool $checked)
     {

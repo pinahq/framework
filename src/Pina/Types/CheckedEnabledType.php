@@ -18,7 +18,6 @@ class CheckedEnabledType extends EnabledType
         $checkbox = App::make(FormCheckbox::class);
         $checkbox->setName($field->getKey());
         $checkbox->setValue('Y');
-        $checkbox->setType('checkbox');
         $checkbox->setTitle($field->getTitle());
         if (!empty($value)) {
             $checkbox->setChecked($value);
