@@ -24,17 +24,19 @@ class EditableTableView extends TableView
     protected function makeTableHeaderCell(Field $field)
     {
         $cell = parent::makeTableHeaderCell($field);
-        $type = $field->getType();
-        $t = App::make($type);
-        if ($t instanceof CheckedEnabledType) {
-            $id = uniqid('ch');
-            /** @var Checkbox $checkbox */
-            $checkbox = App::make(Checkbox::class);
-            $checkbox->setId($id);
-            $checkbox->setName('checkbox-all');
-            $checkbox->setValue('Y');
-            $this->generateCheckAll($id, $field->getKey());
-            $cell->append($checkbox);
+        if ($field->isStatic() == false) {
+            $type = $field->getType();
+            $t = App::make($type);
+            if ($t instanceof CheckedEnabledType) {
+                $id = uniqid('ch');
+                /** @var Checkbox $checkbox */
+                $checkbox = App::make(Checkbox::class);
+                $checkbox->setId($id);
+                $checkbox->setName('checkbox-all');
+                $checkbox->setValue('Y');
+                $this->generateCheckAll($id, $field->getKey());
+                $cell->append($checkbox);
+            }
         }
         return $cell;
     }
