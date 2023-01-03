@@ -4,6 +4,7 @@ namespace Pina\Data;
 
 use Exception;
 use Pina\BadRequestException;
+use Pina\InternalErrorException;
 use Pina\Paging;
 use Pina\TableDataGateway;
 
@@ -96,26 +97,34 @@ abstract class DataCollection
 
     /**
      * Добавляет в коллекцию элемент и возвращает его идентификатор (если предусмотрен схемой)
-     * Если главный ключ составной, вернет первый элемент ключа
      * @param array $data
+     * @param array $context
      * @return string|null
      * @throws Exception
      */
-    public function add(array $data): string
+    public function add(array $data, array $context = []): string
     {
         $schema = $this->getCreationSchema();
 
-        $normalized = $this->normalize($data, $schema);
+        $normalized = $this->normalize(array_merge($data, $context), $schema);
 
         $id = $this->makeQuery()->insertGetId($normalized);
 
         if (empty($id)) {
-            $primaryKey = $this->getPrimaryKey($schema);
-            if (!$primaryKey || !isset($normalized[$primaryKey])) {
-                throw new Exception("Wrong primary key");
-            }
+            $filledId = [];
+            $primaryKey = $schema->getPrimaryKey();
+            foreach ($primaryKey as $pkElement) {
+                if (isset($context[$pkElement])) {
+                    continue;
+                }
 
-            $id = $normalized[$primaryKey];
+                $filledId[] = $normalized[$pkElement] ?? null;
+            }
+            $id = implode(',', $filledId);
+
+            if (empty($id)) {
+                throw new InternalErrorException("Wrong primary key");
+            }
         }
 
         $schema->onUpdate($id, $normalized);
@@ -131,18 +140,40 @@ abstract class DataCollection
      * @return string
      * @throws Exception
      */
-    public function update(string $id, array $data): string
+    public function update(string $id, array $data, array $context = []): string
     {
         $schema = $this->getSchema();
 
         $normalized = $this->normalize($data, $schema, $id);
 
-        $this->makeQuery()->whereId($id)->update($normalized);
+        $query = $this->makeQuery();
+        $primaryKey = $schema->getPrimaryKey();
 
-        $primaryKey = $this->getPrimaryKey($schema);
-        if ($primaryKey) {
-            $id = $normalized[$primaryKey] ?? $id;
+        if (empty($primaryKey)) {
+            throw new InternalErrorException("Wrong primary key during collection update");
         }
+
+        $idFound = false;
+        foreach ($primaryKey as $pkElement) {
+            if (isset($context[$pkElement])) {
+                $query->whereBy($pkElement, $context[$pkElement]);
+                continue;
+            } else {
+                if ($idFound) {
+                    throw new InternalErrorException("Wrong context configuration during collection update");
+                }
+
+                $query->whereBy($pkElement, $id);
+                $id = $normalized[$pkElement];
+                $idFound = true;
+            }
+        }
+
+        if (!$idFound) {
+            throw new InternalErrorException("Wrong ID configuration during collection update");
+        }
+
+        $query->update($normalized);
 
         $schema->onUpdate($id, $normalized);
 
@@ -193,23 +224,6 @@ abstract class DataCollection
         }
 
         return $normalized;
-    }
-
-    /**
-     * Возвращает первое поле первичного ключа при наличии
-     * @param Schema $schema
-     * @return mixed|null
-     */
-    protected function getPrimaryKey(Schema $schema): ?string
-    {
-        $primaryKey = $schema->getPrimaryKey();
-        if (empty($primaryKey)) {
-            return null;
-        }
-        if (count($primaryKey) > 1) {
-            return null;
-        }
-        return array_shift($primaryKey);
     }
 
     /**

@@ -70,7 +70,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $this->exportIfNeeded($filters);
 
-        $data = $this->collection->getList($this->query()->all(), $this->request()->get('page', 0), $this->request()->get("paging", 25));
+        $data = $this->collection->getList($this->filters()->all(), $this->request()->get('page', 0), $this->request()->get("paging", 25));
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
 
@@ -175,7 +175,9 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         $data = $this->request()->all();
 
-        $id = $this->collection->add($data);
+        $context = $this->context()->all();
+
+        $id = $this->collection->add($data, $context);
 
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
@@ -189,7 +191,9 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         $data = $this->request()->all();
 
-        $id = $this->collection->update($id, $data);
+        $context = $this->context()->all();
+
+        $id = $this->collection->update($id, $data, $context);
 
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
@@ -234,7 +238,11 @@ class DelegatedCollectionEndpoint extends Endpoint
     {
         /** @var FilterForm $form */
         $form = App::make(FilterForm::class);
-        $form->load($this->getFilterRecord());
+        $record = $this->getFilterRecord();
+        foreach ($this->context()->all() as $key => $value) {
+            $record->getSchema()->forgetField($key);
+        }
+        $form->load($record);
         if (!$this->collection->getCreationSchema()->isEmpty()) {
             $form->getButtonRow()->append($this->makeCreateButton());
         }
@@ -344,6 +352,9 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeCreateForm(DataRecord $data)
     {
+        foreach ($this->context()->all() as $key => $value) {
+            $data->getSchema()->forgetField($key);
+        }
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
         $form->setMethod('post')->setAction($this->base->link('@'));

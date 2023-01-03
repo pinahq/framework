@@ -10,16 +10,18 @@ class Router
 
     protected $endpoints = [];
     protected $patterns = [];
+    protected $context = [];
 
     /**
      * @param string $pattern
      * @param string $class
      */
-    public function register($pattern, $class)
+    public function register($pattern, $class, $context = [])
     {
         $controller = Url::controller($pattern);
         $this->endpoints[$controller] = $class;
         $this->patterns[$controller] = $pattern;
+        $this->context[$controller] = $context;
     }
 
     public function getPatterns()
@@ -75,11 +77,14 @@ class Router
 
         $controllerCount = count(explode('/', $c));
         $amount = $controllerCount * 2 - 1;
+
         $baseResource = implode('/', array_slice(explode('/', trim($resource, '/')), 0, $amount));
 
         $base = new Http\Location($baseResource);
 
         $request->setLocation($base, $location);
+
+        $request->setContext($this->context[$c]);
 
         $cl = $this->endpoints[$c];
         /** @var Endpoint $inst */

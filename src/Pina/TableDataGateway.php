@@ -2,6 +2,7 @@
 
 namespace Pina;
 
+use Exception;
 use League\Csv\Reader;
 use Pina\Data\Schema;
 use Pina\DB\StructureParser;
@@ -64,6 +65,7 @@ class TableDataGateway extends SQL
     /**
      * Возвращает список полей
      * @return array
+     * @throws Exception
      */
     public function getFields()
     {
@@ -243,10 +245,11 @@ class TableDataGateway extends SQL
     /**
      * Выполняет запрос и возвращает значение первичного ключа для первой строки
      * @return string|int
+     * @throws Exception
      */
     public function id()
     {
-        return $this->value($this->primaryKey());
+        return $this->value($this->singlePrimaryKeyField());
     }
 
     /**
@@ -281,6 +284,7 @@ class TableDataGateway extends SQL
      * Если первичный ключ составной, возвращает название первого поля
      * первичого ключа
      * @return string
+     * @deprecated в пользу getPrimaryKey & singlePrimaryKeyField
      */
     protected function primaryKey()
     {
@@ -290,6 +294,38 @@ class TableDataGateway extends SQL
             $primaryKey = static::$indexes['PRIMARY KEY'] ?? '';
         }
         return is_array($primaryKey) ? $primaryKey[0] : $primaryKey;
+    }
+
+    /**
+     * Возвращает массив полей первичного ключа
+     * @return string[]
+     */
+    protected function getPrimaryKey(): array
+    {
+        $schema = $this->getSchema();
+        $primaryKey = $schema->getPrimaryKey();
+        if (empty($primaryKey)) {
+            $primaryKey = static::$indexes['PRIMARY KEY'] ?? [];
+            if (!is_array($primaryKey)) {
+                $primaryKey = [$primaryKey];
+            }
+        }
+        return $primaryKey;
+    }
+
+    /**
+     * Возвращает первое поля первичного ключа, если PK состоит из одного поля,
+     * иначе выбрасывает исключение
+     * @return string
+     * @throws Exception
+     */
+    protected function singlePrimaryKeyField(): string
+    {
+        $pk = $this->getPrimaryKey();
+        if (count($pk) == 1) {
+            return $pk[0];
+        }
+        throw new Exception("Wrong primary key");
     }
 
     /**
@@ -354,20 +390,22 @@ class TableDataGateway extends SQL
      * Добавляет условие на соответствие ID заданному значению
      * @param array|string $id
      * @return $this
+     * @throws Exception
      */
     public function whereId($id)
     {
-        return $this->whereBy($this->primaryKey(), $id);
+        return $this->whereBy($this->singlePrimaryKeyField(), $id);
     }
 
     /**
      * Добавляет в запрос условие на несоответствие ID заданному значению
      * @param array|string $id
      * @return $this
+     * @throws Exception
      */
     public function whereNotId($id)
     {
-        return $this->whereNotBy($this->primaryKey(), $id);
+        return $this->whereNotBy($this->singlePrimaryKeyField(), $id);
     }
 
     /**
@@ -389,10 +427,11 @@ class TableDataGateway extends SQL
     /**
      * @param string $alias
      * @return $this
+     * @throws Exception
      */
     public function selectId($alias = 'id')
     {
-        return $this->selectAsIfNotSelected($this->primaryKey(), $alias);
+        return $this->selectAsIfNotSelected($this->singlePrimaryKeyField(), $alias);
     }
 
     /**
@@ -596,7 +635,7 @@ class TableDataGateway extends SQL
      * @param array $filters
      * @param Schema $schema
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function whereFilters($filters, Schema $schema)
     {

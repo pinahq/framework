@@ -67,6 +67,22 @@ class Endpoint
     }
 
     /**
+     * @return InputBag
+     */
+    public function filters()
+    {
+        return $this->request->filters();
+    }
+
+    /**
+     * @return InputBag
+     */
+    public function context()
+    {
+        return $this->request->context();
+    }
+
+    /**
      * Server and execution environment parameters ($_SERVER).
      *
      * @return ServerBag
@@ -105,5 +121,6 @@ class Endpoint
     {
         return $this->request->headers;
     }
+
 
 }

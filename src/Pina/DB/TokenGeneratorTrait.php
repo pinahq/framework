@@ -8,7 +8,7 @@ trait TokenGeneratorTrait
     /**
      * @return string
      */
-    abstract public function primaryKey();
+    abstract public function singlePrimaryKeyField(): string;
 
     /**
      * @param array $data
@@ -45,7 +45,7 @@ trait TokenGeneratorTrait
 
     public function insertGetId($data = array(), $fields = false)
     {
-        $pk = $this->primaryKey();
+        $pk = $this->singlePrimaryKeyField();
         if (!isset($data[$pk])) {
             $data[$pk] = $this->getUniqueToken();
         }
@@ -57,7 +57,7 @@ trait TokenGeneratorTrait
 
     public function putGetId($data = array(), $fields = false)
     {
-        $pk = $this->primaryKey();
+        $pk = $this->singlePrimaryKeyField();
         if (!isset($data[$pk])) {
             $data[$pk] = $this->getUniqueToken();
         }
