@@ -44,7 +44,7 @@ class Router
 
         $action .= $this->calcDeeperAction($resource, $this->patterns[$c]);
 
-        return method_exists($this->endpoints[$c], $action);
+        return method_exists($this->endpoints[$c], $action) || method_exists($this->endpoints[$c], 'router');
     }
 
     /**
@@ -88,6 +88,13 @@ class Router
         $action .= $this->calcDeeperAction($resource, $pattern);
 
         if (!method_exists($inst, $action)) {
+
+            if (method_exists($inst, 'router')) {
+                /** @var Router $router */
+                $router = $inst->router();
+                return $router->run($resource, $method, $data);
+            }
+
             throw new NotFoundException();
         }
 
