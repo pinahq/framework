@@ -74,7 +74,7 @@ class Router
         $location = new Http\Location($resource);
 
         $controllerCount = count(explode('/', $c));
-        $amount = floor($controllerCount / 2) + $controllerCount;
+        $amount = $controllerCount * 2 - 1;
         $baseResource = implode('/', array_slice(explode('/', trim($resource, '/')), 0, $amount));
 
         $base = new Http\Location($baseResource);
