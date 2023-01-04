@@ -2,11 +2,14 @@
 
 namespace Pina\Composers;
 
+use Exception;
 use Pina\App;
 use Pina\Controls\BreadcrumbView;
 use Pina\Data\DataTable;
 use Pina\Data\DataRecord;
 use Pina\Data\Schema;
+use Pina\Model\LinkedItem;
+use Pina\Model\LinkedItemCollection;
 use Pina\Request;
 use Pina\Http\Location;
 
@@ -30,6 +33,11 @@ class CollectionComposer
         $this->creation = $creation;
     }
 
+    public function getCollection()
+    {
+        return $this->collection;
+    }
+
     public function setItemCallback(Callable $callback)
     {
         $this->itemCallback = $callback;
@@ -37,31 +45,47 @@ class CollectionComposer
 
     public function index(Location $location)
     {
+        $links = $this->getParentLinks($location->location('@@'));
+        $links->add(new LinkedItem($this->collection, $location->link('@')));
+
         Request::setPlace('page_header', $this->collection);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($location));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
     public function show(Location $location, DataRecord $record)
     {
+        $links = $this->getParentLinks($location->location('@@@'));
+        $links->add(new LinkedItem($this->collection, $location->link('@@')));
+
         $title = $this->getItemTitle($record);
+        $links->add(new LinkedItem($title, $location->link('@')));
+
         Request::setPlace('page_header', $title);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $title));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
     public function create(Location $location)
     {
+        $links = $this->getParentLinks($location->location('@@@'));
+        $links->add(new LinkedItem($this->collection, $location->link('@@')));
+        $links->add(new LinkedItem($this->creation, $location->link('@')));
+
         Request::setPlace('page_header', $this->creation);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $this->creation));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
     public function section(Location $location, DataRecord $record, string $section)
     {
-        $title = $this->getItemTitle($record);
+        $links = $this->getParentLinks($location->location('@@@@'));
+        $links->add(new LinkedItem($this->collection, $location->link('@@@')));
+        $links->add(new LinkedItem($this->getItemTitle($record), $location->link('@@')));
+        $links->add(new LinkedItem($section, $location->link('@')));
+
         Request::setPlace('page_header', $section);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($location, $title, $section));
+        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
-    protected function getItemTitle(DataRecord $record)
+    public function getItemTitle(DataRecord $record)
     {
         if ($this->itemCallback) {
             $fn = $this->itemCallback;
@@ -74,21 +98,38 @@ class CollectionComposer
         return trim($title);
     }
 
-    protected function getBreadcrumb(Location $location, $title = null, $section = null)
+    protected function getParentLinks(Location $location): LinkedItemCollection
+    {
+        if (!$location->resource('@')) {
+            return new LinkedItemCollection();
+        }
+
+        $links = $this->getParentLinks($location->location('@@'));
+
+        try {
+            $title = App::router()->run($location->resource('@'), 'title');
+            if ($title) {
+                $links->add(new LinkedItem($title, $location->link('@')));
+            }
+        } catch (Exception $e) {
+        }
+        return $links;
+    }
+
+    protected function getBreadcrumb(LinkedItemCollection $links)
     {
         $path = [];
-
-        $parts = array_filter([$section, $title, $this->collection]);
-        $l = '@';
-        foreach ($parts as $item) {
-            array_unshift($path, [
-                'title' => $item,
-                'link' => $l == '@' ? null : $location->link($l),
-                'is_active' => $l == '@' ? true : false
-            ]);
-            $l .= '@';
+        foreach ($links as $link) {
+            $path[] = [
+                'title' => $link->getTitle(),
+                'link' => $link->getLink(),
+                'is_active' => false
+            ];
         }
-        array_unshift($path, ['title' => '<i class="mdi mdi-home"></i>', 'link' => $location->link('/')]);
+        array_unshift($path, ['title' => 'Home', 'link' => App::link('/')]);
+
+        $path[count($path) - 1]['is_active'] = true;
+        $path[count($path) - 1]['link'] = null;
 
         $view = App::make(BreadcrumbView::class);
         $view->load(new DataTable($path, new Schema()));

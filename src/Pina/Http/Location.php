@@ -64,4 +64,9 @@ class Location
         return Url::resource($pattern, $params, $this->resource);
     }
 
+    public function location($pattern, $params = []): Location
+    {
+        return new Location($this->resource($pattern, $params));
+    }
+
 }

@@ -123,6 +123,9 @@ class Url
                 case 'options':
                     $a = 'options';
                     break;
+                case 'title':
+                    $a = 'title';
+                    break;
             }
         }
 
@@ -132,7 +135,7 @@ class Url
 
         $data = array();
         $k = $isCollection ? 'pid' : 'id';
-        if ($isCollection && in_array($a, ['update', 'destroy', 'store'])) {
+        if ($isCollection && in_array($a, ['update', 'destroy', 'store', 'options', 'title'])) {
             $data['id'] = null;
         }
         while (count($d)) {

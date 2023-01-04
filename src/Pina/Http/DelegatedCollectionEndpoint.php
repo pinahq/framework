@@ -60,6 +60,20 @@ class DelegatedCollectionEndpoint extends Endpoint
     }
 
     /**
+     * Возвращает именование коллекции или элемента
+     * @param $id
+     * @return string
+     * @throws Exception
+     */
+    public function title($id)
+    {
+        if ($id) {
+            return $this->composer->getItemTitle($this->collection->getRecord($id));
+        }
+        return $this->composer->getCollection();
+    }
+
+    /**
      * @return mixed
      * @throws Exception
      */

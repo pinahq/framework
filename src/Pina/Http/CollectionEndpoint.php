@@ -39,6 +39,20 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     }
 
     /**
+     * Возвращает именование коллекции или элемента
+     * @param $id
+     * @return string
+     * @throws \Exception
+     */
+    public function title($id)
+    {
+        if ($id) {
+            return $this->composer->getItemTitle($this->getDataRecord($id));
+        }
+        return parent::title($id);
+    }
+
+    /**
      * @param $id
      * @return Control
      * @throws \Exception

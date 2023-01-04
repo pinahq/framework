@@ -57,6 +57,11 @@ abstract class FixedCollectionEndpoint extends Endpoint
         return new Schema();
     }
 
+    public function title($id)
+    {
+        return $this->composer->getCollection();
+    }
+
     /**
      * @return mixed
      * @throws \Exception
