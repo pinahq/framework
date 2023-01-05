@@ -43,7 +43,7 @@ class FormInput extends FormControl
      * @param string $value
      * @return $this
      */
-    public function setValue(?string $value): FormControl
+    public function setValue($value): FormControl
     {
         $this->value = $value;
         return $this;
