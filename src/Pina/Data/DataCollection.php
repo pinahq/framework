@@ -164,7 +164,7 @@ abstract class DataCollection
                 }
 
                 $query->whereBy($pkElement, $id);
-                $id = $normalized[$pkElement];
+                $id = $normalized[$pkElement] ?? $id;
                 $idFound = true;
             }
         }
