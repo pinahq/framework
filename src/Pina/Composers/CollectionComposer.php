@@ -101,7 +101,15 @@ class CollectionComposer
     protected function getParentLinks(Location $location): LinkedItemCollection
     {
         if (!$location->resource('@')) {
-            return new LinkedItemCollection();
+            $links = new LinkedItemCollection();
+            try {
+                $title = App::router()->run('/', 'title');
+                if ($title) {
+                    $links->add(new LinkedItem($title, '/'));
+                }
+            } catch (Exception $e) {
+            }
+            return $links;
         }
 
         $links = $this->getParentLinks($location->location('@@'));
@@ -126,7 +134,7 @@ class CollectionComposer
                 'is_active' => false
             ];
         }
-        array_unshift($path, ['title' => 'Home', 'link' => App::link('/')]);
+//        array_unshift($path, ['title' => 'Home', 'link' => App::link('/')]);
 
         $path[count($path) - 1]['is_active'] = true;
         $path[count($path) - 1]['link'] = null;
