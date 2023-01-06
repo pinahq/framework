@@ -93,7 +93,6 @@ class Router
         $action .= $this->calcDeeperAction($resource, $pattern);
 
         if (!method_exists($inst, $action)) {
-
             if (method_exists($inst, 'router')) {
                 /** @var Router $router */
                 $router = $inst->router();
@@ -104,6 +103,24 @@ class Router
         }
 
         return call_user_func_array([$inst, $action], $params);
+    }
+
+    public function findChilds(string $resource)
+    {
+        list($controller, $action, $params) = Url::route($resource, 'get');
+        $prefix = $controller . '/';
+        $found = [];
+        foreach ($this->patterns as $c => $e) {
+            if (strpos($c, $prefix) !== 0) {
+                continue;
+            }
+            $right = substr($c, strlen($prefix));
+            if (strpos($right, '/') !== false) {
+                continue;
+            }
+            $found[] = $resource . '/' . $right;
+        }
+        return $found;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Pina\Http;
 
 use Exception;
+use Pina\Access;
 use Pina\App;
 use Pina\Arr;
 use Pina\Composers\CollectionComposer;
@@ -26,9 +27,12 @@ use Pina\Controls\SortableTableView;
 use Pina\Model\LinkedItem;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
+use Pina\Processors\ResourceLinkHtmlProcessor;
 use Pina\Response;
 
 use Pina\Types\DirectoryType;
+
+use Pina\Types\StringType;
 
 use function Pina\__;
 
@@ -226,6 +230,22 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeCollectionView(DataTable $data)
     {
+        $childs = App::router()->findChilds($this->location->resource('@/:id'));
+        foreach ($childs as $resource) {
+            if (!Access::isPermitted($resource)) {
+                continue;
+            }
+            try {
+                $title = App::router()->run($resource, 'title');
+                if ($title) {
+                    $data->getSchema()->add($resource, $title, StringType::class);
+                    $data->getSchema()->pushHtmlProcessor(new ResourceLinkHtmlProcessor($this->location, $resource, $title));
+                }
+            } catch (Exception $e) {
+
+            }
+        }
+
         if ($this->sortable) {
             return $this->makeSortableCollectionView($data);
         }
@@ -358,7 +378,36 @@ class DelegatedCollectionEndpoint extends Endpoint
         $row = App::make(ButtonRow::class);
         $row->addClass('mb-5');
         $row->setMain($this->makeEditLinkButton());
+        $this->appendNestedResourceButtons($row);
         return $row;
+    }
+
+    protected function appendNestedResourceButtons(Control $control)
+    {
+        $childs = App::router()->findChilds($this->location->resource('@'));
+        foreach ($childs as $resource) {
+            if (!Access::isPermitted($resource)) {
+                continue;
+            }
+            try {
+                $title = App::router()->run($resource, 'title');
+                if ($title) {
+                    $control->append($this->makeResourceButton($title, $resource));
+                }
+            } catch (Exception $e) {
+
+            }
+        }
+        return $control;
+    }
+
+    protected function makeResourceButton($title, $resource)
+    {
+        /** @var LinkedButton $button */
+        $button = App::make(LinkedButton::class);
+        $button->setTitle($title);
+        $button->setLink($this->location->link($resource));
+        return $button;
     }
 
     /**
