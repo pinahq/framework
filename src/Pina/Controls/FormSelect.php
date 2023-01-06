@@ -50,7 +50,8 @@ class FormSelect extends FormInput
         foreach ($this->variants as $variant) {
             $title = isset($variant['title']) ? $variant['title'] : '';
             $id = isset($variant['id']) ? $variant['id'] : $title;
-            $options .= Html::tag('option', $title, ['value' => $id, 'selected' => $this->value == $id ? 'selected' : null]);
+            $selected = is_array($this->value) ? in_array($id, $this->value) : $this->value == $id;
+            $options .= Html::tag('option', $title, ['value' => $id, 'selected' => $selected ? 'selected' : null]);
         }
 
         return $options;

@@ -10,7 +10,8 @@ abstract class FormControl extends Control
 
     abstract public function setName(string $name): FormControl;
 
-    abstract public function setValue(?string $value): FormControl;
+    //не можем ограничить тип $value строкой, так как может быть, например, множественный выбор в select
+    abstract public function setValue($value): FormControl;
 
     abstract public function setDescription(string $description): FormControl;
 
