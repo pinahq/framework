@@ -5,7 +5,7 @@ namespace Pina\Types;
 use Pina\Controls\Control;
 use Pina\Controls\FormControl;
 use Pina\Data\Field;
-use Pina\TableDataGateway;
+use Pina\SQL;
 
 interface TypeInterface
 {
@@ -84,5 +84,5 @@ interface TypeInterface
     public function getSQLType();
 
 
-    public function filter(TableDataGateway $query, string $key, $value);
+    public function filter(SQL $query, string $key, $value);
 }

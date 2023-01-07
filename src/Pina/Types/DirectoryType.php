@@ -10,7 +10,7 @@ use Pina\Controls\FormSelect;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
-use Pina\TableDataGateway;
+use Pina\SQL;
 
 abstract class DirectoryType implements TypeInterface
 {
@@ -87,7 +87,7 @@ abstract class DirectoryType implements TypeInterface
 
     }
 
-    public function filter(TableDataGateway $query, $key, $value)
+    public function filter(SQL $query, string $key, $value)
     {
         return $query->whereBy($key, $value);
     }

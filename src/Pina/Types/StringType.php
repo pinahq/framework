@@ -9,7 +9,7 @@ use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
 
-use Pina\TableDataGateway;
+use Pina\SQL;
 
 use function Pina\__;
 use function sprintf;
@@ -92,7 +92,7 @@ class StringType implements TypeInterface
         return "varchar(" . $this->getSize() . ")";
     }
 
-    public function filter(TableDataGateway $query, string $key, $value)
+    public function filter(SQL $query, string $key, $value)
     {
         return $query->whereLike($key, '%' . $value . '%');
     }
