@@ -74,8 +74,6 @@ class PagingControl extends Control
             }
         }
 
-        return Html::tag('ul', implode('', $items), ['class' => 'pagination']);
+        return implode('', $items);
     }
-
-
 }
