@@ -69,6 +69,12 @@ class Field
         return $this->title;
     }
 
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
+    }
+
     /**
      * Получить тип поля
      * @return string

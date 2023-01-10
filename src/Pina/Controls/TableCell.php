@@ -17,7 +17,7 @@ class TableCell extends Control
      * @param string $text
      * @return $this
      */
-    public function setText($text)
+    public function setText(string $text)
     {
         $this->text = $text;
         return $this;
