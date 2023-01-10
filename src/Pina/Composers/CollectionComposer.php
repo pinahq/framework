@@ -74,11 +74,9 @@ class CollectionComposer
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
-    public function section(Location $location, DataRecord $record, string $section)
+    public function section(Location $location, string $section)
     {
-        $links = $this->getParentLinks($location->location('@@@@'));
-        $links->add(new LinkedItem($this->collection, $location->link('@@@')));
-        $links->add(new LinkedItem($this->getItemTitle($record), $location->link('@@')));
+        $links = $this->getParentLinks($location->location('@@'));
         $links->add(new LinkedItem($section, $location->link('@')));
 
         Request::setPlace('page_header', $section);
