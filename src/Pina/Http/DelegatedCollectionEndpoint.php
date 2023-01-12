@@ -83,19 +83,19 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     public function index()
     {
-        //значимые фильтры, если расширить до всех параметров, то все будут попадать в пагинацию
-        $filters = Arr::only($this->query()->all(), $this->collection->getFilterSchema()->getFieldKeys());
+        $filters = $this->getFilterRecord();
+        $contextAndFilters = array_merge($filters->getData(), $this->context()->all());
 
-        $this->exportIfNeeded($filters);
+        $this->exportIfNeeded($contextAndFilters);
 
-        $data = $this->collection->getList($this->filters()->all(), $this->request()->get('page', 0), $this->request()->get("paging", 25));
+        $data = $this->collection->getList($contextAndFilters, $this->request()->get('page', 0), $this->request()->get("paging", 1));
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
 
         $this->composer->index($this->location);
 
         return $this->makeCollectionView($data)
-            ->after($this->makePagingControl($data->getPaging(), $filters))
+            ->after($this->makePagingControl($data->getPaging()))
             ->after($this->makeIndexButtons())
             ->before($this->makeTabs())
             ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
@@ -329,8 +329,11 @@ class DelegatedCollectionEndpoint extends Endpoint
         return $this->makeButton($link, __('Скачать'));
     }
 
-    protected function makePagingControl($paging, $filters)
+    protected function makePagingControl($paging)
     {
+        //значимые фильтры, если расширить до всех параметров, то все будут попадать в пагинацию
+        $filters = Arr::only($this->query()->all(), $this->collection->getFilterSchema()->getFieldKeys());
+
         /** @var PagingControl $pagingControl */
         $pagingControl = App::make(PagingControl::class);
         $pagingControl->init($paging);
