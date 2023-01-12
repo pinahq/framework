@@ -88,7 +88,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $this->exportIfNeeded($contextAndFilters);
 
-        $data = $this->collection->getList($contextAndFilters, $this->request()->get('page', 0), $this->request()->get("paging", 1));
+        $data = $this->collection->getList($contextAndFilters, $this->request()->get('page', 0), $this->request()->get("paging", 25));
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
 
