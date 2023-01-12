@@ -90,7 +90,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $data = $this->collection->getList($contextAndFilters, $this->request()->get('page', 0), $this->request()->get("paging", 25));
 
-        $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location));
+        $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location, [], $this->context()->all()));
 
         $this->composer->index($this->location);
 
@@ -166,7 +166,9 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     public function show($id)
     {
-        $record = $this->collection->getRecord($id);
+        $context = $this->context()->all();
+
+        $record = $this->collection->getRecord($id, $context);
 
         $this->composer->show($this->location, $record);
 

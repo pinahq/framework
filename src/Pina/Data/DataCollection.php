@@ -78,9 +78,34 @@ abstract class DataCollection
      * @return DataRecord
      * @throws \Exception
      */
-    public function getRecord(string $id): DataRecord
+    public function getRecord(string $id, array $context = []): DataRecord
     {
-        $item = $this->makeRecordQuery()->findOrFail($id);
+        $query = $this->makeRecordQuery();
+        $schema = $this->getSchema();
+
+        if ($context) {
+            $query->whereFilters($context, $this->getFilterSchema());
+        }
+
+        $primaryKey = $schema->getPrimaryKey();
+        if (empty($primaryKey)) {
+            return new DataRecord($query->findOrFail($id), $this->getSchema());
+        }
+
+        foreach ($primaryKey as $k => $pkElement) {
+            if (!isset($context[$pkElement])) {
+                continue;
+            }
+            unset($primaryKey[$k]);
+        }
+        $primaryKey = array_values($primaryKey);
+
+        $count = count($primaryKey);
+        $idParts = explode(',', $id, $count);
+        foreach ($primaryKey as $k => $pkElement) {
+            $query->whereBy($pkElement, $idParts[$k]);
+        }
+        $item = $query->firstOrFail();
         return new DataRecord($item, $this->getSchema());
     }
 
