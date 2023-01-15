@@ -264,6 +264,23 @@ class Schema implements IteratorAggregate
         return $this->getVolume() == 0;
     }
 
+    public function isEditable()
+    {
+        foreach ($this->fields as $field) {
+            if (!$field->isStatic()) {
+                return true;
+            }
+        }
+
+        foreach ($this->getInnerSchemas() as $group) {
+            if ($group->isEditable()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Возвращяет все ключи полей схемы
      * @return array

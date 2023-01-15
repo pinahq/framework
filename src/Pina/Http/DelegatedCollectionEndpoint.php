@@ -382,7 +382,9 @@ class DelegatedCollectionEndpoint extends Endpoint
         /** @var ButtonRow $row */
         $row = App::make(ButtonRow::class);
         $row->addClass('mb-5');
-        $row->setMain($this->makeEditLinkButton());
+        if ($this->collection->getSchema()->isEditable()) {
+            $row->setMain($this->makeEditLinkButton());
+        }
         $this->appendNestedResourceButtons($row);
         return $row;
     }
