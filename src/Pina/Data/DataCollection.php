@@ -6,6 +6,7 @@ use Exception;
 use Pina\BadRequestException;
 use Pina\InternalErrorException;
 use Pina\Paging;
+use Pina\SQL;
 use Pina\TableDataGateway;
 
 use function Pina\__;
@@ -61,15 +62,18 @@ abstract class DataCollection
      * @return DataTable
      * @throws Exception
      */
-    public function getList(array $filters, int $page = 0, int $perPage = 0): DataTable
+    public function getList(array $filters, int $page = 0, int $perPage = 0, array $context = []): DataTable
     {
-        $query = $this->makeListQuery($filters);
+        $query = $this->makeListQuery(array_merge($filters, $context));
         $paging = null;
         if ($perPage) {
             $paging = new Paging($page, $perPage);
             $query->paging($paging);
         }
-        return new DataTable($query->get(), $this->getListSchema(), $paging);
+        $schema = $this->getListSchema();
+        $schema->fieldset(array_keys($context))->setHidden();
+        $schema->restrictPrimaryKeyContext(array_keys($context));
+        return new DataTable($query->get(), $schema, $paging);
     }
 
     /**
@@ -172,6 +176,40 @@ abstract class DataCollection
         $normalized = $this->normalize($data, $schema, $id);
 
         $query = $this->makeQuery();
+
+        $id = $this->filterQueryByPrimaryKey($query, $schema, $id, $normalized, $context);
+
+        $query->update($normalized);
+
+        $schema->onUpdate($id, $normalized);
+
+        return $id;
+    }
+
+    public function bulkUpdate(array $data, array $context = [])
+    {
+        if (empty($data) || !is_array($data)) {
+            return;
+        }
+
+        $schema = $this->getListSchema()->forgetStatic();
+
+        $normalizedData = [];
+        foreach ($data as $id => $v) {
+            $normalizedData[$id] = $schema->normalize($v);
+        }
+
+        foreach ($normalizedData as $id => $normalized) {
+            $query = $this->makeQuery();
+
+            $this->filterQueryByPrimaryKey($query, $schema, $id, $normalizedData, $context);
+
+            $query->update($normalized);
+        }
+    }
+
+    protected function filterQueryByPrimaryKey(SQL $query, Schema $schema, string $id, array $normalized, array $context = [])
+    {
         $primaryKey = $schema->getPrimaryKey();
 
         if (empty($primaryKey)) {
@@ -197,10 +235,6 @@ abstract class DataCollection
         if (!$idFound) {
             throw new InternalErrorException("Wrong ID configuration during collection update");
         }
-
-        $query->update($normalized);
-
-        $schema->onUpdate($id, $normalized);
 
         return $id;
     }

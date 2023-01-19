@@ -14,14 +14,23 @@ class FieldSet
         $this->schema = $schema;
     }
 
+    public function count()
+    {
+        return count($this->fields);
+    }
+
     public function add(Field $field)
     {
         $this->fields[] = $field;
     }
 
-    public function count()
+    public function select(string $fieldKey)
     {
-        return count($this->fields);
+        foreach ($this->schema->getIterator() as $field) {
+            if ($field->getKey() == $fieldKey) {
+                $this->fields[] = $field;
+            }
+        }
     }
 
     public function calc($callable, $fieldKey, $fieldTitle, $fieldType = 'string')

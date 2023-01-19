@@ -214,7 +214,7 @@ class Schema implements IteratorAggregate
      * @param string $key
      * @return $this
      */
-    public function forgetField($key)
+    public function forgetField(string $key)
     {
         foreach ($this->fields as $k => $field) {
             if ($field->getKey() == $key) {
@@ -225,6 +225,27 @@ class Schema implements IteratorAggregate
 
         foreach ($this->getInnerSchemas() as $group) {
             $group->forgetField($key);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Удаляет из схемы все поля с указанными ключам $keys
+     * @param string[] $keys
+     * @return $this
+     */
+    public function forgetFields(array $keys)
+    {
+        foreach ($this->fields as $k => $field) {
+            if (in_array($field->getKey(), $keys)) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->forgetFields($keys);
         }
 
         return $this;
@@ -727,6 +748,16 @@ class Schema implements IteratorAggregate
         return $schema;
     }
 
+    public function has(string $fieldKey)
+    {
+        foreach ($this->getIterator() as $field) {
+            if ($field->getKey() == $fieldKey) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param string[] $fieldKeys
      */
@@ -734,11 +765,7 @@ class Schema implements IteratorAggregate
     {
         $fieldset = new FieldSet($this);
         foreach ($fieldKeys as $fieldKey) {
-            foreach ($this->getIterator() as $field) {
-                if ($field->getKey() == $fieldKey) {
-                    $fieldset->add($field);
-                }
-            }
+            $fieldset->select($fieldKey);
         }
         return $fieldset;
     }
@@ -887,6 +914,11 @@ class Schema implements IteratorAggregate
     public function setPrimaryKey($fields)
     {
         $this->primaryKey = is_array($fields) ? $fields : func_get_args();
+    }
+
+    public function restrictPrimaryKeyContext(array $fields)
+    {
+        $this->primaryKey = array_values(array_diff($this->primaryKey, $fields));
     }
 
     /**

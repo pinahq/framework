@@ -30,6 +30,12 @@ class CheckedEnabledType extends EnabledType
         return $control;
     }
 
+    public function normalize($value, $isMandatory)
+    {
+        $value = $value == 'Y' ? 'Y' : 'N';
+        return parent::normalize($value, $isMandatory);
+    }
+
     protected function makeCheckbox(): FormCheckbox
     {
         /** @var FormCheckbox $checkbox */

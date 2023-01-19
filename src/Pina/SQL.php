@@ -11,6 +11,8 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Data\Field;
+use Pina\Data\FieldSet;
 use Pina\Data\Schema;
 use Pina\Types\StringType;
 
@@ -130,6 +132,7 @@ class SQL
         $tableSchema = $this->getSchema();
 
         $schema = new Schema();
+        $selected = new FieldSet($tableSchema);
         foreach ($this->select as $s) {
             $selecType = $s[0];
             $field = $s[1];
@@ -142,12 +145,15 @@ class SQL
                 continue;
             }
 
-            $selected = $tableSchema->fieldset([$field]);
-            if ($selected->count() == 0) {
-                $f = $schema->add($field, $title, $fieldType)->setAlias($alias);
+            if ($tableSchema->has($field)) {
+                $selected->select($field);
+            } else {
+                $f = Field::make($field, $title, $fieldType);
+                $f->setAlias($alias);
                 if ($selecType == self::SQL_SELECT_CONDITION) {
                     $f->setStatic();
                 }
+                $selected->add($f);
                 continue;
             }
             if ($title && $title <> $field) {
@@ -157,8 +163,8 @@ class SQL
             if ($alias) {
                 $selected->setAlias($field, $alias);
             }
-            $schema->merge($selected->makeSchema());
         }
+        $schema->merge($selected->makeSchema());
 
         foreach ($this->joins as $line) {
             list($type, $table) = $line;
