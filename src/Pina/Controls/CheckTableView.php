@@ -20,9 +20,9 @@ use Pina\StaticResource\Script;
  */
 class CheckTableView extends TableView
 {
-    protected function buildHeader($data)
+    protected function buildHeader()
     {
-        $header = parent::buildHeader($data);
+        $header = parent::buildHeader();
         $header->prepend($this->makeCheckAll());
 
         $this->resources()->append((new Script())->setContent($this->getCheckAllScript()));
