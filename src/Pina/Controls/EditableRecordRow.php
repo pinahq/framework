@@ -24,20 +24,26 @@ class EditableRecordRow extends RecordRow
     {
         $content = '';
         $data = $this->record->getData();
+        $html = $this->record->getHtmlData();
         foreach ($this->record->getSchema()->getIterator() as $field) {
             if ($field->isHidden()) {
                 continue;
             }
-            $type = $field->getType();
-            $name = $field->getKey();
-            $value = isset($data[$name]) ? $data[$name] : null;
-            $pk = $this->record->getSchema()->getPrimaryKey();
-            $id = !empty($pk[0]) ? ($data[$pk[0]] ?? 0) : 0;
 
-            $cell = App::type($type)->setContext($data)->makeControl($field, $value);
-            $cell->setName($this->name . '[' . $id . '][' . $name . ']');
-            $cell->setCompact();
-            $content .= Html::tag('td', $cell);
+            $name = $field->getKey();
+            if ($field->isStatic()) {
+                $content .= Html::tag('td', $html[$name] ?? '');
+            } else {
+                $type = $field->getType();
+                $value = isset($data[$name]) ? $data[$name] : null;
+                $pk = $this->record->getSchema()->getPrimaryKey();
+                $id = !empty($pk[0]) ? ($data[$pk[0]] ?? 0) : 0;
+
+                $cell = App::type($type)->setContext($data)->makeControl($field, $value);
+                $cell->setName($this->name . '[' . $id . '][' . $name . ']');
+                $cell->setCompact();
+                $content .= Html::tag('td', $cell);
+            }
         }
         return $content;
     }
