@@ -27,12 +27,9 @@ use Pina\Controls\SortableTableView;
 use Pina\Model\LinkedItem;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
-use Pina\Processors\ResourceLinkHtmlProcessor;
 use Pina\Response;
 
 use Pina\Types\DirectoryType;
-
-use Pina\Types\StringType;
 
 use function Pina\__;
 
@@ -232,22 +229,6 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeCollectionView(DataTable $data)
     {
-        $childs = App::router()->findChilds($this->location->resource('@/:id'));
-        foreach ($childs as $resource) {
-            if (!Access::isPermitted($resource)) {
-                continue;
-            }
-            try {
-                $title = App::router()->run($resource, 'title');
-                if ($title) {
-                    $data->getSchema()->add($resource, $title, StringType::class);
-                    $data->getSchema()->pushHtmlProcessor(new ResourceLinkHtmlProcessor($this->location, $resource, $title));
-                }
-            } catch (Exception $e) {
-
-            }
-        }
-
         if ($this->sortable) {
             return $this->makeSortableCollectionView($data);
         }

@@ -4,6 +4,8 @@ namespace Pina\Controls;
 
 use Pina\App;
 
+use Pina\Data\Field;
+
 use function Pina\__;
 
 /**
@@ -51,19 +53,15 @@ class RecordForm extends HandledForm
             $widthGained = 0;
             $widthLimit = 12;
             foreach ($schema->getIterator() as $field) {
-                $type = $field->getType();
-                $name = $field->getKey();
-                $value = isset($data[$name]) ? $data[$name] : null;
-                $input = App::type($type)->setContext($data)->makeControl($field, $value);
-
                 $width = $field->getWidth();
-                $widthGained += $width;
-                $inputs[] = $input;
-                if ($widthGained >= $widthLimit) {
-                    $widthGained = 0;
+                if ($widthGained + $width > $widthLimit) {
                     $this->flushInputs($card, $inputs);
+                    $widthGained = 0;
                     $inputs = [];
                 }
+
+                $inputs[] = $this->makeInput($field, $data);
+                $widthGained += $width;
             }
             $this->flushInputs($card, $inputs);
 
@@ -71,6 +69,20 @@ class RecordForm extends HandledForm
         }
 
         return $content;
+    }
+
+    /**
+     * @param Field $field
+     * @param array $data
+     * @return Control|FormControl
+     * @throws \Exception
+     */
+    protected function makeInput(Field $field, array $data)
+    {
+        $type = $field->getType();
+        $name = $field->getKey();
+        $value = isset($data[$name]) ? $data[$name] : null;
+        return App::type($type)->setContext($data)->makeControl($field, $value);
     }
 
     /**

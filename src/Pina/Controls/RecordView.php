@@ -3,16 +3,25 @@
 namespace Pina\Controls;
 
 use Pina\App;
+use Pina\Data\Field;
 
 class RecordView extends Control
 {
     use RecordTrait;
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     protected function draw()
     {
         return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     protected function drawInner()
     {
         $data = $this->record->getHtmlData();
@@ -22,22 +31,66 @@ class RecordView extends Control
             if ($schema->isEmpty()) {
                 continue;
             }
-            $container = $this->makeCard()->setTitle($schema->getTitle());
-            foreach ($schema->getIterator() as $field) {
-                $title = $field->getTitle();
-                $key = $field->getKey();
-                $value = $data[$key];
+            $card = $this->makeCard()->setTitle($schema->getTitle());
 
-                $static = $this->makeFormStatic()
-                    ->setName($key)
-                    ->setTitle($title)
-                    ->setValue($value);
-                $container->append($static);
+            $inputs = [];
+            $widthGained = 0;
+            $widthLimit = 12;
+
+            foreach ($schema->getIterator() as $field) {
+                $width = $field->getWidth();
+                if ($widthGained + $width > $widthLimit) {
+                    $this->flushInputs($card, $inputs);
+                    $widthGained = 0;
+                    $inputs = [];
+                }
+
+                $inputs[] = $this->makeInput($field, $data);
+
+                $widthGained += $width;
             }
-            $content .= $container;
+            $this->flushInputs($card, $inputs);
+            $content .= $card;
         }
 
         return $content;
+    }
+
+    /**
+     * @param Field $field
+     * @param array $data
+     * @return Control|FormControl
+     * @throws \Exception
+     */
+    protected function makeInput(Field $field, array $data)
+    {
+        $title = $field->getTitle();
+        $key = $field->getKey();
+        $value = $data[$key];
+        return $this->makeFormStatic()
+            ->setName($key)
+            ->setTitle($title)
+            ->setValue($value);
+    }
+
+    /**
+     * @param Card $card
+     * @param Control[] $inputs
+     */
+    protected function flushInputs(Card $card, $inputs)
+    {
+        if (count($inputs) > 1) {
+            $row = $this->makeRow();
+            foreach ($inputs as $input) {
+                $row->append($input);
+            }
+            $card->append($row);
+            return;
+        }
+
+        foreach ($inputs as $input) {
+            $card->append($input);
+        }
     }
 
     /**
@@ -46,6 +99,15 @@ class RecordView extends Control
     protected function makeCard()
     {
         return App::make(Card::class);
+    }
+
+
+    /**
+     * @return Control
+     */
+    protected function makeRow(): Control
+    {
+        return App::make(FormRow::class);
     }
 
     /**
