@@ -92,7 +92,7 @@ class Schema implements IteratorAggregate
      * @throws \Exception
      * @return Field
      */
-    public function add($field, $title = '', $type = 'string')
+    public function add($field, $title = '', $type = 'string'): Field
     {
         if (is_string($field)) {
             $f = Field::make($field, $title, $type);
@@ -104,7 +104,7 @@ class Schema implements IteratorAggregate
         return $field;
     }
 
-    public function addField(Field $field)
+    public function addField(Field $field): Field
     {
         $this->fields[] = $field;
         return $field;
@@ -135,10 +135,11 @@ class Schema implements IteratorAggregate
      * Добавляет в схему поле created_at
      * @param string $title
      * @throws \Exception
+     * @return Field
      */
-    public function addCreatedAt($title = 'Created')
+    public function addCreatedAt($title = 'Created'): Field
     {
-        $this->add('created_at', $title, TimestampType::class)
+        return $this->add('created_at', $title, TimestampType::class)
             ->setStatic()
             ->setNullable(false)
             ->setDefault('CURRENT_TIMESTAMP');
@@ -148,15 +149,17 @@ class Schema implements IteratorAggregate
      * Добавляет в схему поле updated_at
      * @param string $title
      * @throws \Exception
+     * @return Field
      */
-    public function addUpdatedAt($title = 'Updated')
+    public function addUpdatedAt($title = 'Updated'): Field
     {
-        $this->add('updated_at', $title, TimestampType::class)
+        $field = $this->add('updated_at', $title, TimestampType::class)
             ->setStatic()
             ->setNullable(false)
             ->setDefault('CURRENT_TIMESTAMP');
 
         $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT_TIMESTAMP');
+        return $field;
     }
 
     /**
