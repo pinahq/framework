@@ -135,6 +135,9 @@ class FormInput extends FormControl
         if ($this->name) {
             $options['name'] = $this->name;
         }
+        if ($this->placeholder) {
+            $options['placeholder'] = $this->placeholder;
+        }
         return $options;
     }
 
