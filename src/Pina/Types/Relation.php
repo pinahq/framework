@@ -6,6 +6,7 @@ namespace Pina\Types;
 
 use Pina\Controls\FormControl;
 use Pina\Data\Field;
+use Pina\SQL;
 use Pina\TableDataGateway;
 
 use function Pina\__;
@@ -111,6 +112,24 @@ class Relation extends DirectoryType
         }
 
         $this->makeRelationQuery()->insert($toInsert);
+    }
+
+    public function filter(SQL $query, string $key, $value)
+    {
+        if (empty($value)) {
+            return $query;
+        }
+
+        $subquery = SQL::subquery(
+            $this->makeRelationQuery()
+                ->calculate('DISTINCT ' . $this->relationField, $this->relationField)
+                ->whereBy($this->directoryField, $value)
+        );
+
+        return $query->innerJoin(
+            //TODO: вычислять наименование PK
+            $subquery->alias('filter_' . $key)->on($this->relationField, 'id')
+        );
     }
 
     public function getSize()

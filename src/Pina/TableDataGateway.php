@@ -662,11 +662,6 @@ class TableDataGateway extends SQL
                     continue;
                 }
 
-                //если не получилось, то смотрим, есть ли поле среди полей текущей таблицы
-                if (!in_array($field->getKey(), $availableFields)) {
-                    continue;
-                }
-
                 /** @var TypeInterface $type */
                 $type = App::type($field->getType());
                 $type->filter($this, $field->getKey(), $value);
