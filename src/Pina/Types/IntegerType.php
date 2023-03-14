@@ -8,8 +8,7 @@ use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
-
-use Pina\SQL;
+use Pina\TableDataGateway;
 
 use function Pina\__;
 
@@ -88,9 +87,12 @@ class IntegerType implements TypeInterface
         return "int(" . $this->getSize() . ")";
     }
 
-    public function filter(SQL $query, string $key, $value)
+    public function filter(TableDataGateway $query, string $key, $value): void
     {
-        return $query->whereBy($key, $value);
+        if (!$query->hasField($query)) {
+            return;
+        }
+        $query->whereBy($key, $value);
     }
 
     /**

@@ -67,6 +67,7 @@ class Relation extends DirectoryType
     /**
      * @param mixed $value
      * @return string
+     * @throws \Exception
      */
     public function format($value)
     {
@@ -74,6 +75,12 @@ class Relation extends DirectoryType
         return implode(', ', $query->column('title'));
     }
 
+    /**
+     * @param mixed $value
+     * @param bool $isMandatory
+     * @return mixed
+     * @throws \Exception
+     */
     public function normalize($value, $isMandatory)
     {
         $originalCount = is_array($value) ? count(array_unique($value)) : 0;
@@ -114,10 +121,10 @@ class Relation extends DirectoryType
         $this->makeRelationQuery()->insert($toInsert);
     }
 
-    public function filter(SQL $query, string $key, $value)
+    public function filter(TableDataGateway $query, string $key, $value): void
     {
         if (empty($value)) {
-            return $query;
+            return;
         }
 
         $subquery = SQL::subquery(
@@ -126,8 +133,8 @@ class Relation extends DirectoryType
                 ->whereBy($this->directoryField, $value)
         );
 
-        return $query->innerJoin(
-            //TODO: вычислять наименование PK
+        $query->innerJoin(
+        //TODO: вычислять наименование PK
             $subquery->alias('filter_' . $key)->on($this->relationField, 'id')
         );
     }

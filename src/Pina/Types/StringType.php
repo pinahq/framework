@@ -8,8 +8,7 @@ use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
 use Pina\Data\Field;
-
-use Pina\SQL;
+use Pina\TableDataGateway;
 
 use function Pina\__;
 use function sprintf;
@@ -92,9 +91,12 @@ class StringType implements TypeInterface
         return "varchar(" . $this->getSize() . ")";
     }
 
-    public function filter(SQL $query, string $key, $value)
+    public function filter(TableDataGateway $query, string $key, $value): void
     {
-        return $query->whereLike($key, '%' . $value . '%');
+        if (!$query->hasField($key)) {
+            return;
+        }
+        $query->whereLike($key, '%' . $value . '%');
     }
 
     /**
