@@ -89,7 +89,7 @@ class IntegerType implements TypeInterface
 
     public function filter(TableDataGateway $query, string $key, $value): void
     {
-        if (!$query->hasField($query)) {
+        if (!$query->hasField($key)) {
             return;
         }
         $query->whereBy($key, $value);
