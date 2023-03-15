@@ -4,6 +4,7 @@ namespace Pina\Data;
 
 use Pina\App;
 
+use Pina\Container\NotFoundException;
 use function array_filter;
 use function implode;
 
@@ -32,10 +33,10 @@ class Field
      * @param mixed $type
      * @param boolean $isMandatory @deprecated
      * @param mixed $default @deprecated
-     * @throws \Exception
+     * @throws NotFoundException
      * @return \static
      */
-    public static function make($key, $title, $type = 'string')
+    public static function make($key, $title, $type)
     {
         $field = new static;
         $field->key = $key;

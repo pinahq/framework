@@ -2,9 +2,8 @@
 
 namespace Pina;
 
-use Closure;
-use Exception;
 use Pina\Container\Container;
+use Pina\Container\NotFoundException;
 use Pina\DB\TriggerUpgrade;
 use Pina\Events\EventManager;
 
@@ -138,7 +137,7 @@ class App
     /**
      * @param string $type
      * @return Types\TypeInterface
-     * @throws Exception
+     * @throws NotFoundException
      */
     public static function type($type)
     {
@@ -146,18 +145,8 @@ class App
             return $type;
         }
 
-        if ($type instanceof Closure) {
-            return static::make(Types\CallbackType::class)->setCallback($type);
-        }
-
         if (is_array($type)) {
             return static::make(Types\EnumType::class)->setVariants($type);
-        }
-
-        if (isset($type[0]) && $type[0] == '/') {
-            $resource = substr($type, 1);
-            $t = static::make(Types\ModuleType::class)->setResource($resource);
-            return $t;
         }
 
         $container = static::types();
@@ -166,7 +155,7 @@ class App
             return $t;
         }
 
-        throw new Exception("Unable to create unsupported class ".$type." as type");
+        throw new NotFoundException("Unable to create unsupported class ".$type." as type");
     }
 
     /**

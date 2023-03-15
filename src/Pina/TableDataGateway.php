@@ -218,7 +218,7 @@ class TableDataGateway extends SQL
      * Добавляет к запросу условие по ID, выполняет его
      * и возвращает первую строку выборки
      * @param string|int $id
-     * @return array
+     * @return array|null
      */
     public function find($id)
     {
@@ -639,8 +639,6 @@ class TableDataGateway extends SQL
      */
     public function whereFilters($filters, Schema $schema)
     {
-        $availableFields = array_keys($this->getFields());
-
         foreach ($filters as $filter => $value) {
             if (empty($value)) {
                 continue;

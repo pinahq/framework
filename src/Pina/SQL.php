@@ -11,6 +11,7 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Container\NotFoundException;
 use Pina\Data\Field;
 use Pina\Data\FieldSet;
 use Pina\Data\Schema;
@@ -117,6 +118,7 @@ class SQL
     /**
      * Возвращает схему на основании выбранных полей задействованных в запросе таблиц
      * @return Schema
+     * @throws NotFoundException
      */
     public function getQuerySchema()
     {
@@ -127,6 +129,10 @@ class SQL
         return $schema;
     }
 
+    /**
+     * @return Schema
+     * @throws NotFoundException
+     */
     protected function grabQuerySchema()
     {
         $tableSchema = $this->getSchema();
@@ -1072,9 +1078,6 @@ class SQL
                 case self::SQL_SELECT_CONDITION:
                     $fields[] = $field . ($alias ? (' as `' . $alias . '`') : '');
                     break;
-                default:
-                    throw new Exception('unkown field type');
-                    break;
             }
         }
         $fields = array_merge($fields, $this->getJoinFieldArray());
@@ -1156,22 +1159,14 @@ class SQL
      * Выполняет запрос и возвращает двумерный массив (таблицу) с набором записей
      * @return array
      */
-    public function get($a = false)
+    public function get()
     {
-        if (!empty($a)) {
-            throw new Exception(__('deprecated usage! please replace ->get(id) to ->find($id)'));
-        }
-
-        if ($this->from == '') {
-            throw new Exception(__("Wrong query: empty FROM condition"));
-        }
-
         return $this->db->table($this->make());
     }
 
     /**
-     * Выполняет запрос и возвращает первую запись из выборки
-     * @return array
+     * Выполняет запрос и возвращает первую запись из выборки или NULL, если ничего не найдено
+     * @return array|null
      */
     public function first()
     {
@@ -1199,7 +1194,7 @@ class SQL
      * Выполняет запрос и возвращает заданную ячейку из первой записи выборки
      * @param string $name
      * @param bool $useLimit
-     * @return string
+     * @return string|null
      */
     public function value($name, $useLimit = true)
     {
@@ -1546,6 +1541,7 @@ class SQL
     private function getOperand($operation, $type, $operand, $alias = '')
     {
         if (is_array($operand) && $type === self::SQL_OPERAND_VALUE && empty($operation)) {
+            //TODO: заменить выброс исключения фильтрацией параметров операнда и строгими типами операндов
             throw new Exception('unsupported format');
         }
 
@@ -1566,8 +1562,8 @@ class SQL
                 return $prefix . $this->getInCondition($operand);
             }
 
+            //TODO: заменить выброс исключения фильтрацией параметров операнда и строгими типами операндов
             throw new Exception('bad array operation');
-            return '';
         }
 
         return $prefix . "'" . $this->db->escape($operand) . "'";
@@ -1927,50 +1923,6 @@ class SQL
     public function makeTruncate()
     {
         return "TRUNCATE " . $this->makeFrom();
-    }
-
-    /**
-     * Выполняет запрос на копирование записей таблицы (INSERT .. SELECT)
-     * а так же возвращает ID добавленной записи
-     * @param array $replaces
-     * @return string
-     */
-    public function copyGetId($replaces = array())
-    {
-        $this->copy($replaces);
-        return $this->db->insertId();
-    }
-
-    /**
-     * Выполняет запрос на копирование записей таблицы (INSERT .. SELECT)
-     * @param array $replaces
-     * @return bool
-     */
-    public function copy($replaces = array())
-    {
-        return $this->db->query($this->makeCopy($replaces));
-    }
-
-    /**
-     * Собирает и возвращает строку запроса на копирование записей таблицы (INSERT .. SELECT)
-     * @param array $replaces
-     * @return string
-     */
-    public function makeCopy($replaces = array())
-    {
-        $fields = array_diff(array_keys($this->fields), array($this->primaryKey));
-
-        $select = $fields;
-        foreach ($select as $k => $selectField) {
-            if (isset($replaces[$selectField])) {
-                $select[$k] = "'$replaces[$selectField]'";
-            }
-        }
-
-        return "INSERT INTO " . $this->getFrom() . " (" . implode(",", $fields) . ")"
-            . " SELECT " . implode(",", $select)
-            . ' FROM ' . $this->getFrom()
-            . $this->makeWhere();
     }
 
     /**

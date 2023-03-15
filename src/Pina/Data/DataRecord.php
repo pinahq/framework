@@ -15,12 +15,17 @@ class DataRecord
     protected $schema;
 
     /**
-     * @param array $data
+     * @param array|null $data
      * @param Schema $schema
      * @throws \Exception
      */
     public function __construct($data, $schema)
     {
+        //TODO: пока принимаем null, как возможный ответ из методов SQL first/find
+        // нужно переделать вместе со строгими типами first/find
+        if (is_null($data)) {
+            $data = [];
+        }
         $schema->fill($data);
         $this->data = $data;
         $this->schema = $schema;
@@ -31,7 +36,7 @@ class DataRecord
         return $this->schema;
     }
 
-    public function getData()
+    public function getData(): array
     {
         return $this->schema->processLineAsData($this->data);
     }

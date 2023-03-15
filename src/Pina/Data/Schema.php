@@ -9,7 +9,9 @@ use LogicException;
 use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
+use Pina\Container\NotFoundException;
 use Pina\Types\IntegerType;
+use Pina\Types\StringType;
 use Pina\Types\TimestampType;
 use Pina\Types\ValidateException;
 
@@ -89,11 +91,15 @@ class Schema implements IteratorAggregate
      * @param mixed $field
      * @param string $title
      * @param string $type
-     * @throws \Exception
+     * @throws NotFoundException
      * @return Field
      */
-    public function add($field, $title = '', $type = 'string'): Field
+    public function add($field, $title = '', $type = ''): Field
     {
+        if (empty($type)) {
+            //TODO: убрать значения title и type по умолчанию
+            $type = StringType::class;
+        }
         if (is_string($field)) {
             $f = Field::make($field, $title, $type);
             $this->fields[] = $f;
