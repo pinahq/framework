@@ -3,7 +3,6 @@
 namespace Pina;
 
 use Pina\Container\Container;
-use Pina\Container\NotFoundException;
 use Pina\DB\TriggerUpgrade;
 use Pina\Events\EventManager;
 
@@ -137,7 +136,7 @@ class App
     /**
      * @param string $type
      * @return Types\TypeInterface
-     * @throws NotFoundException
+     * @throws \Pina\Container\NotFoundException
      */
     public static function type($type)
     {
@@ -155,7 +154,7 @@ class App
             return $t;
         }
 
-        throw new NotFoundException("Unable to create unsupported class ".$type." as type");
+        throw new \Pina\Container\NotFoundException("Unable to create unsupported class ".$type." as type");
     }
 
     /**
