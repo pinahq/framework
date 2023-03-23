@@ -11,7 +11,6 @@ namespace Pina;
  */
 
 use Exception;
-use Pina\Container\NotFoundException;
 use Pina\Data\Field;
 use Pina\Data\FieldSet;
 use Pina\Data\Schema;
