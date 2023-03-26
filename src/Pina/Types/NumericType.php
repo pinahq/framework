@@ -30,6 +30,11 @@ class NumericType extends IntegerType
             return 0;
         }
 
+        $maxValue = pow(10, ($this->getSize() - $this->getDecimals()));
+        if ($value >= $maxValue) {
+            throw new ValidateException(__("Укажите число меньше") . ' ' . $maxValue);
+        }
+
         return $value;
     }
 
