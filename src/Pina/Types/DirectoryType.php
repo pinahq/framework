@@ -44,6 +44,7 @@ abstract class DirectoryType implements TypeInterface
             );
 
         return $control
+            ->setDescription($field->getDescription())
             ->setRequired($field->isMandatory())
             ->setName($field->getKey())
             ->setTitle($field->getTitle());

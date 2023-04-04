@@ -20,6 +20,8 @@ class Schema implements IteratorAggregate
 
     protected $title = '';
 
+    protected $description = '';
+
     /**
      * @var Field[]
      */
@@ -75,15 +77,30 @@ class Schema implements IteratorAggregate
      * @param $title
      * @return $this
      */
-    public function setTitle($title)
+    public function setTitle(string $title)
     {
         $this->title = $title;
         return $this;
     }
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
+    }
+
+    /**
+     * @param string $description
+     * @return $this
+     */
+    public function setDescription(string $description)
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 
     /**

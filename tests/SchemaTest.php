@@ -7,6 +7,7 @@ use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
+use Pina\Types\StringType;
 
 class SchemaTest extends TestCase
 {
@@ -97,7 +98,7 @@ class SchemaTest extends TestCase
         $expected = ['Title1', 'Title2', 'Title3', 'Title4', 'Title5', 'Title6'];
         $this->assertEquals($expected, $schema->getFieldTitles());
 
-        $expected = ['string', 'string', 'string', 'string', 'string', 'string'];
+        $expected = [StringType::class, StringType::class, StringType::class, StringType::class, StringType::class, StringType::class];
         $this->assertEquals($expected, $schema->getFieldTypes());
 
         $this->assertEquals(6, $schema->getVolume());
