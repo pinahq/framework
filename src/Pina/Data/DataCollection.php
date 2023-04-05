@@ -64,7 +64,7 @@ abstract class DataCollection
      */
     public function getList(array $filters, int $page = 0, int $perPage = 0, array $context = []): DataTable
     {
-        $query = $this->makeListQuery(array_merge($filters, $context));
+        $query = $this->makeListQuery($filters, $context);
         $paging = null;
         if ($perPage) {
             $paging = new Paging($page, $perPage);
@@ -186,6 +186,11 @@ abstract class DataCollection
         return $id;
     }
 
+    /**
+     * @param array $data
+     * @param array $context
+     * @throws Exception
+     */
     public function bulkUpdate(array $data, array $context = [])
     {
         if (empty($data) || !is_array($data)) {
@@ -291,10 +296,12 @@ abstract class DataCollection
      * @return TableDataGateway
      * @throws Exception
      */
-    protected function makeListQuery(array $filters): TableDataGateway
+    protected function makeListQuery(array $filters, array $context): TableDataGateway
     {
         $schema = $this->getFilterSchema();
-        return $this->makeQuery()->whereFilters($filters, $schema);
+        $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
+        $schema->merge($contextSchema);
+        return $this->makeQuery()->whereFilters(array_merge($filters, $context), $schema);
     }
 
     /**
