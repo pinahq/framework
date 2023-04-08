@@ -408,6 +408,15 @@ class TableDataGateway extends SQL
         return $this->whereNotBy($this->singlePrimaryKeyField(), $id);
     }
 
+    public function selectAll()
+    {
+        $selectedFields = array_keys($this->getFields());
+        foreach ($selectedFields as $selectedField) {
+            $this->select($selectedField);
+        }
+        return $this;
+    }
+
     /**
      * Добавляет в запрос выборку всех полей кроме заданных
      * @param array|string $field
@@ -441,6 +450,17 @@ class TableDataGateway extends SQL
     public function selectTitle($alias = 'title')
     {
         return $this->selectAsIfNotSelected('title', $alias);
+    }
+
+    public function selectNonStatic()
+    {
+        $schema = $this->getSchema();
+        foreach ($schema as $field) {
+            if (!$field->isStatic()) {
+                $this->select($field->getKey());
+            }
+        }
+        return $this;
     }
 
     /**
