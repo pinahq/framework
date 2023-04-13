@@ -49,6 +49,15 @@ class RecordForm extends HandledForm
                 continue;
             }
             $card = $this->makeCard()->setTitle($schema->getTitle());
+
+            $description = $schema->getDescription();
+            if ($description) {
+                /** @var Paragraph $p */
+                $p = App::make(Paragraph::class);
+                $p->setText($description);
+                $card->append($p);
+            }
+
             $inputs = [];
             $widthGained = 0;
             $widthLimit = 12;
