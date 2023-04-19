@@ -18,7 +18,7 @@ use function Pina\__;
 abstract class DataCollection
 {
     /** @return TableDataGateway */
-    abstract function makeQuery();
+    abstract protected function makeQuery();
 
     /**
      * Основная схема просмотра и редактирования карточки
