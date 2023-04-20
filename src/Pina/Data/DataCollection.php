@@ -140,23 +140,30 @@ abstract class DataCollection
         $id = $this->makeQuery()->insertGetId($normalized);
 
         if (empty($id)) {
-            $filledId = [];
-            $primaryKey = $schema->getPrimaryKey();
-            foreach ($primaryKey as $pkElement) {
-                if (isset($context[$pkElement])) {
-                    continue;
-                }
-
-                $filledId[] = $normalized[$pkElement] ?? null;
-            }
-            $id = implode(',', $filledId);
-
-            if (empty($id)) {
-                throw new InternalErrorException("Wrong primary key");
-            }
+            $id = $this->resolveId($normalized, $schema);
         }
 
         $schema->onUpdate($id, $normalized);
+
+        return $id;
+    }
+
+    protected function resolveId(array $normalized, Schema $schema): string
+    {
+        $filledId = [];
+        $primaryKey = $schema->getPrimaryKey();
+        foreach ($primaryKey as $pkElement) {
+            if (isset($context[$pkElement])) {
+                continue;
+            }
+
+            $filledId[] = $normalized[$pkElement] ?? null;
+        }
+        $id = implode(',', $filledId);
+
+        if (empty($id)) {
+            throw new InternalErrorException("Wrong primary key");
+        }
 
         return $id;
     }
