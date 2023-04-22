@@ -69,7 +69,7 @@ class StringType implements TypeInterface
         }
 
         $size = $this->getSize();
-        if (strlen($value) > $size) {
+        if (mb_strlen($value) > $size) {
             throw new ValidateException(sprintf(__("Укажите значение короче. Максимальная длина %s символов"), $size));
         }
 
