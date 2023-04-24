@@ -31,9 +31,9 @@ class Access
     public static function permit($pattern, $groups = array())
     {
         if (!is_array($groups)) {
-            $groups = explode(';', $groups);
+            $groups = array_filter(explode(';', $groups));
             foreach ($groups as $k => $g) {
-                $groups[$k] = explode(',', $g);
+                $groups[$k] = array_filter(explode(',', $g));
             }
         }
 
