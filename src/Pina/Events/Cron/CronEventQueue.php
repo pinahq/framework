@@ -7,15 +7,14 @@ use Pina\EventQueueInterface;
 class CronEventQueue implements EventQueueInterface
 {
 
-    public function push($handler, $data, $priority)
+    public function push(string $handler, string $data, int $priority)
     {
-        CronEventGateway::instance()->insert([
-            //временное решение, в будущем $handler будет только строкой с именем класса типа Command, а EventHandlerInterface уберем
-            'event' => is_string($handler) ? $handler : $handler->getKey(),
-            'data' => $data,
-            'priority' => $priority,
-            'delay' => 0,//первое событие обрабатывается без задержек
-        ]);
+        CronEventGateway::instance()->insertIgnore([
+                                                       'event' => $handler,
+                                                       'data' => $data,
+                                                       'priority' => $priority,
+                                                       'delay' => 0,//первое событие обрабатывается без задержек
+                                                   ]);
     }
 
 }

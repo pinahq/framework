@@ -8,8 +8,6 @@ use Pina\Controls\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Http\Endpoint;
-use Pina\Http\Location;
-use Pina\Http\Request;
 use Pina\Response;
 
 class CronEventEndpoint extends Endpoint
@@ -20,13 +18,24 @@ class CronEventEndpoint extends Endpoint
 
     public function index()
     {
-        $data = CronEventGateway::instance()->get();
+        $query = CronEventGateway::instance()
+            ->selectAll()
+            ->leftJoin(
+                CronEventWorkerGateway::instance()->on('id', 'id')
+                    ->select('worker_id')
+            );
 
-        $schema = CronEventGateway::instance()->getSchema();
+        $data = $query->get();
+        $schema = $query->getQuerySchema();
 
         return (new TableView)->load(new DataTable($data, $schema));
     }
 
+    /**
+     * @param $id
+     * @return RecordView
+     * @throws \Exception
+     */
     public function show($id)
     {
         $data = CronEventGateway::instance()->find($id);
@@ -37,6 +46,11 @@ class CronEventEndpoint extends Endpoint
         return (new RecordView)->load(new DataRecord($data, $schema));
     }
 
+    /**
+     * @param $id
+     * @return Response
+     * @throws \Exception
+     */
     public function destroy($id)
     {
         if (is_null($id)) {

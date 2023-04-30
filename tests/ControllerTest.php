@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\Data\DataRecord;
 use Pina\Data\Schema;
 use Pina\Controls\Form;
 use Pina\Controls\FormInput;
@@ -11,12 +12,16 @@ use Pina\Controls\RecordView;
 use Pina\Events\Cron\CronEventEndpoint;
 use Pina\App;
 use Pina\CSRF;
+use Pina\Http\Location;
 use Pina\Http\Request;
-use Pina\Input;
 
 class ControllerTest extends TestCase
 {
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function test()
     {
         App::init('test', __DIR__ . '/config');
@@ -27,8 +32,10 @@ class ControllerTest extends TestCase
                 'data' => '123',
                 'priority' => '1',
                 'delay' => '0',
+                'created_at' => '2020-01-02 03:04:05',
+                'scheduled_at' => null,
+                'started_at' => null,
                 'worker_id' => null,
-                'created_at' => '2020-01-02 03:04:05'
             ],
             [
                 'id' => 2,
@@ -36,8 +43,10 @@ class ControllerTest extends TestCase
                 'data' => '124',
                 'priority' => '2',
                 'delay' => '0',
+                'created_at' => '2020-01-02 04:05:06',
+                'scheduled_at' => null,
+                'started_at' => null,
                 'worker_id' => null,
-                'created_at' => '2020-01-02 04:05:06'
             ],
             [
                 'id' => 3,
@@ -45,8 +54,10 @@ class ControllerTest extends TestCase
                 'data' => '125',
                 'priority' => '1',
                 'delay' => '0',
+                'created_at' => '2020-01-02 05:06:07',
+                'scheduled_at' => null,
+                'started_at' => null,
                 'worker_id' => null,
-                'created_at' => '2020-01-02 05:06:07'
             ],
         ];
 
@@ -70,7 +81,7 @@ class ControllerTest extends TestCase
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
+            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Delay</th><th>Created at</th><th>Scheduled at</th><th>Started at</th><th>Worker ID</th></tr>'
             . $tableContent
             . '</table>'
             . '</div></div>';
@@ -78,7 +89,7 @@ class ControllerTest extends TestCase
 
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
 
-        $endpoint = new CronEventEndpoint($request, new \Pina\Http\Location('/'), new \Pina\Http\Location('/'));
+        $endpoint = new CronEventEndpoint($request, new Location('/'), new Location('/'));
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 
@@ -137,7 +148,7 @@ class ControllerTest extends TestCase
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
             . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
-            . $this->getEditFormInner()
+            . $this->getForcedEditFormInner()
             . '</div></div>'
             . '<button type="submit" class="btn btn-primary">Сохранить</button>'
             . '</form>';
@@ -193,7 +204,7 @@ class ControllerTest extends TestCase
         $schema = new Schema();
         $schema->add('mode', 'title', 'string')->setHidden();
         $form = new RecordForm();
-        $form->load(new \Pina\Data\DataRecord(['mode' => 'test'], $schema));
+        $form->load(new DataRecord(['mode' => 'test'], $schema));
         $r = $form->drawWithWrappers();
 
         $cl = $form->getFormClass();
@@ -213,7 +224,6 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><p class="form-control-static">0</p></div>'
-            . '<div class="form-group"><label class="control-label">Worker ID</label><p class="form-control-static">-</p></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
             . '<div class="form-group"><label class="control-label">Started at</label><p class="form-control-static"></p></div>';
@@ -225,7 +235,16 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
-            . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id"></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
+            . '<div class="form-group"><label class="control-label">Started at</label><input type="text" class="form-control" name="started_at"></div>';
+    }
+    private function getForcedEditFormInner()
+    {
+        return '<div class="form-group"><label class="control-label">Event *</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
+            . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Started at</label><input type="text" class="form-control" name="started_at"></div>';

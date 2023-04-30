@@ -14,11 +14,6 @@ class CronEventGateway extends TableDataGateway
 {
 
     protected static $table = "cron_event";
-    protected static $fields = array();
-    protected static $indexes = array(
-        'PRIMARY KEY' => 'id',
-        'KEY queue' => ['priority', 'scheduled_at'],
-    );
 
     /**
      * @return Schema
@@ -28,16 +23,15 @@ class CronEventGateway extends TableDataGateway
     {
         $schema = new Schema();
         $schema->add('id', 'ID', UUIDType::class)->setMandatory();
+        $schema->setPrimaryKey('id');
         $schema->add('event', 'Event', StringType::class)->setMandatory();
         $schema->add('data', 'Data', BlobType::class);
         $schema->add('priority', 'Priority', IntegerType::class);
         $schema->add('delay', 'Delay', IntegerType::class);
-        $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable();
-        $schema->add('created_at', 'Created at', TimestampType::class)->setDefault('CURRENT_TIMESTAMP');
+        $schema->addCreatedAt('Created at');
         $schema->add('scheduled_at', 'Scheduled at', TimestampType::class)->setNullable();
         $schema->add('started_at', 'Started at', TimestampType::class)->setNullable();
-        $schema->setPrimaryKey('id');
-        $schema->addKey('created_at');
+        $schema->addKey(['priority', 'scheduled_at']);
         return $schema;
     }
 
@@ -67,8 +61,7 @@ class CronEventGateway extends TableDataGateway
         $delay = intval($delay);
         $alias = $this->getAlias();
         return $this->updateOperation(
-            "$alias.worker_id=NULL,"
-            . "$alias.scheduled_at=NOW() + INTERVAL $alias.delay SECOND + INTERVAL $delay SECOND,"
+            "$alias.scheduled_at=NOW() + INTERVAL $alias.delay SECOND + INTERVAL $delay SECOND,"
             . "$alias.delay=$alias.delay + $delay"
         );
     }
