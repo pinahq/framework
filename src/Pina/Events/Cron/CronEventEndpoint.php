@@ -18,12 +18,7 @@ class CronEventEndpoint extends Endpoint
 
     public function index()
     {
-        $query = CronEventGateway::instance()
-            ->selectAll()
-            ->leftJoin(
-                CronEventWorkerGateway::instance()->on('id', 'id')
-                    ->select('worker_id')
-            );
+        $query = CronEventGateway::instance();
 
         $data = $query->get();
         $schema = $query->getQuerySchema();

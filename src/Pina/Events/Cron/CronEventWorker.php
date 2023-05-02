@@ -58,30 +58,24 @@ class CronEventWorker
     protected function assignTask(int $workerId, int $priority)
     {
         /** @var CronEventGateway $query */
-        $query = CronEventGateway::instance()
-            ->leftJoin(
-                CronEventWorkerGateway::instance()->on('id', 'id')
-                    ->whereNull('worker_id')
-            )
+        $taskId = CronEventGateway::instance()
+            ->whereNull('worker_id')
             ->whereScheduled()
             //выбираем задачи с приоритетом не меньше воркера
             ->where('priority <= '.intval($priority))
-            ->limit(1)
             ->orderBy('priority', 'asc')
-            ->orderBy('scheduled_at', 'asc');
+            ->orderBy('scheduled_at', 'asc')
+            ->id();
 
-        return CronEventWorkerGateway::instance()->insertFromEvents($workerId, $query);
+        return CronEventGateway::instance()
+            ->whereId($taskId)
+            ->whereNull('worker_id')
+            ->update(['worker_id' => $workerId]);
     }
 
     protected function getNextTask($workerId)
     {
-        return CronEventGateway::instance()
-            ->selectAll()
-            ->innerJoin(
-                CronEventWorkerGateway::instance()->on('id', 'id')
-                    ->onBy('worker_id', $workerId)
-            )
-            ->first();
+        return CronEventGateway::instance()->whereBy('worker_id', $workerId)->first();
     }
 
     /**
@@ -100,7 +94,6 @@ class CronEventWorker
     protected function deleteTask(string  $id)
     {
         CronEventGateway::instance()->whereId($id)->delete();
-        CronEventWorkerGateway::instance()->whereId($id)->delete();
     }
 
     /**
@@ -111,7 +104,6 @@ class CronEventWorker
     protected function pushOff(string $id, int $delay)
     {
         CronEventGateway::instance()->whereId($id)->pushOff($delay);
-        CronEventWorkerGateway::instance()->whereId($id)->delete();
     }
 
 }
