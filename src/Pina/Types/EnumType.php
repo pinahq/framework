@@ -18,7 +18,7 @@ class EnumType extends DirectoryType
         return $this;
     }
 
-    public function format($value)
+    public function format($value): string
     {
         foreach ($this->variants as $v) {
             if ($v['id'] == $value) {

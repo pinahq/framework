@@ -17,7 +17,7 @@ abstract class DirectoryType implements TypeInterface
 
     abstract public function getVariants();
 
-    abstract public function format($value);
+    abstract public function format($value): string;
 
     abstract public function normalize($value, $isMandatory);
 
@@ -36,7 +36,7 @@ abstract class DirectoryType implements TypeInterface
         }
 
         $control = $field->isStatic()
-            ? $this->makeStatic()->setValue($this->format($value))
+            ? $this->makeStatic()->setValue($this->draw($value))
             : (
             $field->isHidden()
                 ? $this->makeHidden()->setValue($value)
@@ -50,7 +50,10 @@ abstract class DirectoryType implements TypeInterface
             ->setTitle($field->getTitle());
     }
 
-
+    public function draw($value): string
+    {
+        return $this->format($value);
+    }
 
     protected function isPlaceholderNeeded(&$variants)
     {

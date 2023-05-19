@@ -24,12 +24,19 @@ abstract class QueryDirectoryType extends DirectoryType
     /**
      * @param mixed $value
      * @return string
+     * @throws \Exception
      */
-    public function format($value)
+    public function format($value): string
     {
-        return $this->makeQuery()->whereId($value)->selectTitle()->value('title');
+        return $this->makeQuery()->whereId($value)->selectTitle()->value('title') ?? '';
     }
 
+    /**
+     * @param mixed $value
+     * @param bool $isMandatory
+     * @return mixed
+     * @throws \Exception
+     */
     public function normalize($value, $isMandatory)
     {
         if (!$this->makeQuery()->whereId($value)->exists()) {

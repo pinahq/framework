@@ -27,6 +27,10 @@ class StringType implements TypeInterface
             ? $this->makeStatic()
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
+        if ($field->isStatic()) {
+            $value = $this->draw($value);
+        }
+
         $input->setName($field->getKey());
         $input->setTitle($field->getTitle());
         $input->setValue($value);
@@ -35,9 +39,14 @@ class StringType implements TypeInterface
         return $input;
     }
 
-    public function format($value)
+    public function format($value): string
     {
-        return $value;
+        return $value ?? '';
+    }
+
+    public function draw($value): string
+    {
+        return $this->format($value);
     }
 
     public function getSize()

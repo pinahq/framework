@@ -27,7 +27,7 @@ class IntegerType implements TypeInterface
             : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
 
         if ($field->isStatic()) {
-            $value = $this->format($value);
+            $value = $this->draw($value);
         }
 
         return $control
@@ -38,9 +38,14 @@ class IntegerType implements TypeInterface
             ->setRequired($field->isMandatory());
     }
 
-    public function format($value)
+    public function format($value): string
     {
         return is_null($value) ? '-' : $value;
+    }
+
+    public function draw($value): string
+    {
+        return $this->format($value);
     }
 
     public function getSize()

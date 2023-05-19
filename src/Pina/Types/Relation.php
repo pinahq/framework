@@ -69,7 +69,7 @@ class Relation extends DirectoryType
      * @return string
      * @throws \Exception
      */
-    public function format($value)
+    public function format($value): string
     {
         $query = $this->makeDirectoryQuery()->whereId($value)->selectTitle();
         return implode(', ', $query->column('title'));

@@ -647,8 +647,18 @@ class Schema implements IteratorAggregate
      */
     public function processLineAsHtml($line)
     {
-        $processed = $this->processLineAsText($line);
-        return $this->makeLine($this->callHtmlProcessors($processed, $line));
+        $processed = $this->processLineAsData($line);
+        $formatted = [];
+        foreach ($this->getIterator() as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
+            $key = $field->getKey();
+            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
+            $type = App::type($field->getType());
+            $formatted[$key] = $type->draw($value);
+        }
+        return $this->makeLine($this->callHtmlProcessors($formatted, $line));
     }
 
     /**

@@ -29,7 +29,14 @@ interface TypeInterface
      * @param mixed $value
      * @return string
      */
-    public function format($value);
+    public function format($value): string;
+
+    /**
+     *
+     * @param mixed $value
+     * @return string
+     */
+    public function draw($value): string;
 
     /**
      * @return int
