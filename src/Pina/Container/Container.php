@@ -104,7 +104,7 @@ class Container implements ContainerInterface
     public function make($id)
     {
         if ($this->has($id)) {
-            return $this->get($id);
+            return clone $this->get($id);
         }
 
         if (class_exists($id)) {
@@ -119,11 +119,6 @@ class Container implements ContainerInterface
     public function has($id)
     {
         return array_key_exists($id, $this->definitions) || array_key_exists($id, $this->sharedDefinitions);
-    }
-
-    public function getKeys(): array
-    {
-        return array_unique(array_merge(array_keys($this->definitions), array_keys($this->shared), array_keys($this->sharedDefinitions)));
     }
 
 }
