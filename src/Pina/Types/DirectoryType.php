@@ -91,12 +91,13 @@ abstract class DirectoryType implements TypeInterface
 
     }
 
-    public function filter(TableDataGateway $query, string $key, $value): void
+    public function filter(TableDataGateway $query, $key, $value): void
     {
-        if (!$query->hasField($key)) {
+        $fields = is_array($key) ? $key : [$key];
+        if (!$query->hasAllFields($fields)) {
             return;
         }
-        $query->whereBy($key, $value);
+        $query->whereBy($fields, $value);
     }
 
     /**

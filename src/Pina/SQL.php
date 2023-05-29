@@ -183,22 +183,22 @@ class SQL
 
 
     /**
-     * @param string $needle
+     * @param string $needleField
      * @return $this|null
      */
-    protected function resolveFieldTable(string $needle)
+    public function resolveFieldTable(string $needleField)
     {
         foreach ($this->select as $s) {
             $field = $s[1];
             $alias = $s[2] ?? $field;
 
-            if ($alias == $needle) {
+            if ($alias == $needleField) {
                 return $this;
             }
 
             if ($field == '*') {
                 $keys = $this->getSchema()->getFieldKeys();
-                if (in_array($needle, $keys)) {
+                if (in_array($needleField, $keys)) {
                     return $this;
                 }
             }
@@ -209,7 +209,7 @@ class SQL
             list($type, $table) = $line;
 
             /** @var SQL $table */
-            $r = $table->resolveFieldTable($needle);
+            $r = $table->resolveFieldTable($needleField);
             if (!is_null($r)) {
                 return $r;
             }

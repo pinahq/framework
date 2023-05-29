@@ -444,5 +444,17 @@ class SQLTest extends TestCase
         $this->assertEquals($q, $gw->make());
         
     }
+
+    public function testHasField()
+    {
+        $query = \Pina\Events\Cron\CronEventGateway::instance();
+        $this->assertTrue($query->hasField('event'));
+        $this->assertFalse($query->hasField('undefined'));
+        $this->assertTrue($query->hasAllFields(['event']));
+        $this->assertTrue($query->hasAllFields(['event', 'data']));
+        $this->assertFalse($query->hasAllFields(['event', 'data', 'undefined']));
+        $this->assertFalse($query->hasAllFields(['undefined']));
+        $this->assertFalse($query->hasAllFields([]));
+    }
     
 }

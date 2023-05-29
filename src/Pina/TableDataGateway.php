@@ -214,6 +214,16 @@ class TableDataGateway extends SQL
         return isset($fields[$field]);
     }
 
+    public function hasAllFields(array $fields): bool
+    {
+        $count = count($fields);
+        if ($count === 0) {
+            return false;
+        }
+        $keys = array_keys($this->getFields());
+        return count(array_intersect($keys, $fields)) === $count;
+    }
+
     /**
      * Добавляет к запросу условие по ID, выполняет его
      * и возвращает первую строку выборки

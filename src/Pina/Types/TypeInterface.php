@@ -94,8 +94,8 @@ interface TypeInterface
     /**
      * Фильтрует данные в таблице, схема которой описана в терминах этого типа
      * @param TableDataGateway $query
-     * @param string $key
+     * @param array|string $key поле или список полей одного типа, по которым фильтруем
      * @param $value
      */
-    public function filter(TableDataGateway $query, string $key, $value): void;
+    public function filter(TableDataGateway $query, $key, $value): void;
 }

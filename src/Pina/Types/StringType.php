@@ -100,12 +100,13 @@ class StringType implements TypeInterface
         return "varchar(" . $this->getSize() . ")";
     }
 
-    public function filter(TableDataGateway $query, string $key, $value): void
+    public function filter(TableDataGateway $query, $key, $value): void
     {
-        if (!$query->hasField($key)) {
+        $fields = is_array($key) ? $key : [$key];
+        if (!$query->hasAllFields($fields)) {
             return;
         }
-        $query->whereLike($key, '%' . $value . '%');
+        $query->whereLike($fields, '%' . $value . '%');
     }
 
     /**

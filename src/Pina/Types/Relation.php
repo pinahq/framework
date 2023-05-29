@@ -30,8 +30,12 @@ class Relation extends DirectoryType
      */
     protected $directoryTable;
 
-    public function __construct(TableDataGateway $relationTable, $relationField, $directoryField, TableDataGateway $directoryTable)
-    {
+    public function __construct(
+        TableDataGateway $relationTable,
+        $relationField,
+        $directoryField,
+        TableDataGateway $directoryTable
+    ) {
         $this->relationTable = $relationTable;
         $this->relationField = $relationField;
         $this->directoryField = $directoryField;
@@ -121,11 +125,13 @@ class Relation extends DirectoryType
         $this->makeRelationQuery()->insert($toInsert);
     }
 
-    public function filter(TableDataGateway $query, string $key, $value): void
+    public function filter(TableDataGateway $query, $key, $value): void
     {
         if (empty($value)) {
             return;
         }
+
+        $fields = is_array($key) ? $key : [$key];
 
         $subquery = SQL::subquery(
             $this->makeRelationQuery()
@@ -135,7 +141,7 @@ class Relation extends DirectoryType
 
         $query->innerJoin(
         //TODO: вычислять наименование PK
-            $subquery->alias('filter_' . $key)->on($this->relationField, 'id')
+            $subquery->alias('filter_' . implode('_', $fields))->on($this->relationField, 'id')
         );
     }
 
