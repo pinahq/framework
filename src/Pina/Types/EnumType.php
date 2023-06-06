@@ -26,7 +26,7 @@ class EnumType extends DirectoryType
             }
         }
 
-        return $value;
+        return $value ?? '';
     }
 
     public function getVariants()
