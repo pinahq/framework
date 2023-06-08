@@ -11,6 +11,11 @@ class RawHtml extends Control
 
     protected $text = '';
 
+    public function __construct(string $text = '')
+    {
+        $this->text = $text;
+    }
+
     /**
      * @param string $text
      * @return $this
