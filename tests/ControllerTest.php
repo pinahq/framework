@@ -88,8 +88,9 @@ class ControllerTest extends TestCase
 
 
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
+        $request->setLocation(new Location('/'), new Location('/'));
 
-        $endpoint = new CronEventEndpoint($request, new Location('/'), new Location('/'));
+        $endpoint = new CronEventEndpoint($request);
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 
@@ -199,6 +200,9 @@ class ControllerTest extends TestCase
         $this->assertEquals('200 OK', $prop->getValue($r));
     }
 
+    /**
+     * @throws Exception
+     */
     public function testHidden()
     {
         $schema = new Schema();
@@ -220,14 +224,14 @@ class ControllerTest extends TestCase
 
     private function getStaticFormInner()
     {
-        return '<div class="form-group"><label class="control-label">Event</label><p class="form-control-static">order.paid</p></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><p class="form-control-static">123</p></div>'
-            . '<div class="form-group"><label class="control-label">Priority</label><p class="form-control-static">1</p></div>'
-            . '<div class="form-group"><label class="control-label">Delay</label><p class="form-control-static">0</p></div>'
-            . '<div class="form-group"><label class="control-label">Worker ID</label><p class="form-control-static">-</p></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
-            . '<div class="form-group"><label class="control-label">Scheduled at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
-            . '<div class="form-group"><label class="control-label">Started at</label><p class="form-control-static"></p></div>';
+        return '<div class="form-group"><label class="control-label">Event</label><div class="form-control-static">order.paid</div></div>'
+            . '<div class="form-group"><label class="control-label">Data</label><div class="form-control-static">123</div></div>'
+            . '<div class="form-group"><label class="control-label">Priority</label><div class="form-control-static">1</div></div>'
+            . '<div class="form-group"><label class="control-label">Delay</label><div class="form-control-static">0</div></div>'
+            . '<div class="form-group"><label class="control-label">Worker ID</label><div class="form-control-static">-</div></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
+            . '<div class="form-group"><label class="control-label">Scheduled at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
+            . '<div class="form-group"><label class="control-label">Started at</label><div class="form-control-static"></div></div>';
     }
 
     private function getEditFormInner()
@@ -237,7 +241,7 @@ class ControllerTest extends TestCase
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
             . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id"></div>'
-            . '<div class="form-group"><label class="control-label">Created at</label><p class="form-control-static">2020-01-02 03:04:05</p></div>'
+            . '<div class="form-group"><label class="control-label">Created at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Started at</label><input type="text" class="form-control" name="started_at"></div>';
     }
