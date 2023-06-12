@@ -24,6 +24,7 @@
     "php": ">=7.2",
     "psr/container": "^1.0",
     "smarty/smarty": "2.6.*",
+    "alex-yashin/php-simple-html": "dev-main#ec08a48958ddd90d9b1ca9e6044f5e6c4d653a41",
     "monolog/monolog": "1.23.*",
     "symfony/http-foundation": "^5.0",
     "league/climate": "3.2.*",
