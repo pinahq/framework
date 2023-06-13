@@ -1,8 +1,10 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Pina\App;
 use Pina\Config;
-use Pina\DB;
+use Pina\DatabaseDriverInterface;
+use Pina\DatabaseDriverStub;
 use Pina\SQL;
 
 class SQLTest extends TestCase
@@ -12,7 +14,7 @@ class SQLTest extends TestCase
     {
         Config::init(__DIR__.'/config');
         
-        \Pina\App::container()->share(\Pina\DatabaseDriverInterface::class, \Pina\DatabaseDriverStub::class);
+        App::container()->share(DatabaseDriverInterface::class, DatabaseDriverStub::class);
 
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_VALUE, 5]);
         $this->assertEquals("`cody_product`.`product_id` = '5'", $q);
@@ -455,6 +457,14 @@ class SQLTest extends TestCase
         $this->assertFalse($query->hasAllFields(['event', 'data', 'undefined']));
         $this->assertFalse($query->hasAllFields(['undefined']));
         $this->assertFalse($query->hasAllFields([]));
+    }
+
+    public function testId()
+    {
+        $query = \Pina\Events\Cron\CronEventGateway::instance();
+        $query->whereId(1);
+        $this->assertEquals("SELECT * FROM `cron_event` WHERE (`cron_event`.`id` = '1')", $query->make());
+
     }
     
 }

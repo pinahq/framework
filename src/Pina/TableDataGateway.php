@@ -402,9 +402,24 @@ class TableDataGateway extends SQL
      * @return $this
      * @throws Exception
      */
-    public function whereId($id)
+    public function whereId($id, $context = [])
     {
-        return $this->whereBy($this->singlePrimaryKeyField(), $id);
+        $pk = $this->getPrimaryKey();
+        //Если PK состоит из нескольких частей, то все кроме одной должны быть переданы через $context
+        foreach ($context as $key => $value) {
+            if (in_array($key, $pk)) {
+                $this->whereBy($key, $value);
+                $pk = array_diff($pk, [$key]);
+            }
+        }
+
+        $singlePk = array_shift($pk);
+
+        if (count($pk) > 0) {
+            throw new Exception("Wrong primary key");
+        }
+
+        return $this->whereBy($singlePk, $id);
     }
 
     /**
@@ -413,9 +428,27 @@ class TableDataGateway extends SQL
      * @return $this
      * @throws Exception
      */
-    public function whereNotId($id)
+    public function whereNotId($id, $context = [])
     {
-        return $this->whereNotBy($this->singlePrimaryKeyField(), $id);
+        $pk = $this->getPrimaryKey();
+        //Если PK состоит из нескольких частей, то все кроме одной должны быть переданы через $context
+        $condition = [];
+        foreach ($context as $key => $value) {
+            if (in_array($key, $pk)) {
+                $condition[] = $this->makeWhereBy($key, $value);
+                $pk = array_diff($pk, [$key]);
+            }
+        }
+
+        $singlePk = array_shift($pk);
+
+        if (count($pk) > 0) {
+            throw new Exception("Wrong primary key");
+        }
+
+        $condition[] = $this->makeWhereBy($singlePk, $id);
+
+        return $this->where('NOT (' . implode(' AND ', $condition) . ')');
     }
 
     public function selectAll()
@@ -675,7 +708,6 @@ class TableDataGateway extends SQL
             }
 
             foreach ($schema->getIterator() as $field) {
-
                 //ищем совпадающее поле в схеме
                 if ($field->getKey() != $filter) {
                     continue;
@@ -696,7 +728,6 @@ class TableDataGateway extends SQL
             }
         }
         return $this;
-
     }
 
 }

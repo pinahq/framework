@@ -546,7 +546,12 @@ class SQL
      */
     public function whereBy($field, $needle)
     {
-        return $this->where($this->makeByCondition(array('=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle)));
+        return $this->where($this->makeWhereBy($field, $needle));
+    }
+
+    protected function makeWhereBy($field, $needle)
+    {
+        return $this->makeByCondition(array('=', self::SQL_OPERAND_FIELD, $field, self::SQL_OPERAND_VALUE, $needle));
     }
 
     /**

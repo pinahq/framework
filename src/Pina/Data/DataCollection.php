@@ -42,9 +42,13 @@ abstract class DataCollection
      * Схема формы создания элемента
      * @return Schema
      */
-    public function getCreationSchema(): Schema
+    public function getCreationSchema($context = []): Schema
     {
-        return $this->getSchema()->forgetStatic();
+        $schema = $this->getSchema()->forgetStatic();
+        foreach ($context as $key => $value) {
+            $schema->forgetField($key);
+        }
+        return $schema;
     }
 
     /**
@@ -88,7 +92,9 @@ abstract class DataCollection
         $schema = $this->getSchema();
 
         if ($context) {
-            $query->whereFilters($context, $this->getFilterSchema());
+            foreach ($context as $field => $value) {
+                $query->whereBy($field, $value);
+            }
         }
 
         $primaryKey = $schema->getPrimaryKey();
@@ -119,9 +125,9 @@ abstract class DataCollection
      * @return DataRecord
      * @throws \Exception
      */
-    public function getNewRecord(array $context): DataRecord
+    public function getNewRecord(array $data, array $context): DataRecord
     {
-        return new DataRecord($context, $this->getCreationSchema());
+        return new DataRecord($data, $this->getCreationSchema($context));
     }
 
     /**
@@ -133,14 +139,15 @@ abstract class DataCollection
      */
     public function add(array $data, array $context = []): string
     {
-        $schema = $this->getCreationSchema();
+        $schema = $this->getCreationSchema($context);
 
-        $normalized = $this->normalize(array_merge($data, $context), $schema);
+        $normalized = $this->normalize($data, $schema, $context);
 
-        $id = $this->makeQuery()->insertGetId($normalized);
+        $toInsert = array_merge($normalized, $context);
+        $id = $this->makeQuery()->insertGetId($toInsert);
 
         if (empty($id)) {
-            $id = $this->resolveId($normalized, $schema);
+            $id = $this->resolveId($normalized, $schema, $context);
         }
 
         $schema->onUpdate($id, $normalized);
@@ -148,24 +155,22 @@ abstract class DataCollection
         return $id;
     }
 
-    protected function resolveId(array $normalized, Schema $schema): string
+    protected function resolveId(array $normalized, Schema $schema, array $context = []): string
     {
-        $filledId = [];
         $primaryKey = $schema->getPrimaryKey();
-        foreach ($primaryKey as $pkElement) {
-            if (isset($context[$pkElement])) {
-                continue;
+        foreach ($context as $key => $value) {
+            if (in_array($key, $primaryKey)) {
+                $primaryKey = array_diff($primaryKey, [$key]);
             }
-
-            $filledId[] = $normalized[$pkElement] ?? null;
         }
-        $id = implode(',', $filledId);
 
-        if (empty($id)) {
+        $singlePrimaryKey = array_shift($primaryKey);
+
+        if (count($primaryKey) > 0) {
             throw new InternalErrorException("Wrong primary key");
         }
 
-        return $id;
+        return $normalized[$singlePrimaryKey] ?? '';
     }
 
     /**
@@ -180,7 +185,7 @@ abstract class DataCollection
     {
         $schema = $this->getSchema();
 
-        $normalized = $this->normalize($data, $schema, $id);
+        $normalized = $this->normalize($data, $schema, $context, $id);
 
         $query = $this->makeQuery();
 
@@ -270,7 +275,7 @@ abstract class DataCollection
      * @return array
      * @throws Exception
      */
-    protected function normalize(array $data, Schema $schema, ?string $id = null): array
+    protected function normalize(array $data, Schema $schema, $context = [], ?string $id = null): array
     {
         $normalized = $schema->normalize($data);
 
@@ -282,10 +287,10 @@ abstract class DataCollection
         foreach ($uniqueKeys as $fields) {
             $query = $this->makeQuery();
             if ($id) {
-                $query->whereNotId($id);
+                $query->whereNotId($id, $context);
             }
             foreach ($fields as $field) {
-                $query->whereBy($field, $normalized[$field] ?? '');
+                $query->whereBy($field, $normalized[$field] ?? ($context[$field] ?? ''));
             }
             if ($query->exists()) {
                 $ex = new BadRequestException();

@@ -177,7 +177,7 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     public function create()
     {
-        $record = $this->collection->getNewRecord($this->query()->all());
+        $record = $this->collection->getNewRecord($this->query()->all(), $this->context()->all());
 
         $this->composer->create($this->location);
 
@@ -403,9 +403,6 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeCreateForm(DataRecord $data)
     {
-        foreach ($this->context()->all() as $key => $value) {
-            $data->getSchema()->forgetField($key);
-        }
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
         $form->setMethod('post')->setAction($this->base->link('@'));
