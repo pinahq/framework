@@ -36,7 +36,6 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->sharedDefinitions[$id])) {
-
             if (is_object($this->sharedDefinitions[$id])) {
                 return $this->sharedDefinitions[$id];
             }
@@ -119,6 +118,13 @@ class Container implements ContainerInterface
     public function has($id)
     {
         return array_key_exists($id, $this->definitions) || array_key_exists($id, $this->sharedDefinitions);
+    }
+
+    public function getKeys(): array
+    {
+        return array_unique(
+            array_merge(array_keys($this->definitions), array_keys($this->shared), array_keys($this->sharedDefinitions))
+        );
     }
 
 }
