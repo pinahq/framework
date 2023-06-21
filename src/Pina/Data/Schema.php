@@ -1044,6 +1044,9 @@ class Schema implements IteratorAggregate
 
     protected function callHtmlProcessors($processed, $raw)
     {
+        foreach ($this->textProcessors as $f) {
+            $processed = $f($processed, $raw);
+        }
         foreach ($this->htmlProcessors as $f) {
             $processed = $f($processed, $raw);
         }
