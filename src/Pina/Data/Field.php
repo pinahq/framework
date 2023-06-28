@@ -261,4 +261,9 @@ class Field
         return 'DEFAULT ' . $default;
     }
 
+    public function isFiltrable()
+    {
+        return App::type($this->type)->isFiltrable();
+    }
+
 }

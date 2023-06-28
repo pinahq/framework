@@ -16,7 +16,7 @@ class BooleanType extends EnumType
         ];
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return false;
     }

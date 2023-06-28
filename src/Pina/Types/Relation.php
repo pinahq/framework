@@ -32,8 +32,8 @@ class Relation extends DirectoryType
 
     public function __construct(
         TableDataGateway $relationTable,
-        $relationField,
-        $directoryField,
+                         $relationField,
+                         $directoryField,
         TableDataGateway $directoryTable
     ) {
         $this->relationTable = $relationTable;
@@ -145,12 +145,12 @@ class Relation extends DirectoryType
         );
     }
 
-    public function getSize()
+    public function getSize(): int
     {
         return 0;
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return '';
     }

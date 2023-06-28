@@ -41,7 +41,7 @@ interface TypeInterface
     /**
      * @return int
      */
-    public function getSize();
+    public function getSize(): int;
 
     /**
      * @return mixed
@@ -53,7 +53,11 @@ interface TypeInterface
      * Даже если тип возвращает здесь true, nullable может быть задано на уровне типа
      * @return bool
      */
-    public function isNullable();
+    public function isNullable(): bool;
+
+    public function isSearchable(): bool;
+
+    public function isFiltrable(): bool;
 
     /**
      * @return array
@@ -88,7 +92,7 @@ interface TypeInterface
     /**
      * @return string
      */
-    public function getSQLType();
+    public function getSQLType(): string;
 
 
     /**

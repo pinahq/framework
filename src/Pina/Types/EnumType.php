@@ -44,7 +44,7 @@ class EnumType extends DirectoryType
         return $value;
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         $variants = array_column($this->variants, 'id');
         return "enum('" . implode("','", $variants) . "')";

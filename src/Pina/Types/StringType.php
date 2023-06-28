@@ -49,7 +49,7 @@ class StringType implements TypeInterface
         return $this->format($value);
     }
 
-    public function getSize()
+    public function getSize(): int
     {
         return 512;
     }
@@ -59,9 +59,19 @@ class StringType implements TypeInterface
         return '';
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return false;
+    }
+
+    public function isSearchable(): bool
+    {
+        return true;
+    }
+
+    public function isFiltrable(): bool
+    {
+        return true;
     }
 
     public function getVariants()
@@ -95,7 +105,7 @@ class StringType implements TypeInterface
 
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return "varchar(" . $this->getSize() . ")";
     }

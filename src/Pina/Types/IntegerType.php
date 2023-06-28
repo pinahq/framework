@@ -48,7 +48,7 @@ class IntegerType implements TypeInterface
         return $this->format($value);
     }
 
-    public function getSize()
+    public function getSize(): int
     {
         return 11;
     }
@@ -58,7 +58,17 @@ class IntegerType implements TypeInterface
         return 0;
     }
 
-    public function isNullable()
+    public function isNullable(): bool
+    {
+        return false;
+    }
+
+    public function isSearchable(): bool
+    {
+        return false;
+    }
+
+    public function isFiltrable(): bool
     {
         return false;
     }
@@ -87,7 +97,7 @@ class IntegerType implements TypeInterface
 
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return "int(" . $this->getSize() . ")";
     }

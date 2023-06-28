@@ -6,17 +6,17 @@ namespace Pina\Types;
 
 class TimestampType extends StringType
 {
-    public function getSize()
+    public function getSize(): int
     {
         return 19;//strlen('0000-00-00 00:00:00')
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return 'timestamp';
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return false;
     }

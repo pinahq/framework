@@ -297,6 +297,23 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    public function forgetNotFiltrable()
+    {
+        foreach ($this->fields as $k => $field) {
+            if (!$field->isFiltrable()) {
+                unset($this->fields[$k]);
+            }
+        }
+
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->getInnerSchemas() as $group) {
+            $group->forgetNotFiltrable();
+        }
+
+        return $this;
+    }
+
     public function getVolume()
     {
         $count = count($this->fields);

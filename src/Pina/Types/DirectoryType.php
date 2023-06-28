@@ -21,7 +21,7 @@ abstract class DirectoryType implements TypeInterface
 
     abstract public function normalize($value, $isMandatory);
 
-    abstract public function getSQLType();
+    abstract public function getSQLType(): string;
 
     public function setContext($context)
     {
@@ -66,9 +66,9 @@ abstract class DirectoryType implements TypeInterface
         return '';
     }
 
-    public function getSize()
+    public function getSize(): int
     {
-        return null;
+        return 0;
     }
 
     public function getDefault()
@@ -76,9 +76,19 @@ abstract class DirectoryType implements TypeInterface
         return null;
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return false;
+    }
+
+    public function isSearchable(): bool
+    {
+        return false;
+    }
+
+    public function isFiltrable(): bool
+    {
+        return true;
     }
 
     public function getData($id)

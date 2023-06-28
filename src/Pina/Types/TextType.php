@@ -8,14 +8,19 @@ use Pina\Controls\FormTextarea;
 class TextType extends StringType
 {
 
-    public function getSize()
+    public function getSize(): int
     {
         return 1024 * 1024;
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return true;
+    }
+
+    public function isFiltrable(): bool
+    {
+        return false;
     }
 
     public function getDefault()
@@ -23,7 +28,7 @@ class TextType extends StringType
         return null;
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         $size = $this->getSize();
         if ($size <= 65535) {

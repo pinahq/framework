@@ -7,7 +7,7 @@ namespace Pina\Types;
 class UUIDType extends StringType
 {
 
-    public function getSize()
+    public function getSize(): int
     {
         return 36;
     }

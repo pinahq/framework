@@ -46,12 +46,12 @@ abstract class QueryDirectoryType extends DirectoryType
         return $value;
     }
 
-    public function getSize()
+    public function getSize(): int
     {
         return 11;
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return "int(" . $this->getSize() . ")";
     }

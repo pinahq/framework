@@ -7,7 +7,7 @@ namespace Pina\Types;
 class BlobType extends TextType
 {
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         $size = $this->getSize();
         if ($size <= 65535) {

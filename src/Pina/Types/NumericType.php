@@ -10,7 +10,7 @@ use function Pina\__;
 class NumericType extends IntegerType
 {
 
-    public function getSize()
+    public function getSize(): int
     {
         return 12;
     }
@@ -38,7 +38,7 @@ class NumericType extends IntegerType
         return $value;
     }
 
-    public function getSQLType()
+    public function getSQLType(): string
     {
         return "decimal(" . $this->getSize() . "," . $this->getDecimals() . ")";
     }
