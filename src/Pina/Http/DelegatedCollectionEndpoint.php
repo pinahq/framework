@@ -126,7 +126,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
             $variants = App::type($type)->getVariants();
             foreach ($variants as $variant) {
-                $menu->addItem(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']]))));
+                $menu->add(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']]))));
             }
             break;
         }

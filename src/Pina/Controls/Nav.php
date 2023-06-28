@@ -20,19 +20,19 @@ class Nav extends Control
         $this->location = $location;
     }
 
-    public function addItem(LinkedItemInterface $item)
+    public function add(LinkedItemInterface $item)
     {
         array_push($this->items, $item);
         return $this;
     }
 
-    public function addItemToHead(LinkedItemInterface $item)
+    public function addToHead(LinkedItemInterface $item)
     {
         array_unshift($this->items, $item);
         return $this;
     }
 
-    public function countItems(): int
+    public function count(): int
     {
         return count($this->items);
     }
