@@ -6,8 +6,6 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Data\DataRecord;
-use Pina\ResourceManagerInterface;
-use Pina\StaticResource\Script;
 
 /**
  * Class CheckTableView
@@ -25,7 +23,7 @@ class CheckTableView extends TableView
         $header = parent::buildHeader();
         $header->prepend($this->makeCheckAll());
 
-        $this->resources()->append((new Script())->setContent($this->getCheckAllScript()));
+        App::assets()->addScriptContent($this->getCheckAllScript());
 
         return $header;
     }
@@ -62,15 +60,6 @@ class CheckTableView extends TableView
         $checkbox->setValue(1);
         $checkbox->wrap(new Wrapper("td"));
         return $checkbox;
-    }
-
-    /**
-     *
-     * @return ResourceManagerInterface
-     */
-    protected function resources()
-    {
-        return App::container()->get(ResourceManagerInterface::class);
     }
 
     protected function getCheckAllScript()

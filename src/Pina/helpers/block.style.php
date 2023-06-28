@@ -1,7 +1,6 @@
 <?php
 
 use Pina\App;
-use Pina\StaticResource\Style;
 
 function smarty_block_style($params, $content, &$view, &$repeat)
 {
@@ -9,14 +8,11 @@ function smarty_block_style($params, $content, &$view, &$repeat)
         return '';
     }
 
-    $resource = new Style();
     if (!empty($params['src'])) {
-        $resource->setSrc($params['src']);
+        App::assets()->addCss($params['src']);
     } elseif (!empty($content)) {
-        $resource->setContent($content);
-    } else {
-        return '';
+        App::assets()->addCssContent($content);
     }
-    App::container()->get(\Pina\ResourceManagerInterface::class)->append($resource);
+
     return '';
 }

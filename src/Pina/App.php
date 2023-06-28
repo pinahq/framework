@@ -182,6 +182,11 @@ class App
         return static::load(Router::class);
     }
 
+    public static function assets(): ResourceManagerInterface
+    {
+        return static::container()->get(ResourceManagerInterface::class);
+    }
+
     /**
      * Запускает приложение: анализирует параметры,
      * выбирает и выполняет цепочку контроллеров

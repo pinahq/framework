@@ -7,8 +7,6 @@ use Pina\CSRF;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Html;
-use Pina\ResourceManagerInterface;
-use Pina\StaticResource\Script;
 
 /**
  * Class SortableListView
@@ -36,11 +34,6 @@ class SortableListView extends Card
         return $this;
     }
 
-    public function __construct()
-    {
-        $this->resources()->append((new Script())->setSrc('/static/default/js/pina.sortable.js'));
-    }
-
     public function setHandler($resource, $method, $params)
     {
         $this->method = $method;
@@ -51,6 +44,8 @@ class SortableListView extends Card
 
     protected function drawInner()
     {
+        App::assets()->addScript('/static/default/js/pina.sortable.js');
+
         $list = $this->makeList();
         $list->setDataAttribute('method', $this->method);
         $list->setDataAttribute('resource', $this->resource);
@@ -96,16 +91,6 @@ class SortableListView extends Card
         }
         $li->setText($record->getMeta('icon') . $muted . Html::a($record->getMeta('title'), $record->getMeta('link')));
         return $li;
-    }
-
-
-    /**
-     *
-     * @return ResourceManagerInterface
-     */
-    protected function resources()
-    {
-        return App::container()->get(ResourceManagerInterface::class);
     }
 
 }

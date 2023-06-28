@@ -34,7 +34,7 @@ class TemplateLayoutContent implements ContentInterface
         }
         
         $view->assign("content", $content);
-        App::container()->get(ResourceManagerInterface::class)->startLayout();
+        App::assets()->startLayout();
         $this->content = $view->fetch('Layout/' . Request::getLayout() . '.tpl');
     }
 

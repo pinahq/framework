@@ -7,8 +7,6 @@ namespace Pina\Controls;
 use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\Field;
-use Pina\ResourceManagerInterface;
-use Pina\StaticResource\Script;
 use Pina\Types\CheckedEnabledType;
 
 class EditableTableView extends TableView
@@ -43,21 +41,10 @@ class EditableTableView extends TableView
 
     protected function generateCheckAll($id, $name)
     {
-        $pattern = '/'.$this->name.'\[\d+\]\['.$name.'\]/';
-        $this->resources()->append(
-            (new Script())->setContent(
-                "<script>document.getElementById('$id').addEventListener('click', function() {let es = this.parentNode.parentNode.parentNode.querySelectorAll('input[type=checkbox]'); for (let i=0;i<es.length;i++) {if (es[i].name.match($pattern)){es[i].checked=this.checked;}}});</script>"
-            )
+        $pattern = '/' . $this->name . '\[\d+\]\[' . $name . '\]/';
+        App::assets()->addScriptContent(
+            "<script>document.getElementById('$id').addEventListener('click', function() {let es = this.parentNode.parentNode.parentNode.querySelectorAll('input[type=checkbox]'); for (let i=0;i<es.length;i++) {if (es[i].name.match($pattern)){es[i].checked=this.checked;}}});</script>"
         );
-    }
-
-    /**
-     *
-     * @return ResourceManagerInterface
-     */
-    protected function resources()
-    {
-        return App::container()->get(ResourceManagerInterface::class);
     }
 
     /**

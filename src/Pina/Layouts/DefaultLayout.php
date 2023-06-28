@@ -5,7 +5,6 @@ namespace Pina\Layouts;
 use Pina\App;
 use Pina\Controls\Control;
 use Pina\Html;
-use Pina\ResourceManagerInterface;
 
 class DefaultLayout extends Control
 {
@@ -26,21 +25,12 @@ class DefaultLayout extends Control
 
     protected function makeCss()
     {
-        return $this->resources()->fetch('css');
+        return App::assets()->fetch('css');
     }
 
     protected function makeJs()
     {
-        return $this->resources()->fetch('js');
-    }
-
-    /**
-     *
-     * @return ResourceManagerInterface
-     */
-    protected function resources()
-    {
-        return App::container()->get(ResourceManagerInterface::class);
+        return App::assets()->fetch('js');
     }
 
     protected function makeMeta()

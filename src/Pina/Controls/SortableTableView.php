@@ -5,7 +5,6 @@ namespace Pina\Controls;
 use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\StaticResource\Script;
 use Pina\CSRF;
 
 class SortableTableView extends SortableListView
@@ -14,11 +13,6 @@ class SortableTableView extends SortableListView
      * @var DataTable
      */
     protected $dataTable;
-
-    public function __construct()
-    {
-        $this->resources()->append((new Script())->setSrc('/static/default/js/pina.table-sortable.js'));
-    }
 
     public function setHandler($resource, $method, $params)
     {
@@ -47,6 +41,8 @@ class SortableTableView extends SortableListView
 
     protected function drawInner()
     {
+        App::assets()->addScript('/static/default/js/pina.table-sortable.js');
+
         $table = $this->makeTable();
         $table->append($this->buildHeader($this->dataTable->getSchema()->getFieldTitles()));
 

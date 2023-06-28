@@ -23,7 +23,7 @@ class TemplaterContent implements ContentInterface
 
         if ($useLayout) {
             $this->view->assign("content", $this->content);
-            App::container()->get(ResourceManagerInterface::class)->startLayout();
+            App::assets()->startLayout();
             $this->content = $this->view->fetch('Layout/' . Request::getLayout() . '.tpl');
         }
     }
@@ -51,7 +51,7 @@ class TemplaterContent implements ContentInterface
     public function drawLayout($content)
     {
         $this->view->assign("content", $content);
-        App::container()->get(ResourceManagerInterface::class)->startLayout();
+        App::assets()->startLayout();
         $this->content = $this->view->fetch('Layout/' . Request::getLayout() . '.tpl');
     }
 

@@ -4,8 +4,6 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\CSRF;
-use Pina\ResourceManagerInterface;
-use Pina\StaticResource\Script;
 
 class ActionButton extends LinkedButton
 {
@@ -34,7 +32,7 @@ class ActionButton extends LinkedButton
 
     protected function includeScripts($classId)
     {
-        $this->resources()->append((new Script())->setContent($this->makeScript($classId)));
+        App::assets()->addScriptContent($this->makeScript($classId));
     }
 
     protected function makeScript($classId)
@@ -51,8 +49,4 @@ class ActionButton extends LinkedButton
 HEREDOC;
     }
 
-    protected function resources(): ResourceManagerInterface
-    {
-        return App::container()->get(ResourceManagerInterface::class);
-    }
 }
