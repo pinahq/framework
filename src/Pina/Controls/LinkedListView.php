@@ -5,9 +5,7 @@ namespace Pina\Controls;
 use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\Data\Schema;
 use Pina\Html;
-use Pina\Http\Location;
 
 class LinkedListView extends Control
 {
@@ -28,9 +26,14 @@ class LinkedListView extends Control
 
     protected function draw()
     {
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        if (empty($inner)) {
+            return '';
+        }
+
         return Html::tag(
             'ul',
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $inner,
             $this->makeAttributes()
         );
     }

@@ -260,9 +260,7 @@ class DelegatedCollectionEndpoint extends Endpoint
             $record->getSchema()->forgetField($key);
         }
         $form->load($record);
-        if (!$this->collection->getCreationSchema()->isEmpty()) {
-            $form->getButtonRow()->append($this->makeCreateButton());
-        }
+        $form->getButtonRow()->append($this->makeResetButton());
         return $form;
     }
 
@@ -418,6 +416,11 @@ class DelegatedCollectionEndpoint extends Endpoint
     protected function makeCreateButton()
     {
         return $this->makeButton($this->base->link('@/create'), __('Добавить'));
+    }
+
+    protected function makeResetButton()
+    {
+        return $this->makeButton($this->base->link('@'), __('Сбросить'));
     }
 
     protected function makeEditLinkButton()

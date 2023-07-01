@@ -39,9 +39,14 @@ class Nav extends Control
 
     protected function draw()
     {
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        if (empty($inner)) {
+            return '';
+        }
+
         return Html::tag(
             'ul',
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $inner,
             $this->makeAttributes()
         );
     }
