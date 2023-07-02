@@ -47,7 +47,7 @@ class Nav extends Control
         return Html::tag(
             'ul',
             $inner,
-            $this->makeAttributes()
+            $this->makeAttributes(['class' => 'nav'])
         );
     }
 
