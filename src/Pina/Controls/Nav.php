@@ -3,6 +3,7 @@
 
 namespace Pina\Controls;
 
+use Pina\App;
 use Pina\Html;
 use Pina\Model\LinkedItemInterface;
 use Pina\Url;
@@ -47,7 +48,7 @@ class Nav extends Control
         return Html::tag(
             'ul',
             $inner,
-            $this->makeAttributes()
+            $this->makeAttributes(['class' => 'nav'])
         );
     }
 
@@ -71,19 +72,37 @@ class Nav extends Control
     protected function makeLinkOptions(LinkedItemInterface $item)
     {
         $options = [];
+        $options['class'] = $this->makeLinkClasses($item);
         if ($this->isActive($item)) {
-            $options['class'] = 'nav-link active';
-        } else {
-            $options['class'] = 'nav-link';
+            $options['class'] .= ' active';
+        }
+        if ($this->isExternalLink($item->getLink())) {
+            $options['target'] = '_blank';
         }
         return $options;
+    }
+
+    protected function makeLinkClasses(LinkedItemInterface $item)
+    {
+        return 'nav-link';
     }
 
     protected function makeItemOptions(LinkedItemInterface $item)
     {
         $options = [];
-        $options['class'] = 'nav-item';
+        $options['class'] = $this->makeItemClasses($item);
         return $options;
+    }
+
+    protected function makeItemClasses(LinkedItemInterface $item)
+    {
+        return 'nav-item';
+    }
+
+    protected function isExternalLink(string $link)
+    {
+        $host = parse_url($link, PHP_URL_HOST);
+        return $host != App::host();
     }
 
     protected function calculateCurrent(): string
