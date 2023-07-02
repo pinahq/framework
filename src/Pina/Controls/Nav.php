@@ -102,7 +102,7 @@ class Nav extends Control
     protected function isExternalLink(string $link)
     {
         $host = parse_url($link, PHP_URL_HOST);
-        return $host != App::host();
+        return !empty($host) && $host != App::host();
     }
 
     protected function calculateCurrent(): string
