@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Catalog\Controls;
+namespace Pina\Controls;
 
 use Pina\Controls\FormSelect;
 use Pina\Html;
