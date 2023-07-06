@@ -6,32 +6,31 @@ use Pina\Html;
 
 class FormCheckbox extends FormInput
 {
-    protected $checked = false;
     protected $type = 'checkbox';
+    protected $checkedValue = 'Y';
 
-    public function setChecked(bool $checked)
+    public function setOptionValue(string $value)
     {
-        $this->checked = $checked;
-
-        return $this;
+        $this->checkedValue = $value;
     }
 
     protected function drawInner()
     {
-        return $this->drawControl();
+        $r = $this->drawInput();
+        return $r;
     }
 
     protected function drawInput()
     {
-        $options = ['type' => $this->type, 'value' => $this->value, 'class' => 'check'];
+        $options = ['type' => $this->type, 'value' => $this->checkedValue];
 
         if ($this->name) {
             $options['name'] = $this->name;
             $options['id'] = $this->name;
         }
 
-        if ($this->checked) {
-            $options['checked'] = $this->checked;
+        if ($this->value == $this->checkedValue) {
+            $options['checked'] = 'checked';
         }
 
         $r = Html::tag('input', '', $options);
