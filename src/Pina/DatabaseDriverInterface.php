@@ -31,6 +31,8 @@ interface DatabaseDriverInterface
 
     public function error();
 
+    public function version(): int;
+
     /**
      * Выполнение функции в рамках одной транзакции
      * @param Closure $closure

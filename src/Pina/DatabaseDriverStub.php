@@ -68,6 +68,11 @@ class DatabaseDriverStub implements DatabaseDriverInterface
         return '';
     }
 
+    public function version(): int
+    {
+        return 0;
+    }
+
     public function transaction($closure)
     {
         return $closure();

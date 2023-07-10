@@ -203,6 +203,8 @@ class StructureParser
                 $length .= ','.$f['decimals'];
             }
             $field->length($length);
+        } elseif ($f['type'] == 'INT') {
+            $field->length(11);
         }
         if (!empty($f['unsigned'])) {
             $field->unsigned();

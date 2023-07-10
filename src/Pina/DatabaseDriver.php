@@ -177,6 +177,11 @@ class DatabaseDriver implements DatabaseDriverInterface
         return mysqli_error($this->conn);
     }
 
+    public function version(): int
+    {
+        return mysqli_get_server_version($this->conn);
+    }
+
     /**
      * @param \Closure $closure
      * @return mixed

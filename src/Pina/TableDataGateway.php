@@ -92,6 +92,9 @@ class TableDataGateway extends SQL
 
     public function getCharset()
     {
+        if ($this->db->version() >= 8000 && static::$charset == 'utf8') {
+            return 'utf8mb3';
+        }
         return static::$charset;
     }
 
