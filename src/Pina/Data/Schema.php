@@ -673,6 +673,7 @@ class Schema implements IteratorAggregate
             $key = $field->getKey();
             $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());
+            $type->setContext($line);
             $formatted[$key] = $type->draw($value);
         }
         return $this->makeLine($this->callHtmlProcessors($formatted, $line));
