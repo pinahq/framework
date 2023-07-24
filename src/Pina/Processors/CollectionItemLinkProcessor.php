@@ -60,6 +60,9 @@ class CollectionItemLinkProcessor
             if (!isset($processed[$key])) {
                 continue;
             }
+            if (strpos($processed[$key], '<a ')) {
+                continue;
+            }
             $processed[$key] = Html::a($processed[$key], $this->location->link('@/:id', ['id' => $raw[$pk]]));
         }
         return $processed;
