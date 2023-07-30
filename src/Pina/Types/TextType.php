@@ -40,6 +40,11 @@ class TextType extends StringType
         return "longtext";
     }
 
+    public function draw($value): string
+    {
+        return nl2br($this->format($value));
+    }
+
     protected function makeInput()
     {
         return App::make(FormTextarea::class);
