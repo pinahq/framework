@@ -9,9 +9,9 @@ function smarty_block_style($params, $content, &$view, &$repeat)
     }
 
     if (!empty($params['src'])) {
-        App::assets()->addCss($params['src']);
+        App::assets()->addStyle($params['src']);
     } elseif (!empty($content)) {
-        App::assets()->addCssContent($content);
+        App::assets()->addStyleContent($content);
     }
 
     return '';

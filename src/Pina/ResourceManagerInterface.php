@@ -5,9 +5,9 @@ namespace Pina;
 interface ResourceManagerInterface
 {
 
-    public function addCss(string $url);
+    public function addStyle(string $url);
 
-    public function addCssContent(string $content);
+    public function addStyleContent(string $content);
 
     public function addScript(string $url);
 

@@ -12,12 +12,12 @@ class ResourceManager implements ResourceManagerInterface
     protected $data = array('layout' => array(), 'content' => array());
     protected $mode = 'content';
 
-    public function addCss(string $url)
+    public function addStyle(string $url)
     {
         $this->append((new Style())->setSrc($url));
     }
 
-    public function addCssContent(string $content)
+    public function addStyleContent(string $content)
     {
         $this->append((new Style())->setContent($content));
     }
