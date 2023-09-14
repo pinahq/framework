@@ -4,7 +4,6 @@ namespace Pina\Data;
 
 use Pina\App;
 
-use Pina\Container\NotFoundException;
 use function array_filter;
 use function implode;
 
@@ -26,33 +25,26 @@ class Field
     //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
     protected $isMultiple = false;
 
-    /**
-     * Создает экземпляр поля
-     * @param string $key
-     * @param string $title
-     * @param mixed $type
-     * @param boolean $isMandatory @deprecated
-     * @param mixed $default @deprecated
-     * @throws NotFoundException
-     * @return \static
-     */
-    public static function make($key, $title, $type)
+    public function __construct(string $key, string $title, $type)
     {
-        $field = new static;
-        $field->key = $key;
-        $field->title = $title;
-        $field->type = $type;
-        $field->isNullable = App::type($type)->isNullable();
-        return $field;
+        $this->key = $key;
+        $this->title = $title;
+        $this->type = $type;
+        $this->isNullable = App::type($type)->isNullable();
     }
 
     /**
      * Получает ключ поля
      * @return string
      */
-    public function getKey()
+    public function getName()
     {
         return $this->alias ?? $this->key;
+    }
+
+    public function getSourceKey()
+    {
+        return $this->key;
     }
 
     public function setAlias(string $alias)
@@ -137,6 +129,11 @@ class Field
     public function isHidden()
     {
         return $this->isHidden;
+    }
+
+    public function match(string $field)
+    {
+        return $this->getName() == $field;
     }
 
     public function setDescription($description)

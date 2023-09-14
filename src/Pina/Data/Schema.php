@@ -118,7 +118,7 @@ class Schema implements IteratorAggregate
             $type = StringType::class;
         }
         if (is_string($field)) {
-            $f = Field::make($field, $title, $type);
+            $f = new Field($field, $title, $type);
             $this->fields[] = $f;
             return $f;
         }
@@ -243,7 +243,7 @@ class Schema implements IteratorAggregate
     public function forgetField(string $key)
     {
         foreach ($this->fields as $k => $field) {
-            if ($field->getKey() == $key) {
+            if ($field->getName() == $key) {
                 unset($this->fields[$k]);
             }
         }
@@ -264,7 +264,7 @@ class Schema implements IteratorAggregate
     public function forgetFields(array $keys)
     {
         foreach ($this->fields as $k => $field) {
-            if (in_array($field->getKey(), $keys)) {
+            if (in_array($field->getName(), $keys)) {
                 unset($this->fields[$k]);
             }
         }
@@ -353,7 +353,7 @@ class Schema implements IteratorAggregate
     {
         $keys = array();
         foreach ($this->fields as $field) {
-            $keys[] = $field->getKey();
+            $keys[] = $field->getName();
         }
         foreach ($this->getInnerSchemas() as $group) {
             $keys = array_merge($keys, $group->getFieldKeys());
@@ -636,7 +636,7 @@ class Schema implements IteratorAggregate
             if ($field->isHidden()) {
                 continue;
             }
-            $key = $field->getKey();
+            $key = $field->getName();
             $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());
             $formatted[$key] = $type->format($value);
@@ -670,7 +670,7 @@ class Schema implements IteratorAggregate
             if ($field->isHidden()) {
                 continue;
             }
-            $key = $field->getKey();
+            $key = $field->getName();
             $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());
             $type->setContext($line);
@@ -700,7 +700,7 @@ class Schema implements IteratorAggregate
             if ($field->isHidden()) {
                 continue;
             }
-            $key = $field->getKey();
+            $key = $field->getName();
             $newLine[$key] = isset($line[$key]) ? $line[$key] : '';
         }
         return $newLine;
@@ -720,7 +720,7 @@ class Schema implements IteratorAggregate
             if ($field->isHidden()) {
                 continue;
             }
-            $key = $field->getKey();
+            $key = $field->getName();
             $newLine[] = isset($line[$key]) ? $line[$key] : '';
         }
         return $newLine;
@@ -794,7 +794,7 @@ class Schema implements IteratorAggregate
         $schema = new Schema();
         foreach ($fieldKeys as $fieldKey) {
             foreach ($this->getIterator() as $field) {
-                if ($field->getKey() == $fieldKey) {
+                if ($field->getName() == $fieldKey) {
                     $schema->add(clone $field);
                 }
             }
@@ -805,7 +805,7 @@ class Schema implements IteratorAggregate
     public function has(string $fieldKey)
     {
         foreach ($this->getIterator() as $field) {
-            if ($field->getKey() == $fieldKey) {
+            if ($field->getName() == $fieldKey) {
                 return true;
             }
         }
@@ -840,7 +840,7 @@ class Schema implements IteratorAggregate
                 continue;
             }
 
-            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $path = str_replace(['[', ']'], ['.', ''], $field->getName());
             $value = Arr::get($data, $path, null);
 
             try {
@@ -850,7 +850,7 @@ class Schema implements IteratorAggregate
                     $value = App::type($field->getType())->setContext($data)->normalize($value, $field->isMandatory());
                 }
             } catch (ValidateException $e) {
-                $errors[] = [$e->getMessage(), $field->getKey()];
+                $errors[] = [$e->getMessage(), $field->getName()];
             }
 
             if ($path) {
@@ -890,7 +890,7 @@ class Schema implements IteratorAggregate
             if ($field->isStatic()) {
                 continue;
             }
-            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $path = str_replace(['[', ']'], ['.', ''], $field->getName());
             $value = Arr::get($data, $path, null);
             if (is_null($value)) {
                 Arr::set($data, $path, App::type($field->getType())->getData($id));
@@ -910,7 +910,7 @@ class Schema implements IteratorAggregate
             if ($field->isStatic()) {
                 continue;
             }
-            $path = str_replace(['[', ']'], ['.', ''], $field->getKey());
+            $path = str_replace(['[', ']'], ['.', ''], $field->getName());
             $value = Arr::get($data, $path, null);
 
             App::type($field->getType())->setData($id, $value);
@@ -926,7 +926,7 @@ class Schema implements IteratorAggregate
     {
         foreach ($this->getIterator() as $field) {
             /** @var Field $field */
-            $key = $field->getKey();
+            $key = $field->getName();
             if (isset($fields[$key])) {
                 continue;
             }

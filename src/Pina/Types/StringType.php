@@ -31,7 +31,7 @@ class StringType implements TypeInterface
             $value = $this->draw($value);
         }
 
-        $input->setName($field->getKey());
+        $input->setName($field->getName());
         $input->setTitle($field->getTitle());
         $input->setValue($value);
         $input->setDescription($field->getDescription());

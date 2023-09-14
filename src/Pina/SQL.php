@@ -153,7 +153,7 @@ class SQL
             if ($tableSchema->has($field)) {
                 $selected->select($field);
             } else {
-                $f = Field::make($field, $title, $fieldType);
+                $f = new Field($field, $title, $fieldType);
                 $f->setAlias($alias);
                 if ($selecType == self::SQL_SELECT_CONDITION) {
                     $f->setStatic();
@@ -186,20 +186,21 @@ class SQL
      * @param string $needleField
      * @return $this|null
      */
-    public function resolveFieldTable(string $needleField)
+    public function resolveFieldTable(Field $field)
     {
         foreach ($this->select as $s) {
-            $field = $s[1];
-            $alias = $s[2] ?? $field;
+            $alias = $s[2] ?? $s[1];
 
-            if ($alias == $needleField) {
+            if ($field->match($alias)) {
                 return $this;
             }
 
-            if ($field == '*') {
+            if ($s[1] == '*') {
                 $keys = $this->getSchema()->getFieldKeys();
-                if (in_array($needleField, $keys)) {
-                    return $this;
+                foreach ($keys as $key) {
+                    if ($field->match($key)) {
+                        return $this;
+                    }
                 }
             }
         }
@@ -209,7 +210,7 @@ class SQL
             list($type, $table) = $line;
 
             /** @var SQL $table */
-            $r = $table->resolveFieldTable($needleField);
+            $r = $table->resolveFieldTable($field);
             if (!is_null($r)) {
                 return $r;
             }

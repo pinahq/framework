@@ -126,7 +126,7 @@ class DelegatedCollectionEndpoint extends Endpoint
 
             $variants = App::type($type)->getVariants();
             foreach ($variants as $variant) {
-                $menu->add(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getKey() => $variant['id']]))));
+                $menu->add(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']]))));
             }
             break;
         }
@@ -273,7 +273,7 @@ class DelegatedCollectionEndpoint extends Endpoint
         $schema = $this->collection->getFilterSchema()->setNullable()->setMandatory(false);
         $tabSchema = $this->getTabSchema();
         foreach ($tabSchema as $tabField) {
-            $schema->forgetField($tabField->getKey());
+            $schema->forgetField($tabField->getName());
             $schema->addField($tabField)->setHidden()->setNullable()->setMandatory(false);
         }
         $normalized = $schema->normalize($this->query()->all());

@@ -27,7 +27,7 @@ class FieldSet
     public function select(string $fieldKey)
     {
         foreach ($this->schema->getIterator() as $field) {
-            if ($field->getKey() == $fieldKey) {
+            if ($field->getName() == $fieldKey) {
                 $this->fields[] = $field;
             }
         }
@@ -38,10 +38,10 @@ class FieldSet
         $this->schema->pushDataProcessor(function ($item) use ($callable, $fieldKey) {
             $data = [];
             foreach ($this->fields as $f) {
-                if (!isset($item[$f->getKey()])) {
+                if (!isset($item[$f->getName()])) {
                     continue;
                 }
-                $data[] = $item[$f->getKey()];
+                $data[] = $item[$f->getName()];
             }
             $item[$fieldKey] = $callable($data);
             return $item;
@@ -52,7 +52,7 @@ class FieldSet
     public function join($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
     {
         foreach ($this->fields as $f) {
-            $this->schema->forgetField($f->getKey());
+            $this->schema->forgetField($f->getName());
         }
         return $this->calc($callable, $fieldKey, $fieldTitle, $fieldType);
     }
@@ -98,7 +98,7 @@ class FieldSet
 
     public function setAlias($key, $alias) {
         foreach ($this->fields as $f) {
-            if ($f->getKey() == $key) {
+            if ($f->getName() == $key) {
                 $f->setAlias($alias);
             }
         }
@@ -107,7 +107,7 @@ class FieldSet
 
     public function setTitle($key, $title) {
         foreach ($this->fields as $f) {
-            if ($f->getKey() == $key) {
+            if ($f->getName() == $key) {
                 $f->setTitle($title);
             }
         }
@@ -119,7 +119,7 @@ class FieldSet
         $schema = new Schema();
         $keys = [];
         foreach ($this->fields as $f) {
-            $keys[] = $f->getKey();
+            $keys[] = $f->getName();
             $schema->add(clone $f);
         }
 

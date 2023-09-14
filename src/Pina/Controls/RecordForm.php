@@ -89,7 +89,7 @@ class RecordForm extends HandledForm
     protected function makeInput(Field $field, array $data)
     {
         $type = $field->getType();
-        $name = $field->getKey();
+        $name = $field->getName();
         $value = isset($data[$name]) ? $data[$name] : null;
         return App::type($type)->setContext($data)->makeControl($field, $value);
     }

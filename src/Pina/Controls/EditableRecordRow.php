@@ -30,7 +30,7 @@ class EditableRecordRow extends RecordRow
                 continue;
             }
 
-            $name = $field->getKey();
+            $name = $field->getName();
             if ($field->isStatic()) {
                 $content .= Html::tag('td', $html[$name] ?? '');
             } else {

@@ -32,7 +32,7 @@ class EditableTableView extends TableView
                 $checkbox->setId($id);
                 $checkbox->setName('checkbox-all');
                 $checkbox->setValue('Y');
-                $this->generateCheckAll($id, $field->getKey());
+                $this->generateCheckAll($id, $field->getName());
                 $cell->append($checkbox);
             }
         }

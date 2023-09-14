@@ -503,7 +503,7 @@ class TableDataGateway extends SQL
         $schema = $this->getSchema();
         foreach ($schema as $field) {
             if (!$field->isStatic()) {
-                $this->select($field->getKey());
+                $this->select($field->getName());
             }
         }
         return $this;
@@ -712,22 +712,22 @@ class TableDataGateway extends SQL
 
             foreach ($schema->getIterator() as $field) {
                 //ищем совпадающее поле в схеме
-                if ($field->getKey() != $filter) {
+                if (!$field->match($filter)) {
                     continue;
                 }
 
                 //пытаемся выявить таблицу на основе выбранных для текущего запроса полей
-                $table = $this->resolveFieldTable($field->getKey());
+                $table = $this->resolveFieldTable($field);
                 if ($table) {
                     /** @var TypeInterface $type */
                     $type = App::type($field->getType());
-                    $type->filter($table, $field->getKey(), $value);
+                    $type->filter($table, $field->getSourceKey(), $value);
                     continue;
                 }
 
                 /** @var TypeInterface $type */
                 $type = App::type($field->getType());
-                $type->filter($this, $field->getKey(), $value);
+                $type->filter($this, $field->getSourceKey(), $value);
             }
         }
         return $this;

@@ -24,7 +24,7 @@ class CheckedEnabledType extends EnabledType
             );
 
 
-        $control->setName($field->getKey());
+        $control->setName($field->getName());
         $control->setTitle($field->getTitle());
 
         return $control;

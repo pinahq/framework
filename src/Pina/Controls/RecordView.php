@@ -73,7 +73,7 @@ class RecordView extends Control
     protected function makeInput(Field $field, array $data)
     {
         $title = $field->getTitle();
-        $key = $field->getKey();
+        $key = $field->getName();
         $value = $data[$key];
         return $this->makeFormStatic()
             ->setName($key)
