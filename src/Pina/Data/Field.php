@@ -33,6 +33,12 @@ class Field
         $this->isNullable = App::type($type)->isNullable();
     }
 
+    public static function make(string $key, string $title, $type)
+    {
+        return new Field($key, $title, $type);
+    }
+
+
     /**
      * Получает ключ поля
      * @return string
