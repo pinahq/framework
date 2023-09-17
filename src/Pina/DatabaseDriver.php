@@ -20,7 +20,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         $config = Config::load('db');
 
         $this->conn = mysqli_connect(
-            "p:" . $config['host'], $config['user'], $config['pass'], $config['base'], $config['port']
+            $config['host'], $config['user'], $config['pass'], $config['base'], $config['port']
         );
 
         if (empty($this->conn)) {
