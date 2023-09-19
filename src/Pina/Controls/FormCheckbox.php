@@ -9,9 +9,10 @@ class FormCheckbox extends FormInput
     protected $type = 'checkbox';
     protected $checkedValue = 'Y';
 
-    public function setOptionValue(string $value)
+    public function setOptionValue(string $value): FormCheckbox
     {
         $this->checkedValue = $value;
+        return $this;
     }
 
     protected function drawInner()
