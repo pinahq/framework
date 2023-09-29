@@ -37,16 +37,18 @@ while ($cmd = array_shift($argv)) {
 
             list($msec, $sec) = explode(' ', microtime());
             $totalTime = (float)$msec + (float)$sec - $startTime;
+            $memory = floor(memory_get_peak_usage() / 1000000);
 
             $context = [
                 'cmd' => $cmd,
                 'input' => $input,
                 'output' => $output,
                 'time' => $totalTime,
+                'memory_peak' => $memory.'M',
             ];
             Log::info('command', $command->__toString() . ": " . $output, $context);
             echo $output . "\n";
-            echo $command->__toString() . ' ' . round($totalTime, 4) . 's done.' . "\n";
+            echo $command->__toString() . ' ' . round($totalTime, 4) . 's '.$memory.'M done.' . "\n";
         } catch (Exception $e) {
             Log::error('system', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
             echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";

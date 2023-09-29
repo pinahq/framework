@@ -16,11 +16,11 @@ class CheckedEnabledType extends EnabledType
     public function makeControl(Field $field, $value): FormControl
     {
         $control = $field->isStatic()
-            ? $this->makeStatic()->setValue($value)
+            ? $this->makeStatic()->setValue($this->draw($value))
             : (
             $field->isHidden()
                 ? $this->makeHidden()->setValue($value)
-                : $this->makeCheckbox()->setValue('Y')->setChecked($value == 'Y')
+                : $this->makeCheckbox()->setValue($value)
             );
 
 
