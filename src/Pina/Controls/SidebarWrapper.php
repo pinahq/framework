@@ -8,14 +8,20 @@ class SidebarWrapper extends Control
 {
 
     /**
-     * @var Control
+     * @var Control[]
      */
-    protected $sidebar;
+    protected $sidebar = [];
     protected $width = 8;
 
     public function setSidebar(Control $sidebar)
     {
-        $this->sidebar = $sidebar;
+        $this->sidebar = [];
+        return $this->addToSidebar($sidebar);
+    }
+
+    public function addToSidebar(Control $control)
+    {
+        $this->sidebar[] = $control;
         return $this;
     }
 
@@ -41,7 +47,7 @@ class SidebarWrapper extends Control
         if (empty($this->sidebar)) {
             return '';
         }
-        return Html::tag('div', $this->sidebar->drawWithWrappers(), ['class' => 'col-lg-' . (12 - $this->width)]);
+        return Html::tag('div', implode('', $this->sidebar), ['class' => 'col-lg-' . (12 - $this->width)]);
     }
 
 }

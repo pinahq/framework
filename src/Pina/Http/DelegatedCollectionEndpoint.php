@@ -91,11 +91,17 @@ class DelegatedCollectionEndpoint extends Endpoint
 
         $this->composer->index($this->location);
 
+        $sidebarWrapper = $this->makeSidebarWrapper();
+        $sidebarWrapper->addToSidebar($this->makeFilterForm());
+        if (!$this->collection->getCreationSchema()->isEmpty()) {
+            $sidebarWrapper->addToSidebar($this->makeCreateButton());
+        }
+
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging()))
             ->after($this->makeIndexButtons())
             ->before($this->makeTabs())
-            ->wrap($this->makeSidebarWrapper()->setSidebar($this->makeFilterForm()));
+            ->wrap($sidebarWrapper);
     }
 
     protected function getTabSchema(): Schema
