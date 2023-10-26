@@ -140,9 +140,23 @@ class Structure
      * @param Structure $existedStructure
      * @return string
      */
-    public function makeAlterTableForeignKeys($table, $existedStructure)
+    public function makeAlterTableDropForeignKeys($table, $existedStructure)
     {
-        $conditions = $this->makeIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
+        $conditions = $this->makeDropIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
+        if (empty($conditions)) {
+            return '';
+        }
+        return 'ALTER TABLE `' . $table . '` ' . implode(', ', $conditions);
+    }
+
+    /**
+     * @param string $table
+     * @param Structure $existedStructure
+     * @return string
+     */
+    public function makeAlterTableAddForeignKeys($table, $existedStructure)
+    {
+        $conditions = $this->makeAddIndexPath($existedStructure->getforeignKeys(), $this->foreignKeys);
         if (empty($conditions)) {
             return '';
         }
@@ -241,12 +255,38 @@ class Structure
     public function makeIndexPath($from, $to)
     {
         $conditions = array();
+        $conditions = array_merge($conditions, $this->makeDropIndexPath($from, $to));
+        $conditions = array_merge($conditions, $this->makeAddIndexPath($from, $to));
+        return $conditions;
+    }
+
+    /**
+     * @param StructureItemInterface[] $from
+     * @param StructureItemInterface[] $to
+     * @return array
+     */
+    public function makeDropIndexPath($from, $to)
+    {
+        $conditions = array();
         $gatewayStrings = array_map(array($this, 'callMake'), $to);
         $existedStrings = array_map(array($this, 'callMake'), $from);
         $toDelete = array_diff($existedStrings, $gatewayStrings);
         foreach ($toDelete as $indexKey => $t) {
             $conditions[] = $from[$indexKey]->makeDrop($indexKey);
         }
+        return $conditions;
+    }
+
+    /**
+     * @param StructureItemInterface[] $from
+     * @param StructureItemInterface[] $to
+     * @return array
+     */
+    public function makeAddIndexPath($from, $to)
+    {
+        $conditions = array();
+        $gatewayStrings = array_map(array($this, 'callMake'), $to);
+        $existedStrings = array_map(array($this, 'callMake'), $from);
         $toCreate = array_diff($gatewayStrings, $existedStrings);
         foreach ($toCreate as $indexKey => $t) {
             $conditions[] = $to[$indexKey]->makeAdd();

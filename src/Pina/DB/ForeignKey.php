@@ -15,10 +15,15 @@ class ForeignKey implements StructureItemInterface
     {
         $this->columns = $columns;
     }
-    
+
     public function getColumns()
     {
         return $this->columns;
+    }
+
+    public function hasField($field)
+    {
+        return in_array($field, $this->columns);
     }
 
     public function references($table, $keys)
