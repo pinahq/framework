@@ -107,7 +107,7 @@ class Schema implements IteratorAggregate
      * Добавляет в схему поле
      * @param mixed $field
      * @param string $title
-     * @param string $type
+     * @param mixed $type
      * @throws NotFoundException
      * @return Field
      */
