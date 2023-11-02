@@ -20,7 +20,12 @@ class Script extends StaticResource
 
         $src = $this->isExternalUrl() ? $this->src : $this->makeLocalUrl();
 
-        return Html::tag('script', '', ['src' => $src, 'type' => 'text/javascript']);
+        return Html::tag('script', '', ['src' => $src, 'type' => $this->getTagType()]);
+    }
+
+    protected function getTagType()
+    {
+        return 'text/javascript';
     }
 
 }

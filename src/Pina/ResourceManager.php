@@ -2,6 +2,7 @@
 
 namespace Pina;
 
+use Pina\StaticResource\ModuleScript;
 use Pina\StaticResource\Script;
 use Pina\StaticResource\StaticResource;
 use Pina\StaticResource\Style;
@@ -25,6 +26,11 @@ class ResourceManager implements ResourceManagerInterface
     public function addScript(string $url)
     {
         $this->append((new Script())->setSrc($url));
+    }
+
+    public function addModuleScript(string $url)
+    {
+        $this->append((new ModuleScript())->setSrc($url));
     }
 
     public function addScriptContent(string $content)
