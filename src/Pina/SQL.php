@@ -1302,9 +1302,9 @@ class SQL
     /**
      * Собирает, выполняет и возвращает результат запроса с COUNT заданного поля
      * @param string $field
-     * @return string
+     * @return int
      */
-    public function count($field = false)
+    public function count($field = false): int
     {
         if ($this->from == '') {
             return '';
@@ -1320,7 +1320,7 @@ class SQL
 
         $sql .= $this->makeGroupBy();
 
-        return $this->db->one($sql);
+        return intval($this->db->one($sql));
     }
 
     /**
