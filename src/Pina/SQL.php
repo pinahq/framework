@@ -1207,7 +1207,10 @@ class SQL
             $this->limit(1);
         }
 
-        return $this->db->one($this->selectIfNotSelected($name)->make());
+        $this->selectIfNotSelected($name);
+        $this->forgetAllSelectedExcept([$name]);
+
+        return $this->db->one($this->make());
     }
 
     /**
