@@ -1220,49 +1220,32 @@ class SQL
      */
     public function column($name, $key = null)
     {
-        $oldSelect = $this->select;
-
-        $nameAliasLine = $this->getSelectItemByAlias($name);
-        $keyAliasLine = null;
+        $this->selectIfNotSelected($name);
         if ($key) {
-            $keyAliasLine = $this->getSelectItemByAlias($key);
+            $this->selectIfNotSelected($key);
         }
-
-        $this->select = array();
-        if ($nameAliasLine) {
-            $this->select[] = $nameAliasLine;
-        } else {
-            $this->select($name);
-        }
-        if ($key) {
-            if ($keyAliasLine) {
-                $this->select[] = $keyAliasLine;
-            } else {
-                $this->select($key);
-            }
-        }
+        $this->forgetAllSelectedExcept([$name, $key]);
         $sql = $this->make();
         $r = $key ? array_column($this->db->table($sql), $name, $key) : $this->db->col($sql);
-        $this->select = $oldSelect;
         return $r;
     }
 
-    /**
-     * @param string $needle
-     * @return array
-     */
-    protected function getSelectItemByAlias($needle)
+    public function forgetAllSelectedExcept(array $fields)
     {
         foreach ($this->select as $k => $v) {
             $type = array_shift($v);
             $field = array_shift($v);
             $alias = array_shift($v);
-            if ($alias && $alias == $needle) {
-                return $this->select[$k];
+
+            $isMatch = $alias && in_array($alias, $fields) || in_array($field, $fields);
+            if (!$isMatch) {
+                unset($this->select[$k]);
             }
         }
 
-        return null;
+        foreach ($this->joins as $k => $v) {
+            $this->joins[$k][1]->forgetAllSelectedExcept($fields);
+        }
     }
 
     /**

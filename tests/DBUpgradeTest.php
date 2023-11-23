@@ -77,11 +77,12 @@ SQL;
         $structure->setIndexes($gatewayIndexes);
         $structure->setForeignKeys($gatewayForeignKeys);
         $path = $structure->makeAlterTable('tbl', $existedStructure);
-        $pathFK = $structure->makeAlterTableForeignKeys('tbl', $existedStructure);
+        $pathDropFK = $structure->makeAlterTableDropForeignKeys('tbl', $existedStructure);
+        $pathAddFK = $structure->makeAlterTableAddForeignKeys('tbl', $existedStructure);
 
         $this->assertContains('DROP COLUMN `id`', $path);
-        $this->assertContains('DROP FOREIGN KEY `child_ibfk_1`', $pathFK);
-        $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $pathFK);
+        $this->assertContains('DROP FOREIGN KEY `child_ibfk_1`', $pathDropFK);
+        $this->assertContains('ADD CONSTRAINT FOREIGN KEY (`parent_id2`) REFERENCES `parent2` (`id`)', $pathAddFK);
         $this->assertContains('DROP PRIMARY KEY', $path);
         $this->assertContains('ADD PRIMARY KEY (`id2`)', $path);
         $this->assertContains('ADD KEY (`parent_id3`)', $path);
@@ -153,11 +154,14 @@ SQL;
         $this->assertContains($c2 = "ADD COLUMN `media_id` INT(10) NOT NULL DEFAULT '0'", $path);
         $this->assertContains($c3 = "ADD KEY (`media_id`)", $path);
         
-        $pathFK = $structure->makeAlterTableForeignKeys('resource', $existedStructure);
-        $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $pathFK);
+        $pathDropFK = $structure->makeAlterTableDropForeignKeys('resource', $existedStructure);
+        $pathAddFK = $structure->makeAlterTableAddForeignKeys('resource', $existedStructure);
+
+        $this->assertContains($c4 = "ADD CONSTRAINT FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)", $pathAddFK);
 
         $this->assertEquals('ALTER TABLE `resource` ' . $c1 . ', ' . $c2 . ', ' . $c3, $path);
-        $this->assertEquals('ALTER TABLE `resource` ' . $c4, $pathFK);
+        $this->assertEquals('', $pathDropFK);
+        $this->assertEquals('ALTER TABLE `resource` ' . $c4, $pathAddFK);
 
         $newTableCondition = <<<SQL
 CREATE TABLE IF NOT EXISTS `resource` (
