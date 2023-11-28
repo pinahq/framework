@@ -207,7 +207,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $field->setMandatory($mandatory);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->setMandatory($mandatory);
         }
         return $this;
@@ -218,7 +218,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $field->setNullable($nullable, $default);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->setNullable($nullable, $default);
         }
         return $this;
@@ -229,7 +229,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $field->setStatic($static);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->setStatic($static);
         }
         return $this;
@@ -249,7 +249,7 @@ class Schema implements IteratorAggregate
         }
         $this->fields = array_values($this->fields);
 
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->forgetField($key);
         }
 
@@ -270,7 +270,7 @@ class Schema implements IteratorAggregate
         }
         $this->fields = array_values($this->fields);
 
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->forgetFields($keys);
         }
 
@@ -290,7 +290,7 @@ class Schema implements IteratorAggregate
         }
         $this->fields = array_values($this->fields);
 
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->forgetStatic();
         }
 
@@ -307,7 +307,7 @@ class Schema implements IteratorAggregate
 
         $this->fields = array_values($this->fields);
 
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $group->forgetNotFiltrable();
         }
 
@@ -317,7 +317,7 @@ class Schema implements IteratorAggregate
     public function getVolume()
     {
         $count = count($this->fields);
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $count += $group->getVolume();
         }
         return $count;
@@ -336,7 +336,7 @@ class Schema implements IteratorAggregate
             }
         }
 
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             if ($group->isEditable()) {
                 return true;
             }
@@ -355,7 +355,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $keys[] = $field->getName();
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $keys = array_merge($keys, $group->getFieldKeys());
         }
         return $keys;
@@ -372,7 +372,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $titles[] = $field->getTitle();
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $titles = array_merge($titles, $group->getFieldTitles());
         }
         return $titles;
@@ -388,7 +388,7 @@ class Schema implements IteratorAggregate
         foreach ($this->fields as $field) {
             $types[] = $field->getType();
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $types = array_merge($types, $group->getFieldTypes());
         }
         return $types;
@@ -604,7 +604,7 @@ class Schema implements IteratorAggregate
         foreach ($this->dataProcessors as $p) {
             $line = $p($line);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $line = $group->processLineAsData($line);
         }
         return $line;
@@ -1012,7 +1012,7 @@ class Schema implements IteratorAggregate
     public function getUniqueKeys()
     {
         $keys = $this->uniqueKeys;
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $keys = array_merge($keys, $group->getUniqueKeys());
         }
         return $keys;
@@ -1043,7 +1043,7 @@ class Schema implements IteratorAggregate
         foreach ($this->metaProcessors as $f) {
             $processed = $f($processed, $raw);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $processed = $group->callMetaProcessors($processed, $raw);
         }
         return $processed;
@@ -1054,7 +1054,7 @@ class Schema implements IteratorAggregate
         foreach ($this->textProcessors as $f) {
             $processed = $f($processed, $raw);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $processed = $group->callTextProcessors($processed, $raw);
         }
         return $processed;
@@ -1068,7 +1068,7 @@ class Schema implements IteratorAggregate
         foreach ($this->htmlProcessors as $f) {
             $processed = $f($processed, $raw);
         }
-        foreach ($this->getInnerSchemas() as $group) {
+        foreach ($this->groups as $group) {
             $processed = $group->callHtmlProcessors($processed, $raw);
         }
         return $processed;
