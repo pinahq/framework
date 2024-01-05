@@ -316,7 +316,7 @@ class DelegatedCollectionEndpoint extends Endpoint
     protected function makePagingControl($paging)
     {
         //значимые фильтры, если расширить до всех параметров, то все будут попадать в пагинацию
-        $filters = Arr::only($this->query()->all(), $this->collection->getFilterSchema()->getFieldKeys());
+        $filters = Arr::only($this->query()->all(), $this->collection->getFilterSchema($this->context()->all())->getFieldKeys());
 
         /** @var PagingControl $pagingControl */
         $pagingControl = App::make(PagingControl::class);
