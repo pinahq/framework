@@ -96,9 +96,8 @@ abstract class DataCollection
         $schema = $this->getSchema();
 
         if ($context) {
-            foreach ($context as $field => $value) {
-                $query->whereBy($field, $value);
-            }
+            $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
+            $query->whereFilters($context, $contextSchema);
         }
 
         $primaryKey = $schema->getPrimaryKey();
