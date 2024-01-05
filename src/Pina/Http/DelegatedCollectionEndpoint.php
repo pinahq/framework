@@ -262,9 +262,6 @@ class DelegatedCollectionEndpoint extends Endpoint
         /** @var FilterForm $form */
         $form = App::make(FilterForm::class);
         $record = $this->getFilterRecord();
-        foreach ($this->context()->all() as $key => $value) {
-            $record->getSchema()->forgetField($key);
-        }
         $form->load($record);
         $form->getButtonRow()->append($this->makeResetButton());
         return $form;
@@ -276,7 +273,7 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function getFilterRecord(): DataRecord
     {
-        $schema = $this->collection->getFilterSchema()->setNullable()->setMandatory(false);
+        $schema = $this->collection->getFilterSchema($this->context()->all())->setNullable()->setMandatory(false);
         $tabSchema = $this->getTabSchema();
         foreach ($tabSchema as $tabField) {
             $schema->forgetField($tabField->getName());

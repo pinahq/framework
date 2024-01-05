@@ -55,9 +55,13 @@ abstract class DataCollection
      * Схема фильтров коллекции
      * @return Schema
      */
-    public function getFilterSchema(): Schema
+    public function getFilterSchema($context = []): Schema
     {
-        return $this->getSchema()->forgetNotFiltrable()->setStatic(false)->setNullable()->setMandatory(false);
+        $schema = $this->getSchema()->forgetNotFiltrable()->setStatic(false)->setNullable()->setMandatory(false);
+        foreach ($context as $k => $v) {
+            $schema->forgetField($k);
+        }
+        return $schema;
     }
 
     /**
@@ -310,7 +314,7 @@ abstract class DataCollection
      */
     protected function makeListQuery(array $filters, array $context): TableDataGateway
     {
-        $schema = $this->getFilterSchema();
+        $schema = $this->getFilterSchema($context);
         $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
         $schema->merge($contextSchema);
         return $this->makeQuery()->whereFilters(array_merge($filters, $context), $schema);
