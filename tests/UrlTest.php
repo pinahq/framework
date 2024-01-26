@@ -23,6 +23,16 @@ class UrlTest extends TestCase
             'http://test.local/test?category_id=5&ref=my',
             $location->link(':title?category_id=:id&ref=:ref', ['id' => 5, 'title' => 'test', 'ref' => 'my'])
         );
+        $location = new Location('my-resource/');
+        $this->assertEquals(
+            'http://test.local/my-resource/5',
+            $location->link('@/:id', ['id' => 5])
+        );
+        $location = new Location('/my-resource/');
+        $this->assertEquals(
+            'http://test.local/my-resource/5',
+            $location->link('@/:id', ['id' => 5])
+        );
     }
 
     /**

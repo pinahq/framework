@@ -199,7 +199,7 @@ class Url
             $level++;
         }
         if ($level > 0) {
-            $parentResource = explode('/', $parent);
+            $parentResource = explode('/', rtrim($parent, '/'));
             for ($i = 0; $i < $level - 1; $i++) {
                 array_pop($parentResource);
             }
