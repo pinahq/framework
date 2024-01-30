@@ -47,14 +47,18 @@ class Access
             $groups,
         );
 
+        $found = false;
         foreach (self::$data as $k => $existed) {
             if ($existed[self::ACCESS_FIELD_PREG] == $line[self::ACCESS_FIELD_PREG]
                 && $existed[self::ACCESS_FIELD_PRIORITY] == $line[self::ACCESS_FIELD_PRIORITY]) {
                 self::$data[$k][self::ACCESS_FIELD_GROUPS] = array_merge(self::$data[$k][self::ACCESS_FIELD_GROUPS], $line[self::ACCESS_FIELD_GROUPS]);
+                $found = true;
             }
         }
 
-        self::$data[] = $line;
+        if (!$found) {
+            self::$data[] = $line;
+        }
         self::$sorted = false;
     }
 
@@ -73,7 +77,6 @@ class Access
     public static function isPermitted($resource)
     {
         $resource = Url::trim($resource);
-
         if (!self::$sorted) {
             self::sort();
         }
