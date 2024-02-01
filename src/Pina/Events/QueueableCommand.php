@@ -37,7 +37,7 @@ class QueueableCommand extends Command
         if (!App::container()->has(EventQueueInterface::class)) {
             /** @var Command $cmd */
             $cmd = App::load($this->cmd);
-            return $cmd();
+            return $cmd($data);
         }
 
         /** @var EventQueueInterface $queue */
