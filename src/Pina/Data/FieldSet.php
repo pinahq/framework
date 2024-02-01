@@ -96,6 +96,13 @@ class FieldSet
         return $this;
     }
 
+    public function setMultiple($multiple = true) {
+        foreach ($this->fields as $f) {
+            $f->setMultiple($multiple);
+        }
+        return $this;
+    }
+
     public function setAlias($key, $alias) {
         foreach ($this->fields as $f) {
             if ($f->getName() == $key) {

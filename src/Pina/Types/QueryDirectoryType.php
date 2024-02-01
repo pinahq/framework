@@ -28,7 +28,7 @@ abstract class QueryDirectoryType extends DirectoryType
      */
     public function format($value): string
     {
-        return $this->makeQuery()->whereId($value)->selectTitle()->value('title') ?? '';
+        return implode(', ', $this->makeQuery()->whereId($value)->selectTitle()->column('title'));
     }
 
     /**

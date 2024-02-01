@@ -43,6 +43,10 @@ abstract class DirectoryType implements TypeInterface
                 : $this->makeSelect()->setVariants($variants)->setValue($value)
             );
 
+        if ($field->isMultiple()) {
+            $control->setMultiple(true);
+        }
+
         return $control
             ->setDescription($field->getDescription())
             ->setRequired($field->isMandatory())
