@@ -150,8 +150,8 @@ class Schema implements IteratorAggregate
      */
     public function addTimestamps($createdAtTitle = 'Created', $updatedAtTitle = 'Updated')
     {
-        $this->addCreatedAt($createdAtTitle);
-        $this->addUpdatedAt($updatedAtTitle);
+        $this->addCreatedAt($createdAtTitle)->setWidth(6);
+        $this->addUpdatedAt($updatedAtTitle)->setWidth(6);
     }
 
     /**
