@@ -7,9 +7,11 @@ namespace Pina\Http;
 use Pina\App;
 use Pina\Controls\ActionButton;
 use Pina\Controls\LinkedButton;
+use Pina\Controls\RawHtml;
 use Pina\Controls\RecordForm;
 use Pina\Controls\SidebarWrapper;
 use Pina\Controls\TableView;
+use Pina\Controls\Wrapper;
 use Pina\Data\DataRecord;
 
 use Pina\Data\DataTable;
@@ -56,13 +58,16 @@ class RichEndpoint extends Endpoint
         return App::make(TableView::class)->load($data);
     }
 
-    /**
-     *
-     * @return SidebarWrapper
-     */
     protected function makeSidebarWrapper(): SidebarWrapper
     {
         return App::make(SidebarWrapper::class);
+    }
+
+    protected function makeAlert($text, $style = 'danger')
+    {
+        $alert = new Wrapper(".alert alert-" . $style);
+        $alert->append(new RawHtml($text));
+        return $alert;
     }
 
 }
