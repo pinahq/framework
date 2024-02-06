@@ -16,7 +16,7 @@ class ActionButton extends LinkedButton
         $this->includeScripts($classId);
     }
 
-    public function setHandler($resource, $method, $params)
+    public function setHandler($resource, $method, $params = [])
     {
         $this->setDataAttribute('resource', ltrim($resource, '/'));
         $this->setDataAttribute('method', $method);
