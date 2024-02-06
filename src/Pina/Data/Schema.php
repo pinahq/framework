@@ -278,6 +278,27 @@ class Schema implements IteratorAggregate
     }
 
     /**
+     * Удаляет из схемы все поля с указанными ключам $keys
+     * @param string[] $keys
+     * @return $this
+     */
+    public function forgetAllExcept(array $keys)
+    {
+        foreach ($this->fields as $k => $field) {
+            if (!in_array($field->getName(), $keys)) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->groups as $group) {
+            $group->forgetAllExcept($keys);
+        }
+
+        return $this;
+    }
+
+    /**
      * Удаляет из схемы все статические поля
      * @return $this
      */

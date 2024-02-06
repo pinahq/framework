@@ -7,9 +7,7 @@ use Pina\Arr;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
-use Pina\Controls\LinkedButton;
 use Pina\Controls\PagingControl;
-use Pina\Controls\SidebarWrapper;
 use Pina\Controls\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
@@ -22,7 +20,7 @@ use Pina\Composers\CollectionComposer;
 
 use function Pina\__;
 
-abstract class FixedCollectionEndpoint extends Endpoint
+abstract class FixedCollectionEndpoint extends RichEndpoint
 {
 
     /** @var CollectionComposer  */
@@ -140,15 +138,6 @@ abstract class FixedCollectionEndpoint extends Endpoint
         return $form;
     }
 
-    /**
-     *
-     * @return SidebarWrapper
-     */
-    protected function makeSidebarWrapper()
-    {
-        return App::make(SidebarWrapper::class);
-    }
-
     protected function makeIndexButtons()
     {
         /** @var ButtonRow $buttons */
@@ -163,12 +152,7 @@ abstract class FixedCollectionEndpoint extends Endpoint
     {
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
-        /** @var LinkedButton $buttons */
-        $btn = App::make(LinkedButton::class);
-        $btn->setLink($this->base->link('@.' . $export->getExtension(), $this->query()->all()));
-        $btn->setTitle(__('Скачать'));
-
-        return $btn;
+        return $this->makeLinkedButton(__('Скачать'), $this->base->link('@.' . $export->getExtension(), $this->query()->all()));
     }
 
     /**
