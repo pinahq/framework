@@ -336,15 +336,15 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     /**
      * @return Control
      */
-    protected function makeViewForm(DataRecord $data)
+    protected function makeViewForm(DataRecord $record)
     {
-        return App::make(RecordView::class)->load($data)->after($this->makeViewButtonRow());
+        return App::make(RecordView::class)->load($record)->after($this->makeViewButtonRow($record));
     }
 
     /**
      * @return ButtonRow
      */
-    protected function makeViewButtonRow()
+    protected function makeViewButtonRow(DataRecord $record)
     {
         /** @var ButtonRow $row */
         $row = App::make(ButtonRow::class);
