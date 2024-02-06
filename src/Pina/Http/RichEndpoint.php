@@ -28,12 +28,15 @@ class RichEndpoint extends Endpoint
         return $button;
     }
 
-    protected function makeActionButton($title, $resource, $method, $params = [])
+    protected function makeActionButton($title, $resource, $method, $params = [], $style = ''): ActionButton
     {
         /** @var ActionButton $button */
         $button = App::make(ActionButton::class);
         $button->setTitle($title);
         $button->setHandler($resource, $method, $params);
+        if ($style) {
+            $button->setStyle($style);
+        }
         return $button;
     }
 
