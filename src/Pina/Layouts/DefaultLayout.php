@@ -7,6 +7,7 @@ use Pina\App;
 use Pina\Controls\Control;
 use Pina\Html;
 use Pina\Request;
+use Pina\Controls\Meta;
 
 class DefaultLayout extends Control
 {
@@ -114,12 +115,7 @@ class DefaultLayout extends Control
 
     protected function drawContentMeta()
     {
-        return $this->drawMetaLine(['name' => 'description', 'content' => Request::getPlace('meta_description')])
-            . $this->drawMetaLine(['name' => 'keywords', 'content' => Request::getPlace('meta_keywords')])
-            . $this->drawMetaLine(['property' => 'og:type', 'content' => Request::getPlace('og_type')])
-            . $this->drawMetaLine(['property' => 'og:title', 'content' => Request::getPlace('og_title')])
-            . $this->drawMetaLine(['property' => 'og:description', 'content' => Request::getPlace('og_description')])
-            . $this->drawMetaLine(['property' => 'og:image', 'content' => Request::getPlace('og_image')]);
+        return App::load(Meta::class);
     }
 
     protected function drawBrowserMeta()
