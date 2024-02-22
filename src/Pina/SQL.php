@@ -769,7 +769,7 @@ class SQL
                 $direction = 'asc';
             }
 
-            if (!preg_match('/^[\w_\.]+$/', $orderBy)) {
+            if (!preg_match('/^[`\w_\.]+$/', $orderBy)) {
                 return $this;
             }
 
