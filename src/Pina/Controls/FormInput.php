@@ -101,7 +101,7 @@ class FormInput extends FormControl
 
     protected function drawInner()
     {
-        $r = Html::tag('label', $this->getLabelContent(), ['class' => 'control-label']);
+        $r = $this->title ? Html::tag('label', $this->getLabelContent(), ['class' => 'control-label']) : '';
         $r .= $this->drawControl();
         return $r;
     }

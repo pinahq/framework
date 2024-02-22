@@ -10,12 +10,9 @@ use Pina\Composers\CollectionComposer;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
-use Pina\Controls\LinkedButton;
 use Pina\Controls\Nav;
 use Pina\Controls\PagingControl;
-use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
-use Pina\Controls\SidebarWrapper;
 use Pina\Controls\TableView;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
@@ -38,7 +35,7 @@ use function Pina\__;
  * Предоставляет HTTP-интерфейс для управления коллекцией, которая пробрасывается
  * через поле $collection
  */
-class DelegatedCollectionEndpoint extends Endpoint
+class DelegatedCollectionEndpoint extends RichEndpoint
 {
     /** @var CollectionComposer  */
     protected $composer;
@@ -283,15 +280,6 @@ class DelegatedCollectionEndpoint extends Endpoint
         return new DataRecord($normalized, $schema);
     }
 
-    /**
-     *
-     * @return SidebarWrapper
-     */
-    protected function makeSidebarWrapper()
-    {
-        return App::make(SidebarWrapper::class);
-    }
-
     protected function makeIndexButtons()
     {
         /** @var ButtonRow $buttons */
@@ -310,7 +298,7 @@ class DelegatedCollectionEndpoint extends Endpoint
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
         $link = $this->base->link('@.' . $export->getExtension(), $this->query()->all());
-        return $this->makeButton($link, __('Скачать'));
+        return $this->makeLinkedButton(__('Скачать'), $link);
     }
 
     protected function makePagingControl($paging)
@@ -340,26 +328,23 @@ class DelegatedCollectionEndpoint extends Endpoint
      */
     protected function makeEditForm(DataRecord $data)
     {
-        /** @var RecordForm $form */
-        $form = App::make(RecordForm::class);
-        $form->setMethod('put')->setAction($this->location->link('@'));
+        $form = $this->makeRecordForm($this->location->link('@'), 'put', $data);
         $form->getButtonRow()->append($this->makeCancelButton());
-        $form->load($data);
         return $form;
     }
 
     /**
      * @return Control
      */
-    protected function makeViewForm(DataRecord $data)
+    protected function makeViewForm(DataRecord $record)
     {
-        return App::make(RecordView::class)->load($data)->after($this->makeViewButtonRow());
+        return App::make(RecordView::class)->load($record)->after($this->makeViewButtonRow($record));
     }
 
     /**
      * @return ButtonRow
      */
-    protected function makeViewButtonRow()
+    protected function makeViewButtonRow(DataRecord $record)
     {
         /** @var ButtonRow $row */
         $row = App::make(ButtonRow::class);
@@ -381,7 +366,7 @@ class DelegatedCollectionEndpoint extends Endpoint
             try {
                 $title = App::router()->run($resource, 'title');
                 if ($title) {
-                    $control->append($this->makeResourceButton($title, $resource));
+                    $control->append($this->makeLinkedButton($title, $this->location->link($resource)));
                 }
             } catch (Exception $e) {
 
@@ -390,56 +375,32 @@ class DelegatedCollectionEndpoint extends Endpoint
         return $control;
     }
 
-    protected function makeResourceButton($title, $resource)
-    {
-        /** @var LinkedButton $button */
-        $button = App::make(LinkedButton::class);
-        $button->setTitle($title);
-        $button->setLink($this->location->link($resource));
-        return $button;
-    }
-
     /**
      * @return Control
      */
     protected function makeCreateForm(DataRecord $data)
     {
-        /** @var RecordForm $form */
-        $form = App::make(RecordForm::class);
-        $form->setMethod('post')->setAction($this->base->link('@'));
-        $form->load($data);
-        return $form;
+        return $this->makeRecordForm($this->base->link('@'), 'post', $data);
     }
 
     protected function makeCancelButton()
     {
-        return $this->makeButton($this->location->link('@'), __('Отменить'));
+        return $this->makeLinkedButton(__('Отменить'), $this->location->link('@'));
     }
 
     protected function makeCreateButton()
     {
-        return $this->makeButton($this->base->link('@/create'), __('Добавить'));
+        return $this->makeLinkedButton(__('Добавить'), $this->base->link('@/create'));
     }
 
     protected function makeResetButton()
     {
-        return $this->makeButton($this->base->link('@'), __('Сбросить'));
+        return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
     }
 
     protected function makeEditLinkButton()
     {
-        return $this->makeButton($this->location->link('@', ['display' => 'edit']), __('Редактировать'), 'primary');
-    }
-
-    protected function makeButton($link, $title, $style = '')
-    {
-        $button = App::make(LinkedButton::class);
-        $button->setLink($link);
-        $button->setTitle($title);
-        if ($style) {
-            $button->setStyle($style);
-        }
-        return $button;
+        return $this->makeLinkedButton(__('Редактировать'), $this->location->link('@', ['display' => 'edit']), 'primary');
     }
 
 }

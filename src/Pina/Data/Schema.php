@@ -150,8 +150,8 @@ class Schema implements IteratorAggregate
      */
     public function addTimestamps($createdAtTitle = 'Created', $updatedAtTitle = 'Updated')
     {
-        $this->addCreatedAt($createdAtTitle);
-        $this->addUpdatedAt($updatedAtTitle);
+        $this->addCreatedAt($createdAtTitle)->setWidth(6);
+        $this->addUpdatedAt($updatedAtTitle)->setWidth(6);
     }
 
     /**
@@ -272,6 +272,27 @@ class Schema implements IteratorAggregate
 
         foreach ($this->groups as $group) {
             $group->forgetFields($keys);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Удаляет из схемы все поля с указанными ключам $keys
+     * @param string[] $keys
+     * @return $this
+     */
+    public function forgetAllExcept(array $keys)
+    {
+        foreach ($this->fields as $k => $field) {
+            if (!in_array($field->getName(), $keys)) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->groups as $group) {
+            $group->forgetAllExcept($keys);
         }
 
         return $this;
