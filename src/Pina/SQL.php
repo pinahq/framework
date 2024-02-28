@@ -469,7 +469,7 @@ class SQL
      * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
      * Условие задается как отношение поля к некоторому значению или массиву значений
      * @param string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @param string $op
      * @return $this
      */
@@ -483,7 +483,7 @@ class SQL
      * Добавляет в запрос условие соединения, по которому текущая таблица присоединяется к вышестоящей
      * Условие задается как отношение поля к некоторому значению или массиву значений
      * @param string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @param string $op
      * @return $this
      */
@@ -542,7 +542,7 @@ class SQL
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
      * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция IN
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereBy($field, $needle)
@@ -558,7 +558,7 @@ class SQL
     /**
      * Добавляет в запрос условие выборки "$field больше чем $needle"
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereGreaterThan($field, $needle)
@@ -569,7 +569,7 @@ class SQL
     /**
      * Добавляет в запрос условие выборки "$field больше или равно $needle"
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereGreaterOrEqual($field, $needle)
@@ -580,7 +580,7 @@ class SQL
     /**
      * Добавляет в запрос условие выборки "$field меньше чем $needle"
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereLessThan($field, $needle)
@@ -591,7 +591,7 @@ class SQL
     /**
      * Добавляет в запрос условие выборки "$field меньше или равно $needle"
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereLessOrEqual($field, $needle)
@@ -604,7 +604,7 @@ class SQL
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
      * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция NOT IN
      * @param array|string $field
-     * @param array|string $needle
+     * @param array|string|int|float $needle
      * @return $this
      */
     public function whereNotBy($field, $needle)
@@ -642,8 +642,8 @@ class SQL
      * Добавляет в запрос условие выборки, основанное на конструкции BETWEEN
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
      * @param array|string $field
-     * @param string $start
-     * @param string $end
+     * @param string|int|float $start
+     * @param string|int|float $end
      * @return $this
      */
     public function whereBetween($field, $start, $end)
@@ -656,8 +656,8 @@ class SQL
      * Имя поля может быть как строкой, так и массивом. В случае массива сформируется набор конструкций OR
      * Значение может быть как строкой, так и массивом. В случае массива сформируется конструкция OR
      * @param array|string $field
-     * @param string $start
-     * @param string $end
+     * @param string|int|float $start
+     * @param string|int|float $end
      * @return $this
      */
     public function whereNotBetween($field, $start, $end)
