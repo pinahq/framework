@@ -2,7 +2,6 @@
 
 namespace Pina\Controls;
 
-use Pina\App;
 use Pina\CSRF;
 
 class ActionButton extends LinkedButton
@@ -11,9 +10,6 @@ class ActionButton extends LinkedButton
     {
         $this->addClass('pina-action');
         $this->setLink('#');
-        $classId = uniqid('btn');
-        $this->addClass($classId);
-        $this->includeScripts($classId);
     }
 
     public function setHandler($resource, $method, $params = [])
@@ -29,30 +25,10 @@ class ActionButton extends LinkedButton
         return $this;
     }
 
-
     public function setSuccess($success)
     {
         $this->setDataAttribute('success', $success);
         return $this;
-    }
-
-    protected function includeScripts($classId)
-    {
-        App::assets()->addScriptContent($this->makeScript($classId));
-    }
-
-    protected function makeScript($classId)
-    {
-        return <<<HEREDOC
-<script>
-    $(".$classId").on("success", function(event, packet, status, xhr) {
-        if (!PinaRequest.handleRedirect(xhr)) {
-            var target = $(self).attr("data-success") ? $(self).attr("data-success") : document.location.pathname;
-            document.location = target + "?changed=" + Math.random();
-        }
-    });
-    </script>
-HEREDOC;
     }
 
 }
