@@ -318,6 +318,26 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    /**
+     * Удаляет из схемы все скрытые статические поля
+     * @return $this
+     */
+    public function forgetHiddenStatic()
+    {
+        foreach ($this->fields as $k => $field) {
+            if ($field->isStatic() && $field->isHidden()) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->groups as $group) {
+            $group->forgetHiddenStatic();
+        }
+
+        return $this;
+    }
+
     public function forgetNotFiltrable()
     {
         foreach ($this->fields as $k => $field) {

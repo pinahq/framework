@@ -15,11 +15,6 @@ class NumericType extends IntegerType
         return 12;
     }
 
-    public function makeControl(Field $field, $value): FormControl
-    {
-        return parent::makeControl($field, $value)->setType('text');
-    }
-
     public function normalize($value, $isMandatory)
     {
         if (!is_numeric($value)) {

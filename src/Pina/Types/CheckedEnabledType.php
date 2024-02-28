@@ -13,21 +13,21 @@ use Pina\Controls\FormCheckbox;
 class CheckedEnabledType extends EnabledType
 {
 
-    public function makeControl(Field $field, $value): FormControl
+    protected function resolveInput(Field $field): FormControl
     {
-        $control = $field->isStatic()
-            ? $this->makeStatic()->setValue($this->draw($value))
-            : (
-            $field->isHidden()
-                ? $this->makeHidden()->setValue($value)
-                : $this->makeCheckbox()->setValue($value)
-            );
+        if ($field->isStatic() && $field->isHidden()) {
+            return $this->makeNoInput();
+        }
 
+        if ($field->isStatic()) {
+            return $this->makeStatic();
+        }
 
-        $control->setName($field->getName());
-        $control->setTitle($field->getTitle());
+        if ($field->isHidden()) {
+            return $this->makeHidden();
+        }
 
-        return $control;
+        return $this->makeCheckbox();
     }
 
     public function normalize($value, $isMandatory)

@@ -44,7 +44,9 @@ class RecordForm extends HandledForm
         $content = parent::drawInner();
 
         $data = $this->record->getData();
-        foreach ($this->record->getSchema()->getGroupIterator() as $schema) {
+        $groupedSchema = clone $this->record->getSchema();
+        $groupedSchema->forgetHiddenStatic();
+        foreach ($groupedSchema->getGroupIterator() as $schema) {
             if ($schema->isEmpty()) {
                 continue;
             }

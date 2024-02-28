@@ -9,6 +9,7 @@ use Pina\Controls\FormControl;
 use Pina\Controls\FormSelect;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
+use Pina\Controls\NoInput;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
 
@@ -30,28 +31,40 @@ abstract class DirectoryType implements TypeInterface
 
     public function makeControl(Field $field, $value): FormControl
     {
-        $variants = $this->getVariants();
-        if ($this->isPlaceholderNeeded($variants)) {
-            array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
+        $input = $this->resolveInput($field);
+
+        if ($field->isStatic()) {
+            $value = $this->draw($value);
         }
 
-        $control = $field->isStatic()
-            ? $this->makeStatic()->setValue($this->draw($value))
-            : (
-            $field->isHidden()
-                ? $this->makeHidden()->setValue($value)
-                : $this->makeSelect()->setVariants($variants)->setValue($value)
-            );
+        $input->setValue($value);
+        $input->setDescription($field->getDescription());
+        $input->setRequired($field->isMandatory());
+        $input->setName($field->getName());
+        $input->setTitle($field->getTitle());
 
+        return $input;
+    }
+
+    protected function resolveInput(Field $field): FormControl
+    {
+        if ($field->isStatic() && $field->isHidden()) {
+            return $this->makeNoInput();
+        }
+
+        if ($field->isStatic()) {
+            return $this->makeStatic();
+        }
+
+        if ($field->isHidden()) {
+            return $this->makeHidden();
+        }
+
+        $input = $this->makeSelect();
         if ($field->isMultiple()) {
-            $control->setMultiple(true);
+            $input->setMultiple(true);
         }
-
-        return $control
-            ->setDescription($field->getDescription())
-            ->setRequired($field->isMandatory())
-            ->setName($field->getName())
-            ->setTitle($field->getTitle());
+        return $input;
     }
 
     public function draw($value): string
@@ -119,7 +132,14 @@ abstract class DirectoryType implements TypeInterface
      */
     protected function makeSelect()
     {
-        return App::make(FormSelect::class);
+        /** @var FormSelect $control */
+        $control = App::make(FormSelect::class);
+        $variants = $this->getVariants();
+        if ($this->isPlaceholderNeeded($variants)) {
+            array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
+        }
+        $control->setVariants($variants);
+        return $control;
     }
 
     /**
@@ -138,4 +158,8 @@ abstract class DirectoryType implements TypeInterface
         return App::make(HiddenInput::class);
     }
 
+    protected function makeNoInput()
+    {
+        return App::make(NoInput::class);
+    }
 }

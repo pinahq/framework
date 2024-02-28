@@ -27,7 +27,10 @@ class RecordView extends Control
         $data = $this->record->getHtmlData();
 
         $content = '';
-        foreach ($this->record->getSchema()->getGroupIterator() as $schema) {
+
+        $groupedSchema = clone $this->record->getSchema();
+        $groupedSchema->forgetHiddenStatic();
+        foreach ($groupedSchema->getGroupIterator() as $schema) {
             if ($schema->isEmpty()) {
                 continue;
             }

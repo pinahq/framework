@@ -7,6 +7,7 @@ use Pina\Controls\FormControl;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\HiddenInput;
+use Pina\Controls\NoInput;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
 
@@ -23,20 +24,34 @@ class StringType implements TypeInterface
 
     public function makeControl(Field $field, $value): FormControl
     {
-        $input = $field->isStatic()
-            ? $this->makeStatic()
-            : ($field->isHidden() ? $this->makeHidden() : $this->makeInput()->setType('text'));
+        $input = $this->resolveInput($field);
+        $input->setName($field->getName());
+        $input->setTitle($field->getTitle());
+        $input->setDescription($field->getDescription());
+        $input->setRequired($field->isMandatory());
 
         if ($field->isStatic()) {
             $value = $this->draw($value);
         }
-
-        $input->setName($field->getName());
-        $input->setTitle($field->getTitle());
         $input->setValue($value);
-        $input->setDescription($field->getDescription());
-        $input->setRequired($field->isMandatory());
         return $input;
+    }
+
+    protected function resolveInput(Field $field): FormControl
+    {
+        if ($field->isStatic() && $field->isHidden()) {
+            return $this->makeNoInput();
+        }
+
+        if ($field->isStatic()) {
+            return $this->makeStatic();
+        }
+
+        if ($field->isHidden()) {
+            return $this->makeHidden();
+        }
+
+        return $this->makeInput();
     }
 
     public function format($value): string
@@ -141,6 +156,11 @@ class StringType implements TypeInterface
     protected function makeHidden()
     {
         return App::make(HiddenInput::class);
+    }
+
+    protected function makeNoInput()
+    {
+        return App::make(NoInput::class);
     }
 
 }

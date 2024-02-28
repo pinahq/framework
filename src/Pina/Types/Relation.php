@@ -61,11 +61,11 @@ class Relation extends DirectoryType
         return $this->makeDirectoryQuery()->selectId()->selectTitle()->get();
     }
 
-    public function makeControl(Field $field, $value): FormControl
+    protected function makeSelect()
     {
-        $control = parent::makeControl($field, $value);
-        $control->setMultiple(true);
-        return $control;
+        $input = parent::makeSelect();
+        $input->setMultiple(true);
+        return $input;
     }
 
     /**
