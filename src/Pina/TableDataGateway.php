@@ -53,6 +53,33 @@ class TableDataGateway extends SQL
     }
 
     /**
+     * Возвращает схему таблицы
+     * @return Schema
+     */
+    public function getSchema()
+    {
+        return clone static::getSchemaExtensions();
+    }
+
+    public static function addSchema(Schema $schema)
+    {
+        static::getSchemaExtensions()->addGroup($schema);
+    }
+
+    protected static function getSchemaExtensions(): Schema
+    {
+        /** @var Container\Container $tables */
+        $schemas = App::load('schema');
+        if ($schemas->has(static::$table)) {
+            return $schemas->get(static::$table);
+        }
+
+        $schema = new Schema();
+        $schemas->share(static::$table, $schema);
+        return $schema;
+    }
+
+    /**
      * Возвращает название таблицы
      * @return string
      */
@@ -191,7 +218,7 @@ class TableDataGateway extends SQL
     public static function instance()
     {
         $cl = get_called_class();
-        return new $cl();
+        return App::make($cl);
     }
 
     /**
