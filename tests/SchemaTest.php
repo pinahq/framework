@@ -7,7 +7,11 @@ use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
+use Pina\Types\BooleanType;
+use Pina\Types\IntegerType;
+use Pina\Types\NumericType;
 use Pina\Types\StringType;
+use Pina\Types\TextType;
 
 class SchemaTest extends TestCase
 {
@@ -50,8 +54,8 @@ class SchemaTest extends TestCase
     public function testValidate()
     {
         $schema = new Schema();
-        $schema->add('order_id', 'Номер заказа', 'string', true);
-        $schema->add('name', 'ФИО', 'string');
+        $schema->add('order_id', 'Номер заказа', StringType::class, true);
+        $schema->add('name', 'ФИО', StringType::class);
 
         $normalized = $schema->normalize(
             [
@@ -168,18 +172,18 @@ class SchemaTest extends TestCase
     public function testField()
     {
         $schema = new Schema();
-        $schema->add('id', 'ID', 'int');
-        $f = $schema->add('title', 'Title', 'string')->setDescription('Please enter description');
+        $schema->add('id', 'ID', IntegerType::class);
+        $f = $schema->add('title', 'Title', StringType::class)->setDescription('Please enter description');
         $this->assertEquals('Please enter description', $f->getDescription());
     }
 
     private function makeSchema()
     {
         $schema = new Schema();
-        $schema->add('id', 'ID', 'int');
-        $schema->add('title', 'Title', 'string');
-        $schema->add('price', 'Price', 'numeric');
-        $schema->add('currency', 'Currency', 'string');
+        $schema->add('id', 'ID', IntegerType::class);
+        $schema->add('title', 'Title', StringType::class);
+        $schema->add('price', 'Price', NumericType::class);
+        $schema->add('currency', 'Currency', StringType::class);
         return $schema;
     }
 
@@ -189,11 +193,11 @@ class SchemaTest extends TestCase
     public function testSQL()
     {
         $schema = new Schema();
-        $schema->add('id', 'ID', 'int');
-        $schema->add('title', 'Title', 'string');
-        $schema->add('price', 'Price', 'numeric');
-        $schema->add('description', 'Description', 'text');
-        $schema->add('enabled', 'Enabled', 'bool');
+        $schema->add('id', 'ID', IntegerType::class);
+        $schema->add('title', 'Title', StringType::class);
+        $schema->add('price', 'Price', NumericType::class);
+        $schema->add('description', 'Description', TextType::class);
+        $schema->add('enabled', 'Enabled', BooleanType::class);
         $schema->add('filter', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']]);
         $schema->add('filter2', 'Filter', [['id' => 'new', 'title' => 'New'], ['id' => 'old', 'title' => 'Old']])
             ->setMandatory()->setDefault('new');

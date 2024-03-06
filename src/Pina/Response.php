@@ -2,8 +2,6 @@
 
 namespace Pina;
 
-use Pina\App;
-
 class Response implements ResponseInterface
 {
 
@@ -46,7 +44,7 @@ class Response implements ResponseInterface
     public static function partialContent($start, $end, $max)
     {
         return static::code('206 Partial Content')
-                ->header('Content-Range: bytes ' . intval($start) . '-' . intval($end) . '/' . intval($max));
+                ->header('Content-Range', 'bytes ' . intval($start) . '-' . intval($end) . '/' . intval($max));
     }
 
     /* HTTP Codes 3xx */
@@ -132,7 +130,31 @@ class Response implements ResponseInterface
     {
         $response = self::code($code);
         if (Request::isExternalRequest()) {
-            $content = \Pina\App::createResponseContent(['code' => $code], 'errors', 'show');
+
+            $codeNumber = substr($code, 0, 3);
+            if (App::router()->exists($codeNumber, 'get')) {
+                $data = App::router()->run($codeNumber, 'get', []);
+                if ($data instanceof Response) {
+                    if (!$data->hasContent()) {
+                        $content = App::createResponseContent([], $codeNumber, 'index');
+                        $data->setContent($content);
+                    }
+                    return $data;
+                }
+
+                $content = new TemplateLayoutContent;
+                if (Request::isExternalRequest()) {
+                    $layout = $data->getLayout();
+                    $r = $layout->append($data)->drawWithWrappers();
+                    $content->setContent($r);
+                } else {
+                    $content->setContent($data->drawWithWrappers());
+                }
+                return Response::ok()->setContent($content);
+            }
+
+
+            $content = App::createResponseContent(['code' => $code], 'errors', 'show');
             $response->setContent($content);
             return $response;
         }
@@ -183,13 +205,13 @@ class Response implements ResponseInterface
         $this->errors[] = [$message, $subject];
         return $this;
     }
-    
+
     public function setErrors($errors)
     {
         $this->errors = $errors;
         return $this;
     }
-    
+
     public function hasContent()
     {
         return $this->content !== null;
@@ -200,12 +222,12 @@ class Response implements ResponseInterface
         $this->content = $content;
         return $this;
     }
-    
+
     public function json($data = [])
     {
         return $this->setContent(new JsonContent($data));
     }
-    
+
     public function emptyContent()
     {
         return $this->setContent(new EmptyContent);
@@ -220,7 +242,7 @@ class Response implements ResponseInterface
         foreach ($this->headers as $header) {
             header($header[0] . ':' . $header[1]);
         }
-        
+
         if (!empty($this->content)) {
             header('Content-Type: ' . $this->content->getType());
             if ($this->errors) {
