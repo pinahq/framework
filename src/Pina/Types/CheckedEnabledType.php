@@ -42,6 +42,11 @@ class CheckedEnabledType extends EnabledType
         return App::make(FormCheckbox::class);
     }
 
+    public function draw($value): string
+    {
+        return $this->makeStatic()->setValue($value)->setCompact();
+    }
+
     /**
      * @return FormStatic
      */
