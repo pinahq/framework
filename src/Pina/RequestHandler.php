@@ -181,28 +181,6 @@ class RequestHandler
     public function run()
     {
         if (!Access::isHandlerPermitted($this->resource)) {
-            if (App::router()->exists('403', 'get')) {
-                $data = App::router()->run('403', 'get', []);
-                if ($data instanceof Response) {
-                    if (!$data->hasContent()) {
-                        $content = App::createResponseContent([], '403', 'index');
-                        $data->setContent($content);
-                    }
-                    return $data;
-                }
-
-                $content = new TemplateLayoutContent;
-                if (Request::isExternalRequest()) {
-                    //$content->drawLayout($data->drawWithWrappers());
-                    $layout = $data->getLayout();
-                    $r = $layout->append($data)->drawWithWrappers();
-                    $content->setContent($r);
-                } else {
-                    $content->setContent($data->drawWithWrappers());
-                }
-                return Response::ok()->setContent($content);
-            }
-
             return $this->forbidden();
         }
 
