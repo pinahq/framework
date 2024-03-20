@@ -9,6 +9,8 @@ use Pina\Paging;
 use Pina\SQL;
 use Pina\TableDataGateway;
 
+use Pina\Types\SearchType;
+
 use function Pina\__;
 
 /**
@@ -57,7 +59,12 @@ abstract class DataCollection
      */
     public function getFilterSchema($context = []): Schema
     {
-        $schema = $this->getSchema()->forgetNotFiltrable()->setStatic(false)->setNullable()->setMandatory(false);
+        $schema = new Schema();
+        if ($this->getSchema()->hasSearchable()) {
+            $schema->add('search', __('Поиск'), SearchType::class);
+        }
+        $schema->merge($this->getSchema()->forgetNotFiltrable());
+        $schema->setStatic(false)->setNullable()->setMandatory(false);
         foreach ($context as $k => $v) {
             $schema->forgetField($k);
         }
@@ -316,7 +323,7 @@ abstract class DataCollection
         $schema = $this->getFilterSchema($context);
         $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
         $schema->merge($contextSchema);
-        return $this->makeQuery()->whereFilters(array_merge($filters, $context), $schema);
+        return $this->makeQuery()->whereSearch($filters['search'] ?? '', $this->getSchema())->whereFilters(array_merge($filters, $context), $schema);
     }
 
     /**

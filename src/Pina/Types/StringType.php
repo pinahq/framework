@@ -86,7 +86,7 @@ class StringType implements TypeInterface
 
     public function isFiltrable(): bool
     {
-        return true;
+        return false;
     }
 
     public function getVariants()

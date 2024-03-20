@@ -435,6 +435,22 @@ class Schema implements IteratorAggregate
         return $types;
     }
 
+    public function hasSearchable(): bool
+    {
+        foreach ($this->fields as $field) {
+            $type = App::type($field->getType());
+            if ($type->isSearchable()) {
+                return true;
+            }
+        }
+        foreach ($this->groups as $group) {
+            if ($group->hasSearchable()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Добавляет мета-процессор в стек процессоров.
      * Мета-процессор должен быть функцией с двумя параметрами:

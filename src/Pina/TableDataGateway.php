@@ -725,6 +725,25 @@ class TableDataGateway extends SQL
         return $this->load($schema, $csv);
     }
 
+    public function whereSearch($search, Schema $schema)
+    {
+        foreach ($schema->getIterator() as $field) {
+            $type = App::type($field->getType());
+            if (!$type->isSearchable()) {
+                continue;
+            }
+            $table = $this->resolveFieldTable($field);
+            if (!$table) {
+                $table = $this;
+            }
+            if (!$table->hasField($field->getName())) {
+                continue;
+            }
+            $conditions[] = $table->makeByCondition(array('LIKE', self::SQL_OPERAND_FIELD, $field->getName(), self::SQL_OPERAND_VALUE, '%' . $search . '%'));
+        }
+        return $this->where(implode(' OR ', $conditions));
+    }
+
     /**
      * @param array $filters
      * @param Schema $schema
