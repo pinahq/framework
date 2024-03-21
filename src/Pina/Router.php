@@ -2,8 +2,11 @@
 
 namespace Pina;
 
+use Exception;
 use Pina\Http\Endpoint;
 use Pina\Http\Request;
+use Pina\Model\LinkedItem;
+use Pina\Model\LinkedItemCollection;
 
 class Router
 {
@@ -115,6 +118,33 @@ class Router
             $found[] = $resource . '/' . $right;
         }
         return $found;
+    }
+
+    /**
+     * @return LinkedItemCollection
+     */
+    public function getMenu(): LinkedItemCollection
+    {
+        $menu = new LinkedItemCollection();
+        foreach ($this->patterns as $pattern) {
+            if (strpos($pattern, '/') !== false) {
+                continue;
+            }
+
+            $resource = Url::resource($pattern, []);
+            if (!Access::isPermitted($resource)) {
+                continue;
+            }
+
+            try {
+                $title = $this->run($resource, 'title');
+                if ($title) {
+                    $menu->add(new LinkedItem($title, '/' . $resource));
+                }
+            } catch (Exception $e) {
+            }
+        }
+        return $menu;
     }
 
     /**
