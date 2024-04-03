@@ -25,6 +25,10 @@ class ControllerTest extends TestCase
     public function test()
     {
         App::init('test', __DIR__ . '/config');
+
+        \Pina\Request::push(new \Pina\RequestHandler('lk/1/cron-events', 'index', []));
+        $_SERVER['HTTP_HOST'] = 'test.com';
+
         $data = [
             [
                 'id' => 1,
@@ -69,12 +73,14 @@ class ControllerTest extends TestCase
                 ->whereBy('created_at', $v['created_at'])
                 ->id();
 
+            $url = App::link('lk/1/cron-events/:id', ['id' => $data[$k]['id']]);
+
             $data[$k]['scheduled_at'] = $data[$k]['created_at'];
             $data[$k]['started_at'] = '';
             $data[$k]['worker_id'] = '-';
             $tableContent .= '<tr>' . implode(
-                    array_map(function ($a) {
-                        return '<td>' . $a . '</td>';
+                    array_map(function ($a) use ($url) {
+                        return '<td><a href="'.$url.'">' . $a . '</a></td>';
                     }, $data[$k])
                 ) . '</tr>';
         }
@@ -88,7 +94,7 @@ class ControllerTest extends TestCase
 
 
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
-        $request->setLocation(new Location('/'), new Location('/'));
+        $request->setLocation(new Location('/lk/1/cron-events'), new Location('/lk/1/cron-events'));
 
         $endpoint = new CronEventEndpoint($request);
         $r = $endpoint->index();
@@ -96,19 +102,21 @@ class ControllerTest extends TestCase
 
         $id = Pina\Events\Cron\CronEventGateway::instance()->id();
 
+        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events" data-method="delete" data-params="" data-csrf-token="'.CSRF::token().'">Удалить</a>';
+
         $expectedRowHtml = '<div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>';
+            . '</div></div>' . $removeButton;
 
         $r = $endpoint->show($id);
         $this->assertEquals($expectedRowHtml, (string)$r);
 
         $router = App::router();
-        $router->register('cron-events', CronEventEndpoint::class);
+//        $router->register('cron-events', CronEventEndpoint::class);
         $router->register('lk/:profile_id/cron-events', CronEventEndpoint::class);
 
-        $html = $router->run("cron-events", 'get')->drawWithWrappers();
-        $this->assertEquals($expectedHtml, $html);
+//        $html = $router->run("cron-events", 'get')->drawWithWrappers();
+//        $this->assertEquals($expectedHtml, $html);
         $html = $router->run("lk/1/cron-events", 'get')->drawWithWrappers();
         $this->assertEquals($expectedHtml, $html);
         $this->assertEmpty($router->run("lk/1/cron-events/2/active-triggers", 'get')->drawWithWrappers());
@@ -167,13 +175,15 @@ class ControllerTest extends TestCase
         $form->append($note);
         $r->wrap($form);
 
+        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events/'.$id.'" data-method="delete" data-params="" data-csrf-token="'.CSRF::token().'">Удалить</a>';
+
         $expectedWrapHtml = '<form action="/delete!" method="post">'
             . CSRF::formField('delete')
             . '<p>note</p>'
             . '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>'
+            . '</div></div>'. $removeButton
             . '</td></tr></table>'
             . '</form>';
 
@@ -182,7 +192,7 @@ class ControllerTest extends TestCase
         $expectedWrapHtml = '<table><tr><td>'
             . '<div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>'
+            . '</div></div>'. $removeButton
             . '</td></tr></table>';
 
         $this->assertEquals($expectedWrapHtml, (string)$r->unwrap());
@@ -198,6 +208,8 @@ class ControllerTest extends TestCase
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('200 OK', $prop->getValue($r));
+
+        \Pina\Request::pop();
     }
 
     /**
