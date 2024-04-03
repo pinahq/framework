@@ -132,14 +132,16 @@ abstract class DirectoryType implements TypeInterface
      */
     protected function makeSelect()
     {
-        /** @var FormSelect $control */
-        $control = App::make(FormSelect::class);
         $variants = $this->getVariants();
         if ($this->isPlaceholderNeeded($variants)) {
             array_unshift($variants, ['id' => '', 'title' => $this->getPlaceholder()]);
         }
-        $control->setVariants($variants);
-        return $control;
+        return $this->makeFormSelect()->setVariants($variants);
+    }
+
+    protected function makeFormSelect(): FormSelect
+    {
+        return App::make(FormSelect::class);
     }
 
     /**

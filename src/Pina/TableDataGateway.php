@@ -741,6 +741,9 @@ class TableDataGateway extends SQL
             }
             $conditions[] = $table->makeByCondition(array('LIKE', self::SQL_OPERAND_FIELD, $field->getName(), self::SQL_OPERAND_VALUE, '%' . $search . '%'));
         }
+        if (empty($conditions)) {
+            return $this;
+        }
         return $this->where(implode(' OR ', $conditions));
     }
 
