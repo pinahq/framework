@@ -47,8 +47,7 @@ class CronEventEndpoint extends RichEndpoint
      */
     public function show($id)
     {
-        $data = CronEventGateway::instance()->find($id);
-
+        $data = CronEventGateway::instance()->findOrFail($id);
 
         $schema = CronEventGateway::instance()->getSchema();
         $schema->forgetField('id');
