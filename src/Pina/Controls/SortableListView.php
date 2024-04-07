@@ -38,7 +38,7 @@ class SortableListView extends Card
     {
         $this->method = $method;
         $this->resource = ltrim($resource, '/');
-        $this->params = htmlspecialchars(http_build_query($params), ENT_COMPAT);
+        $this->params = http_build_query($params);
         return $this;
     }
 
@@ -49,7 +49,7 @@ class SortableListView extends Card
         $list = $this->makeList();
         $list->setDataAttribute('method', $this->method);
         $list->setDataAttribute('resource', $this->resource);
-        $list->setDataAttribute('params', $this->params);
+        $list->setDataAttribute('params', http_build_query($this->params));
         $csrfAttributes = CSRF::tagAttributeArray($this->method);
         if (!empty($csrfAttributes['data-csrf-token'])) {
             $list->setDataAttribute('csrf-token', $csrfAttributes['data-csrf-token']);

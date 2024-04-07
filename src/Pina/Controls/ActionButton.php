@@ -16,7 +16,7 @@ class ActionButton extends LinkedButton
     {
         $this->setDataAttribute('resource', ltrim($resource, '/'));
         $this->setDataAttribute('method', $method);
-        $this->setDataAttribute('params', htmlspecialchars(http_build_query($params), ENT_COMPAT));
+        $this->setDataAttribute('params', http_build_query($params));
         $csrfAttributes = CSRF::tagAttributeArray($method);
         if (!empty($csrfAttributes['data-csrf-token'])) {
             $this->setDataAttribute('csrf-token', $csrfAttributes['data-csrf-token']);
