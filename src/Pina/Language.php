@@ -53,6 +53,10 @@ class Language
             return static::$code;
         }
 
+        if (!empty($code) && !in_array($code, static::$availableLanguages)) {
+            return static::$code;
+        }
+
         $oldCode = static::$code;
         static::$code = $code;
 
