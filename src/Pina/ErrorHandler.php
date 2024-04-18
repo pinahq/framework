@@ -10,18 +10,15 @@ class ErrorHandler
     public static function handle($errno, $errstr, $errfile, $errline, $errcontext, $backtrace = [])
     {
         if (!(ini_get("error_reporting") & $errno)) {
-            Response::internalError()->send();
             return;
         }
 
         if (ini_get("display_errors") == 0 && ini_get("log_errors") == 0) {
-            Response::internalError()->send();
             return;
         }
 
         # If error has been supressed with an @
         if (error_reporting() == 0) {
-            Response::internalError()->send();
             return;
         }
 
@@ -74,8 +71,6 @@ class ErrorHandler
         ];
 
         Log::error('php', $errstr, $context);
-
-        Response::internalError()->send();
     }
 
     public static function shutdown()
@@ -97,6 +92,8 @@ class ErrorHandler
             @header("HTTP/1.1 500 Internal Server Error");
 
             static::handle($errno, $errstr, $errfile, $errline, [], $backtrace);
+
+            Response::internalError()->send();
         }
     }
 
