@@ -20,12 +20,17 @@ class BadRequestException extends RuntimeException
 
     public function setErrors($errors)
     {
-        $this->errors = $errors;
+        foreach ($errors as $error) {
+            $message = $error[0] ?? '';
+            $field = $error[1] ?? '';
+            $this->addError($message, $field);
+        }
     }
 
     public function addError($message, $field)
     {
         $this->errors[] = [$message, $field];
+        $this->message .= $message . ($field ? ' (' . $field .')' : ''). '; ';
     }
 
     public function getErrors()
