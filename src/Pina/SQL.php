@@ -1052,6 +1052,7 @@ class SQL
     /**
      * Собирает и возвращает строку со списком полей на выборку
      * @return string
+     * @throws Exception
      */
     public function makeFields()
     {
@@ -1068,6 +1069,7 @@ class SQL
     /**
      * Возвращает подготовленный массив со списком полей
      * @return array
+     * @throws Exception
      */
     public function getFieldArray()
     {
@@ -1078,7 +1080,7 @@ class SQL
             $alias = array_shift($v);
             switch ($type) {
                 case self::SQL_SELECT_FIELD:
-                    $fields[] = $this->getAlias() . '.' . ($field == '*' ? $field : '`' . $field . '`' ) . ($alias ? (' as `' . $alias . '`') : '');
+                    $fields[] = $this->getAlias() . '.' . $this->escapeField($field) . ($alias ? (' as ' . $this->escapeField($alias)) : '');
                     break;
                 case self::SQL_SELECT_CONDITION:
                     $fields[] = $field . ($alias ? (' as `' . $alias . '`') : '');
@@ -1087,6 +1089,26 @@ class SQL
         }
         $fields = array_merge($fields, $this->getJoinFieldArray());
         return $fields;
+    }
+
+    /**
+     * @param $field
+     * @return string
+     * @throws Exception
+     */
+    protected function escapeField(string $field): string
+    {
+        if ($field == '*') {
+            return $field;
+        }
+
+        $field = trim($field,'`');
+
+        if (strpos($field, ',') !== false || strpos($field, '`') !== false) {
+            throw new Exception('wrong field format');
+        }
+
+        return '`' . $field . '`';
     }
 
     /**
