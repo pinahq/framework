@@ -727,6 +727,10 @@ class TableDataGateway extends SQL
 
     public function whereSearch($search, Schema $schema)
     {
+        $search = trim($search);
+        if (empty($search)) {
+            return $this;
+        }
         foreach ($schema->getIterator() as $field) {
             $type = App::type($field->getType());
             if (!$type->isSearchable()) {
