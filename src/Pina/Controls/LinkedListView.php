@@ -56,17 +56,25 @@ class LinkedListView extends Control
         $title = $record->getMeta('title');
         $link = $record->getMeta('link');
         if ($link) {
-            /** @var LinkedListItem $item */
-            $item = App::make(LinkedListItem::class);
+            $item = $this->makeLinkedListItem();
             $item->setLink($link);
             $item->setText($title);
             return $this->addActiveClass($item, $record);
         }
 
-        /** @var ListItem $item */
-        $item = App::make(ListItem::class);
+        $item = $this->makeListItem();
         $item->setText($title);
         return $this->addActiveClass($item, $record);
+    }
+
+    protected function makeLinkedListItem(): LinkedListItem
+    {
+        return App::make(LinkedListItem::class);
+    }
+
+    protected function makeListItem(): ListItem
+    {
+        return App::make(ListItem::class);
     }
 
     /**
