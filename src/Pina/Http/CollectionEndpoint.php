@@ -11,7 +11,6 @@ use Pina\TableDataGateway;
 use Pina\Data\Schema;
 use Pina\Data\DataRecord;
 use Pina\Controls\ButtonRow;
-use Pina\Controls\LinkedButton;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
 
@@ -243,6 +242,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     {
         /** @var RecordForm $form */
         $form = parent::makeFilterForm();
+        $form->getButtonRow()->append($this->makeResetButton());
         $form->getButtonRow()->append($this->makeCreateButton());
         return $form;
     }
@@ -283,11 +283,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
      */
     protected function makeCreateForm(DataRecord $data)
     {
-        /** @var RecordForm $form */
-        $form = App::make(RecordForm::class);
-        $form->setMethod('post')->setAction($this->base->link('@'));
-        $form->load($data);
-        return $form;
+        return $this->makeRecordForm($this->base->link('@'), 'post', $data);
     }
 
     protected function makeIndexButtons()
@@ -299,19 +295,17 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
     protected function makeCancelButton()
     {
-        /** @var LinkedButton $button */
-        $button = App::make(LinkedButton::class);
-        $button->setLink($this->location->link('@'));
-        $button->setTitle(__('Отменить'));
-        return $button;
+        return $this->makeLinkedButton(__('Отменить'), $this->location->link('@'));
+    }
+
+    protected function makeResetButton()
+    {
+        return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
     }
 
     protected function makeCreateButton()
     {
-        $button = App::make(LinkedButton::class);
-        $button->setLink($this->base->link('@/create'));
-        $button->setTitle(__('Добавить'));
-        return $button;
+        return $this->makeLinkedButton(__('Добавить'), $this->base->link('@/create'));
     }
 
     /**
@@ -328,13 +322,8 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
     protected function makeEditLinkButton()
     {
-        $button = App::make(LinkedButton::class);
-        $button->setLink($this->location->link('@', ['display' => 'edit']));
-        $button->setStyle('primary');
-        $button->setTitle(__('Редактировать'));
-        return $button;
+        return $this->makeLinkedButton(__('Редактировать'), $this->location->link('@', ['display' => 'edit']), 'primary');
     }
-
 
     /**
      * @return TableDataGateway
