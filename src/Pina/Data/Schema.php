@@ -924,6 +924,27 @@ class Schema implements IteratorAggregate
         return $record;
     }
 
+    public function normalizeTable(array $table, $paramName = '')
+    {
+        $normalizedData = [];
+
+        foreach ($table as $id => $line) {
+            try {
+                $normalized = $this->normalize($line);
+            } catch (BadRequestException $e) {
+                $errors = $e->getErrors();
+                foreach ($errors as $k => $error) {
+                    $errors[$k][1] = $paramName ? $paramName . '['.$id.'][' . $error[1] . ']' : '';
+                }
+                $newError = new BadRequestException();
+                $newError->setErrors($errors);
+                throw $newError;
+            }
+            $normalizedData[$id] = $normalized;
+        }
+        return $normalizedData;
+    }
+
     /**
      * Дополняет данные данными из внешних источников
      * @param $data
@@ -951,6 +972,16 @@ class Schema implements IteratorAggregate
             $value = Arr::get($data, $path, null);
             if (is_null($value)) {
                 Arr::set($data, $path, App::type($field->getType())->getData($id));
+            }
+        }
+    }
+
+    public function fillDefaults(&$data)
+    {
+        foreach ($this as $field) {
+            $name = $field->getName();
+            if (!isset($data[$name])) {
+                $data[$name] = $field->getDefault();
             }
         }
     }
