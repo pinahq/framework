@@ -150,7 +150,8 @@ class Response implements ResponseInterface
                 } else {
                     $content->setContent($data->drawWithWrappers());
                 }
-                return Response::ok()->setContent($content);
+                $response->setContent($content);
+                return $response;
             }
 
 
