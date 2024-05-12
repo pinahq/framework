@@ -924,24 +924,51 @@ class Schema implements IteratorAggregate
         return $record;
     }
 
-    public function normalizeTable(array $table, $paramName = '')
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function normalizeTable(array $table, string $paramName = '')
     {
-        $normalizedData = [];
+        $pk = $this->getPrimaryKey();
+        return $this->normalizeTableInner($table, $paramName, $pk, []);
+    }
 
-        foreach ($table as $id => $line) {
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    protected function normalizeTableInner(array $table, string $paramName, array $pk, array $ids)
+    {
+        if (empty($pk)) {
             try {
-                $normalized = $this->normalize($line);
+                $normalized =  $this->normalize($table);
             } catch (BadRequestException $e) {
                 $errors = $e->getErrors();
+                $brackets = '';
+                foreach ($ids as $idElement) {
+                    $brackets .= '[' . $idElement . ']';
+                }
                 foreach ($errors as $k => $error) {
-                    $errors[$k][1] = $paramName ? $paramName . '['.$id.'][' . $error[1] . ']' : '';
+                    $errors[$k][1] = $paramName ? $paramName . $brackets . '[' . $error[1] . ']' : '';
                 }
                 $newError = new BadRequestException();
                 $newError->setErrors($errors);
                 throw $newError;
             }
-            $normalizedData[$id] = $normalized;
+
+            return $normalized;
         }
+
+        array_shift($pk);
+
+        $normalizedData = [];
+        foreach ($table as $id => $line) {
+            $idsDeeper = $ids;
+            $idsDeeper[] = $id;
+            $normalizedData[$id] = $this->normalizeTableInner($line, $paramName, $pk, $idsDeeper);
+        }
+
         return $normalizedData;
     }
 
