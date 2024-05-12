@@ -37,10 +37,15 @@ class EditableRecordRow extends RecordRow
                 $type = $field->getType();
                 $value = isset($data[$name]) ? $data[$name] : null;
                 $pk = $this->record->getSchema()->getPrimaryKey();
-                $id = !empty($pk[0]) ? ($data[$pk[0]] ?? 0) : 0;
+
+                $nameBrackets = '';
+                foreach ($pk as $pkElement)  {
+                    $idElement = !empty($data[$pkElement]) ? $data[$pkElement] : '';
+                    $nameBrackets .= '[' . $idElement . ']';
+                }
 
                 $cell = App::type($type)->setContext($data)->makeControl($field, $value);
-                $cell->setName($this->name . '[' . $id . '][' . $name . ']');
+                $cell->setName($this->name . $nameBrackets . '[' . $name . ']');
                 $cell->setCompact();
                 $content .= Html::tag('td', $cell);
             }
