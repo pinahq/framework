@@ -220,7 +220,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
     public function updateSortable()
     {
-        $ids = $this->request()->get('id');
+        $ids = $this->request()->all()['id'] ?? [];
 
         $this->collection->reorder($ids);
 
