@@ -10,26 +10,27 @@ use Pina\Model\LinkedItemCollection;
 
 class Router
 {
-
-    protected $endpoints = [];
-    protected $patterns = [];
-    protected $context = [];
+    /** @var \Pina\Router\Route[]  */
+    protected $items = [];
 
     /**
      * @param string $pattern
      * @param string $class
      */
-    public function register($pattern, $class, $context = [])
+    public function register($pattern, $class, $context = []): \Pina\Router\Route
     {
-        $controller = Url::controller($pattern);
-        $this->endpoints[$controller] = $class;
-        $this->patterns[$controller] = $pattern;
-        $this->context[$controller] = $context;
+        $route = new \Pina\Router\Route($pattern, $class, $context);
+        $this->items[$route->getController()] = $route;
+        return $route;
     }
 
     public function getPatterns()
     {
-        return array_values($this->patterns);
+        $patterns = [];
+        foreach ($this->items as $item) {
+            $patterns[] = $item->getPattern();
+        }
+        return $patterns;
     }
 
     /**
@@ -47,9 +48,9 @@ class Router
             return false;
         }
 
-        $action .= $this->calcDeeperAction($resource, $this->patterns[$c]);
+        $action .= $this->calcDeeperAction($resource, $this->items[$c]->getPattern());
 
-        return method_exists($this->endpoints[$c], $action);
+        return method_exists($this->items[$c]->getEndpoint(), $action);
     }
 
     public function getEndpointClass($resource): ?string
@@ -62,7 +63,7 @@ class Router
             return null;
         }
 
-        return $this->endpoints[$c] ?? null;
+        return isset($this->items[$c]) ? $this->items[$c]->getEndpoint() : null;
     }
 
     /**
@@ -82,8 +83,7 @@ class Router
             throw new Container\NotFoundException;
         }
 
-
-        $pattern = $this->patterns[$c];
+        $pattern = $this->items[$c]->getPattern();
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
@@ -100,11 +100,9 @@ class Router
 
         $request->setLocation($base, $location);
 
-        $request->setContext($this->context[$c]);
+        $request->setContext($this->items[$c]->getContext());
 
-        $cl = $this->endpoints[$c];
-        /** @var Endpoint $inst */
-        $inst = new $cl($request);
+        $inst = $this->items[$c]->makeEndpoint($request);
 
         $action .= $this->calcDeeperAction($resource, $pattern);
 
@@ -120,7 +118,7 @@ class Router
         list($controller, $action, $params) = Url::route($resource, 'get');
         $prefix = $controller . '/';
         $found = [];
-        foreach ($this->patterns as $c => $e) {
+        foreach ($this->items as $c => $e) {
             if (strpos($c, $prefix) !== 0) {
                 continue;
             }
@@ -139,7 +137,8 @@ class Router
     public function getMenu(): LinkedItemCollection
     {
         $menu = new LinkedItemCollection();
-        foreach ($this->patterns as $pattern) {
+        foreach ($this->items as $route) {
+            $pattern = $route->getPattern();
             if (strpos($pattern, '/') !== false) {
                 continue;
             }
@@ -167,14 +166,14 @@ class Router
     public function base($controller)
     {
         $controller = trim($controller, "/");
-        if (!empty($this->endpoints[$controller])) {
+        if (!empty($this->items[$controller])) {
             return $controller;
         }
 
         $parts = explode("/", $controller);
         for ($i = count($parts) - 2; $i >= 0; $i--) {
             $c = implode("/", array_slice($parts, 0, $i + 1));
-            if (isset($this->endpoints[$c])) {
+            if (isset($this->items[$c])) {
                 return $c;
             }
         }
