@@ -3,6 +3,8 @@
 namespace Pina\Router;
 
 use Pina\Access;
+use Pina\App;
+use Pina\Controls\Menu\Menu;
 use Pina\Http\Endpoint;
 use Pina\Http\Request;
 use Pina\Url;
@@ -35,7 +37,7 @@ class Route
     {
         return $this->context;
     }
-    
+
     public function getEndpoint()
     {
         return $this->endpoint;
@@ -50,6 +52,21 @@ class Route
     public function permit($groups)
     {
         Access::permit($this->pattern, $groups);
+        return $this;
+    }
+
+    public function addToMenu(Menu $menu)
+    {
+        $endpoint = $this->makeEndpoint(new Request());
+        if (!method_exists($endpoint, 'title')) {
+            return $this;
+        }
+
+        $title = $endpoint->title(0);
+        if (empty($title)) {
+            return $this;
+        }
+        $menu->appendLink($title, App::link($this->pattern));
         return $this;
     }
 
