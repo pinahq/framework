@@ -55,7 +55,7 @@ class Route
         return $this;
     }
 
-    public function addToMenu(Menu $menu)
+    public function addToMenu(Menu ...$menus)
     {
         $endpoint = $this->makeEndpoint(new Request());
         if (!method_exists($endpoint, 'title')) {
@@ -66,7 +66,9 @@ class Route
         if (empty($title)) {
             return $this;
         }
-        $menu->appendLink($title, App::link($this->pattern));
+        foreach ($menus as $menu) {
+            $menu->appendLink($title, App::link($this->pattern));
+        }
         return $this;
     }
 

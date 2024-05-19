@@ -15,7 +15,13 @@ class MenuItem extends Control
             return '';
         }
 
-        return Html::tag('li', $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(), $this->makeAttributes());
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+
+        if (empty($inner)) {
+            return '';
+        }
+
+        return Html::tag('li', $inner, $this->makeAttributes());
     }
 
     protected function isPermitted(): bool
