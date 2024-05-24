@@ -38,7 +38,7 @@ class SortableListView extends Card
     {
         $this->method = $method;
         $this->resource = ltrim($resource, '/');
-        $this->params = http_build_query($params);
+        $this->params = $params;
         return $this;
     }
 

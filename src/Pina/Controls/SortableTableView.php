@@ -14,14 +14,6 @@ class SortableTableView extends SortableListView
      */
     protected $dataTable;
 
-    public function setHandler($resource, $method, $params)
-    {
-        $this->method = $method;
-        $this->resource = ltrim($resource, '/');
-        $this->params = htmlspecialchars(http_build_query($params), ENT_COMPAT);
-        return $this;
-    }
-
     /**
      * @param DataTable $dataTable
      */
@@ -80,7 +72,8 @@ class SortableTableView extends SortableListView
         return App::make(Table::class)->addClass('table table-hover pina-table-sortable')
             ->setDataAttribute('method', $this->method)
             ->setDataAttribute('csrf-token', CSRF::token())
-            ->setDataAttribute('resource', $this->resource);
+            ->setDataAttribute('resource', $this->resource)
+            ->setDataAttribute('params', http_build_query($this->params));
     }
 
     /**
