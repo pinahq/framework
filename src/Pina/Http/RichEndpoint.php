@@ -13,6 +13,7 @@ use Pina\Controls\HandledForm;
 use Pina\Controls\LinkedButton;
 use Pina\Controls\RawHtml;
 use Pina\Controls\RecordForm;
+use Pina\Controls\RecordView;
 use Pina\Controls\SidebarWrapper;
 use Pina\Controls\SubmitButton;
 use Pina\Controls\TableView;
@@ -54,6 +55,14 @@ class RichEndpoint extends Endpoint
         $form = App::make(RecordForm::class);
         $form->setAction($action);
         $form->setMethod($method);
+        $form->load($data);
+        return $form;
+    }
+
+    protected function makeRecordView(DataRecord $data): RecordView
+    {
+        /** @var RecordView $form */
+        $form = App::make(RecordView::class);
         $form->load($data);
         return $form;
     }

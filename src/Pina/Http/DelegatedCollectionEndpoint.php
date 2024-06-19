@@ -172,7 +172,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
         $this->composer->show($this->location, $record);
 
-        return $this->makeRecordView($record)->wrap($this->makeSidebarWrapper());
+        return $this->resolveRecordView($record)->wrap($this->makeSidebarWrapper());
     }
 
     /**
@@ -316,7 +316,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     /**
      * @return Control
      */
-    protected function makeRecordView(DataRecord $data)
+    protected function resolveRecordView(DataRecord $data)
     {
         $display = $this->query()->get('display');
         $component = $display == 'edit' ? $this->makeEditForm($data) : $this->makeViewForm($data);
@@ -338,7 +338,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeViewForm(DataRecord $record)
     {
-        return App::make(RecordView::class)->load($record)->after($this->makeViewButtonRow($record));
+        return $this->makeRecordView($record)->after($this->makeViewButtonRow($record));
     }
 
     /**

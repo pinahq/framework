@@ -62,7 +62,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
         $this->composer->show($this->location, $record);
 
-        return $this->makeRecordView($record)
+        return $this->resolveRecordView($record)
             ->wrap($this->makeSidebarWrapper());
     }
 
@@ -250,7 +250,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /**
      * @return Control
      */
-    protected function makeRecordView(DataRecord $data)
+    protected function resolveRecordView(DataRecord $data)
     {
         $display = $this->query()->get('display');
         $component = $display == 'edit' ? $this->makeEditForm($data) : $this->makeViewForm($data);
@@ -275,7 +275,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
      */
     protected function makeViewForm(DataRecord $data)
     {
-        return App::make(RecordView::class)->load($data)->after($this->makeViewButtonRow());
+        return $this->makeRecordView($data)->after($this->makeViewButtonRow());
     }
 
     /**

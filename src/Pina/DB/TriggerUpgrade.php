@@ -4,6 +4,7 @@ namespace Pina\DB;
 
 use Pina\App;
 use Pina\Arr;
+use Pina\Log;
 
 class TriggerUpgrade {
     
