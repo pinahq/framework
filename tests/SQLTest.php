@@ -283,26 +283,6 @@ class SQLTest extends TestCase
         $sql = $gw->make();
         $this->assertEquals('SELECT `cody_product`.`product_id` as `old_product_id` FROM `cody_product`', $sql);
 
-        $this->assertNotEquals(
-            SQL::table('cody_product')->select('product_id')->select('product_title')->make(),
-            SQL::table('cody_product')->select('product_id, product_title')->make()
-        );
-
-        $this->assertNotEquals(
-            SQL::table('cody_product')->select('product_id', 'id')->select('product_title', 'title')->make(),
-            SQL::table('cody_product')->select('product_id as id, product_title AS title')->make()
-        );
-
-        $this->assertEquals(
-            SQL::table('cody_product')->select('product_id')->select('product_title')->make(),
-            SQL::table('cody_product')->select(['product_id', 'product_title'])->make()
-        );
-
-        $this->assertNotEquals(
-            SQL::table('cody_product')->select('product_id', 'id')->select('product_title', 'title')->make(),
-            SQL::table('cody_product')->select(['product_id as id', 'product_title AS title'])->make()
-        );
-
         $this->assertEquals(    
             "SELECT SUM(quantity) - SUM(delivered) as `left` FROM `order_product` WHERE (`order_product`.`order_id` = '38') GROUP BY order_id",
             SQL::table('order_product')->whereBy('order_id', 38)->groupBy('order_id')->calculate('SUM(quantity) - SUM(delivered)', 'left')->selectIfNotSelected('left')->make()

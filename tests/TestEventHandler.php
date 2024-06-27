@@ -1,6 +1,6 @@
 <?php
 
-class TestEventHandler implements Pina\Events\EventHandlerInterface
+class TestEventHandler
 {
 
     protected $key = '';
@@ -8,11 +8,6 @@ class TestEventHandler implements Pina\Events\EventHandlerInterface
     public function __construct($key)
     {
         $this->key = $key;
-    }
-
-    public function getKey()
-    {
-        return $this->key;
     }
 
     public function handle($payload)

@@ -1,45 +1,28 @@
 <?php
 
-
 namespace Pina\Events;
 
-use Exception;
-use \Pina\Command;
+use Pina\App;
 
-class Event
+abstract class Event
 {
-    /** @var Command[][] */
-    protected $handlers = [];
 
-    public function __construct()
+    abstract public function queueable(): bool;
+
+    abstract public function serialize(): array;
+
+    public static function subscribe(callable $handler, int $priority = \Pina\Event::PRIORITY_NORMAL)
     {
-        $this->handlers[\Pina\Event::PRIORITY_HIGH] = [];
-        $this->handlers[\Pina\Event::PRIORITY_NORMAL] = [];
-        $this->handlers[\Pina\Event::PRIORITY_LOW] = [];
+        /** @var Bus $bus */
+        $bus = App::load(Bus::class);
+        $bus->subscribe(static::class, $handler, $priority);
     }
 
-    public function subscribe(Command $handler, $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function trigger()
     {
-        if (!isset($this->handlers[$priority])) {
-            throw new Exception();
-        }
-        $this->handlers[$priority][] = $handler;
-        return $this;
+        /** @var Bus $bus */
+        $bus = App::load(Bus::class);
+        $bus->trigger($this);
     }
 
-    public function trigger($data)
-    {
-        foreach ($this->handlers as $priority => $hs) {
-            foreach ($hs as $handler) {
-                $handler($data);
-            }
-        }
-        return $this;
-    }
-
-}
-
-function queue($className, $priority = \Pina\Event::PRIORITY_NORMAL)
-{
-    return new QueueableCommand($className, $priority);
 }

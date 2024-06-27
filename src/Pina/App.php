@@ -4,7 +4,6 @@ namespace Pina;
 
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
-use Pina\Events\EventManager;
 
 class App
 {
@@ -88,15 +87,6 @@ class App
         return static::load(ModuleRegistry::class);
     }
 
-    /**
-     * Возвращает объект для работы с событиями
-     * @return EventManager
-     */
-    public static function events()
-    {
-        return static::load(EventManager::class);
-    }
-
     public static function event($name)
     {
         /** @var Container $events */
@@ -104,7 +94,7 @@ class App
         if ($events->has($name)) {
             return $events->get($name);
         }
-        $events->share($name, $e = new \Pina\Events\Event());
+        $events->share($name, $e = new \Pina\Events\EventHandlerRegistry());
         return $e;
     }
 
