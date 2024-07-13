@@ -21,7 +21,7 @@ class DefaultLayout extends Control
         $this->loadResources();
 
         //вначале генерируем тег body, чтобы все контролы внутри body смогли зарегистировать css перед генерацией head
-        $body = Html::tag('body', $this->drawBody());
+        $body = Html::tag('body', $this->drawBody(), $this->makeAttributes());
         $head = Html::tag('head', $this->drawHead());
         return '<!DOCTYPE html>' . "\n" . Html::tag('html', $head . $body . $this->drawJs());
     }
