@@ -117,9 +117,12 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $menu->addClass('nav nav-tabs');
         $menu->setLocation($this->location->link('@', $this->query()->all()));
 
-        $data = $this->getFilterRecord()->getData();
-
         $schema = $this->getTabSchema();
+        if ($schema->isEmpty()) {
+            return $menu;
+        }
+
+        $data = $this->getFilterRecord()->getTextData();//нужны данные из формы с фильтрами до нормализации
         foreach ($schema as $field) {
             /** @var Field $field */
             $type = $field->getType();
