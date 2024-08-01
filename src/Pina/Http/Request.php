@@ -53,7 +53,9 @@ class Request extends SymfonyRequest
     {
         $key = 'pid';
         foreach ($this->context as $context) {
-            $bag->add([$context => $this->attributes->get($key)]);
+            //опираемся на новую логику без pid, ppid и т.д., сохраняя совместимость
+            $value = $this->attributes->has($context) ? $this->attributes->get($context) : $this->attributes->get($key);
+            $bag->add([$context => $value]);
             $key = 'p' . $key;
         }
         return $bag;

@@ -66,7 +66,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     public function title($id)
     {
         if ($id) {
-            return $this->composer->getItemTitle($this->collection->getRecord($id));
+            return $this->composer->getItemTitle($this->collection->getRecord($id, $this->context()->all()));
         }
         return $this->composer->getCollection();
     }
