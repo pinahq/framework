@@ -122,7 +122,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             return $menu;
         }
 
-        $data = array_filter($this->getFilterRecord()->getTextData());//нужны данные из формы с фильтрами до нормализации
+        $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
         foreach ($schema as $field) {
             /** @var Field $field */
             $type = $field->getType();

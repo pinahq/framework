@@ -933,6 +933,18 @@ class Schema implements IteratorAggregate
         return $fieldset;
     }
 
+    public function mine($data)
+    {
+        $r = [];
+        foreach ($this->getIterator() as $field) {
+            if ($field->isStatic()) {
+                continue;
+            }
+            $r[$field->getName()] = $data[$field->getName()] ?? null;
+        }
+        return $r;
+    }
+
     /**
      *
      * @param array $data
