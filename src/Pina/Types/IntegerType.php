@@ -65,7 +65,7 @@ class IntegerType implements TypeInterface
 
     public function play($value): string
     {
-        return $this->format($value);
+        return $this->draw($value);
     }
 
     public function getSize(): int
