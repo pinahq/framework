@@ -12,6 +12,6 @@ class BodyLessCard extends Card
         if ($this->title) {
             $header = Html::tag('h3', $this->title);
         }
-        return $header . Html::nest('div', $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter());
+        return $header . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
     }
 }
