@@ -59,6 +59,11 @@ class DataRecord
         return $this->schema->processLineAsHtml($this->data);
     }
 
+    public function getInteractiveData()
+    {
+        return $this->schema->processLineAsInteractive($this->data);
+    }
+
     public function getMetaData()
     {
         if (!is_null($this->meta)) {

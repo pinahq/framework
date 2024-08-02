@@ -24,7 +24,7 @@ class RecordView extends Control
      */
     protected function drawInner()
     {
-        $data = $this->record->getHtmlData();
+        $data = $this->record->getInteractiveData();
 
         $content = '';
 

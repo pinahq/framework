@@ -389,6 +389,7 @@ class Schema implements IteratorAggregate
     /**
      * Возвращяет все ключи полей схемы
      * @return array
+     * @deprecated в пользу getFieldNames
      */
     public function getFieldKeys()
     {
@@ -402,6 +403,21 @@ class Schema implements IteratorAggregate
         return $keys;
     }
 
+    /**
+     * Возвращяет все ключи полей схемы
+     * @return array
+     */
+    public function getFieldNames()
+    {
+        $keys = array();
+        foreach ($this->fields as $field) {
+            $keys[] = $field->getName();
+        }
+        foreach ($this->groups as $group) {
+            $keys = array_merge($keys, $group->getFieldNames());
+        }
+        return $keys;
+    }
 
     /**
      * Возвращает все наименования полей схемы
@@ -748,6 +764,42 @@ class Schema implements IteratorAggregate
         }
         return $data;
     }
+
+    /**
+     * @param array $line
+     * @return array
+     * @throws \Exception
+     */
+    public function processLineAsInteractive($line)
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = [];
+        foreach ($this->getIterator() as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
+            $key = $field->getName();
+            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
+            $type = App::type($field->getType());
+            $type->setContext($line);
+            $formatted[$key] = $type->play($value);
+        }
+        return $this->makeLine($this->callHtmlProcessors($formatted, $line));
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    public function processListAsInteractive($data)
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->processLineAsInteractive($line);
+        }
+        return $data;
+    }
+
 
 
     public function makeLine($line)

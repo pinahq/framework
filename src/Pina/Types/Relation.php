@@ -4,8 +4,7 @@
 namespace Pina\Types;
 
 
-use Pina\Controls\FormControl;
-use Pina\Data\Field;
+use Pina\App;
 use Pina\SQL;
 use Pina\TableDataGateway;
 
@@ -32,8 +31,8 @@ class Relation extends DirectoryType
 
     public function __construct(
         TableDataGateway $relationTable,
-                         $relationField,
-                         $directoryField,
+        $relationField,
+        $directoryField,
         TableDataGateway $directoryTable
     ) {
         $this->relationTable = $relationTable;
@@ -77,6 +76,21 @@ class Relation extends DirectoryType
     {
         $query = $this->makeDirectoryQuery()->whereId($value)->selectTitle();
         return implode(', ', $query->column('title'));
+    }
+
+    public function play($value): string
+    {
+        $query = $this->makeDirectoryQuery()->whereId($value)->selectId();
+        $list = $query->get();
+
+        $types = array_combine($this->relationTable->getSchema()->getFieldNames(), $this->relationTable->getSchema()->getFieldTypes());
+        $type = $types[$this->directoryField];
+
+        $r = [];
+        foreach ($list as $item) {
+            $r[] = App::type($type)->play($item['id']);
+        }
+        return implode(', ', $r);
     }
 
     /**
