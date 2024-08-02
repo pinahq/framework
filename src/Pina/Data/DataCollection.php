@@ -37,7 +37,7 @@ abstract class DataCollection
      */
     public function getListSchema(): Schema
     {
-        return $this->makeQuery()->getSchema();
+        return $this->makeQuery()->getSchema()->forgetDetailed();
     }
 
     /**

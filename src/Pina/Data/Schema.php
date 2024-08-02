@@ -165,7 +165,8 @@ class Schema implements IteratorAggregate
         return $this->add('created_at', $title, TimestampType::class)
             ->setStatic()
             ->setNullable(false)
-            ->setDefault('CURRENT_TIMESTAMP');
+            ->setDefault('CURRENT_TIMESTAMP')
+            ->setDetailed();
     }
 
     /**
@@ -179,7 +180,8 @@ class Schema implements IteratorAggregate
         $field = $this->add('updated_at', $title, TimestampType::class)
             ->setStatic()
             ->setNullable(false)
-            ->setDefault('CURRENT_TIMESTAMP');
+            ->setDefault('CURRENT_TIMESTAMP')
+            ->setDetailed();
 
         $this->addFieldDefinition('updated_at', 'ON UPDATE CURRENT_TIMESTAMP');
         return $field;
@@ -193,6 +195,8 @@ class Schema implements IteratorAggregate
     public function merge(Schema $schema)
     {
         $this->fields = array_merge($this->fields, $schema->fields);
+        $this->groups = array_merge($this->groups, $schema->groups);
+
         $this->dataProcessors = array_merge($this->dataProcessors, $schema->dataProcessors);
         $this->textProcessors = array_merge($this->textProcessors, $schema->textProcessors);
         $this->htmlProcessors = array_merge($this->htmlProcessors, $schema->htmlProcessors);
@@ -333,6 +337,22 @@ class Schema implements IteratorAggregate
 
         foreach ($this->groups as $group) {
             $group->forgetHiddenStatic();
+        }
+
+        return $this;
+    }
+
+    public function forgetDetailed()
+    {
+        foreach ($this->fields as $k => $field) {
+            if ($field->isDetailed()) {
+                unset($this->fields[$k]);
+            }
+        }
+        $this->fields = array_values($this->fields);
+
+        foreach ($this->groups as $group) {
+            $group->forgetDetailed();
         }
 
         return $this;

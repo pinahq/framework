@@ -20,6 +20,7 @@ class Field
     protected $isNullable = false;
     protected $isStatic = false;
     protected $isHidden = false;
+    protected $isDetailed = false;
     protected $width = 12;
 
     //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
@@ -135,6 +136,17 @@ class Field
     public function isHidden()
     {
         return $this->isHidden;
+    }
+
+    public function setDetailed($detailed = true)
+    {
+        $this->isDetailed = $detailed;
+        return $this;
+    }
+
+    public function isDetailed()
+    {
+        return $this->isDetailed;
     }
 
     public function match(string $field)
