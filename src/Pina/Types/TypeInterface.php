@@ -39,6 +39,13 @@ interface TypeInterface
     public function draw($value): string;
 
     /**
+     *
+     * @param mixed $value
+     * @return string
+     */
+    public function play($value): string;
+
+    /**
      * @return int
      */
     public function getSize(): int;

@@ -72,6 +72,11 @@ abstract class DirectoryType implements TypeInterface
         return $this->format($value);
     }
 
+    public function play($value): string
+    {
+        return $this->draw($value);
+    }
+
     protected function isPlaceholderNeeded(&$variants)
     {
         $ids = array_column($variants, 'id');

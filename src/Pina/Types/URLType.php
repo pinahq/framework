@@ -27,7 +27,7 @@ class URLType extends StringType
      * @param mixed $value
      * @return string
      */
-    public function draw($value): string
+    public function play($value): string
     {
         $options = [];
         if ($this->isExternalLink($value ?? '')) {

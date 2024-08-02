@@ -64,6 +64,11 @@ class StringType implements TypeInterface
         return $this->format($value);
     }
 
+    public function play($value): string
+    {
+        return $this->draw($value);
+    }
+
     public function getSize(): int
     {
         return 512;
