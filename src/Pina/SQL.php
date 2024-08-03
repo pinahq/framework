@@ -11,6 +11,7 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Data\FieldSet;
@@ -132,6 +133,26 @@ class SQL
     public function getDataTable(): DataTable
     {
         return new DataTable($this->get(), $this->getQuerySchema());
+    }
+
+    public function findDataRecord($id): DataRecord
+    {
+        return new DataRecord($this->find($id), $this->getQuerySchema());
+    }
+
+    public function findDataRecordOrFail($id): DataRecord
+    {
+        return new DataRecord($this->findOrFail($id), $this->getQuerySchema());
+    }
+
+    public function firstDataRecord(): DataRecord
+    {
+        return new DataRecord($this->first(), $this->getQuerySchema());
+    }
+
+    public function firstDataRecordOrFail(): DataRecord
+    {
+        return new DataRecord($this->firstOrFail(), $this->getQuerySchema());
     }
 
     /**
