@@ -11,6 +11,7 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Data\FieldSet;
 use Pina\Data\Schema;
@@ -126,6 +127,11 @@ class SQL
             return $this->getSchema();
         }
         return $schema;
+    }
+
+    public function getDataTable(): DataTable
+    {
+        return new DataTable($this->get(), $this->getQuerySchema());
     }
 
     /**
