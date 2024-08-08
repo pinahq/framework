@@ -73,6 +73,13 @@ class Schema implements IteratorAggregate
      */
     protected $definitions = [];
 
+    public function __clone()
+    {
+        foreach ($this->groups as $k => $group) {
+            $this->groups[$k] = clone $group;
+        }
+    }
+
     /**
      * @param $title
      * @return $this
