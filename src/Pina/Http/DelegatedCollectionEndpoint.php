@@ -113,8 +113,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makeTabs(): Nav
     {
         /** @var Nav $menu */
-        $menu = App::make(Nav::class);
-        $menu->addClass('nav nav-tabs');
+        $menu = $this->makeTabNav();
         $menu->setLocation($this->location->link('@', $this->query()->all()));
 
         $schema = $this->getTabSchema();
@@ -137,6 +136,13 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             break;
         }
 
+        return $menu;
+    }
+
+    protected function makeTabNav(): Nav
+    {
+        $menu = App::make(Nav::class);
+        $menu->addClass('nav nav-tabs');
         return $menu;
     }
 
