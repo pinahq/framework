@@ -244,7 +244,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         if ($this->sortable) {
             return $this->makeSortableCollectionView($data);
         }
-        return App::make(TableView::class)->load($data);
+        return $this->makeTableView($data);
     }
 
     protected function makeSortableCollectionView(DataTable $data)
