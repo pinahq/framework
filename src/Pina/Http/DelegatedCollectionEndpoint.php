@@ -12,8 +12,6 @@ use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
 use Pina\Controls\Nav;
 use Pina\Controls\PagingControl;
-use Pina\Controls\RecordView;
-use Pina\Controls\TableView;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
@@ -133,7 +131,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             foreach ($variants as $variant) {
                 $menu->add(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']]))));
             }
-            break;
         }
 
         return $menu;
