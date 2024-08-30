@@ -1185,7 +1185,7 @@ class Schema implements IteratorAggregate
      * @return Field
      * @throws \Exception
      */
-    public function addAutoincrementPrimaryKey($field, $title)
+    public function addAutoincrementPrimaryKey($field = 'id', $title = 'ID')
     {
         $r = $this->add($field, $title, IntegerType::class)->setStatic();
         $this->setPrimaryKey([$field]);
