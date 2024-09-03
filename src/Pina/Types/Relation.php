@@ -80,11 +80,15 @@ class Relation extends DirectoryType
 
     public function play($value): string
     {
-        $query = $this->makeDirectoryQuery()->whereId($value)->selectId();
+        $query = $this->makeDirectoryQuery()->whereId($value)->selectId()->selectTitle();
         $list = $query->get();
 
         $types = array_combine($this->relationTable->getSchema()->getFieldNames(), $this->relationTable->getSchema()->getFieldTypes());
-        $type = $types[$this->directoryField];
+
+        $type = $types[$this->directoryField] ?? null;
+        if (is_null($type)) {
+            return implode(', ', array_column($list, 'title'));
+        }
 
         $r = [];
         foreach ($list as $item) {
