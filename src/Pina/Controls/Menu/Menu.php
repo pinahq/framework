@@ -26,34 +26,46 @@ class Menu extends Control
         );
     }
 
-    public function prependLink(string $title, string $link)
+    public function prependLink(string $title, string $link): MenuItem
     {
-        $this->prepend($this->makeLink($title, $link));
+        $item = $this->makeLink($title, $link);
+        $this->prepend($item);
+        return $item;
     }
 
-    public function prependAction(string $title, string $resource, string $method, array $params = [])
+    public function prependAction(string $title, string $resource, string $method, array $params = []): MenuItem
     {
-        $this->prepend($this->makeAction($title, $resource, $method, $params));
+        $item = $this->makeAction($title, $resource, $method, $params);
+        $this->prepend($item);
+        return $item;
     }
 
-    public function prependNested(string $title, Menu $menu)
+    public function prependNested(string $title, Menu $menu): MenuItem
     {
-        $this->prepend($this->makeNested($title, $menu));
+        $item = $this->makeNested($title, $menu);
+        $this->prepend($item);
+        return $item;
     }
 
-    public function appendLink(string $title, string $link)
+    public function appendLink(string $title, string $link): MenuItem
     {
-        $this->append($this->makeLink($title, $link));
+        $item = $this->makeLink($title, $link);
+        $this->append($item);
+        return $item;
     }
 
-    public function appendAction(string $title, string $resource, string $method, array $params = [])
+    public function appendAction(string $title, string $resource, string $method, array $params = []): MenuItem
     {
-        $this->append($this->makeAction($title, $resource, $method, $params));
+        $item = $this->makeAction($title, $resource, $method, $params);
+        $this->append($item);
+        return $item;
     }
 
-    public function appendNested(string $title, Menu $menu)
+    public function appendNested(string $title, Menu $menu): MenuItem
     {
-        $this->append($this->makeNested($title, $menu));
+        $item = $this->makeNested($title, $menu);
+        $this->append($item);
+        return $item;
     }
 
     protected function makeLink(string $title, string $link): LinkMenuItem
@@ -64,7 +76,7 @@ class Menu extends Control
         return $item;
     }
 
-    protected function makeAction(string $title, string $resource, string $method, array $params = [])
+    protected function makeAction(string $title, string $resource, string $method, array $params = []): ActionMenuItem
     {
         /** @var ActionMenuItem $item */
         $item = App::make(ActionMenuItem::class);
