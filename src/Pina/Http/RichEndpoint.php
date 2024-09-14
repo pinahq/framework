@@ -7,6 +7,7 @@ namespace Pina\Http;
 use Pina\App;
 use Pina\Composers\CollectionComposer;
 use Pina\Controls\ActionButton;
+use Pina\Controls\Badge;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\EditableTableView;
 use Pina\Controls\HandledForm;
@@ -119,6 +120,14 @@ class RichEndpoint extends Endpoint
         $alert = new Wrapper(".alert alert-" . $style);
         $alert->append(new RawHtml($text));
         return $alert;
+    }
+
+    protected function makeBadge($text): Badge
+    {
+        /** @var Badge $badge */
+        $badge = App::make(Badge::class);
+        $badge->setText($text);
+        return $badge;
     }
 
     protected function makeCollectionComposer(string $collection, string $creation): CollectionComposer

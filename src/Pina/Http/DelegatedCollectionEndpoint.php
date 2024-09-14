@@ -10,7 +10,7 @@ use Pina\Composers\CollectionComposer;
 use Pina\Controls\ButtonRow;
 use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
-use Pina\Controls\Nav;
+use Pina\Controls\Nav\Nav;
 use Pina\Controls\PagingControl;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
@@ -19,7 +19,6 @@ use Pina\Data\Field;
 use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\Controls\SortableTableView;
-use Pina\Model\LinkedItem;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
@@ -110,13 +109,13 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeTabs(): Nav
     {
-        /** @var Nav $menu */
-        $menu = $this->makeTabNav();
-        $menu->setLocation($this->location->link('@', $this->query()->all()));
+        /** @var Nav $nav */
+        $nav = $this->makeTabMenu();
+        $nav->setLocation($this->location->link('@', $this->query()->all()));
 
         $schema = $this->getTabSchema();
         if ($schema->isEmpty()) {
-            return $menu;
+            return $nav;
         }
 
         $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
@@ -129,17 +128,22 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
             $variants = App::type($type)->getVariants();
             foreach ($variants as $variant) {
-                $menu->add(new LinkedItem($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']]))));
+                $menuItem = $nav->appendLink($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']])));
+                if (!empty($variant['badges']) && is_array($variant['badges'])) {
+                    foreach ($variant['badges'] as $badge) {
+                        $menuItem->append($this->makeBadge($badge));
+                    }
+                }
             }
         }
 
-        return $menu;
+        return $nav;
     }
 
-    protected function makeTabNav(): Nav
+    protected function makeTabMenu(): Nav
     {
         $menu = App::make(Nav::class);
-        $menu->addClass('nav nav-tabs');
+        $menu->addClass('nav-tabs');
         return $menu;
     }
 
@@ -227,7 +231,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     public function updateSortable()
     {
         $ids = $this->request()->all()['id'] ?? [];
-
         $this->collection->reorder($ids);
 
         return Response::ok()->emptyContent();

@@ -1,21 +1,19 @@
 <?php
 
 
-namespace Pina\Controls\Menu;
-
+namespace Pina\Controls\Nav;
 
 use Pina\Access;
 use Pina\CSRF;
-use Pina\Html;
 
-class ActionMenuItem extends MenuItem
+class ActionNavItem extends LinkNavItem
 {
-    protected $title = '';
     protected $resource = '';
 
-    public function load(string $title, string $resource, string $method, array $params = [])
+    public function load(string $title, string $resource, string $method = 'get', array $params = [])
     {
         $this->title = $title;
+        $this->link = '#';
         $this->resource = $resource;
 
         $this->setDataAttribute('resource', ltrim($resource, '/'));
@@ -31,11 +29,6 @@ class ActionMenuItem extends MenuItem
     protected function isPermitted(): bool
     {
         return Access::isPermitted($this->resource);
-    }
-
-    protected function drawInner()
-    {
-        return Html::a($this->title, '#', $this->makeAttributes());
     }
 
 }

@@ -4,7 +4,7 @@ namespace Pina\Router;
 
 use Pina\Access;
 use Pina\App;
-use Pina\Controls\Menu\Menu;
+use Pina\Controls\Nav\Nav;
 use Pina\Http\Endpoint;
 use Pina\Http\Request;
 use Pina\Url;
@@ -55,7 +55,7 @@ class Route
         return $this;
     }
 
-    public function addToMenu(Menu ...$menus)
+    public function addToMenu(Nav ...$menus)
     {
         $endpoint = $this->makeEndpoint(new Request());
         if (!method_exists($endpoint, 'title')) {
@@ -66,8 +66,17 @@ class Route
         if (empty($title)) {
             return $this;
         }
+
+        $badges = [];
+        if (method_exists($endpoint, 'badges')) {
+            $badges = $endpoint->badges(0);
+        }
+
         foreach ($menus as $menu) {
-            $menu->appendLink($title, App::link($this->pattern));
+            $menuItem = $menu->appendLink($title, App::link($this->pattern));
+            foreach ($badges as $badge) {
+                $menuItem->append($badge);
+            }
         }
         return $this;
     }
