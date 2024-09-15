@@ -17,9 +17,14 @@ class Badge extends Control
 
     protected function draw()
     {
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        if (empty($inner)) {
+            return '';
+        }
+
         return Html::nest('span.badge',
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
-            $this->makeAttributes()
+                          $inner,
+                          $this->makeAttributes()
         );
     }
 
