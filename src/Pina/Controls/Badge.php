@@ -22,10 +22,7 @@ class Badge extends Control
             return '';
         }
 
-        return Html::nest('span.badge',
-                          $inner,
-                          $this->makeAttributes()
-        );
+        return Html::nest('span.badge', $inner, $this->makeAttributes());
     }
 
     protected function drawInner()
