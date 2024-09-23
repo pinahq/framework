@@ -7,6 +7,9 @@ use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\CSRF;
 
+/**
+ * @deprecated в пользу конкретных реализаций под библиотеки сортировок
+ */
 class SortableTableView extends SortableListView
 {
     /**

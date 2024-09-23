@@ -1201,6 +1201,17 @@ class Schema implements IteratorAggregate
         return $this->primaryKey;
     }
 
+    public function calculateContextPrimaryKey(array $context): array
+    {
+        $primaryKey = $this->getPrimaryKey();
+        foreach ($primaryKey as $k => $pkElement) {
+            if (isset($context[$pkElement])) {
+                unset($primaryKey[$k]);
+            }
+        }
+        return $primaryKey;
+    }
+
     /**
      * @param array|string $fields
      */

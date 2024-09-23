@@ -4,6 +4,7 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Data\Field;
+use Pina\Html;
 
 class RecordView extends Control
 {
@@ -15,7 +16,7 @@ class RecordView extends Control
      */
     protected function draw()
     {
-        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        return Html::nest('div', $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(), $this->makeAttributes());
     }
 
     /**

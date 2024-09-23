@@ -9,6 +9,8 @@ use Pina\Paging;
 use Pina\SQL;
 use Pina\TableDataGateway;
 
+use Pina\Types\DirectoryType;
+use Pina\Types\Relation;
 use Pina\Types\SearchType;
 
 use function Pina\__;
@@ -51,6 +53,25 @@ abstract class DataCollection
             $schema->forgetField($key);
         }
         return $schema;
+    }
+
+    public function getVariantAvailableSchema()
+    {
+        $schema = $this->getSchema();
+        $schema->forgetStatic();
+
+        $r = new Schema();
+        foreach ($schema as $field) {
+            if ($field->getType() instanceof Relation) {
+                continue;
+            }
+
+            if (is_subclass_of($field->getType(), DirectoryType::class)) {
+                $r->addField($field);
+            }
+        }
+
+        return $r;
     }
 
     /**
@@ -191,9 +212,16 @@ abstract class DataCollection
      * @return string
      * @throws Exception
      */
-    public function update(string $id, array $data, array $context = []): string
+    public function update(string $id, array $data, array $context = [], array $fields = []): string
     {
         $schema = $this->getSchema();
+        if ($fields) {
+            $schema = $schema->forgetAllExcept($fields);
+        }
+
+        if ($schema->isEmpty()) {
+            return $id;
+        }
 
         $normalized = $this->normalize($data, $schema, $context, $id);
 

@@ -79,4 +79,23 @@ class DataRecord
         return isset($meta[$prop]) ? $meta[$prop] : (isset($this->data[$prop]) ? $this->data[$prop] : null);
     }
 
+    public function getPrimaryKey($context = []): array
+    {
+        $pk = $this->schema->calculateContextPrimaryKey($context);
+        $r = [];
+        foreach ($pk as $name) {
+            $r[$name] = $this->data[$name] ?? null;
+        }
+        return $r;
+    }
+
+    public function getSinglePrimaryKey($context = [])
+    {
+        $pk = $this->getPrimaryKey($context);
+        if (empty($pk) || count($pk) > 1) {
+            throw new \Exception("Primary key misconfiguration");
+        }
+        return array_shift($pk);
+    }
+
 }

@@ -9,21 +9,30 @@ use Pina\CSRF;
 class ActionNavItem extends LinkNavItem
 {
     protected $resource = '';
+    protected $method = '';
+    protected $params = [];
 
     public function load(string $title, string $resource, string $method = 'get', array $params = [])
     {
         $this->title = $title;
         $this->link = '#';
         $this->resource = $resource;
+        $this->method = $method;
+        $this->params = $params;
+    }
 
-        $this->setDataAttribute('resource', ltrim($resource, '/'));
-        $this->setDataAttribute('method', $method);
-        $this->setDataAttribute('params', http_build_query($params));
-        $csrfAttributes = CSRF::tagAttributeArray($method);
+    protected function makeLinkAttributes()
+    {
+        $options = parent::makeLinkAttributes();
+        $options['data-resource'] = ltrim($this->resource, '/');
+        $options['data-method'] = $this->method;
+        $options['data-params'] = http_build_query($this->params);
+        $csrfAttributes = CSRF::tagAttributeArray($this->method);
         if (!empty($csrfAttributes['data-csrf-token'])) {
-            $this->setDataAttribute('csrf-token', $csrfAttributes['data-csrf-token']);
+            $options['data-csrf-token'] = $csrfAttributes['data-csrf-token'];
         }
-        $this->addClass('pina-action');
+        $options['class'] = trim(($options['class'] ?? '') . ' pina-action');
+        return $options;
     }
 
     protected function isPermitted(): bool

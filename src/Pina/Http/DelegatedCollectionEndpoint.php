@@ -18,7 +18,7 @@ use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
-use Pina\Controls\SortableTableView;
+use Pina\Layouts\EmptyLayout;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
@@ -44,8 +44,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected $export;
 
     /** @var bool */
-    protected $sortable = false;
-
     public function __construct(Request $request)
     {
         parent::__construct($request);
@@ -96,6 +94,33 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             ->after($this->makeIndexButtons())
             ->before($this->makeTabs())
             ->wrap($sidebarWrapper);
+    }
+
+    public function indexContextMenu($id)
+    {
+        /** @var Nav $menu */
+        $menu = App::make(Nav::class);
+
+        $data = $this->collection->getRecord($id)->getData();
+
+        $schema = $this->collection->getVariantAvailableSchema();
+        foreach ($schema as $field) {
+            $title = $field->getTitle();
+            $name = $field->getName();
+            $variants = App::type($field->getType())->getVariants();
+
+            /** @var Nav $dropdown */
+            $dropdown = App::make(Nav::class);
+            foreach ($variants as $variant) {
+                $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/field', ['id' => $id]), 'put', [$name => $variant['id']]);
+                if ($data[$name] == $variant['id']) {
+                    $item->addClass('active');
+                }
+            }
+            $menu->appendDropdown($title, $dropdown);
+        }
+
+        return $menu->setLayout(App::load(EmptyLayout::class));
     }
 
     protected function getTabSchema(): Schema
@@ -228,6 +253,17 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
 
+    public function updateField($tmp, $id)
+    {
+        $data = $this->request()->all();
+        $context = $this->context()->all();
+
+        $this->collection->update($id, $data, $context, array_keys($data));
+
+        return Response::ok();
+    }
+
+
     public function updateSortable()
     {
         $ids = $this->request()->all()['id'] ?? [];
@@ -241,22 +277,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeCollectionView(DataTable $data)
     {
-        if ($this->sortable) {
-            return $this->makeSortableCollectionView($data);
-        }
-        return $this->makeTableView($data);
-    }
-
-    protected function makeSortableCollectionView(DataTable $data)
-    {
-        /** @var SortableTableView $view */
-        $view = App::make(SortableTableView::class);
-        $view->load($data);
-        return $view->setHandler(
-            $this->base->resource('@/all/sortable'),
-            'put',
-            []
-        );
+        return $this->makeTableView($data)->setLocation($this->base, $this->context()->all());
     }
 
     /**

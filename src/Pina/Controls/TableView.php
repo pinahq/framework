@@ -6,6 +6,7 @@ use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Field;
+use Pina\Http\Location;
 
 class TableView extends Card
 {
@@ -13,6 +14,23 @@ class TableView extends Card
      * @var DataTable
      */
     protected $dataTable;
+
+    /** @var Location */
+    protected $location;
+
+    protected $context = [];
+
+    public function __construct()
+    {
+        $this->location = new Location(App::resource());
+    }
+
+    public function setLocation(Location $location, array $context = [])
+    {
+        $this->location = $location;
+        $this->context = $context;
+        return $this;
+    }
 
     /**
      * @param DataTable $dataTable
