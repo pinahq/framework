@@ -78,9 +78,9 @@ class Nav extends Control
         }
     }
 
-    public function prependLink(string $title, string $link): NavItem
+    public function prependLink(string $title, string $link, ?bool $newPage = null): NavItem
     {
-        $item = $this->makeLink($title, $link);
+        $item = $this->makeLink($title, $link, $newPage);
         $this->calcScore($link);
         $this->prepend($item);
         return $item;
@@ -100,9 +100,9 @@ class Nav extends Control
         return $item;
     }
 
-    public function appendLink(string $title, string $link): NavItem
+    public function appendLink(string $title, string $link, ?bool $newPage = null): NavItem
     {
-        $item = $this->makeLink($title, $link);
+        $item = $this->makeLink($title, $link, $newPage);
         $this->calcScore($link);
         $this->append($item);
         return $item;
@@ -120,11 +120,11 @@ class Nav extends Control
         $this->append($this->makeDropdown($title, $menu));
     }
 
-    protected function makeLink(string $title, string $link): LinkNavItem
+    protected function makeLink(string $title, string $link, ?bool $newPage = null): LinkNavItem
     {
         /** @var LinkNavItem $item */
         $item = App::make(LinkNavItem::class);
-        $item->load($title, $link);
+        $item->load($title, $link, $newPage);
         return $item;
     }
 

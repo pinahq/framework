@@ -100,6 +100,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     {
         /** @var Nav $menu */
         $menu = App::make(Nav::class);
+        $menu->appendLink(__('Открыть в новой вкладке'), $this->base->link('@/:id', ['id' => $id]), true);
 
         $data = $this->collection->getRecord($id)->getData();
 

@@ -12,11 +12,13 @@ class LinkNavItem extends NavItem
 {
 
     protected $link = '';
+    protected $newPage = null;
 
-    public function load(string $title, string $link)
+    public function load(string $title, string $link, ?bool $newPage = null)
     {
         $this->title = $title;
         $this->link = $link;
+        $this->newPage = $newPage;
     }
 
     public function getLink()
@@ -62,6 +64,10 @@ class LinkNavItem extends NavItem
 
     protected function isExternalLink()
     {
+        if (!is_null($this->newPage) && $this->newPage) {
+            return true;
+        }
+
         $host = parse_url($this->link, PHP_URL_HOST);
         return !empty($host) && $host != App::host();
     }
