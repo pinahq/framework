@@ -354,6 +354,24 @@ class TableDataGateway extends SQL
         return $primaryKey;
     }
 
+    public function getSinglePrimaryKey($context = [])
+    {
+        $pk = $this->getPrimaryKey();
+        foreach ($context as $key => $value) {
+            if (in_array($key, $pk)) {
+                $this->whereBy($key, $value);
+                $pk = array_diff($pk, [$key]);
+            }
+        }
+
+        $singlePk = array_shift($pk);
+        if (count($pk) > 0) {
+            throw new Exception("Wrong primary key");
+        }
+
+        return $singlePk;
+    }
+
     /**
      * Возвращает первое поля первичного ключа, если PK состоит из одного поля,
      * иначе выбрасывает исключение

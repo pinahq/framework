@@ -150,6 +150,22 @@ abstract class DataCollection
         return new DataRecord($item, $this->getSchema());
     }
 
+    public function getNextId($id, array $context = [])
+    {
+        $query = $this->makeListQuery([], $context);
+        $pk = $query->getSinglePrimaryKey($context);
+        $query->whereGreaterThan($pk, $id);
+        return $query->min($pk);
+    }
+
+    public function getPreviousId($id, array $context = [])
+    {
+        $query = $this->makeListQuery([], $context);
+        $pk = $query->getSinglePrimaryKey($context);
+        $query->whereLessThan($pk, $id);
+        return $query->max($pk);
+    }
+
     /**
      * Инициализирует новую запись со значениями по умолчанию под вставку
      * @param array $context

@@ -384,6 +384,15 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             $row->setMain($this->makeEditLinkButton());
         }
         $this->appendNestedResourceButtons($row);
+        $context = $this->context()->all();
+        $prevId = $this->collection->getPreviousId($record->getSinglePrimaryKey($context), $context);
+        if ($prevId) {
+            $row->append($this->makeLinkedButton('⟵', $this->base->link('@/:id', ['id' => $prevId]), 'info'));
+        }
+        $nextId = $this->collection->getNextId($record->getSinglePrimaryKey($context), $context);
+        if ($nextId) {
+            $row->append($this->makeLinkedButton('⟶', $this->base->link('@/:id', ['id' => $nextId]), 'info'));
+        }
         return $row;
     }
 
