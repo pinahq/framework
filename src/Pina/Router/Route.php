@@ -5,6 +5,7 @@ namespace Pina\Router;
 use Pina\Access;
 use Pina\App;
 use Pina\Controls\Nav\Nav;
+use Pina\CSRF;
 use Pina\Http\Endpoint;
 use Pina\Http\Request;
 use Pina\Url;
@@ -52,6 +53,13 @@ class Route
     public function permit($groups)
     {
         Access::permit($this->pattern, $groups);
+        return $this;
+    }
+
+    public function ignoreCSRF()
+    {
+        $controller = URL::controller($this->pattern);
+        CSRF::whitelist([$controller]);
         return $this;
     }
 
