@@ -108,7 +108,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         foreach ($schema as $field) {
             $title = $field->getTitle();
             $name = $field->getName();
-            $variants = App::type($field->getType())->getVariants();
+            $variants = App::type($field->getType())->setContext($data)->getVariants();
 
             /** @var Nav $dropdown */
             $dropdown = App::make(Nav::class);
