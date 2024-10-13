@@ -155,7 +155,7 @@ abstract class DataCollection
         $query = $this->makeListQuery([], $context);
         $pk = $query->getSinglePrimaryKey($context);
         $query->whereGreaterThan($pk, $id);
-        return $query->min($pk);
+        return $query->min($query->getAlias(). '.`' .$pk.'`');
     }
 
     public function getPreviousId($id, array $context = [])
@@ -163,7 +163,7 @@ abstract class DataCollection
         $query = $this->makeListQuery([], $context);
         $pk = $query->getSinglePrimaryKey($context);
         $query->whereLessThan($pk, $id);
-        return $query->max($pk);
+        return $query->max($query->getAlias(). '.`' .$pk.'`');
     }
 
     /**

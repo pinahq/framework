@@ -12,6 +12,7 @@ use Pina\Controls\Control;
 use Pina\Controls\FilterForm;
 use Pina\Controls\Nav\Nav;
 use Pina\Controls\PagingControl;
+use Pina\Controls\RawHtml;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
@@ -384,16 +385,27 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             $row->setMain($this->makeEditLinkButton());
         }
         $this->appendNestedResourceButtons($row);
+        return $row;
+    }
+
+    protected function makePreviousButton(DataRecord $record): Control
+    {
         $context = $this->context()->all();
         $prevId = $this->collection->getPreviousId($record->getSinglePrimaryKey($context), $context);
-        if ($prevId) {
-            $row->append($this->makeLinkedButton('⟵', $this->base->link('@/:id', ['id' => $prevId]), 'info'));
+        if (empty($prevId)) {
+            return new RawHtml();
         }
+        return $this->makeLinkedButton('⟵', $this->base->link('@/:id', ['id' => $prevId]), 'info');
+    }
+
+    protected function makeNextButton(DataRecord $record): Control
+    {
+        $context = $this->context()->all();
         $nextId = $this->collection->getNextId($record->getSinglePrimaryKey($context), $context);
-        if ($nextId) {
-            $row->append($this->makeLinkedButton('⟶', $this->base->link('@/:id', ['id' => $nextId]), 'info'));
+        if (empty($nextId)) {
+            return new RawHtml();
         }
-        return $row;
+        return $this->makeLinkedButton('⟶', $this->base->link('@/:id', ['id' => $nextId]), 'info');
     }
 
     protected function appendNestedResourceButtons(Control $control)
