@@ -14,10 +14,14 @@ class LinkNavItem extends NavItem
     protected $link = '';
     protected $newPage = null;
 
-    public function load(string $title, string $link, ?bool $newPage = null)
+    public function load(string $title, string $link)
     {
         $this->title = $title;
         $this->link = $link;
+    }
+
+    public function setNewPage(?bool $newPage = true)
+    {
         $this->newPage = $newPage;
     }
 

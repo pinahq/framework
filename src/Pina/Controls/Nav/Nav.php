@@ -125,6 +125,9 @@ class Nav extends Control
         /** @var LinkNavItem $item */
         $item = App::make(LinkNavItem::class);
         $item->load($title, $link, $newPage);
+        if ($newPage) {
+            $item->setNewPage();
+        }
         return $item;
     }
 
