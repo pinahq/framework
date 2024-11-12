@@ -5,6 +5,7 @@ namespace Pina\Layouts;
 use Exception;
 use Pina\App;
 use Pina\Controls\Control;
+use Pina\CSRF;
 use Pina\Html;
 use Pina\Request;
 use Pina\Controls\Meta;
@@ -95,7 +96,8 @@ class DefaultLayout extends Control
         return $this->drawCharset()
             . $this->drawCanonical()
             . $this->drawContentMeta()
-            . $this->drawBrowserMeta();
+            . $this->drawBrowserMeta()
+            . $this->drawCSRFMeta();
     }
 
     protected function drawCharset()
@@ -128,6 +130,11 @@ class DefaultLayout extends Control
                     'content' => "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
                 ]
             );
+    }
+
+    protected function drawCSRFMeta()
+    {
+        return $this->drawMetaLine(['name' => 'csrf-token', 'content' => CSRF::token()]);
     }
 
     protected function drawMetaLine($attributes)
