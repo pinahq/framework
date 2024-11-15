@@ -83,13 +83,55 @@ class Input
         } else {
             $contentType = self::getContentType();
             if ($contentType == 'application/x-www-form-urlencoded') {
-                $putdata = file_get_contents('php://input');
-                parse_str($putdata, $data);
+                $input = file_get_contents('php://input');
+                parse_str($input, $data);
             } elseif ($contentType == 'multipart/form-data') {
-                //TODO: implement multipart/form-data parsing
+                $data = static::parseMultipartFormData();
             }
         }
         return $data;
+    }
+
+    protected static function parseMultipartFormData()
+    {
+        $r = [];
+
+        $input = file_get_contents('php://input');
+        $boundary = static::resolveBoundary();
+        if (empty($boundary)) {
+            parse_str(urldecode($input), $r);
+            return $r;
+        }
+
+        $parts = preg_split("/-+$boundary/", $input);
+        array_pop($parts);
+
+        $str = '';
+        foreach ($parts as $id => $block) {
+            if (empty($block)) {
+                continue;
+            }
+
+            if (strpos($block, 'application/octet-stream') !== FALSE) {
+                preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
+                $r['_FILES'][$matches[1]] = $matches[2];
+            } else {
+                preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
+                $str .= $matches[1]."=".$matches[2]."&";
+            }
+        }
+        $parsed = [];
+        parse_str($str, $parsed);
+        return array_merge($r, $parsed);
+    }
+
+    protected static function resolveBoundary()
+    {
+        $matches = [];
+        if (!preg_match('/boundary=(.*)$/', $_SERVER['CONTENT_TYPE'], $matches)) {
+            return '';
+        }
+        return $matches[1];
     }
 
     public static function getContentType()
