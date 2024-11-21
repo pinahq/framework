@@ -125,18 +125,24 @@ class Relation extends DirectoryType
 
     public function setData($id, $value)
     {
+        $value = is_array($value) ? $value : [];
+
+        $existed = $this->makeRelationQuery()
+            ->whereBy($this->relationField, $id)
+            ->column($this->directoryField);
+
+        $toDeleteIds = array_diff($existed, $value);
+        $toInsertIds = array_diff($value, $existed);
+
         $this->makeRelationQuery()
             ->whereBy($this->relationField, $id)
+            ->whereBy($this->directoryField, $toDeleteIds)
             ->delete();
 
-        $toInsert = [];
-        if (!is_array($value)) {
-            return;
-        }
-        foreach ($value as $item) {
+        foreach ($toInsertIds as $insertId) {
             $toInsert[] = [
                 $this->relationField => $id,
-                $this->directoryField => $item,
+                $this->directoryField => $insertId,
             ];
         }
 
