@@ -28,7 +28,7 @@ trait TokenGeneratorTrait
      * @param array|string $id
      * @return $this
      */
-    abstract public function whereId($id);
+    abstract public function whereId($id, $context = []);
 
     /**
      * @return bool
