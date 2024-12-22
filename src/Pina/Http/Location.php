@@ -10,14 +10,18 @@ class Location
 
     protected $resource = '';
 
-    public function __construct($resource)
+    /** @var \Pina\Http\Url  */
+    protected $server;
+
+    public function __construct($resource, \Pina\Http\Url $server = null)
     {
         $this->resource = $resource;
+        $this->server = $server ?? new \Pina\Http\Url('');
     }
 
     public function link($pattern, $params = [])
     {
-        $url = App::baseUrl();
+        $url = $this->server->__toString();
 
         $parts = explode('?', $pattern);
         $query = '';
@@ -66,7 +70,7 @@ class Location
 
     public function location($pattern, $params = []): Location
     {
-        return new Location($this->resource($pattern, $params));
+        return new Location($this->resource($pattern, $params), $this->server);
     }
 
 }

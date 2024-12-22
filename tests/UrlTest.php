@@ -3,14 +3,16 @@
 use PHPUnit\Framework\TestCase;
 use Pina\Http\Location;
 use Pina\Url;
+use Pina\App;
 
 class UrlTest extends TestCase
 {
 
     public function testLocation()
     {
-        $_SERVER['HTTP_HOST'] = 'test.local';
-        $location = new Location('my-resource');
+        $server = new \Pina\Http\Url('http://test.local/');
+        $location = new Location('my-resource', $server);
+
         $this->assertEquals(
             'http://test.local/my-resource?category_id=5',
             $location->link('@?category_id=:id', ['id' => 5, 'title' => 'test'])
@@ -23,12 +25,12 @@ class UrlTest extends TestCase
             'http://test.local/test?category_id=5&ref=my',
             $location->link(':title?category_id=:id&ref=:ref', ['id' => 5, 'title' => 'test', 'ref' => 'my'])
         );
-        $location = new Location('my-resource/');
+        $location = new Location('my-resource/', $server);
         $this->assertEquals(
             'http://test.local/my-resource/5',
             $location->link('@/:id', ['id' => 5])
         );
-        $location = new Location('/my-resource/');
+        $location = new Location('/my-resource/', $server);
         $this->assertEquals(
             'http://test.local/my-resource/5',
             $location->link('@/:id', ['id' => 5])

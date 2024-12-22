@@ -2,6 +2,7 @@
 
 namespace Pina\Http;
 
+use Pina\App;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -30,12 +31,12 @@ class Request extends SymfonyRequest
 
     public function getBaseLocation(): Location
     {
-        return $this->base ?? new Location('/');
+        return $this->base ?? App::baseUrl();
     }
 
     public function getLocation(): Location
     {
-        return $this->location ?? new Location('/');
+        return $this->location ?? App::baseUrl();
     }
 
     public function filters()

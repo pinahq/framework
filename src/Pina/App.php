@@ -4,6 +4,7 @@ namespace Pina;
 
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
+use Pina\Http\Location;
 
 class App
 {
@@ -39,6 +40,7 @@ class App
         }
 
         self::$container = new Container;
+        self::$container->set('base_url', new Location('/', new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
         if (isset(self::$config['depencies']) && is_array(self::$config['depencies'])) {
             foreach (self::$config['depencies'] as $key => $value) {
                 self::$container->set($key, $value);
@@ -67,6 +69,22 @@ class App
     public static function container()
     {
         return self::$container;
+    }
+
+    public static function call(Container $env, Callable $fn)
+    {
+        $back = static::$container;
+
+        $env->addFallback(static::$container);
+        static::$container = $env;
+
+        try {
+            $fn();
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            static::$container = $back;
+        }
     }
 
     /**
@@ -276,9 +294,9 @@ class App
      * Базовый URL на основе настроек схемы и домена приложения
      * @return string
      */
-    public static function baseUrl()
+    public static function baseUrl(): Location
     {
-        return self::scheme() . "://" . self::host() . "/";
+        return static::$container->get('base_url');
     }
 
     /**
@@ -415,22 +433,7 @@ class App
      */
     public static function link($pattern, $params = array())
     {
-        $url = self::baseUrl();
-        if (Input::isScript() && !empty(self::$config['allow_script_url'])) {
-            $url .= 'index.php?action=';
-        }
-
-        $resource = Route::resource($pattern, $params);
-        $ps = self::getParamsString($pattern, $params);
-
-        $url .= ltrim($resource, '/');
-        $url .= !empty($ps) ? ('?' . $ps) : '';
-
-        if (!empty($params['anchor'])) {
-            $url .= "#" . $params["anchor"];
-        }
-
-        return $url;
+        return self::baseUrl()->link($pattern, $params);
     }
 
     /**

@@ -22,7 +22,7 @@ class TableView extends Card
 
     public function __construct()
     {
-        $this->location = new Location(App::resource());
+        $this->location = App::baseUrl()->location(App::resource());
     }
 
     public function setLocation(Location $location, array $context = [])

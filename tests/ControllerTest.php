@@ -27,7 +27,7 @@ class ControllerTest extends TestCase
         App::init('test', __DIR__ . '/config');
 
         \Pina\Request::push(new \Pina\RequestHandler('lk/1/cron-events', 'index', []));
-        $_SERVER['HTTP_HOST'] = 'test.com';
+        App::container()->set('base_url', new Location(''));
 
         $data = [
             [
@@ -104,9 +104,9 @@ class ControllerTest extends TestCase
 
         $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events" data-method="delete" data-params="" data-csrf-token="'.CSRF::token().'">Удалить</a>';
 
-        $expectedRowHtml = '<div class="card"><div class="card-body">'
+        $expectedRowHtml = '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>' . $removeButton;
+            . '</div></div>' . $removeButton.'</div>';
 
         $r = $endpoint->show($id);
         $this->assertEquals($expectedRowHtml, (string)$r);
@@ -181,18 +181,18 @@ class ControllerTest extends TestCase
             . CSRF::formField('delete')
             . '<p>note</p>'
             . '<table><tr><td>'
-            . '<div class="card"><div class="card-body">'
+            . '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>'. $removeButton
+            . '</div></div>'. $removeButton .'</div>'
             . '</td></tr></table>'
             . '</form>';
 
         $this->assertEquals($expectedWrapHtml, (string)$r);
 
         $expectedWrapHtml = '<table><tr><td>'
-            . '<div class="card"><div class="card-body">'
+            . '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
-            . '</div></div>'. $removeButton
+            . '</div></div>'. $removeButton . '</div>'
             . '</td></tr></table>';
 
         $this->assertEquals($expectedWrapHtml, (string)$r->unwrap());
