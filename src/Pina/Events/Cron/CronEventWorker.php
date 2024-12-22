@@ -34,12 +34,7 @@ class CronEventWorker
                     Log::info('event', 'Worker ' . $workerId . ' has started ' . $task['event']);
                     $this->startTask($task['id']);
                     try {
-                        if (class_exists($task['event']) && in_array(Command::class, class_parents($task['event']))) {
-                            $cmd = App::load($task['event']);
-                            $cmd($task['data']);
-                        } else {
-                            Log::error('event', 'Handler not found', $task);
-                        }
+                        $this->runTask($task);
                         $this->deleteTask($task['id']);
                     } catch (Exception $e) {
                         Log::error('event', $e->getMessage(), $task);
@@ -52,6 +47,16 @@ class CronEventWorker
                 }
             }
             sleep($restSeconds);
+        }
+    }
+
+    protected function runTask($task)
+    {
+        if (class_exists($task['event']) && in_array(Command::class, class_parents($task['event']))) {
+            $cmd = App::load($task['event']);
+            $cmd($task['data']);
+        } else {
+            Log::error('event', 'Handler not found', $task);
         }
     }
 

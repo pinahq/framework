@@ -21,7 +21,7 @@ class CronEventGateway extends TableDataGateway
      */
     public function getSchema()
     {
-        $schema = new Schema();
+        $schema = parent::getSchema();
         $schema->add('id', 'ID', UUIDType::class)->setMandatory();
         $schema->setPrimaryKey('id');
         $schema->add('event', 'Event', StringType::class)->setMandatory();

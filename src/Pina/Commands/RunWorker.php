@@ -4,6 +4,7 @@
 namespace Pina\Commands;
 
 
+use Pina\App;
 use Pina\Command;
 use Pina\Config;
 use Pina\Events\Cron\CronEventWorker;
@@ -26,7 +27,8 @@ class RunWorker extends Command
             return;
         }
 
-        $worker = new CronEventWorker();
+        /** @var CronEventWorker $worker */
+        $worker = App::make(CronEventWorker::class);
         $worker->work(
             $this->workerId,
             isset($this->config['max_tasks']) ? $this->config['max_tasks'] : 10,

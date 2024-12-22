@@ -4,5 +4,6 @@ namespace Pina;
 
 use Pina\Commands\RunWorker;
 
-$command = new RunWorker();
+/** @var RunWorker $command */
+$command = App::make(RunWorker::class);
 $command();
