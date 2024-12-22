@@ -27,7 +27,6 @@ class TableDataGateway extends SQL
     protected static $indexes = [];
     protected static $engine = "InnoDB";
     protected static $charset = "utf8";
-    protected $context = array();
 
     /**
      * Возвращает список триггеров
@@ -63,20 +62,23 @@ class TableDataGateway extends SQL
 
     public static function addSchema(Schema $schema)
     {
-        static::getSchemaExtensions()->addGroup($schema);
+        $tableSchema = static::getSchemaExtensions();
+        $tableSchema->addGroup($schema);
+
+        /** @var Container\Container $container */
+        $container = App::load('schema');
+        $container->share(static::$table, $tableSchema);
     }
 
     protected static function getSchemaExtensions(): Schema
     {
-        /** @var Container\Container $tables */
-        $schemas = App::load('schema');
-        if ($schemas->has(static::$table)) {
-            return $schemas->get(static::$table);
+        /** @var Container\Container $container */
+        $container = App::load('schema');
+        if ($container->has(static::$table)) {
+            return $container->get(static::$table);
         }
 
-        $schema = new Schema();
-        $schemas->share(static::$table, $schema);
-        return $schema;
+        return new Schema();
     }
 
     /**
@@ -134,7 +136,7 @@ class TableDataGateway extends SQL
     public function getUpgrades()
     {
         $fields = $this->getFields();
-        if (empty($fields)) {
+        if (empty($fields) || empty($this->getTable())) {
             return array(array(), array());
         }
 
@@ -219,19 +221,6 @@ class TableDataGateway extends SQL
     {
         $cl = get_called_class();
         return App::make($cl);
-    }
-
-    /**
-     * Добавляет контекст выполнения запроса.
-     * Контекст используется как в выборке, так и при вставке
-     * @param string $field
-     * @param mixed $value
-     * @return $this
-     */
-    public function context($field, $value)
-    {
-        $this->context[$field] = $value;
-        return $this->whereBy($field, $value);
     }
 
     /**

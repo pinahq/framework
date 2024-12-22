@@ -40,6 +40,8 @@ class SQL
     private $unions = array();
     private $ons = array();
 
+    protected $context = array();
+
     public function __clone()
     {
         foreach ($this->joins as $k => $join) {
@@ -105,6 +107,19 @@ class SQL
     {
         $this->db = $db ? $db : App::container()->get(DatabaseDriverInterface::class);
         $this->from = $table;
+    }
+
+    /**
+     * Добавляет контекст выполнения запроса.
+     * Контекст используется как в выборке, так и при вставке
+     * @param string $field
+     * @param mixed $value
+     * @return $this
+     */
+    public function context($field, $value)
+    {
+        $this->context[$field] = $value;
+        return $this;
     }
 
     /**
@@ -550,6 +565,14 @@ class SQL
                 $q .= '(' . $on . ')';
             }
         }
+
+        foreach ($this->context as $k => $v) {
+            if (!empty($q)) {
+                $q .= ' AND ';
+            }
+            $q .= $this->makeByCondition(array('=', self::SQL_OPERAND_FIELD, $k, self::SQL_OPERAND_VALUE, $v), $parentAlias);
+        }
+
         return !empty($q) ? (' ON ' . $q) : ' ON 1 ';
     }
 
@@ -889,7 +912,7 @@ class SQL
      */
     public function makeWhere()
     {
-        $sql = join(' AND ', $this->getWhereArray());
+        $sql = join(' AND ', $this->getWhereArray(true));
 
         if ($sql != '') {
             $sql = ' WHERE ' . $sql;
@@ -902,9 +925,15 @@ class SQL
      * Возвращает массив с подготовленным набором условий для конструкции WHERE
      * @return array
      */
-    public function getWhereArray()
+    public function getWhereArray(bool $root)
     {
         $wheres = array();
+        if ($root) {
+            foreach ($this->context as $k => $v) {
+                $wheres[] = $this->makeWhereBy($k, $v);
+            }
+        }
+
         foreach ($this->where as $where) {
             if (empty($where)) {
                 continue;
@@ -937,7 +966,7 @@ class SQL
         foreach ($this->joins as $line) {
             if (count($line) == 2) {
                 list($type, $table) = $line;
-                $wheres = array_merge($wheres, $table->getWhereArray());
+                $wheres = array_merge($wheres, $table->getWhereArray(false));
             }
         }
         return $wheres;

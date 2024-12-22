@@ -10,6 +10,12 @@ class Container implements ContainerInterface
     protected $definitions = [];
     protected $sharedDefinitions = [];
     protected $shared = [];
+    protected $fallbacks = [];
+
+    public function addFallback(ContainerInterface $fallback)
+    {
+        $this->fallbacks[] = $fallback;
+    }
 
     public function set($id, $concrete)
     {
@@ -78,6 +84,12 @@ class Container implements ContainerInterface
             );
         }
 
+        foreach ($this->fallbacks as $fallback) {
+            if ($fallback->has($id)) {
+                return $fallback->get($id);
+            }
+        }
+
         throw new NotFoundException(
             sprintf('Alias (%s) is not being managed by the container', $id)
         );
@@ -117,7 +129,16 @@ class Container implements ContainerInterface
 
     public function has($id)
     {
-        return array_key_exists($id, $this->definitions) || array_key_exists($id, $this->sharedDefinitions);
+        $filled = array_key_exists($id, $this->definitions) || array_key_exists($id, $this->sharedDefinitions);
+        if ($filled) {
+            return true;
+        }
+        foreach ($this->fallbacks as $fallback) {
+            if ($fallback->has($id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getKeys(): array
