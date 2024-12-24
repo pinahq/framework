@@ -6,7 +6,7 @@ class Url
 {
     protected $url = '';
 
-    public function __construct($url)
+    public function __construct(string $url)
     {
         $this->url = $url;
     }
