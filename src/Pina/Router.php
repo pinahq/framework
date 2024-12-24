@@ -3,10 +3,10 @@
 namespace Pina;
 
 use Exception;
-use Pina\Http\Endpoint;
 use Pina\Http\Request;
 use Pina\Model\LinkedItem;
 use Pina\Model\LinkedItemCollection;
+use Pina\Router\RouteGroup;
 
 class Router
 {
@@ -22,6 +22,11 @@ class Router
         $route = new \Pina\Router\Route($pattern, $class, $context);
         $this->items[$route->getController()] = $route;
         return $route;
+    }
+
+    public function makeGroup($tags = [])
+    {
+        return new RouteGroup($this, $tags);
     }
 
     public function getPatterns()
@@ -157,6 +162,16 @@ class Router
             }
         }
         return $menu;
+    }
+
+    public function forgetByTag($tag)
+    {
+        foreach ($this->items as $k => $route) {
+            if ($route->hasTag($tag)) {
+                $route->clearPermission();
+                unset($this->items[$k]);
+            }
+        }
     }
 
     /**

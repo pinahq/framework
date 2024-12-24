@@ -62,6 +62,16 @@ class Access
         self::$sorted = false;
     }
 
+    public static function clear($pattern)
+    {
+        list($preg, $map) = Url::preg($pattern);
+        foreach (self::$data as $k => $existed) {
+            if ($existed[self::ACCESS_FIELD_PREG] == $preg) {
+                unset(self::$data[$k]);
+            }
+        }
+    }
+
     public static function isPrivate($resource)
     {
         $resource = Url::trim($resource);

@@ -16,6 +16,7 @@ class Route
     protected $pattern = '';
     protected $endpoint = '';
     protected $context = [];
+    protected $tags = [];
 
     public function __construct(string $pattern, string $class, array $context = [])
     {
@@ -56,6 +57,12 @@ class Route
         return $this;
     }
 
+    public function clearPermission()
+    {
+        Access::clear($this->pattern);
+        return $this;
+    }
+
     public function ignoreCSRF()
     {
         $controller = URL::controller($this->pattern);
@@ -89,5 +96,14 @@ class Route
         return $this;
     }
 
+    public function addTag($tag)
+    {
+        $this->tags[] = $tag;
+    }
+
+    public function hasTag($tag): bool
+    {
+        return in_array($tag, $this->tags);
+    }
 
 }
