@@ -8,6 +8,7 @@ use ArrayIterator;
 class ModuleRegistry implements IteratorAggregate
 {
 
+    protected $bootOrder = [];
     protected $registry = [];
 
     public function load($module)
@@ -15,6 +16,25 @@ class ModuleRegistry implements IteratorAggregate
         if (isset($this->registry[$module])) {
             return;
         }
+        $this->bootOrder[] = $module;
+        $this->registry[$module] = new $module;
+    }
+
+    public function loadBefore($module, $mark)
+    {
+        if (isset($this->registry[$module])) {
+            return;
+        }
+        $positionKey = array_search($mark, $this->bootOrder);
+        if ($positionKey === false) {
+            $this->load($module);
+            return;
+        }
+        $this->bootOrder = array_merge(
+            array_slice($this->bootOrder, 0, $positionKey),
+            [$module],
+            array_slice($this->bootOrder, $positionKey)
+        );
         $this->registry[$module] = new $module;
     }
 
@@ -38,7 +58,8 @@ class ModuleRegistry implements IteratorAggregate
             }
         }
 
-        foreach ($this->registry as $ns => $module) {
+        foreach ($this->bootOrder as $ns) {
+            $module = $this->registry[$ns];
             if (!$method || !method_exists($module, $method)) {
                 continue;
             }
