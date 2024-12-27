@@ -294,9 +294,14 @@ class App
      * Базовый URL на основе настроек схемы и домена приложения
      * @return string
      */
-    public static function baseUrl(): Location
+    public static function baseUrl($resource = ''): Location
     {
-        return static::$container->get('base_url');
+        /** @var Location $location */
+        $location = static::$container->get('base_url');
+        if ($resource) {
+            return $location->location($resource);
+        }
+        return $location;
     }
 
     /**
@@ -433,7 +438,7 @@ class App
      */
     public static function link($pattern, $params = array())
     {
-        return self::baseUrl()->link($pattern, $params);
+        return self::baseUrl(Request::resource())->link($pattern, $params);
     }
 
     /**
