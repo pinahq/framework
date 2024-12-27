@@ -146,7 +146,9 @@ class Relation extends DirectoryType
             ];
         }
 
-        $this->makeRelationQuery()->insert($toInsert);
+        if ($toInsert) {
+            $this->makeRelationQuery()->insert($toInsert);
+        }
     }
 
     public function filter(TableDataGateway $query, $key, $value): void
