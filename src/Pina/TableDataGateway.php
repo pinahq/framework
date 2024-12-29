@@ -460,6 +460,15 @@ class TableDataGateway extends SQL
         return $this->whereBy($singlePk, $id);
     }
 
+    public function whereSlug($id, $context = [])
+    {
+        $slug = $this->getSchema()->getSlug();
+        if ($slug) {
+            return $this->whereBy($slug, $id);
+        }
+        return $this->whereId($id, $context);
+    }
+
     /**
      * Добавляет в запрос условие на несоответствие ID заданному значению
      * @param array|string $id

@@ -68,6 +68,8 @@ class Schema implements IteratorAggregate
      */
     protected $keys = [];
 
+    protected $slug = null;
+
     /**
      * @var array
      */
@@ -210,6 +212,10 @@ class Schema implements IteratorAggregate
 
         if (empty($this->primaryKey) && !empty($schema->primaryKey)) {
             $this->primaryKey = $schema->primaryKey;
+        }
+
+        if (!$this->slug && $schema->slug) {
+            $this->slug = $schema->slug;
         }
     }
 
@@ -1238,6 +1244,16 @@ class Schema implements IteratorAggregate
     public function addKey($fields)
     {
         $this->keys[] = is_array($fields) ? $fields : func_get_args();
+    }
+
+    public function setSlug($field)
+    {
+        $this->slug = $field;
+    }
+
+    public function getSlug()
+    {
+        return $this->slug;
     }
 
     /**

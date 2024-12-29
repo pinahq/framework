@@ -98,4 +98,13 @@ class DataRecord
         return array_shift($pk);
     }
 
+    public function getSlug($context = [])
+    {
+        $slug = $this->schema->getSlug();
+        if ($slug) {
+            return $this->data[$slug] ?? null;
+        }
+        return $this->getSinglePrimaryKey($context);
+    }
+
 }
