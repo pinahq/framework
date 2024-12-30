@@ -33,6 +33,11 @@ abstract class DataCollection
         return $this->makeQuery()->getSchema();
     }
 
+    public function getRecordSchema(): Schema
+    {
+        return $this->getSchema()->setImmutableStatic();
+    }
+
     /**
      * Схема списка (таблицы)
      * @return Schema
@@ -121,16 +126,16 @@ abstract class DataCollection
     public function getRecord(string $id, array $context = []): DataRecord
     {
         $query = $this->makeRecordQuery();
-        $schema = $this->getSchema();
+        $schema = $this->getRecordSchema();
 
         if ($context) {
-            $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
+            $contextSchema = $schema->fieldset(array_keys($context))->makeSchema();
             $query->whereFilters($context, $contextSchema);
         }
 
         $primaryKey = $schema->getPrimaryKey();
         if (empty($primaryKey)) {
-            return new DataRecord($query->findOrFail($id), $this->getSchema());
+            return new DataRecord($query->findOrFail($id), $schema);
         }
 
         foreach ($primaryKey as $k => $pkElement) {
@@ -147,7 +152,7 @@ abstract class DataCollection
             $query->whereBy($pkElement, $idParts[$k]);
         }
         $item = $query->firstOrFail();
-        return new DataRecord($item, $this->getSchema());
+        return new DataRecord($item, $schema);
     }
 
     public function getNextId($id, array $context = [])
@@ -230,7 +235,7 @@ abstract class DataCollection
      */
     public function update(string $id, array $data, array $context = [], array $fields = []): string
     {
-        $schema = $this->getSchema();
+        $schema = $this->getRecordSchema();
         if ($fields) {
             $schema = $schema->forgetAllExcept($fields);
         }

@@ -382,6 +382,21 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    public function setImmutableStatic()
+    {
+        foreach ($this->fields as $field) {
+            if ($field->isImmutable()) {
+                $field->setStatic();
+            }
+        }
+
+        foreach ($this->groups as $group) {
+            $group->setImmutableStatic();
+        }
+
+        return $this;
+    }
+
     public function getVolume()
     {
         $count = count($this->fields);

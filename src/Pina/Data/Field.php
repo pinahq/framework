@@ -19,6 +19,7 @@ class Field
     protected $isMandatory = false;
     protected $isNullable = false;
     protected $isStatic = false;
+    protected $isImmutable = false;
     protected $isHidden = false;
     protected $isDetailed = false;
     protected $width = 12;
@@ -125,6 +126,17 @@ class Field
     public function isStatic()
     {
         return $this->isStatic;
+    }
+
+    public function setImmutable($immutable = true)
+    {
+        $this->isImmutable = $immutable;
+        return $this;
+    }
+
+    public function isImmutable()
+    {
+        return $this->isImmutable;
     }
 
     public function setHidden($hidden = true)

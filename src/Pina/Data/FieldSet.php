@@ -88,6 +88,14 @@ class FieldSet
         return $this;
     }
 
+    public function setImmutable($static = true)
+    {
+        foreach ($this->fields as $f) {
+            $f->setImmutable($static);
+        }
+        return $this;
+    }
+
     public function setHidden($hidden = true)
     {
         foreach ($this->fields as $f) {
