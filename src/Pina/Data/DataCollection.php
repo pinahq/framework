@@ -128,10 +128,9 @@ abstract class DataCollection
             $query->whereFilters($context, $contextSchema);
         }
 
-        $slug = $schema->getSlug();
         $primaryKey = $schema->getPrimaryKey();
-        if ($slug || empty($primaryKey)) {
-            return new DataRecord($query->whereSlug($id)->firstOrFail(), $this->getSchema());
+        if (empty($primaryKey)) {
+            return new DataRecord($query->findOrFail($id), $this->getSchema());
         }
 
         foreach ($primaryKey as $k => $pkElement) {

@@ -142,11 +142,6 @@ class FieldSet
             }
         }
 
-        $slug = $this->schema->getSlug();
-        if ($slug && in_array($slug, $keys)) {
-            $schema->setSlug($slug);
-        }
-
         //TODO: добавить перенос field definitions
 
         return $schema;
