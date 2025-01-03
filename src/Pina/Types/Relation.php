@@ -139,6 +139,7 @@ class Relation extends DirectoryType
             ->whereBy($this->directoryField, $toDeleteIds)
             ->delete();
 
+        $toInsert = [];
         foreach ($toInsertIds as $insertId) {
             $toInsert[] = [
                 $this->relationField => $id,
