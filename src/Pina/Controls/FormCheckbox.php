@@ -17,8 +17,7 @@ class FormCheckbox extends FormInput
 
     protected function drawInner()
     {
-        $r = $this->drawInput();
-        return $r;
+        return $this->drawControl();
     }
 
     protected function drawInput()
