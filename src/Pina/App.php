@@ -220,28 +220,28 @@ class App
             exit;
         }
 
-        App::resource($resource);
-
-        $modules = self::modules();
-        $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
-        $modules->boot('http');
-
-        $resource = DispatcherRegistry::dispatch($resource);
-
-        $handler = new RequestHandler($resource, $method, $data);
-
-        if (!CSRF::verify($handler->controller(), $data)) {
-            @header('HTTP/1.1 403 Forbidden');
-            exit;
-        }
-
-        $defaultLayout = App::getDefaultLayout();
-        if ($defaultLayout) {
-            $handler->setLayout($defaultLayout);
-        }
-
-        Request::push($handler);
         try {
+            App::resource($resource);
+
+            $modules = self::modules();
+            $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
+            $modules->boot('http');
+
+            $resource = DispatcherRegistry::dispatch($resource);
+
+            $handler = new RequestHandler($resource, $method, $data);
+
+            if (!CSRF::verify($handler->controller(), $data)) {
+                @header('HTTP/1.1 403 Forbidden');
+                exit;
+            }
+
+            $defaultLayout = App::getDefaultLayout();
+            if ($defaultLayout) {
+                $handler->setLayout($defaultLayout);
+            }
+
+            Request::push($handler);
             $response = Request::run();
             $response->send();
         } catch (BadRequestException $e) {
