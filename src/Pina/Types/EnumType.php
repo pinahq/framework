@@ -67,7 +67,24 @@ class EnumType extends DirectoryType
         return str_replace('-', '_', $name);
     }
 
-    public function getTimestampTriggers($ignoredStatuses)
+    public function getIndependentTimestampTriggers($field, $ignoredStatuses)
+    {
+        $statuses = array_column($this->getVariants(), 'id');
+        $statuses = array_diff($statuses, $ignoredStatuses);
+
+        $insertTrigger = '';
+        $updateTrigger = '';
+
+        foreach ($statuses as $status) {
+            list($insertTriggerPart, $updateTriggerPart) = $this->getTimestampTriggerPart($field, [$status]);
+            $insertTrigger .= $insertTriggerPart;
+            $updateTrigger .= $updateTriggerPart;
+        }
+
+        return [$insertTrigger, $updateTrigger];
+    }
+
+    public function getChainTimestampTriggers($field, $ignoredStatuses)
     {
         $statuses = array_column($this->getVariants(), 'id');
 
@@ -75,7 +92,7 @@ class EnumType extends DirectoryType
         $updateTrigger = '';
 
         if (array_intersect($ignoredStatuses, $statuses)) {
-            list($insertTriggerPart, $updateTriggerPart) = $this->getTimestampTriggerPart($ignoredStatuses);
+            list($insertTriggerPart, $updateTriggerPart) = $this->getTimestampTriggerPart($field, $ignoredStatuses);
             $insertTrigger .= $insertTriggerPart;
             $updateTrigger .= $updateTriggerPart;
             $statuses = array_diff($statuses, $ignoredStatuses);
@@ -87,7 +104,7 @@ class EnumType extends DirectoryType
                 break;
             }
 
-            list($insertTriggerPart, $updateTriggerPart) = $this->getTimestampTriggerPart($statuses);
+            list($insertTriggerPart, $updateTriggerPart) = $this->getTimestampTriggerPart($field, $statuses);
             $insertTrigger .= $insertTriggerPart;
             $updateTrigger .= $updateTriggerPart;
 
@@ -97,11 +114,11 @@ class EnumType extends DirectoryType
         return [$insertTrigger, $updateTrigger];
     }
 
-    protected function getTimestampTriggerPart($statuses)
+    protected function getTimestampTriggerPart($field, $statuses)
     {
         $statusesCondition = "('".implode("','", $statuses)."')";
-        $insertTriggerCondition = "NEW.status IN $statusesCondition";
-        $updateTriggerCondition = "NEW.status <> OLD.status AND NEW.status IN $statusesCondition AND OLD.status NOT IN $statusesCondition";
+        $insertTriggerCondition = "NEW.$field IN $statusesCondition";
+        $updateTriggerCondition = "NEW.$field <> OLD.$field AND NEW.$field IN $statusesCondition AND OLD.$field NOT IN $statusesCondition";
         $firstStatus = $this->normalizeFieldName($statuses[0]);
         $insertTrigger = "IF ($insertTriggerCondition) THEN "
             . " SET NEW.".$firstStatus."_at=NOW();"
