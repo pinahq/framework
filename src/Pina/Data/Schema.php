@@ -754,6 +754,7 @@ class Schema implements IteratorAggregate
             $key = $field->getName();
             $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
             $type = App::type($field->getType());
+            $type->setContext($line);
             $formatted[$key] = $type->format($value);
         }
         return $this->makeLine($this->callTextProcessors($formatted, $line));
