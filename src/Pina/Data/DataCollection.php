@@ -179,6 +179,7 @@ abstract class DataCollection
      */
     public function getNewRecord(array $data, array $context): DataRecord
     {
+        $data = array_merge($data, $context);
         return new DataRecord($data, $this->getCreationSchema($context));
     }
 

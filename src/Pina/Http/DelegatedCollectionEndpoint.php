@@ -302,13 +302,14 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function getFilterRecord(): DataRecord
     {
-        $schema = $this->collection->getFilterSchema($this->context()->all())->setNullable()->setMandatory(false);
+        $context = $this->context()->all();
+        $schema = $this->collection->getFilterSchema($context)->setNullable()->setMandatory(false);
         $tabSchema = $this->getTabSchema();
         foreach ($tabSchema as $tabField) {
             $schema->forgetField($tabField->getName());
             $schema->addField($tabField)->setHidden()->setNullable()->setMandatory(false);
         }
-        $normalized = $schema->normalize($this->query()->all());
+        $normalized = array_merge($schema->normalize($this->query()->all()), $context);
         return new DataRecord($normalized, $schema);
     }
 
