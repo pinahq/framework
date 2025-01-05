@@ -51,13 +51,9 @@ abstract class DataCollection
      * Схема формы создания элемента
      * @return Schema
      */
-    public function getCreationSchema($context = []): Schema
+    public function getCreationSchema(): Schema
     {
-        $schema = $this->getSchema()->forgetStatic();
-        foreach ($context as $key => $value) {
-            $schema->forgetField($key);
-        }
-        return $schema;
+        return $this->getSchema()->forgetStatic();
     }
 
     public function getVariantAvailableSchema()
@@ -180,7 +176,11 @@ abstract class DataCollection
     public function getNewRecord(array $data, array $context): DataRecord
     {
         $data = array_merge($data, $context);
-        return new DataRecord($data, $this->getCreationSchema($context));
+        $schema = $this->getCreationSchema();
+        foreach ($context as $key => $value) {
+            $schema->forgetField($key);
+        }
+        return new DataRecord($data, $schema);
     }
 
     /**
@@ -192,12 +192,13 @@ abstract class DataCollection
      */
     public function add(array $data, array $context = []): string
     {
-        $schema = $this->getCreationSchema($context);
+        $schema = $this->getCreationSchema();
 
-        $normalized = $this->normalize($data, $schema, $context);
+        header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
 
-        $toInsert = array_merge($normalized, $context);
-        $id = $this->makeQuery()->insertGetId($toInsert);
+        $normalized = $this->normalize(array_merge($context, $data), $schema, $context);
+
+        $id = $this->makeQuery()->insertGetId($normalized);
 
         if (empty($id)) {
             $id = $this->resolveId($normalized, $schema, $context);

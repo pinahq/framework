@@ -993,7 +993,7 @@ class Schema implements IteratorAggregate
      * @return array
      * @throws \Exception
      */
-    public function normalize($data, $context = [])
+    public function normalize($data)
     {
         $errors = [];
         $record = [];
@@ -1010,7 +1010,7 @@ class Schema implements IteratorAggregate
                 if ($value == '' && $field->isNullable() && !$field->isMandatory()) {
                     $value = null;
                 } else {
-                    $value = App::type($field->getType())->setContext(array_merge($data, $context))->normalize($value, $field->isMandatory());
+                    $value = App::type($field->getType())->setContext($data)->normalize($value, $field->isMandatory());
                 }
             } catch (ValidateException $e) {
                 $errors[] = [$e->getMessage(), $field->getName()];
