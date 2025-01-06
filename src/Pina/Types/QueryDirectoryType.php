@@ -10,6 +10,8 @@ use function Pina\__;
 
 abstract class QueryDirectoryType extends DirectoryType
 {
+    protected $cacheSeconds = 0;
+
     abstract protected function makeQuery(): TableDataGateway;
 
     /**
@@ -28,7 +30,7 @@ abstract class QueryDirectoryType extends DirectoryType
      */
     public function format($value): string
     {
-        return implode(', ', $this->makeQuery()->whereId($value)->selectTitle()->column('title'));
+        return implode(', ', $this->makeQuery()->whereId($value)->selectTitle()->column('title', null, $this->cacheSeconds));
     }
 
     /**
