@@ -17,8 +17,6 @@ class CacheTest extends TestCase
         sleep(2);
         $this->assertEquals(false, $cache->has($key));
 
-        print_r($cache);
-
     }
 
 }
