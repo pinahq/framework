@@ -1,15 +1,15 @@
 <?php
 
-namespace Pina;
+namespace Pina\Cache;
 
 class Cache
 {
 
     protected $data = [];
 
-    public function set($key, $expire, &$value)
+    public function set($key, &$value, $seconds = 1)
     {
-        $this->data[$key] = [time() + $expire, $value];
+        $this->data[$key] = [time() + $seconds, $value, 0];
         return $value;
     }
 
@@ -28,7 +28,7 @@ class Cache
 
     public function get($key)
     {
-        $this->data[$key][2] = ($this->data[$key][2] ?? 0) + 1;
+        $this->data[$key][2]++;
         return $this->data[$key][1] ?? null;
     }
 

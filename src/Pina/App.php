@@ -2,6 +2,7 @@
 
 namespace Pina;
 
+use Pina\Cache\Cache;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;

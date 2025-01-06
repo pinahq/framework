@@ -29,6 +29,8 @@ class Relation extends DirectoryType
      */
     protected $directoryTable;
 
+    protected $cacheSeconds = 0;
+
     public function __construct(
         TableDataGateway $relationTable,
         $relationField,
@@ -75,13 +77,13 @@ class Relation extends DirectoryType
     public function format($value): string
     {
         $query = $this->makeDirectoryQuery()->whereId($value)->selectTitle();
-        return implode(', ', $query->column('title'));
+        return implode(', ', $query->column('title', null, $this->cacheSeconds));
     }
 
     public function play($value): string
     {
         $query = $this->makeDirectoryQuery()->whereId($value)->selectId()->selectTitle();
-        $list = $query->get();
+        $list = $query->get($this->cacheSeconds);
 
         $types = array_combine($this->relationTable->getSchema()->getFieldNames(), $this->relationTable->getSchema()->getFieldTypes());
 
