@@ -1247,6 +1247,11 @@ class SQL
         return $this->db->table($this->make());
     }
 
+    public function cacheGet($expire = 1)
+    {
+        return $this->db->cacheTable($this->make(), $expire);
+    }
+
     /**
      * Выполняет запрос и возвращает первую запись из выборки или NULL, если ничего не найдено
      * @return array|null
@@ -1258,6 +1263,13 @@ class SQL
         return $this->db->row($this->make());
     }
 
+    public function cacheFirst($expire = 1)
+    {
+        $this->limit(1);
+
+        return $this->db->cacheRow($this->make(), $expire);
+    }
+
     /**
      * Выполняет запрос и возвращает первую запись из выборки
      * Если запись не найдена, выбрасывает исключение
@@ -1267,6 +1279,15 @@ class SQL
     public function firstOrFail()
     {
         $line = $this->first();
+        if (!isset($line)) {
+            throw new NotFoundException;
+        }
+        return $line;
+    }
+
+    public function cacheFirstOrFail($expire = 1)
+    {
+        $line = $this->cacheFirst($expire);
         if (!isset($line)) {
             throw new NotFoundException;
         }
@@ -1291,6 +1312,18 @@ class SQL
         return $this->db->one($this->make());
     }
 
+    public function cacheValue($name, $useLimit = true, $expire = 1)
+    {
+        if ($useLimit) {
+            $this->limit(1);
+        }
+
+        $this->selectIfNotSelected($name);
+        $this->forgetAllSelectedExcept([$name]);
+
+        return $this->db->cacheOne($this->make(), $expire);
+    }
+
     /**
      * Выполняет запрос и возвращает заданную колонку $name из выборки.
      * Если задан второй параметр $key, то значения из этого поля станут ключами
@@ -1310,6 +1343,20 @@ class SQL
         $r = $key ? array_column($this->db->table($sql), $name, $key) : $this->db->col($sql);
         return $r;
     }
+
+    public function cacheColumn($name, $key = null)
+    {
+        $this->selectIfNotSelected($name);
+        if ($key) {
+            $this->selectIfNotSelected($key);
+        }
+        $this->forgetAllSelectedExcept([$name, $key]);
+        $sql = $this->make();
+        $r = $key ? array_column($this->db->cacheTable($sql), $name, $key) : $this->db->cacheCol($sql);
+        return $r;
+    }
+
+
 
     public function forgetAllSelectedExcept(array $fields)
     {

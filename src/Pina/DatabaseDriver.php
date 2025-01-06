@@ -45,6 +45,9 @@ class DatabaseDriver implements DatabaseDriverInterface
 
     protected function doQuery($sql, $retry)
     {
+        static $number = 0;
+        static $total = 0;
+
         list($msec, $sec) = explode(' ', microtime());
         $startTime = (float) $msec + (float) $sec;
 
@@ -58,13 +61,31 @@ class DatabaseDriver implements DatabaseDriverInterface
         list($msec, $sec) = explode(' ', microtime());
         $totalTime = (float) $msec + (float) $sec - $startTime;
 
+        $total += $totalTime;
+        $number += 1;
+        echo round($total, 4) .' '. $number .' '. round($totalTime, 4) . ' ' . $sql . "<br />\n<br />\n";
+
         Log::debug('mysql', round($totalTime, 4) . ' ' . $sql);
+
+
 
         if ($this->errno()) {
             throw new InternalErrorException($this->error() . '; Failed query: ' . $sql, $this->errno());
         }
 
         return $rc;
+    }
+
+    protected function cache($method, $sql, $expire)
+    {
+        $key = 'db:' . $method .':'.$sql;
+        /** @var Cache $cache */
+        $cache = App::load(Cache::class);
+        if ($cache->has($key)) {
+            return $cache->get($key);
+        }
+
+        return $cache->set($key, $expire, $this->$method($sql));
     }
 
     public function table($sql)
@@ -81,6 +102,11 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
+    public function cacheTable($sql, $expire = 1)
+    {
+        return $this->cache('table', $sql, $expire);
+    }
+
     public function row($sql)
     {
         $rc = $this->query($sql);
@@ -90,6 +116,11 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         return $r;
+    }
+
+    public function cacheRow($sql, $expire = 1)
+    {
+        return $this->cache('row', $sql, $expire);
     }
 
     public function col($sql)
@@ -111,6 +142,11 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
+    public function cacheCol($sql, $expire = 1)
+    {
+        return $this->cache('col', $sql, $expire);
+    }
+
     public function one($sql)
     {
         $rc = $this->query($sql);
@@ -120,6 +156,11 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         return $row[0] ?? null;
+    }
+
+    public function cacheOne($sql, $expire)
+    {
+        return $this->cache('one', $sql, $expire);
     }
 
     public function batch($queries)
