@@ -149,6 +149,11 @@ class App
         throw new \Pina\Container\NotFoundException("Unable to create unsupported class ".$type." as type");
     }
 
+    public function cache(): Cache
+    {
+        return static::load(Cache::class);
+    }
+
     /**
      * Подгружает класс из загрузчика
      */
