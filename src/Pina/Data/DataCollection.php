@@ -194,8 +194,6 @@ abstract class DataCollection
     {
         $schema = $this->getCreationSchema();
 
-        header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-
         $normalized = $this->normalize(array_merge($context, $data), $schema, $context);
 
         $id = $this->makeQuery()->insertGetId($normalized);
