@@ -81,14 +81,11 @@ class DefaultLayout extends Control
 
     protected function drawHead()
     {
-        return Html::tag(
-            'head',
-            $this->drawTitle()
+        return $this->drawTitle()
             . $this->drawMeta()
             . $this->drawIcon()
             . $this->drawCss()
-            . $this->drawHeadCounters()
-        );
+            . $this->drawHeadCounters();
     }
 
     protected function drawMeta()
