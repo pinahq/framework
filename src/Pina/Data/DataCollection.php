@@ -59,6 +59,7 @@ abstract class DataCollection
     public function getVariantAvailableSchema()
     {
         $schema = $this->getSchema();
+        $schema->setImmutableStatic();
         $schema->forgetStatic();
 
         $r = new Schema();
