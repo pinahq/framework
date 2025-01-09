@@ -37,6 +37,8 @@ class Form extends Control
 
     protected function draw()
     {
+        $this->loadResources();
+
         return Html::tag(
             'form',
             $this->drawHeader()
@@ -46,6 +48,10 @@ class Form extends Control
             . $this->drawFooter(),
             $this->makeAttributes()
         );
+    }
+
+    protected function loadResources()
+    {
     }
 
     protected function drawHeader()

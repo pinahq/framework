@@ -700,21 +700,20 @@ class Schema implements IteratorAggregate
 
 
     /**
-     *
-     * @param mixed $line
-     * @return mixed
+     * @param array $line
+     * @return array
      */
-    public function processLineAsMeta($line)
+    public function processLineAsMeta(array &$line): array
     {
         return $this->callMetaProcessors([], $line);
     }
 
     /**
      *
-     * @param mixed $line
-     * @return mixed
+     * @param array $line
+     * @return array
      */
-    public function processLineAsData($line)
+    public function processLineAsData(array &$line): array
     {
         foreach ($this->dataProcessors as $p) {
             $line = $p($line);
@@ -727,10 +726,21 @@ class Schema implements IteratorAggregate
 
     /**
      *
+     * @param array $line
+     * @param string $key
+     * @return mixed
+     */
+    public function processValueAsData(array &$line, string $key)
+    {
+        return $this->processLineAsData($line)[$key] ?? null;
+    }
+
+    /**
+     *
      * @param array $data
      * @return array
      */
-    public function processListAsData($data)
+    public function processListAsData(array &$data): array
     {
         foreach ($data as $k => $line) {
             $data[$k] = $this->processLineAsData($line);
@@ -738,16 +748,13 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    /**
-     * @param array $line
-     * @return array
-     * @throws \Exception
-     */
-    public function processLineAsText($line)
+    protected function formatLine(array &$processed, array &$line, string $onlyFieldName = null): array
     {
-        $processed = $this->processLineAsData($line);
         $formatted = [];
         foreach ($this->getIterator() as $field) {
+            if ($onlyFieldName && $field->getName() != $onlyFieldName) {
+                continue;
+            }
             if ($field->isHidden()) {
                 continue;
             }
@@ -757,20 +764,7 @@ class Schema implements IteratorAggregate
             $type->setContext($line);
             $formatted[$key] = $type->format($value);
         }
-        return $this->makeLine($this->callTextProcessors($formatted, $line));
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     * @throws \Exception
-     */
-    public function processListAsText($data)
-    {
-        foreach ($data as $k => $line) {
-            $data[$k] = $this->processLineAsText($line);
-        }
-        return $data;
+        return $formatted;
     }
 
     /**
@@ -778,11 +772,44 @@ class Schema implements IteratorAggregate
      * @return array
      * @throws \Exception
      */
-    public function processLineAsHtml($line)
+    public function processLineAsText(array &$line): array
     {
         $processed = $this->processLineAsData($line);
+        $formatted = $this->formatLine($processed, $line);
+        return $this->makeLine($this->callTextProcessors($formatted, $line));
+    }
+
+    /**
+     * @param array $line
+     * @throws \Exception
+     */
+    public function processValueAsText(array &$line, string $fieldName): string
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = $this->formatLine($processed, $line, $fieldName);
+        return $this->callTextProcessors($formatted, $line)[$fieldName] ?? '';
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    public function processListAsText(array &$data): array
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->processLineAsText($line);
+        }
+        return $data;
+    }
+
+    protected function drawLine(array &$processed, array &$line, string $onlyFieldName = null): array
+    {
         $formatted = [];
         foreach ($this->getIterator() as $field) {
+            if ($onlyFieldName && $field->getName() != $onlyFieldName) {
+                continue;
+            }
             if ($field->isHidden()) {
                 continue;
             }
@@ -792,20 +819,7 @@ class Schema implements IteratorAggregate
             $type->setContext($line);
             $formatted[$key] = $type->draw($value);
         }
-        return $this->makeLine($this->callHtmlProcessors($formatted, $line));
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     * @throws \Exception
-     */
-    public function processListAsHtml($data)
-    {
-        foreach ($data as $k => $line) {
-            $data[$k] = $this->processLineAsHtml($line);
-        }
-        return $data;
+        return $formatted;
     }
 
     /**
@@ -813,11 +827,40 @@ class Schema implements IteratorAggregate
      * @return array
      * @throws \Exception
      */
-    public function processLineAsInteractive($line)
+    public function processLineAsHtml(array &$line): array
     {
         $processed = $this->processLineAsData($line);
+        $formatted = $this->drawLine($processed, $line);
+        return $this->makeLine($this->callHtmlProcessors($formatted, $line));
+    }
+
+    public function processValueAsHtml(array &$line, string $fieldName): string
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = $this->drawLine($processed, $line, $fieldName);
+        return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    public function processListAsHtml(array &$data): array
+    {
+        foreach ($data as $k => $line) {
+            $data[$k] = $this->processLineAsHtml($line);
+        }
+        return $data;
+    }
+
+    protected function playLine(array &$processed, array &$line, string $onlyFieldName = null): array
+    {
         $formatted = [];
         foreach ($this->getIterator() as $field) {
+            if ($onlyFieldName && $field->getName() != $onlyFieldName) {
+                continue;
+            }
             if ($field->isHidden()) {
                 continue;
             }
@@ -827,7 +870,26 @@ class Schema implements IteratorAggregate
             $type->setContext($line);
             $formatted[$key] = $type->play($value);
         }
+        return $formatted;
+    }
+
+    /**
+     * @param array $line
+     * @return array
+     * @throws \Exception
+     */
+    public function processLineAsInteractive(array &$line): array
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = $this->playLine($processed, $line);
         return $this->makeLine($this->callHtmlProcessors($formatted, $line));
+    }
+
+    public function processValueAsInteractive(array &$line, string $fieldName): string
+    {
+        $processed = $this->processLineAsData($line);
+        $formatted = $this->playLine($processed, $line, $fieldName);
+        return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
     }
 
     /**
@@ -835,7 +897,7 @@ class Schema implements IteratorAggregate
      * @return array
      * @throws \Exception
      */
-    public function processListAsInteractive($data)
+    public function processListAsInteractive(array &$data): array
     {
         foreach ($data as $k => $line) {
             $data[$k] = $this->processLineAsInteractive($line);

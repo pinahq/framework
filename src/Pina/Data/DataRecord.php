@@ -41,27 +41,45 @@ class DataRecord
         return $this->schema->processLineAsData($this->data);
     }
 
+    public function getValue(string $key)
+    {
+        return $this->schema->processValueAsData($this->data, $key);
+    }
+
     /**
-     * @return array
      * @throws \Exception
      */
-    public function getTextData()
+    public function getTextData(): array
     {
         return $this->schema->processLineAsText($this->data);
     }
 
+    public function getTextValue(string $fieldName)
+    {
+        return $this->schema->processValueAsText($this->data, $fieldName);
+    }
+
     /**
-     * @return array
      * @throws \Exception
      */
-    public function getHtmlData()
+    public function getHtmlData(): array
     {
         return $this->schema->processLineAsHtml($this->data);
     }
 
-    public function getInteractiveData()
+    public function getHtmlValue(string $fieldName)
+    {
+        return $this->schema->processValueAsHtml($this->data, $fieldName);
+    }
+
+    public function getInteractiveData(): array
     {
         return $this->schema->processLineAsInteractive($this->data);
+    }
+
+    public function getInteractiveValue($fieldName)
+    {
+        return $this->schema->processValueAsInteractive($this->data, $fieldName);
     }
 
     public function getMetaData()

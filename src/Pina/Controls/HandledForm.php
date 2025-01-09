@@ -26,15 +26,10 @@ class HandledForm extends Form
         return $this->formClass;
     }
 
-    protected function drawInner()
+    protected function loadResources()
     {
-        $this->makeScript();
+        parent::loadResources();
 
-        return parent::drawInner();
-    }
-
-    protected function makeScript()
-    {
         App::assets()->addScriptContent(
             '<script>$(".' . $this->formClass . '").on("success", function(event, packet, status, xhr) {if (!PinaRequest.handleRedirect(xhr)) {var target = $(this).attr("data-success") ? $(this).attr("data-success") : document.location.pathname; document.location = target + "?changed=" + Math.random(); }});</script>'
         );
