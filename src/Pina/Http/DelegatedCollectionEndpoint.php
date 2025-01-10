@@ -13,6 +13,7 @@ use Pina\Controls\FilterForm;
 use Pina\Controls\Nav\Nav;
 use Pina\Controls\PagingControl;
 use Pina\Controls\RawHtml;
+use Pina\Controls\Wrapper;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
@@ -134,15 +135,13 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      * @return Nav
      * @throws Exception
      */
-    protected function makeTabs(): Nav
+    protected function makeTabs(): Control
     {
-        /** @var Nav $nav */
-        $nav = $this->makeTabNav();
-        $nav->setLocation($this->location->link('@', $this->query()->all()));
+        $container = $this->makeTabContainer();
 
         $schema = $this->getTabSchema();
         if ($schema->isEmpty()) {
-            return $nav;
+            return $container;
         }
 
         $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
@@ -153,6 +152,10 @@ class DelegatedCollectionEndpoint extends RichEndpoint
                 throw new Exception(sprintf("Для навигации поддерживаются только наследники DirectoryType, класс %s не подходит", $type));
             }
 
+            /** @var Nav $nav */
+            $nav = $this->makeTabNav();
+            $nav->setLocation($this->location->link('@', $this->query()->all()));
+
             $variants = App::type($type)->getVariants();
             foreach ($variants as $variant) {
                 $menuItem = $nav->appendLink($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']])));
@@ -162,9 +165,15 @@ class DelegatedCollectionEndpoint extends RichEndpoint
                     }
                 }
             }
+            $container->append($nav);
         }
 
-        return $nav;
+        return $container;
+    }
+
+    protected function makeTabContainer()
+    {
+        return new Wrapper('nav.tabs');
     }
 
     protected function makeTabNav(): Nav
