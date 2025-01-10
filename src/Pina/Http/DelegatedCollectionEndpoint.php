@@ -27,6 +27,8 @@ use Pina\Response;
 
 use Pina\Types\DirectoryType;
 
+use Pina\Types\Relation;
+
 use function Pina\__;
 
 /**
@@ -114,10 +116,28 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
             /** @var Nav $dropdown */
             $dropdown = App::make(Nav::class);
-            foreach ($variants as $variant) {
-                $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/field', ['id' => $id]), 'put', [$name => $variant['id']]);
-                if ($data[$name] == $variant['id']) {
-                    $item->addClass('active');
+
+            if ($field->getType() instanceof Relation) {
+                foreach ($variants as $variant) {
+                    if (in_array($variant['id'], $data[$name])) {
+                        $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/relation', ['id' => $id]), 'delete', [$name => $variant['id']]);
+                        $item->addClass('active');
+                    }
+                }
+
+                foreach ($variants as $variant) {
+                    if (!in_array($variant['id'], $data[$name])) {
+                        $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/relation', ['id' => $id]), 'post', [$name => $variant['id']]);
+                    }
+                }
+
+
+            } else {
+                foreach ($variants as $variant) {
+                    $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/field', ['id' => $id]), 'put', [$name => $variant['id']]);
+                    if ($data[$name] == $variant['id']) {
+                        $item->addClass('active');
+                    }
                 }
             }
             $menu->appendDropdown($title, $dropdown);
@@ -270,6 +290,34 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $context = $this->context()->all();
 
         $this->collection->update($id, $data, $context, array_keys($data));
+
+        return Response::ok();
+    }
+
+    public function storeRelation($tmp, $id)
+    {
+        $data = $this->request()->all();
+        $context = $this->context()->all();
+
+        $keys = array_keys($data);
+        $field = array_shift($keys);
+        $value = $data[$field] ?? null;
+
+        $this->collection->addToRelation($id, $field, $value, $context);
+
+        return Response::ok();
+    }
+
+    public function destroyRelation($tmp, $id)
+    {
+        $data = $this->request()->all();
+        $context = $this->context()->all();
+
+        $keys = array_keys($data);
+        $field = array_shift($keys);
+        $value = $data[$field] ?? null;
+
+        $this->collection->deleteFromRelation($id, $field, $value, $context);
 
         return Response::ok();
     }

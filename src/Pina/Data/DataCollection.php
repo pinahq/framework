@@ -3,6 +3,7 @@
 namespace Pina\Data;
 
 use Exception;
+use Pina\App;
 use Pina\BadRequestException;
 use Pina\InternalErrorException;
 use Pina\Paging;
@@ -64,10 +65,6 @@ abstract class DataCollection
 
         $r = new Schema();
         foreach ($schema as $field) {
-            if ($field->getType() instanceof Relation) {
-                continue;
-            }
-
             if (is_subclass_of($field->getType(), DirectoryType::class)) {
                 $r->addField($field);
             }
@@ -256,6 +253,48 @@ abstract class DataCollection
         $schema->onUpdate($id, $normalized);
 
         return $id;
+    }
+
+    public function addToRelation(string $id, string $fieldName, $value, array $context)
+    {
+        $schema = $this->getSchema()->fieldset([$fieldName])->makeSchema();
+        if ($schema->isEmpty()) {
+            return;
+        }
+
+        foreach ($schema as $f) {
+            if (!$f->getType() instanceof Relation) {
+                return;
+            }
+            if ($f->getName() != $fieldName) {
+                return;
+            }
+            $type = App::type($f->getType());
+            $data = $type->getData($id);
+            $data[] = $value;
+            $type->setData($id, $data);
+        }
+    }
+
+    public function deleteFromRelation(string $id, string $fieldName, $value, array $context)
+    {
+        $schema = $this->getSchema()->fieldset([$fieldName])->makeSchema();
+        if ($schema->isEmpty()) {
+            return;
+        }
+
+        foreach ($schema as $f) {
+            if (!$f->getType() instanceof Relation) {
+                return;
+            }
+            if ($f->getName() != $fieldName) {
+                return;
+            }
+            $type = App::type($f->getType());
+            $data = $type->getData($id);
+            $data = array_diff($data, [$value]);
+            $type->setData($id, $data);
+        }
     }
 
     /**
