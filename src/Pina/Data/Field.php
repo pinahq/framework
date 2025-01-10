@@ -22,6 +22,7 @@ class Field
     protected $isImmutable = false;
     protected $isHidden = false;
     protected $isDetailed = false;
+    protected $tags = [];
     protected $width = 12;
 
     //TODO: временный атрибут, по идее должно управляться через тип отношений (one-to-one, one-to-many, many-to-many)
@@ -233,6 +234,18 @@ class Field
     {
         $this->default = $default;
         return $this;
+    }
+
+    public function tag($tag)
+    {
+        $this->tags[] = $tag;
+        $this->tags = array_unique($this->tags);
+        return $this;
+    }
+
+    public function hasTag($tag)
+    {
+        return in_array($tag, $this->tags);
     }
 
     /**

@@ -129,6 +129,14 @@ class FieldSet
         return $this;
     }
 
+    public function tag($tag)
+    {
+        foreach ($this->fields as $f) {
+            $f->tag($tag);
+        }
+        return $this;
+    }
+
     public function makeSchema()
     {
         $schema = new Schema();
