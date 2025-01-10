@@ -391,7 +391,13 @@ abstract class DataCollection
             $usedField = null;
             foreach ($fields as $field) {
                 if (!isset($normalized[$field]) && !isset($context[$field])) {
-                    continue;
+                    if ($query->hasContext($field)) {
+                        //условие уже заложено в запрос, можно перейти к следующему элементу ключа
+                        continue;
+                    } else {
+                        //не имеет смысла проверять ключ, часть данных которого непроиницализирована
+                        continue 2;
+                    }
                 }
                 $usedField = $field;
                 $query->whereBy($field, $normalized[$field] ?? ($context[$field] ?? ''));

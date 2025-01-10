@@ -122,6 +122,11 @@ class SQL
         return $this;
     }
 
+    public function hasContext($field): bool
+    {
+        return isset($this->context[$field]);
+    }
+
     /**
      * Возвращает схему таблицы
      * @return Schema
