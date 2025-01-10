@@ -5,6 +5,7 @@ namespace Pina\Layouts;
 use Exception;
 use Pina\App;
 use Pina\Controls\Control;
+use Pina\Controls\IconMeta;
 use Pina\CSRF;
 use Pina\Html;
 use Pina\Request;
@@ -156,7 +157,7 @@ class DefaultLayout extends Control
 
     protected function drawIcon()
     {
-        return '';
+        return App::load(IconMeta::class);
     }
 
     protected function drawHeadCounters()
