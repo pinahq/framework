@@ -8,6 +8,7 @@ class JsonAPI
     protected $endpoint = '';
     protected $headers = [];
     protected $info = false;
+    protected $response = null;
 
     public function __construct(string $endpoint, array $headers = [])
     {
@@ -39,13 +40,23 @@ class JsonAPI
             curl_setopt($ch, CURLOPT_POSTFIELDS, $this->encodePacket($packet));
         }
 
-        $result = curl_exec($ch);
-        $result = json_decode($result, true);
+        $this->response = curl_exec($ch);
+        $result = json_decode($this->response, true);
 
         $this->info = curl_getinfo($ch);
         curl_close($ch);
 
         return $this->processResponse($result);
+    }
+
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
+    public function getLastResponse()
+    {
+        return $this->response;
     }
 
     public function isSuccess()
