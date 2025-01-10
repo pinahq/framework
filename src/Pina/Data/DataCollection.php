@@ -388,12 +388,17 @@ abstract class DataCollection
             if ($id) {
                 $query->whereNotId($id, $context);
             }
+            $usedField = null;
             foreach ($fields as $field) {
+                if (!isset($normalized[$field]) && !isset($context[$field])) {
+                    continue;
+                }
+                $usedField = $field;
                 $query->whereBy($field, $normalized[$field] ?? ($context[$field] ?? ''));
             }
-            if ($query->exists()) {
+            if ($usedField && $query->exists()) {
                 $ex = new BadRequestException();
-                $ex->setErrors([[__("Данное значение уже используется"), $field]]);
+                $ex->setErrors([[__("Данное значение уже используется"), $usedField]]);
                 throw $ex;
             }
         }
