@@ -59,6 +59,11 @@ class DataRecord
         return $this->schema->processValueAsText($this->data, $fieldName);
     }
 
+    public function formatValue(string $fieldName): string
+    {
+        return $this->schema->formatValue($this->data, $fieldName);
+    }
+
     /**
      * @throws \Exception
      */
@@ -67,9 +72,14 @@ class DataRecord
         return $this->schema->processLineAsHtml($this->data);
     }
 
-    public function getHtmlValue(string $fieldName)
+    public function getHtmlValue(string $fieldName): string
     {
         return $this->schema->processValueAsHtml($this->data, $fieldName);
+    }
+
+    public function drawValue(string $fieldName): string
+    {
+        return $this->schema->drawValue($this->data, $fieldName);
     }
 
     public function getInteractiveData(): array
@@ -77,9 +87,14 @@ class DataRecord
         return $this->schema->processLineAsInteractive($this->data);
     }
 
-    public function getInteractiveValue($fieldName)
+    public function getInteractiveValue(string $fieldName): string
     {
         return $this->schema->processValueAsInteractive($this->data, $fieldName);
+    }
+
+    public function playValue(string $fieldName): string
+    {
+        return $this->schema->playValue($this->data, $fieldName);
     }
 
     public function getMetaData()

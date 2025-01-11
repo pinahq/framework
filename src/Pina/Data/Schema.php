@@ -748,8 +748,10 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function formatLine(array &$processed, array &$line, string $onlyFieldName = null): array
+    protected function formatLine(array &$line, string $onlyFieldName = null): array
     {
+        $processed = $this->processLineAsData($line);
+
         $formatted = [];
         foreach ($this->getIterator() as $field) {
             if ($onlyFieldName && $field->getName() != $onlyFieldName) {
@@ -767,6 +769,12 @@ class Schema implements IteratorAggregate
         return $formatted;
     }
 
+    public function formatValue(array &$line, string $fieldName): string
+    {
+        $formatted = $this->formatLine($line, $fieldName);
+        return $formatted[$fieldName] ?? '';
+    }
+
     /**
      * @param array $line
      * @return array
@@ -774,8 +782,7 @@ class Schema implements IteratorAggregate
      */
     public function processLineAsText(array &$line): array
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->formatLine($processed, $line);
+        $formatted = $this->formatLine($line);
         return $this->makeLine($this->callTextProcessors($formatted, $line));
     }
 
@@ -785,8 +792,7 @@ class Schema implements IteratorAggregate
      */
     public function processValueAsText(array &$line, string $fieldName): string
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->formatLine($processed, $line, $fieldName);
+        $formatted = $this->formatLine($line, $fieldName);
         return $this->callTextProcessors($formatted, $line)[$fieldName] ?? '';
     }
 
@@ -803,8 +809,10 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function drawLine(array &$processed, array &$line, string $onlyFieldName = null): array
+    protected function drawLine(array &$line, string $onlyFieldName = null): array
     {
+        $processed = $this->processLineAsData($line);
+
         $formatted = [];
         foreach ($this->getIterator() as $field) {
             if ($onlyFieldName && $field->getName() != $onlyFieldName) {
@@ -822,6 +830,12 @@ class Schema implements IteratorAggregate
         return $formatted;
     }
 
+    public function drawValue(array &$line, string $fieldName): string
+    {
+        $formatted = $this->drawLine($line, $fieldName);
+        return $formatted[$fieldName] ?? '';
+    }
+
     /**
      * @param array $line
      * @return array
@@ -829,15 +843,13 @@ class Schema implements IteratorAggregate
      */
     public function processLineAsHtml(array &$line): array
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->drawLine($processed, $line);
+        $formatted = $this->drawLine($line);
         return $this->makeLine($this->callHtmlProcessors($formatted, $line));
     }
 
     public function processValueAsHtml(array &$line, string $fieldName): string
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->drawLine($processed, $line, $fieldName);
+        $formatted = $this->drawLine($line, $fieldName);
         return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
     }
 
@@ -854,8 +866,10 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function playLine(array &$processed, array &$line, string $onlyFieldName = null): array
+    protected function playLine(array &$line, string $onlyFieldName = null): array
     {
+        $processed = $this->processLineAsData($line);
+
         $formatted = [];
         foreach ($this->getIterator() as $field) {
             if ($onlyFieldName && $field->getName() != $onlyFieldName) {
@@ -873,6 +887,12 @@ class Schema implements IteratorAggregate
         return $formatted;
     }
 
+    public function playValue(array &$line, string $fieldName): string
+    {
+        $formatted = $this->playLine($line, $fieldName);
+        return $formatted[$fieldName] ?? '';
+    }
+
     /**
      * @param array $line
      * @return array
@@ -880,15 +900,13 @@ class Schema implements IteratorAggregate
      */
     public function processLineAsInteractive(array &$line): array
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->playLine($processed, $line);
+        $formatted = $this->playLine($line);
         return $this->makeLine($this->callHtmlProcessors($formatted, $line));
     }
 
     public function processValueAsInteractive(array &$line, string $fieldName): string
     {
-        $processed = $this->processLineAsData($line);
-        $formatted = $this->playLine($processed, $line, $fieldName);
+        $formatted = $this->playLine($line, $fieldName);
         return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
     }
 
