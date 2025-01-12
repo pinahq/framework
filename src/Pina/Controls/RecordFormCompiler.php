@@ -21,6 +21,8 @@ class RecordFormCompiler extends Control
     {
         $groupedSchema = clone $this->record->getSchema();
         $groupedSchema->forgetHiddenStatic();
+
+        $content = '';
         foreach ($groupedSchema->getGroupIterator() as $schema) {
             if ($schema->isEmpty()) {
                 continue;
