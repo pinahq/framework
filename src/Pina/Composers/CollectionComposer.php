@@ -5,6 +5,7 @@ namespace Pina\Composers;
 use Exception;
 use Pina\App;
 use Pina\Controls\BreadcrumbView;
+use Pina\Controls\Nav\Nav;
 use Pina\Data\DataTable;
 use Pina\Data\DataRecord;
 use Pina\Data\Schema;
@@ -20,6 +21,7 @@ class CollectionComposer
     protected $collection;
     protected $creation;
     protected $itemCallback;
+    protected $menu;
 
     public function __construct()
     {
@@ -31,6 +33,11 @@ class CollectionComposer
     {
         $this->collection = $collection;
         $this->creation = $creation;
+    }
+
+    public function setMenu(Nav $menu)
+    {
+        $this->menu = $menu;
     }
 
     public function getCollection()
@@ -50,6 +57,9 @@ class CollectionComposer
 
         Request::setPlace('page_header', $this->collection);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        if ($this->menu) {
+            Request::setPlace('section_menu', $this->menu);
+        }
     }
 
     public function show(Location $location, DataRecord $record)
@@ -62,6 +72,9 @@ class CollectionComposer
 
         Request::setPlace('page_header', $title);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        if ($this->menu) {
+            Request::setPlace('section_menu', $this->menu);
+        }
     }
 
     public function create(Location $location)
@@ -72,6 +85,9 @@ class CollectionComposer
 
         Request::setPlace('page_header', $this->creation);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        if ($this->menu) {
+            Request::setPlace('section_menu', $this->menu);
+        }
     }
 
     public function section(Location $location, string $section)
@@ -81,6 +97,9 @@ class CollectionComposer
 
         Request::setPlace('page_header', $section);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        if ($this->menu) {
+            Request::setPlace('section_menu', $this->menu);
+        }
     }
 
     public function getItemTitle(DataRecord $record)
