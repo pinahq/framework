@@ -157,38 +157,45 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeTabs(): Control
     {
-        $container = $this->makeTabContainer();
-
         $schema = $this->getTabSchema();
         if ($schema->isEmpty()) {
-            return $container;
+            return new RawHtml();
         }
 
-        $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
+        $container = $this->makeTabContainer();
         foreach ($schema as $field) {
             /** @var Field $field */
-            $type = $field->getType();
-            if (!is_subclass_of($type, DirectoryType::class)) {
-                throw new Exception(sprintf("Для навигации поддерживаются только наследники DirectoryType, класс %s не подходит", $type));
-            }
-
-            /** @var Nav $nav */
-            $nav = $this->makeTabNav();
-            $nav->setLocation($this->location->link('@', $this->query()->all()));
-
-            $variants = App::type($type)->getVariants();
-            foreach ($variants as $variant) {
-                $menuItem = $nav->appendLink($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']])));
-                if (!empty($variant['badges']) && is_array($variant['badges'])) {
-                    foreach ($variant['badges'] as $badge) {
-                        $menuItem->append($this->makeBadge($badge));
-                    }
-                }
-            }
+            $nav = $this->makeFieldTabs($field);
             $container->append($nav);
         }
 
         return $container;
+    }
+
+    protected function makeFieldTabs(Field $field)
+    {
+        $type = $field->getType();
+        if (!is_subclass_of($type, DirectoryType::class)) {
+            throw new Exception(sprintf("Для навигации поддерживаются только наследники DirectoryType, класс %s не подходит", $type));
+        }
+
+        /** @var Nav $nav */
+        $nav = $this->makeTabNav();
+        $nav->setLocation($this->location->link('@', $this->query()->all()));
+
+        $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
+
+        $variants = App::type($type)->getVariants();
+        foreach ($variants as $variant) {
+            $menuItem = $nav->appendLink($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']])));
+            if (!empty($variant['badges']) && is_array($variant['badges'])) {
+                foreach ($variant['badges'] as $badge) {
+                    $menuItem->append($this->makeBadge($badge));
+                }
+            }
+        }
+
+        return $nav;
     }
 
     protected function makeTabContainer()
