@@ -1369,7 +1369,7 @@ class SQL
      * @param string $field
      * @return int
      */
-    public function count($field = false): int
+    public function count($field = false, $cacheSeconds = 0): int
     {
         if ($this->from == '') {
             return '';
@@ -1385,7 +1385,7 @@ class SQL
 
         $sql .= $this->makeGroupBy();
 
-        return intval($this->db->one($sql));
+        return intval($this->db->one($sql, $cacheSeconds));
     }
 
     /**

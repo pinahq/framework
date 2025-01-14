@@ -59,7 +59,7 @@ class Relation extends DirectoryType
      */
     public function getVariants()
     {
-        return $this->makeDirectoryQuery()->selectId()->selectTitle()->get();
+        return $this->makeDirectoryQuery()->selectId()->selectTitle()->get($this->cacheSeconds);
     }
 
     protected function makeSelect()
@@ -76,12 +76,18 @@ class Relation extends DirectoryType
      */
     public function format($value): string
     {
+        if (empty($value)) {
+            return '';
+        }
         $query = $this->makeDirectoryQuery()->whereId($value)->selectTitle();
         return implode(', ', $query->column('title', null, $this->cacheSeconds));
     }
 
     public function play($value): string
     {
+        if (empty($value)) {
+            return '';
+        }
         $query = $this->makeDirectoryQuery()->whereId($value)->selectId()->selectTitle();
         $list = $query->get($this->cacheSeconds);
 
