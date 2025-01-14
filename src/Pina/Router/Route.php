@@ -99,6 +99,7 @@ class Route
     public function addTag($tag)
     {
         $this->tags[] = $tag;
+        return $this;
     }
 
     public function hasTag($tag): bool
