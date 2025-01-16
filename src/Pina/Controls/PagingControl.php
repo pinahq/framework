@@ -27,11 +27,11 @@ class PagingControl extends Control
 
     protected function draw()
     {
-        return Html::tag(
-            'ul',
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
-            $this->makeAttributes(['class' => 'pagination'])
-        );
+        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        if (empty($inner)) {
+            return '';
+        }
+        return Html::tag('ul', $inner, $this->makeAttributes(['class' => 'pagination']));
     }
 
     protected function drawInner()
