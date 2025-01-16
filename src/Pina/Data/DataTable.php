@@ -3,9 +3,10 @@
 namespace Pina\Data;
 
 use Iterator;
+use Countable;
 use Pina\Paging;
 
-class DataTable implements Iterator
+class DataTable implements Iterator, Countable
 {
     /** @var array */
     protected $data = [];
@@ -67,6 +68,11 @@ class DataTable implements Iterator
     public function getHtmlData()
     {
         return $this->schema->processListAsHtml($this->data);
+    }
+
+    public function count(): int
+    {
+        return count($this->data);
     }
 
     /**

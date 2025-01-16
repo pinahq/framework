@@ -88,9 +88,13 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $this->composer->index($this->location);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
-        $sidebarWrapper->addToSidebar($this->makeFilterForm());
-        if (!$this->collection->getCreationSchema()->isEmpty()) {
-            $sidebarWrapper->addToSidebar($this->makeCreateButton());
+        if ($data->count()) {
+            //если данных нет, то не имеет смысла показывать форму фильтрации,
+            // а кнопка добавить внизу списка будет практически наверху, зачем ее дублировать
+            $sidebarWrapper->addToSidebar($this->makeFilterForm());
+            if (!$this->collection->getCreationSchema()->isEmpty()) {
+                $sidebarWrapper->addToSidebar($this->makeCreateButton());
+            }
         }
 
         return $this->makeCollectionView($data)

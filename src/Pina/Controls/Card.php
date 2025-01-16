@@ -30,11 +30,15 @@ class Card extends Control
         if ($this->title) {
             $header = Html::tag('h5', $this->title, ['class' => 'card-title']);
         }
+        $inner = $header . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        if (empty($inner)) {
+            return '';
+        }
         return Html::tag(
             'div',
             Html::tag(
                 'div',
-                $header . $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+                $inner,
                 ['class' => 'card-body']
             ),
             $this->makeAttributes(['class' => 'card'])
