@@ -4,7 +4,6 @@ namespace Pina\Types;
 
 use Pina\Controls\FormControl;
 use Pina\Data\Field;
-use Pina\Types\IntegerType;
 
 class MegabyteType extends IntegerType
 {
@@ -45,7 +44,7 @@ class MegabyteType extends IntegerType
     protected function convertStringToBytes($from)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $number = substr($from, 0, -2);
+        $number = trim(substr($from, 0, -2));
         $suffix = strtoupper(substr($from,-2));
         //B or no suffix
         if(is_numeric(substr($suffix, 0, 1))) {
