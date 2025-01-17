@@ -14,7 +14,7 @@ class FormContentControl extends FormInput
 
     /**
      * Указать контент, который будет отрисовываться на месте поля ввода
-     * @param string $content
+     * @param mixed $content
      */
     public function setContent($content)
     {

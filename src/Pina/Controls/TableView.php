@@ -22,6 +22,7 @@ class TableView extends Card
 
     public function __construct()
     {
+        //клонировать не нужно, так как неизменяемый объект
         $this->location = App::baseUrl()->location(App::resource());
     }
 

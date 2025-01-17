@@ -28,6 +28,11 @@ class RecordForm extends HandledForm implements InputFactoryInterface
         $this->buttonRow->setMain($this->makeSubmit());
     }
 
+    public function __clone()
+    {
+        $this->buttonRow = clone $this->buttonRow;
+    }
+
     /**
      * @return ButtonRow
      */

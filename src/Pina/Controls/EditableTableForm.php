@@ -28,6 +28,12 @@ class EditableTableForm extends HandledForm
         $this->button->setTitle(__('Сохранить'));
     }
 
+    public function __clone()
+    {
+        $this->table = clone $this->table;
+        $this->button = clone $this->button;
+    }
+
     public function setName(string $name)
     {
         $this->table->setName($name);
