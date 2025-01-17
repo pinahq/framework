@@ -13,6 +13,7 @@ use Pina\Controls\FilterForm;
 use Pina\Controls\Nav\Nav;
 use Pina\Controls\PagingControl;
 use Pina\Controls\RawHtml;
+use Pina\Controls\SidebarWrapper;
 use Pina\Controls\Wrapper;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
@@ -88,8 +89,9 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $this->composer->index($this->location);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
-        if ($data->count()) {
-            //если данных нет, то не имеет смысла показывать форму фильтрации,
+        if ($data->count() || $this->query()->all()) {
+            //если данных нет и нет поискового запроса, который обнулил данные,
+            // то не имеет смысла показывать форму фильтрации,
             // а кнопка добавить внизу списка будет практически наверху, зачем ее дублировать
             $sidebarWrapper->addToSidebar($this->makeFilterForm());
             if (!$this->collection->getCreationSchema()->isEmpty()) {
@@ -249,7 +251,10 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
         $this->composer->show($this->location, $record);
 
-        return $this->resolveRecordView($record)->wrap($this->makeSidebarWrapper());
+        $sidebarWrapper = $this->makeSidebarWrapper();
+        $this->appendNestedResourceButtons($sidebarWrapper);
+
+        return $this->resolveRecordView($record)->wrap($sidebarWrapper);
     }
 
     /**
@@ -453,7 +458,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         if ($this->collection->getSchema()->isEditable()) {
             $row->setMain($this->makeEditLinkButton());
         }
-        $this->appendNestedResourceButtons($row);
         return $row;
     }
 
@@ -477,7 +481,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         return $this->makeLinkedButton('⟶', $this->base->link('@/:id', ['id' => $nextId]), 'info');
     }
 
-    protected function appendNestedResourceButtons(Control $control)
+    protected function appendNestedResourceButtons(SidebarWrapper $control)
     {
         $childs = App::router()->findChilds($this->location->resource('@'));
         foreach ($childs as $resource) {
@@ -487,7 +491,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             try {
                 $title = App::router()->run($resource, 'title');
                 if ($title) {
-                    $control->append($this->makeLinkedButton($title, $this->location->link($resource)));
+                    $control->addToSidebar($this->makeLinkedButton($title, $this->location->link($resource)));
                 }
             } catch (Exception $e) {
 
