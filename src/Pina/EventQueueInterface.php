@@ -5,6 +5,6 @@ namespace Pina;
 interface EventQueueInterface
 {
 
-    public function push(string $handler, string $data, int $priority);
+    public function push(string $handler, string $data, int $priority, bool $unique = false);
 
 }

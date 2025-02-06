@@ -24,12 +24,18 @@ class QueuedListener
             return $handler($event);
         }
 
-        $data = json_encode([$this->listener, get_class($event), $event->serialize()], JSON_UNESCAPED_UNICODE);
-
-        /** @var EventQueueInterface $queue */
-        $queue = App::container()->get(EventQueueInterface::class);
-        $queue->push(QueueHandler::class, $data, $this->priority);
+        $this->queue(json_encode([$this->listener, get_class($event), $event->serialize()], JSON_UNESCAPED_UNICODE));
 
         return '';
+    }
+
+    protected function queue(string $data)
+    {
+        $this->makeQueue()->push(QueueHandler::class, $data, $this->priority);
+    }
+
+    protected function makeQueue(): EventQueueInterface
+    {
+        return App::container()->get(EventQueueInterface::class);
     }
 }
