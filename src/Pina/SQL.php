@@ -1378,7 +1378,7 @@ class SQL
         $sql = 'SELECT ';
         $sql .= $this->makeCountFields($field);
 
-        $sql .= ' FROM ' . $this->getFrom();
+        $sql .= ' FROM ' . $this->makeFrom();
 
         $sql .= $this->makeJoins();
         $sql .= $this->makeWhere();
