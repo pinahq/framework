@@ -917,7 +917,7 @@ class SQL
      */
     public function makeWhere()
     {
-        $sql = join(' AND ', $this->getWhereArray(true));
+        $sql = join(' AND ', $this->getWhereArray());
 
         if ($sql != '') {
             $sql = ' WHERE ' . $sql;
@@ -930,7 +930,7 @@ class SQL
      * Возвращает массив с подготовленным набором условий для конструкции WHERE
      * @return array
      */
-    public function getWhereArray(bool $root)
+    public function getWhereArray(bool $root = true)
     {
         $wheres = array();
         if ($root) {
