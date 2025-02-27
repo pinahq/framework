@@ -397,6 +397,9 @@ class Schema implements IteratorAggregate
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getVolume()
     {
         $count = count($this->fields);
@@ -406,15 +409,21 @@ class Schema implements IteratorAggregate
         return $count;
     }
 
+    /**
+     * @return bool
+     */
     public function isEmpty()
     {
         return $this->getVolume() == 0;
     }
 
+    /**
+     * @return bool
+     */
     public function isEditable()
     {
         foreach ($this->fields as $field) {
-            if (!$field->isStatic()) {
+            if (!$field->isStatic() && !$field->isImmutable()) {
                 return true;
             }
         }
