@@ -3,8 +3,9 @@
 namespace Pina;
 
 use Exception;
-use Pina\Cache\Cache;
+use Pina\Cache\CacheInterface;
 use Pina\Cache\CacheSlot;
+use Pina\Cache\StaticCache;
 use RuntimeException;
 
 class DatabaseDriver implements DatabaseDriverInterface
@@ -72,19 +73,17 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $rc;
     }
 
-    protected function cache($key): CacheSlot
+    protected function cache(string $key, CacheInterface $cache = null): CacheSlot
     {
-        /** @var Cache $cache */
-        $cache = App::load(Cache::class);
-        return new CacheSlot($cache, $key);
+        return new CacheSlot($cache ? $cache : App::load(StaticCache::class), $key);
     }
 
-    public function table($sql, $cacheSeconds = 0)
+    public function table($sql, $cacheSeconds = 0, CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
-            $cache = $this->cache('db:table:'.$sql);
-            if ($cache->filled()) {
-                return $cache->get();
+            $cacheSlot = $this->cache('db:table:'.$sql, $cache);
+            if ($cacheSlot->filled()) {
+                return $cacheSlot->get();
             }
         }
 
@@ -98,18 +97,18 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         if ($cacheSeconds > 0) {
-            $cache->set($result, $cacheSeconds);
+            $cacheSlot->set($result, $cacheSeconds);
         }
 
         return $result;
     }
 
-    public function row($sql, $cacheSeconds = 0)
+    public function row($sql, $cacheSeconds = 0, CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
-            $cache = $this->cache('db:row:'.$sql);
-            if ($cache->filled()) {
-                return $cache->get();
+            $cacheSlot = $this->cache('db:row:'.$sql, $cache);
+            if ($cacheSlot->filled()) {
+                return $cacheSlot->get();
             }
         }
 
@@ -120,18 +119,18 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         if ($cacheSeconds > 0) {
-            $cache->set($r, $cacheSeconds);
+            $cacheSlot->set($r, $cacheSeconds);
         }
 
         return $r;
     }
 
-    public function col($sql, $cacheSeconds = 0)
+    public function col($sql, $cacheSeconds = 0, CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
-            $cache = $this->cache('db:col:'.$sql);
-            if ($cache->filled()) {
-                return $cache->get();
+            $cacheSlot = $this->cache('db:col:'.$sql, $cache);
+            if ($cacheSlot->filled()) {
+                return $cacheSlot->get();
             }
         }
 
@@ -150,18 +149,18 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         if ($cacheSeconds > 0) {
-            $cache->set($result, $cacheSeconds);
+            $cacheSlot->set($result, $cacheSeconds);
         }
 
         return $result;
     }
 
-    public function one($sql, $cacheSeconds = 0)
+    public function one($sql, $cacheSeconds = 0, CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
-            $cache = $this->cache('db:col:'.$sql);
-            if ($cache->filled()) {
-                return $cache->get();
+            $cacheSlot = $this->cache('db:col:'.$sql, $cache);
+            if ($cacheSlot->filled()) {
+                return $cacheSlot->get();
             }
         }
 
@@ -172,15 +171,10 @@ class DatabaseDriver implements DatabaseDriverInterface
         mysqli_free_result($rc);
 
         if ($cacheSeconds > 0) {
-            $cache->set($row[0], $cacheSeconds);
+            $cacheSlot->set($row[0], $cacheSeconds);
         }
 
         return $row[0] ?? null;
-    }
-
-    public function cacheOne($sql, $expire)
-    {
-        return $this->cache('one', $sql, $expire);
     }
 
     public function batch($queries)

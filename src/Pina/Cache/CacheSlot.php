@@ -8,7 +8,7 @@ class CacheSlot
     protected $cache;
     protected $key = '';
 
-    public function __construct(Cache $cache, $key)
+    public function __construct(CacheInterface $cache, $key)
     {
         $this->cache = $cache;
         $this->key = $key;

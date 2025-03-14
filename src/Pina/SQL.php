@@ -11,6 +11,9 @@ namespace Pina;
  */
 
 use Exception;
+use Pina\Cache\CacheInterface;
+use Pina\Cache\SharedCache;
+use Pina\Cache\StaticCache;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Field;
@@ -41,6 +44,9 @@ class SQL
     private $ons = array();
 
     protected $context = array();
+
+    protected $cacheSeconds = 0;
+    protected $cacheStorage = null;
 
     public function __clone()
     {
@@ -1243,24 +1249,41 @@ class SQL
         return $this;
     }
 
+    public function cacheShared($cacheSeconds = 1)
+    {
+        return $this->cache($cacheSeconds, App::load(SharedCache::class));
+    }
+
+    public function cacheStatic($cacheSeconds = 1)
+    {
+        return $this->cache($cacheSeconds, App::load(StaticCache::class));
+    }
+
+    public function cache($cacheSeconds = 1, CacheInterface $cacheStorage = null)
+    {
+        $this->cacheSeconds = $cacheSeconds;
+        $this->cacheStorage = $cacheStorage;
+        return $this;
+    }
+
     /**
      * Выполняет запрос и возвращает двумерный массив (таблицу) с набором записей
      * @return array
      */
-    public function get($cacheSeconds = 0)
+    public function get()
     {
-        return $this->db->table($this->make(), $cacheSeconds);
+        return $this->db->table($this->make(), $this->cacheSeconds, $this->cacheStorage);
     }
 
     /**
      * Выполняет запрос и возвращает первую запись из выборки или NULL, если ничего не найдено
      * @return array|null
      */
-    public function first($cacheSeconds = 0)
+    public function first()
     {
         $this->limit(1);
 
-        return $this->db->row($this->make(), $cacheSeconds);
+        return $this->db->row($this->make(), $this->cacheSeconds, $this->cacheStorage);
     }
 
     /**
@@ -1269,9 +1292,9 @@ class SQL
      * @return array
      * @throws NotFoundException
      */
-    public function firstOrFail($cacheSeconds = 0)
+    public function firstOrFail()
     {
-        $line = $this->first($cacheSeconds);
+        $line = $this->first($this->cacheSeconds, $this->cacheStorage);
         if (!isset($line)) {
             throw new NotFoundException;
         }
@@ -1284,12 +1307,12 @@ class SQL
      * @param bool $useLimit
      * @return string|null
      */
-    public function value($name, $cacheSeconds = 0)
+    public function value($name)
     {
         $this->selectIfNotSelected($name);
         $this->forgetAllSelectedExcept([$name]);
 
-        return $this->db->one($this->make(), $cacheSeconds);
+        return $this->db->one($this->make(), $this->cacheSeconds, $this->cacheStorage);
     }
 
     /**
@@ -1300,7 +1323,7 @@ class SQL
      * @param string $key
      * @return array
      */
-    public function column($name, $key = null, $cacheSeconds = 0)
+    public function column($name, $key = null)
     {
         $this->selectIfNotSelected($name);
         if ($key) {
@@ -1308,7 +1331,7 @@ class SQL
         }
         $this->forgetAllSelectedExcept([$name, $key]);
         $sql = $this->make();
-        $r = $key ? array_column($this->db->table($sql, $cacheSeconds), $name, $key) : $this->db->col($sql, $cacheSeconds);
+        $r = $key ? array_column($this->db->table($sql, $this->cacheSeconds, $this->cacheStorage), $name, $key) : $this->db->col($sql, $this->cacheSeconds, $this->cacheStorage);
         return $r;
     }
 
@@ -1369,7 +1392,7 @@ class SQL
      * @param string $field
      * @return int
      */
-    public function count($field = false, $cacheSeconds = 0): int
+    public function count($field = false): int
     {
         if ($this->from == '') {
             return '';
@@ -1385,7 +1408,7 @@ class SQL
 
         $sql .= $this->makeGroupBy();
 
-        return intval($this->db->one($sql, $cacheSeconds));
+        return intval($this->db->one($sql, $this->cacheSeconds, $this->cacheStorage));
     }
 
     /**

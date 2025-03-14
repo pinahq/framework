@@ -2,7 +2,7 @@
 
 namespace Pina\Cache;
 
-class Cache
+class StaticCache implements CacheInterface
 {
 
     protected $data = [];
