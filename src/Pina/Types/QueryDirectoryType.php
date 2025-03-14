@@ -20,7 +20,7 @@ abstract class QueryDirectoryType extends DirectoryType
      */
     public function getVariants()
     {
-        return $this->makeQuery()->selectId()->selectTitle()->get($this->cacheSeconds);
+        return $this->makeQuery()->selectId()->selectTitle()->cacheStatic($this->cacheSeconds)->get();
     }
 
     /**
@@ -33,7 +33,7 @@ abstract class QueryDirectoryType extends DirectoryType
         if (empty($value)) {
             return '';
         }
-        return implode(', ', $this->makeQuery()->whereId($value)->selectTitle()->column('title', null, $this->cacheSeconds));
+        return implode(', ', $this->makeQuery()->whereId($value)->selectTitle()->cacheStatic($this->cacheSeconds)->column('title'));
     }
 
     /**
