@@ -59,7 +59,7 @@ class Relation extends DirectoryType
      */
     public function getVariants()
     {
-        return $this->makeDirectoryQuery()->selectId()->selectTitle()->get($this->cacheSeconds);
+        return $this->makeDirectoryQuery()->selectId()->selectTitle()->cacheStatic($this->cacheSeconds)->get();
     }
 
     protected function makeSelect()
@@ -80,7 +80,7 @@ class Relation extends DirectoryType
             return '';
         }
         $query = $this->makeDirectoryQuery()->whereId($value)->selectTitle();
-        return implode(', ', $query->column('title', null, $this->cacheSeconds));
+        return implode(', ', $query->cacheStatic($this->cacheSeconds)->column('title'));
     }
 
     public function play($value): string
@@ -89,7 +89,7 @@ class Relation extends DirectoryType
             return '';
         }
         $query = $this->makeDirectoryQuery()->whereId($value)->selectId()->selectTitle();
-        $list = $query->get($this->cacheSeconds);
+        $list = $query->cacheStatic($this->cacheSeconds)->get();
 
         $types = array_combine($this->relationTable->getSchema()->getFieldNames(), $this->relationTable->getSchema()->getFieldTypes());
 
