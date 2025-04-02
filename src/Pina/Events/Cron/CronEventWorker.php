@@ -37,7 +37,7 @@ class CronEventWorker
                         $this->runTask($task);
                         $this->deleteTask($task['id']);
                     } catch (Exception $e) {
-                        Log::error('event', $e->getMessage(), $task);
+                        Log::error('event', $task['id'] . ' ' . $task['event'] . ': ' .$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
                         //откладываем задачу на $pushOffSeconds
                         $this->pushOff($task['id'], $pushOffSeconds);
                     }
