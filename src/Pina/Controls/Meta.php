@@ -19,7 +19,11 @@ class Meta extends Control
     {
         $r = '';
         foreach ($this->lines as $name => $content) {
-            $r .= $this->drawMetaLine($name, $content);
+            if ($name == 'title') {
+                $r .= $this->drawTitle($content);
+            } else {
+                $r .= $this->drawMetaLine($name, $content);
+            }
         }
         return $r;
     }
@@ -30,6 +34,11 @@ class Meta extends Control
             return '';
         }
         return Html::tag('meta', '', $this->makeMetaAttributes($name, $content));
+    }
+
+    protected function drawTitle($content)
+    {
+        return Html::tag('title', $content);
     }
 
     protected function makeMetaAttributes($name, $content)

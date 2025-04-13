@@ -82,8 +82,7 @@ class DefaultLayout extends Control
 
     protected function drawHead()
     {
-        return $this->drawTitle()
-            . $this->drawMeta()
+        return $this->drawMeta()
             . $this->drawIcon()
             . $this->drawCss()
             . $this->drawHeadCounters();
@@ -141,18 +140,6 @@ class DefaultLayout extends Control
             return '';
         }
         return Html::tag('meta', '', $attributes);
-    }
-
-
-    protected function drawTitle()
-    {
-        $parts = [strip_tags(Request::getPlace('page_header')), $this->getCompanyTitle()];
-        return Html::tag('title', implode(' - ', array_filter($parts)));
-    }
-
-    protected function getCompanyTitle()
-    {
-        return '';
     }
 
     protected function drawIcon()
