@@ -36,7 +36,7 @@ abstract class AbstractClosureTable extends TableDataGateway
         $addTreeNode = "
             IF (NEW.parent_id IS NOT NULL) THEN
                 INSERT INTO $table (parent_id, id, length)
-                SELECT $table.parent_id, NEW.id, note_book_tree.length + 1
+                SELECT $table.parent_id, NEW.id, $table.length + 1
                 FROM $table WHERE id = NEW.parent_id
                 UNION
                 SELECT NEW.parent_id, NEW.id, 1;
