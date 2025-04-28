@@ -68,7 +68,7 @@ class Language
         return static::$code;
     }
 
-    public static function translate($string, $ns = null)
+    public static function translate($string)
     {
         if (!isset(static::$code)) {
             static::init();
@@ -83,30 +83,16 @@ class Language
             return '';
         }
 
-        $module = $ns ? App::modules()->get($ns . "\\Module") : Request::module();
-        if (empty($module)) {
-            return $string;
-        }
-
-        $moduleKey = $module->getNamespace();
-
         if (!isset(static::$data[static::$code])) {
             static::$data[static::$code] = [];
         }
 
-        if (!isset(static::$data[static::$code][$moduleKey])) {
-            $path = $module->getPath();
-            $file = $path . "/lang/" . static::$code . '.php';
-            static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
-        }
-
-        if (!isset(static::$data[static::$code][$moduleKey][$string])) {
-            $moduleKey = '__fallback__';
+        if (!isset(static::$data[static::$code][$string])) {
             $file = App::path() . '/../lang/' . static::$code . '.php';
-            static::$data[static::$code][$moduleKey] = file_exists($file) ? include($file) : [];
+            static::$data[static::$code] = file_exists($file) ? include($file) : [];
         }
 
-        return static::$data[static::$code][$moduleKey][$string] ?? $string;
+        return static::$data[static::$code][$string] ?? $string;
     }
 
     /**
