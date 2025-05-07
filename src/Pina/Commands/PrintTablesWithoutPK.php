@@ -6,7 +6,7 @@ use Pina\App;
 use Pina\Command;
 use Pina\TableDataGateway;
 
-class PrintTabesWithoutPK extends Command
+class PrintTablesWithoutPK extends Command
 {
 
     protected function execute($input = '')
