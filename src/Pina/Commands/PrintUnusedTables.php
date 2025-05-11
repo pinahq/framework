@@ -24,6 +24,10 @@ class PrintUnusedTables extends Command
                 }
 
                 $usedTables[] = $table;
+
+                if (method_exists($gw, 'getEmbedTables') && $embed = $gw->getEmbedTables()) {
+                    $usedTables = array_merge($usedTables, $embed);
+                }
             }
         );
 
@@ -37,6 +41,8 @@ class PrintUnusedTables extends Command
         foreach ($unusedTables as $table) {
             echo sprintf($pattern, $table) . "\n";
         }
+
+        echo "\nFound " . count($unusedTables) . " table(s)\n";
     }
 
 }
