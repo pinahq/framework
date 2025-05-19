@@ -419,48 +419,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         return $pagingControl;
     }
 
-    /**
-     * @return Control
-     */
-    protected function resolveRecordView(DataRecord $data)
-    {
-        $display = $this->query()->get('display');
-        $component = $display == 'edit' ? $this->makeEditForm($data) : $this->makeViewForm($data);
-        return $component;
-    }
-
-    /**
-     * @return Control
-     */
-    protected function makeEditForm(DataRecord $data)
-    {
-        $form = $this->makeRecordForm($this->location->link('@'), 'put', $data);
-        $form->getButtonRow()->append($this->makeCancelButton());
-        return $form;
-    }
-
-    /**
-     * @return Control
-     */
-    protected function makeViewForm(DataRecord $record)
-    {
-        return $this->makeRecordView($record)->after($this->makeViewButtonRow($record));
-    }
-
-    /**
-     * @return ButtonRow
-     */
-    protected function makeViewButtonRow(DataRecord $record)
-    {
-        /** @var ButtonRow $row */
-        $row = App::make(ButtonRow::class);
-        $row->addClass('mb-5');
-        if ($this->collection->getSchema()->isEditable()) {
-            $row->setMain($this->makeEditLinkButton());
-        }
-        return $row;
-    }
-
     protected function makePreviousButton(DataRecord $record): Control
     {
         $context = $this->context()->all();
@@ -508,11 +466,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         return $this->makeRecordForm($this->base->link('@'), 'post', $data);
     }
 
-    protected function makeCancelButton()
-    {
-        return $this->makeLinkedButton(__('Отменить'), $this->location->link('@'));
-    }
-
     protected function makeCreateButton()
     {
         return $this->makeLinkedButton(__('Добавить'), $this->base->link('@/create'));
@@ -521,11 +474,6 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makeResetButton()
     {
         return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
-    }
-
-    protected function makeEditLinkButton()
-    {
-        return $this->makeLinkedButton(__('Редактировать'), $this->location->link('@', ['display' => 'edit']), 'primary');
     }
 
 }
