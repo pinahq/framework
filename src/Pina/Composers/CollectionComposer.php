@@ -5,7 +5,7 @@ namespace Pina\Composers;
 use Exception;
 use Pina\App;
 use Pina\Controls\BreadcrumbView;
-use Pina\Controls\Nav\Nav;
+use Pina\Controls\Meta;
 use Pina\Data\DataTable;
 use Pina\Data\DataRecord;
 use Pina\Data\Schema;
@@ -48,6 +48,8 @@ class CollectionComposer
         $links = $this->getParentLinks($location->location('@@'));
         $links->add(new LinkedItem($this->collection, $location->link('@')));
 
+        $this->meta()->set('title', $this->collection);
+
         Request::setPlace('page_header', $this->collection);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
@@ -60,6 +62,8 @@ class CollectionComposer
         $title = $this->getItemTitle($record);
         $links->add(new LinkedItem($title, $location->link('@')));
 
+        $this->meta()->set('title', $title);
+
         Request::setPlace('page_header', $title);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
@@ -70,6 +74,8 @@ class CollectionComposer
         $links->add(new LinkedItem($this->collection, $location->link('@@')));
         $links->add(new LinkedItem($this->creation, $location->link('@')));
 
+        $this->meta()->set('title', $this->creation);
+
         Request::setPlace('page_header', $this->creation);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
@@ -78,6 +84,8 @@ class CollectionComposer
     {
         $links = $this->getParentLinks($location->location('@@'));
         $links->add(new LinkedItem($section, $location->link('@')));
+
+        $this->meta()->set('title', $section);
 
         Request::setPlace('page_header', $section);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
@@ -142,5 +150,9 @@ class CollectionComposer
         return $view;
     }
 
+    protected function meta(): Meta
+    {
+        return App::load(Meta::class);
+    }
 
 }
