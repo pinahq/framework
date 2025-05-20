@@ -4,10 +4,12 @@ namespace Pina\Layouts;
 
 use Exception;
 use Pina\App;
+use Pina\Config;
 use Pina\Controls\Control;
 use Pina\Controls\IconMeta;
 use Pina\CSRF;
 use Pina\Html;
+use Pina\Menu\MainMenu;
 use Pina\Request;
 use Pina\Controls\Meta;
 
@@ -53,9 +55,13 @@ class DefaultLayout extends Control
      */
     protected function drawHeader()
     {
-        return Html::zz('header.container section(a.logo[href=/](img[src=/logo.png]))');
+        return Html::nest('header/.container', $this->drawMainMenu());
     }
 
+    protected function drawMainMenu()
+    {
+        return clone App::load(MainMenu::class);
+    }
 
     /**
      * @return string
@@ -63,12 +69,16 @@ class DefaultLayout extends Control
      */
     protected function drawPageHeader()
     {
-        $title = strval(Request::getPlace('page_header'));
+        $title = Request::getPlace('page_header');
         if (empty($title)) {
             return '';
         }
         $breadcrumb = Request::getPlace('breadcrumb');
-        return Html::zz('nav.breadcrumbs(.container(%+header(h1%)))', $breadcrumb, $title);
+        return Html::zz(
+            '.page-header(.container(%+h1%))',
+            $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '',
+            $title
+        );
     }
 
     /**
@@ -77,7 +87,17 @@ class DefaultLayout extends Control
      */
     protected function drawFooter()
     {
-        return Html::zz('footer.container%', 'Made on PinaFramework (c) Alex Yashin');
+        $domain = Config::get('app', 'host');
+        return Html::zz(
+            'footer(.container(a[href=/]%+%))',
+            $domain,
+            $this->drawCopyright()
+        );
+    }
+
+    protected function drawCopyright()
+    {
+        return Html::nest('span.copyright', '© 2007-' . date('Y') . ' Alex Yashin');
     }
 
     protected function drawHead()
