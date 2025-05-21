@@ -19,6 +19,11 @@ class Place
         $this->composer->push($callable);
     }
 
+    public function set(string $content)
+    {
+        $this->composer->set($content);
+    }
+
     public function make(...$params): string
     {
         return $this->composer->make(!empty($params) ? $params : $this->params);

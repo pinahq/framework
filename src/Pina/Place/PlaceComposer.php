@@ -22,6 +22,12 @@ class PlaceComposer
         $this->stack[] = $callable;
     }
 
+    public function set(string $content)
+    {
+        $this->stack = [];
+        $this->stack[] = new PlaceContent($content);
+    }
+
     public function make(array $params)
     {
         $r = '';

@@ -24,6 +24,11 @@ class PlaceTest extends TestCase
 
         $merged = \Pina\App::place('test')->make(2, 3);
         $this->assertEquals('56', $merged);
+
+        $this->assertEquals('', \Pina\App::place('empty'));
+
+        \Pina\App::place('test')->set('hello world');
+        $this->assertEquals('hello world', \Pina\App::place('test'));
     }
 
 }
