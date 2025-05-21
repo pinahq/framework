@@ -119,6 +119,7 @@ class SchemaTest extends TestCase
      */
     public function testFieldset()
     {
+        $line = $this->makeLine();
         $schema = $this->makeSchema();
         $concat = function ($a) {
             return implode(' ', $a);
@@ -127,13 +128,12 @@ class SchemaTest extends TestCase
 
         $this->assertEquals(['id', 'title', 'price'], $schema->getFieldKeys());
 
-        $line = $this->makeLine();
         $this->assertEquals(
             ['id' => '5', 'title' => 'Test', 'price' => '4000 RUB'],
             $schema->processLineAsText($line)
         );
 
-        $line = $this->makeLine();
+//        $line = $this->makeLine();
         $schema = $this->makeSchema();
         $schema->fieldset(['price', 'currency'])->printf('%d - %s', 'test', 'Test');
         $this->assertEquals(
