@@ -119,13 +119,6 @@ class SchemaTest extends TestCase
      */
     public function testFieldset()
     {
-        $line = [
-            'id' => 5,
-            'title' => 'Test',
-            'price' => 4000,
-            'currency' => 'RUB'
-        ];
-
         $schema = $this->makeSchema();
         $concat = function ($a) {
             return implode(' ', $a);
@@ -134,16 +127,18 @@ class SchemaTest extends TestCase
 
         $this->assertEquals(['id', 'title', 'price'], $schema->getFieldKeys());
 
+        $line = $this->makeLine();
         $this->assertEquals(
             ['id' => '5', 'title' => 'Test', 'price' => '4000 RUB'],
             $schema->processLineAsText($line)
         );
 
+        $line = $this->makeLine();
         $schema = $this->makeSchema();
         $schema->fieldset(['price', 'currency'])->printf('%d - %s', 'test', 'Test');
         $this->assertEquals(
             ['id' => 5, 'title' => 'Test', 'price' => 4000, 'currency' => 'RUB', 'test' => '4000 - RUB'],
-            $schema->processLineAsText($line)
+            $schema->processLineAsData($line)
         );
 
         /*
@@ -175,6 +170,16 @@ class SchemaTest extends TestCase
         $schema->add('id', 'ID', IntegerType::class);
         $f = $schema->add('title', 'Title', StringType::class)->setDescription('Please enter description');
         $this->assertEquals('Please enter description', $f->getDescription());
+    }
+
+    private function makeLine()
+    {
+        return [
+            'id' => 5,
+            'title' => 'Test',
+            'price' => 4000,
+            'currency' => 'RUB'
+        ];
     }
 
     private function makeSchema()

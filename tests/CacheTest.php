@@ -7,7 +7,7 @@ class CacheTest extends TestCase
 
     public function testCommand()
     {
-        $cache = new \Pina\Cache\Cache();
+        $cache = new \Pina\Cache\StaticCache();
         $key = 'query:SELECT value FROM test WHERE id=1';
         $value = 100;
         $cache->set($key, $value, 1);
