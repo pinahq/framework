@@ -2,7 +2,6 @@
 
 namespace Pina;
 
-use Pina\Cache\Cache;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;
@@ -150,9 +149,23 @@ class App
         throw new \Pina\Container\NotFoundException("Unable to create unsupported class ".$type." as type");
     }
 
-    public function cache(): Cache
+    public static function place($key, ...$params): Place\Place
     {
-        return static::load(Cache::class);
+        static $container = null;
+
+        if (is_null($container)) {
+            $container = new Container();
+        }
+
+        if (!$container->has($key)) {
+            $composer = new Place\PlaceComposer($key);
+            $container->share($key, $composer);
+        } else {
+            /** @var Place\PlaceComposer $composer */
+            $composer = $container->load($key);
+        }
+
+        return $composer->concrete($params);
     }
 
     /**
