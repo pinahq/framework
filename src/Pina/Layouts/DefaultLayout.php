@@ -10,6 +10,7 @@ use Pina\Controls\IconMeta;
 use Pina\CSRF;
 use Pina\Html;
 use Pina\Menu\MainMenu;
+use Pina\Menu\SectionMenuComposer;
 use Pina\Request;
 use Pina\Controls\Meta;
 
@@ -42,6 +43,7 @@ class DefaultLayout extends Control
     protected function drawBody()
     {
         return $this->drawHeader()
+            . $this->drawSectionMenu()
             . $this->drawPageHeader()
             . $this->drawInnerBefore()
             . $this->drawInner()
@@ -79,6 +81,16 @@ class DefaultLayout extends Control
             $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '',
             $title
         );
+    }
+
+    protected function drawSectionMenu()
+    {
+        /** @var SectionMenuComposer $composer */
+        $composer = App::load(SectionMenuComposer::class);
+        $menu = $composer->resolve(App::resource());
+        $menu->addClass('bar');
+        $r = strval($menu);
+        return $r ? Html::nest('.section-header/.container', $r) : '';
     }
 
     /**
