@@ -174,11 +174,13 @@ class DefaultLayout extends Control
 
     protected function drawCss()
     {
+        App::assets()->addStyleContent(App::place('styles'));
         return App::assets()->fetch('css');
     }
 
     protected function drawJs()
     {
+        App::assets()->addScriptContent(App::place('scripts'));
         return App::assets()->fetch('js');
     }
 

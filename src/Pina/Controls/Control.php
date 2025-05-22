@@ -242,12 +242,16 @@ abstract class Control extends AttributedBlock implements ResponseInterface
         return $this->drawWithWrappers();
     }
 
+    public function __invoke()
+    {
+        return $this->drawWithWrappers();
+    }
+
     public function send()
     {
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/html');
         echo $this->__toString();
     }
-
 
 }
