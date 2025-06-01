@@ -16,6 +16,9 @@ use Pina\Controls\RecordView;
 
 use function Pina\__;
 
+/**
+ * @deprecated в пользу DelegatedCollectionEndpoint
+ */
 abstract class CollectionEndpoint extends FixedCollectionEndpoint
 {
     public function getSchema()
@@ -250,7 +253,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /**
      * @return Control
      */
-    protected function resolveRecordView(DataRecord $data)
+    protected function resolveRecordView(DataRecord $data): Control
     {
         $display = $this->query()->get('display');
         $component = $display == 'edit' ? $this->makeEditForm($data) : $this->makeViewForm($data);
@@ -260,7 +263,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /**
      * @return Control
      */
-    protected function makeEditForm(DataRecord $data)
+    protected function makeEditForm(DataRecord $data): RecordForm
     {
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
@@ -273,9 +276,9 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /**
      * @return Control
      */
-    protected function makeViewForm(DataRecord $data)
+    protected function makeViewForm(DataRecord $record): RecordView
     {
-        return $this->makeRecordView($data)->after($this->makeViewButtonRow());
+        return $this->makeRecordView($record)->after($this->makeViewButtonRow($record));
     }
 
     /**
@@ -293,11 +296,6 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
         return $buttons;
     }
 
-    protected function makeCancelButton()
-    {
-        return $this->makeLinkedButton(__('Отменить'), $this->location->link('@'));
-    }
-
     protected function makeResetButton()
     {
         return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
@@ -311,18 +309,13 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     /**
      * @return ButtonRow
      */
-    protected function makeViewButtonRow()
+    protected function makeViewButtonRow(DataRecord $record): ButtonRow
     {
         /** @var ButtonRow $row */
         $row = App::make(ButtonRow::class);
         $row->addClass('mb-5');
         $row->setMain($this->makeEditLinkButton());
         return $row;
-    }
-
-    protected function makeEditLinkButton()
-    {
-        return $this->makeLinkedButton(__('Редактировать'), $this->location->link('@', ['display' => 'edit']), 'primary');
     }
 
     /**
