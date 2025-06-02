@@ -54,18 +54,21 @@ class CollectionComposer
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
     }
 
-    public function show(Location $location, DataRecord $record)
+    public function showTitle(Location $location, string $title)
     {
         $links = $this->getParentLinks($location->location('@@@'));
         $links->add(new LinkedItem($this->collection, $location->link('@@')));
-
-        $title = $this->getItemTitle($record);
         $links->add(new LinkedItem($title, $location->link('@')));
 
         $this->meta()->set('title', $title);
 
         Request::setPlace('page_header', $title);
         Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+    }
+
+    public function show(Location $location, DataRecord $record)
+    {
+        $this->showTitle($location, $this->getItemTitle($record));
     }
 
     public function create(Location $location)
