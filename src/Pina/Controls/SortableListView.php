@@ -3,7 +3,6 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\CSRF;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Html;
@@ -50,10 +49,6 @@ class SortableListView extends Card
         $list->setDataAttribute('method', $this->method);
         $list->setDataAttribute('resource', $this->resource);
         $list->setDataAttribute('params', http_build_query($this->params));
-        $csrfAttributes = CSRF::tagAttributeArray($this->method);
-        if (!empty($csrfAttributes['data-csrf-token'])) {
-            $list->setDataAttribute('csrf-token', $csrfAttributes['data-csrf-token']);
-        }
         foreach ($this->dataTable as $record) {
             /** @var DataRecord $record */
             $list->append($this->makeListItem($record));

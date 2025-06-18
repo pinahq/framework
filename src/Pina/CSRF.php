@@ -56,30 +56,6 @@ class CSRF
         @setcookie('csrf_token', self::$token, time() + $expired, '/');
     }
     
-    public static function formField($method)
-    {
-        if (in_array(strtolower($method), self::$saveMethods)) {
-            return '';
-        }
-        return '<input type="hidden" name="csrf_token" value="'.self::token().'" />';
-    }
-    
-    public static function tagAttribute($method)
-    {
-        if (in_array(strtolower($method), self::$saveMethods)) {
-            return '';
-        }
-        return ' data-csrf-token="'.self::token().'"';
-    }
-    
-    public static function tagAttributeArray($method)
-    {
-        if (in_array(strtolower($method), self::$saveMethods)) {
-            return [];
-        }
-        return ['data-csrf-token' => self::token()];
-    }
-    
     public static function token()
     {
         self::init();

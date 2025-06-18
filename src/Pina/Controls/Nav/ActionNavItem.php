@@ -4,7 +4,6 @@
 namespace Pina\Controls\Nav;
 
 use Pina\Access;
-use Pina\CSRF;
 
 class ActionNavItem extends LinkNavItem
 {
@@ -27,10 +26,6 @@ class ActionNavItem extends LinkNavItem
         $options['data-resource'] = ltrim($this->resource, '/');
         $options['data-method'] = $this->method;
         $options['data-params'] = http_build_query($this->params);
-        $csrfAttributes = CSRF::tagAttributeArray($this->method);
-        if (!empty($csrfAttributes['data-csrf-token'])) {
-            $options['data-csrf-token'] = $csrfAttributes['data-csrf-token'];
-        }
         $options['class'] = trim(($options['class'] ?? '') . ' pina-action');
         return $options;
     }

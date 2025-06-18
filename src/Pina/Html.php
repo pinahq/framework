@@ -33,8 +33,6 @@ class Html extends \SimpleHtml\Html
             'data-resource' => ltrim($resource, '/'),
             'data-params' => http_build_query(array_diff_key($params, array_flip($map))),
         ];
-        $r += CSRF::tagAttributeArray($method);
-
         return $r;
     }
 

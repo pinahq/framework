@@ -43,8 +43,6 @@ function smarty_function_action_attributes($params, &$view)
     list($preg, $map) = Url::preg($pattern);
     $result .= ' data-params="' . htmlspecialchars(http_build_query(array_diff_key($params, array_flip($map))), ENT_COMPAT) . '"';
 
-    $result .= CSRF::tagAttribute($method);
-
     $result .= ' ';
 
     if ($assign) {

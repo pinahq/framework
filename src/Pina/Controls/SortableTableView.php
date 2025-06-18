@@ -5,7 +5,6 @@ namespace Pina\Controls;
 use Pina\App;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\CSRF;
 
 /**
  * @deprecated в пользу конкретных реализаций под библиотеки сортировок
@@ -74,7 +73,6 @@ class SortableTableView extends SortableListView
     {
         return App::make(Table::class)->addClass('table table-hover pina-table-sortable')
             ->setDataAttribute('method', $this->method)
-            ->setDataAttribute('csrf-token', CSRF::token())
             ->setDataAttribute('resource', $this->resource)
             ->setDataAttribute('params', http_build_query($this->params));
     }

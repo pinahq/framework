@@ -68,7 +68,6 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         $r .= ' target="' . $ps["target"] . '"';
     }
     $r .= '>';
-    $r .= CSRF::formField($ps['method']);
     $r .= $add;
     
     $ps['resource'] = $resource;

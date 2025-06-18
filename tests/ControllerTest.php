@@ -102,7 +102,7 @@ class ControllerTest extends TestCase
 
         $id = Pina\Events\Cron\CronEventGateway::instance()->id();
 
-        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events" data-method="delete" data-params="" data-csrf-token="'.CSRF::token().'">Удалить</a>';
+        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events" data-method="delete" data-params="">Удалить</a>';
 
         $expectedRowHtml = '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner()
@@ -134,7 +134,6 @@ class ControllerTest extends TestCase
 
         $expectedRowEditHtml = ''
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
-            . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
             . $this->getEditFormInner()
             . '</div></div>'
@@ -155,7 +154,6 @@ class ControllerTest extends TestCase
 
         $expectedWrapHtml = ''
             . '<form class="' . $cl . ' form pina-form" action="/put!lk/1/cron-events/' . $id . '" method="post">'
-            . CSRF::formField('PUT')
             . '<div class="card"><div class="card-body">'
             . $this->getForcedEditFormInner()
             . '</div></div>'
@@ -175,10 +173,9 @@ class ControllerTest extends TestCase
         $form->append($note);
         $r->wrap($form);
 
-        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events/'.$id.'" data-method="delete" data-params="" data-csrf-token="'.CSRF::token().'">Удалить</a>';
+        $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events/'.$id.'" data-method="delete" data-params="">Удалить</a>';
 
         $expectedWrapHtml = '<form action="/delete!" method="post">'
-            . CSRF::formField('delete')
             . '<p>note</p>'
             . '<table><tr><td>'
             . '<div><div class="card"><div class="card-body">'

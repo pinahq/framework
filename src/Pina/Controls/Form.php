@@ -2,7 +2,6 @@
 
 namespace Pina\Controls;
 
-use Pina\CSRF;
 use Pina\Html;
 
 /**
@@ -56,7 +55,7 @@ class Form extends Control
 
     protected function drawHeader()
     {
-        return CSRF::formField($this->method);
+        return '';
     }
 
     protected function drawFooter()

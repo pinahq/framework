@@ -1,7 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\CSRF;
 use Pina\Html;
 use Pina\Model\TagOptions;
 
@@ -23,10 +22,9 @@ class HtmlTest extends TestCase
             'data-method' => 'post',
             'data-resource' => 'products',
             'data-params' => 'category_id=5',
-            'data-csrf-token' => CSRF::token(),
             ], $attributes);
 
-        $expectedHtml = '<a class="pina-action" href="#" data-method="post" data-resource="products" data-params="category_id=1" data-csrf-token="'.CSRF::token().'">Link</a>';
+        $expectedHtml = '<a class="pina-action" href="#" data-method="post" data-resource="products" data-params="category_id=1">Link</a>';
         $html = Html::a('Link', '#', ['class' => 'pina-action'] + Html::getActionAttributes('post', 'products', ['category_id' => 1]));
         $this->assertEquals($expectedHtml, $html);
     }
