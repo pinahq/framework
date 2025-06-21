@@ -578,21 +578,38 @@ class App
         }
     }
 
-    public static function walkModuleClasses($type, $callback)
-    {
-        $paths = self::modules()->getPaths();
-        foreach ($paths as $ns => $path) {
-            static::walkClassesInPath($ns, $path, $type, $callback);
-        }
-    }
-
     /**
      * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
      * функцию-обработчик
      * @param string $type Суффикс имени класса
      * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
      */
-    public static function walkClassesInPath($ns, $path, $type, $callback)
+    public static function walkModuleClasses(string $type, callable $callback)
+    {
+        static::walkModuleClassNames($type, function($className) use ($callback) {
+            try {
+                $c = new $className;
+                $callback($c);
+            } catch (\Throwable $e) {
+            }
+        });
+    }
+
+    /**
+     * Обходит именна классов, с заданным суффиксом и выполняет для каждого заданную
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
+    public static function walkModuleClassNames(string $type, callable $callback)
+    {
+        $paths = self::modules()->getPaths();
+        foreach ($paths as $ns => $path) {
+            static::walkClassNamesInPath($ns, $path, $type, $callback);
+        }
+    }
+
+    public static function walkClassNamesInPath(string $ns, string $path, string $type, callable $callback)
     {
         $suffix = $type . '.php';
         $suffixLength = strlen($suffix);
@@ -603,11 +620,7 @@ class App
 
         foreach ($toWalk as $file) {
             $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
-            try {
-                $c = new $className;
-                $callback($c);
-            } catch (\Throwable $e) {
-            }
+            $callback($className);
         }
 
         $paths = array_filter($allFiles, function ($s) use ($path) {
@@ -615,7 +628,7 @@ class App
         });
 
         foreach ($paths as $file) {
-            static::walkClassesInPath(
+            static::walkClassNamesInPath(
                 $ns . '\\' . pathinfo($file, PATHINFO_FILENAME),
                 $path . '/' . $file,
                 $type,
