@@ -20,6 +20,11 @@ class Reference extends QueryDirectoryType
         return clone $this->query;
     }
 
+    public function isNullable(): bool
+    {
+        return true;
+    }
+
     public function getSQLType(): string
     {
         $pk = $this->query->getSinglePrimaryKey();
