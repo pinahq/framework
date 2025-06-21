@@ -569,8 +569,11 @@ class App
 
             foreach ($files as $file) {
                 $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                $c = new $className;
-                $callback($c);
+                try {
+                    $c = new $className;
+                    $callback($c);
+                } catch (\Throwable $e) {
+                }
             }
         }
     }
@@ -600,8 +603,11 @@ class App
 
         foreach ($toWalk as $file) {
             $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
-            $c = new $className;
-            $callback($c);
+            try {
+                $c = new $className;
+                $callback($c);
+            } catch (\Throwable $e) {
+            }
         }
 
         $paths = array_filter($allFiles, function ($s) use ($path) {
