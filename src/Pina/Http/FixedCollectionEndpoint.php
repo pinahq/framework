@@ -30,12 +30,22 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
     /** @return TableDataGateway */
     abstract function makeQuery();
 
-    public function __construct(Request $request)
+    abstract protected function getCollectionTitle(): string;
+
+    /**
+     * Возвращает именование коллекции или элемента
+     * @param $id
+     * @return string
+     * @throws \Exception
+     */
+    public function title($id = '')
     {
-        parent::__construct($request);
-        /** @var CollectionComposer composer */
-        $this->composer = App::make(CollectionComposer::class);
-        $this->composer->configure(__('Список'), __('Создать'));
+        return $this->getCollectionTitle();
+    }
+
+    protected function makeConfiguredCollectionComposer(): CollectionComposer
+    {
+        return $this->makeCollectionComposer($this->getCollectionTitle(), __('Добавить'));
     }
 
     public function getListSchema()
@@ -55,11 +65,6 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
         return new Schema();
     }
 
-    public function title($id)
-    {
-        return $this->composer->getCollection();
-    }
-
     /**
      * @return mixed
      * @throws \Exception
@@ -72,7 +77,7 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
 
         $data = $this->getDataTable($filters);
 
-        $this->composer->index($this->location);
+        $this->makeConfiguredCollectionComposer()->index($this->location());
 
         return $this->makeCollectionView($data)
             ->after($this->makePagingControl($data->getPaging(), $filters))
@@ -99,7 +104,7 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
      */
     protected function exportIfNeeded($filters)
     {
-        $extension = pathinfo($this->location->link('@'), PATHINFO_EXTENSION);
+        $extension = pathinfo($this->location()->link('@'), PATHINFO_EXTENSION);
         if (empty($extension)) {
             return;
         }
@@ -152,7 +157,7 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
     {
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
-        return $this->makeLinkedButton(__('Скачать'), $this->base->link('@.' . $export->getExtension(), $this->query()->all()));
+        return $this->makeLinkedButton(__('Скачать'), $this->base()->link('@.' . $export->getExtension(), $this->query()->all()));
     }
 
     /**

@@ -12,7 +12,7 @@ abstract class SortableCollectionEndpoint extends CollectionEndpoint
     protected function makeCollectionView(DataTable $data)
     {
         return $this->makeSortableList($data)->setHandler(
-            $this->base->resource('@/all/sortable'),
+            $this->base()->resource('@/all/sortable'),
             'put',
             []
         );

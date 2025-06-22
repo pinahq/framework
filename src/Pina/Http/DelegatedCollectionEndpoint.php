@@ -64,7 +64,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
     protected function makeConfiguredCollectionComposer(): CollectionComposer
     {
-        return $this->makeCollectionComposer($this->title(), __('Добавить'));
+        return $this->makeCollectionComposer($this->getCollectionTitle(), __('Добавить'));
     }
 
     /**
@@ -81,9 +81,9 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         $collection = $this->makeDataCollection();
         $data = $collection->getList($filters->getData(), $this->request()->get('page', 0), $this->request()->get("paging", 25), $this->context()->all());
 
-        $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location, [], $this->context()->all()));
+        $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location(), [], $this->context()->all()));
 
-        $this->makeConfiguredCollectionComposer()->index($this->location);
+        $this->makeConfiguredCollectionComposer()->index($this->location());
 
         $sidebarWrapper = $this->makeSidebarWrapper();
         if ($data->count() || $this->query()->all()) {
@@ -107,7 +107,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
     {
         /** @var Nav $menu */
         $menu = App::make(Nav::class);
-        $menu->appendLink(__('Открыть в новой вкладке'), $this->base->link('@/:id', ['id' => $id]), true);
+        $menu->appendLink(__('Открыть в новой вкладке'), $this->base()->link('@/:id', ['id' => $id]), true);
 
         $collection = $this->makeDataCollection();
         $data = $collection->getRecord($id)->getData();
@@ -124,21 +124,21 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             if ($field->getType() instanceof Relation) {
                 foreach ($variants as $variant) {
                     if (in_array($variant['id'], $data[$name])) {
-                        $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/relation', ['id' => $id]), 'delete', [$name => $variant['id']]);
+                        $item = $dropdown->appendAction($variant['title'], $this->base()->resource('@/:id/relation', ['id' => $id]), 'delete', [$name => $variant['id']]);
                         $item->addClass('active');
                     }
                 }
 
                 foreach ($variants as $variant) {
                     if (!in_array($variant['id'], $data[$name])) {
-                        $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/relation', ['id' => $id]), 'post', [$name => $variant['id']]);
+                        $dropdown->appendAction($variant['title'], $this->base()->resource('@/:id/relation', ['id' => $id]), 'post', [$name => $variant['id']]);
                     }
                 }
 
 
             } else {
                 foreach ($variants as $variant) {
-                    $item = $dropdown->appendAction($variant['title'], $this->base->resource('@/:id/field', ['id' => $id]), 'put', [$name => $variant['id']]);
+                    $item = $dropdown->appendAction($variant['title'], $this->base()->resource('@/:id/field', ['id' => $id]), 'put', [$name => $variant['id']]);
                     if ($data[$name] == $variant['id']) {
                         $item->addClass('active');
                     }
@@ -185,13 +185,13 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
         /** @var Nav $nav */
         $nav = $this->makeTabNav();
-        $nav->setLocation($this->location->link('@', $this->query()->all()));
+        $nav->setLocation($this->location()->link('@', $this->query()->all()));
 
         $data = array_filter($this->getFilterRecord()->getSchema()->mine($this->query()->all()));//нужны данные из формы с фильтрами до нормализации
 
         $variants = App::type($type)->getVariants();
         foreach ($variants as $variant) {
-            $menuItem = $nav->appendLink($variant['title'], $this->location->link('@', array_merge($data, [$field->getName() => $variant['id']])));
+            $menuItem = $nav->appendLink($variant['title'], $this->location()->link('@', array_merge($data, [$field->getName() => $variant['id']])));
             if (!empty($variant['badges']) && is_array($variant['badges'])) {
                 foreach ($variant['badges'] as $badge) {
                     $menuItem->append($this->makeBadge($badge));
@@ -221,7 +221,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function exportIfNeeded($filters)
     {
-        $extension = pathinfo($this->location->link('@'), PATHINFO_EXTENSION);
+        $extension = pathinfo($this->location()->link('@'), PATHINFO_EXTENSION);
         if (empty($extension)) {
             return;
         }
@@ -248,7 +248,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
         $record = $this->makeDataCollection()->getRecord($id, $context);
 
-        $this->makeConfiguredCollectionComposer()->show($this->location, $record);
+        $this->makeConfiguredCollectionComposer()->show($this->location(), $record);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
         $this->appendNestedResourceButtons($sidebarWrapper);
@@ -263,7 +263,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
     {
         $record = $this->makeDataCollection()->getNewRecord($this->query()->all(), $this->context()->all());
 
-        $this->makeConfiguredCollectionComposer()->create($this->location);
+        $this->makeConfiguredCollectionComposer()->create($this->location());
 
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }
@@ -280,7 +280,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
         $id = $this->makeDataCollection()->add($data, $context);
 
-        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
+        return Response::ok()->contentLocation($this->base()->link('@/:id', ['id' => $id]));
     }
 
     /**
@@ -296,7 +296,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
         $id = $this->makeDataCollection()->update($id, $data, $context);
 
-        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
+        return Response::ok()->contentLocation($this->base()->link('@/:id', ['id' => $id]));
     }
 
     public function updateField($tmp, $id)
@@ -351,7 +351,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeCollectionView(DataTable $data)
     {
-        return $this->makeTableView($data)->setLocation($this->base, $this->context()->all());
+        return $this->makeTableView($data)->setLocation($this->base(), $this->context()->all());
     }
 
     /**
@@ -402,7 +402,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
     {
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
-        $link = $this->base->link('@.' . $export->getExtension(), $this->query()->all());
+        $link = $this->base()->link('@.' . $export->getExtension(), $this->query()->all());
         return $this->makeLinkedButton(__('Скачать'), $link);
     }
 
@@ -425,7 +425,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         if (empty($prevId)) {
             return new RawHtml();
         }
-        return $this->makeLinkedButton('⟵', $this->base->link('@/:id', ['id' => $prevId]), 'info');
+        return $this->makeLinkedButton('⟵', $this->base()->link('@/:id', ['id' => $prevId]), 'info');
     }
 
     protected function makeNextButton(DataRecord $record): Control
@@ -435,12 +435,12 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         if (empty($nextId)) {
             return new RawHtml();
         }
-        return $this->makeLinkedButton('⟶', $this->base->link('@/:id', ['id' => $nextId]), 'info');
+        return $this->makeLinkedButton('⟶', $this->base()->link('@/:id', ['id' => $nextId]), 'info');
     }
 
     protected function appendNestedResourceButtons(SidebarWrapper $control)
     {
-        $childs = App::router()->findChilds($this->location->resource('@'));
+        $childs = App::router()->findChilds($this->location()->resource('@'));
         foreach ($childs as $resource) {
             if (!Access::isPermitted($resource)) {
                 continue;
@@ -448,7 +448,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             try {
                 $title = App::router()->run($resource, 'title');
                 if ($title) {
-                    $control->addToSidebar($this->makeLinkedButton($title, $this->location->link($resource)));
+                    $control->addToSidebar($this->makeLinkedButton($title, $this->location()->link($resource)));
                 }
             } catch (Exception $e) {
 
@@ -462,17 +462,17 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
      */
     protected function makeCreateForm(DataRecord $data)
     {
-        return $this->makeRecordForm($this->base->link('@'), 'post', $data);
+        return $this->makeRecordForm($this->base()->link('@'), 'post', $data);
     }
 
     protected function makeCreateButton()
     {
-        return $this->makeLinkedButton(__('Добавить'), $this->base->link('@/create'));
+        return $this->makeLinkedButton(__('Добавить'), $this->base()->link('@/create'));
     }
 
     protected function makeResetButton()
     {
-        return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
+        return $this->makeLinkedButton(__('Сбросить'), $this->base()->link('@'));
     }
 
 }

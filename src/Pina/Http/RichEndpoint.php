@@ -61,7 +61,7 @@ class RichEndpoint extends Endpoint
 
     protected function makeEditForm(DataRecord $data): RecordForm
     {
-        $form = $this->makeRecordForm($this->location->link('@'), 'put', $data);
+        $form = $this->makeRecordForm($this->location()->link('@'), 'put', $data);
         $form->getButtonRow()->append($this->makeCancelButton());
         return $form;
     }
@@ -117,7 +117,7 @@ class RichEndpoint extends Endpoint
             $row->setMain($this->makeSubmit($submitTitle));
         }
         if ($cancelTitle) {
-            $row->append($this->makeLinkedButton($cancelTitle, $this->location->link('@')));
+            $row->append($this->makeLinkedButton($cancelTitle, $this->location()->link('@')));
         }
 
         $form->append($row);
@@ -160,7 +160,7 @@ class RichEndpoint extends Endpoint
         return $badge;
     }
 
-    protected function makeCollectionComposer(string $collection, string $creation): CollectionComposer
+    protected function makeCollectionComposer(string $collection, string $creation = ''): CollectionComposer
     {
         /** @var CollectionComposer $composer */
         $composer = App::make(CollectionComposer::class);
@@ -170,12 +170,12 @@ class RichEndpoint extends Endpoint
 
     protected function makeCancelButton(): LinkedButton
     {
-        return $this->makeLinkedButton(__('Отменить'), $this->location->link('@'));
+        return $this->makeLinkedButton(__('Отменить'), $this->location()->link('@'));
     }
 
     protected function makeEditLinkButton(): LinkedButton
     {
-        return $this->makeLinkedButton(__('Редактировать'), $this->location->link('@', ['display' => 'edit']), 'primary');
+        return $this->makeLinkedButton(__('Редактировать'), $this->location()->link('@', ['display' => 'edit']), 'primary');
     }
 
 }

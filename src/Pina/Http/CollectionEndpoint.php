@@ -46,10 +46,10 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
      * @return string
      * @throws \Exception
      */
-    public function title($id)
+    public function title($id = '')
     {
         if ($id) {
-            return $this->composer->getItemTitle($this->getDataRecord($id));
+            return $this->makeConfiguredCollectionComposer()->getItemTitle($this->getDataRecord($id));
         }
         return parent::title($id);
     }
@@ -63,7 +63,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     {
         $record = $this->getDataRecord($id);
 
-        $this->composer->show($this->location, $record);
+        $this->makeConfiguredCollectionComposer()->show($this->location(), $record);
 
         return $this->resolveRecordView($record)
             ->wrap($this->makeSidebarWrapper());
@@ -87,7 +87,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     public function create()
     {
         $record = $this->getNewDataRecord();
-        $this->composer->create($this->location);
+        $this->makeConfiguredCollectionComposer()->create($this->location());
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }
 
@@ -112,7 +112,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
         $this->trigger('created', $id);
 
-        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
+        return Response::ok()->contentLocation($this->base()->link('@/:id', ['id' => $id]));
     }
 
     /**
@@ -128,7 +128,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
         $this->trigger('updated', $id);
 
-        return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
+        return Response::ok()->contentLocation($this->base()->link('@/:id', ['id' => $id]));
     }
 
     public function updateSortable()
@@ -267,7 +267,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
     {
         /** @var RecordForm $form */
         $form = App::make(RecordForm::class);
-        $form->setMethod('put')->setAction($this->location->link('@'));
+        $form->setMethod('put')->setAction($this->location()->link('@'));
         $form->getButtonRow()->append($this->makeCancelButton());
         $form->load($data);
         return $form;
@@ -286,7 +286,7 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
      */
     protected function makeCreateForm(DataRecord $data)
     {
-        return $this->makeRecordForm($this->base->link('@'), 'post', $data);
+        return $this->makeRecordForm($this->base()->link('@'), 'post', $data);
     }
 
     protected function makeIndexButtons()
@@ -298,12 +298,12 @@ abstract class CollectionEndpoint extends FixedCollectionEndpoint
 
     protected function makeResetButton()
     {
-        return $this->makeLinkedButton(__('Сбросить'), $this->base->link('@'));
+        return $this->makeLinkedButton(__('Сбросить'), $this->base()->link('@'));
     }
 
     protected function makeCreateButton()
     {
-        return $this->makeLinkedButton(__('Добавить'), $this->base->link('@/create'));
+        return $this->makeLinkedButton(__('Добавить'), $this->base()->link('@/create'));
     }
 
     /**

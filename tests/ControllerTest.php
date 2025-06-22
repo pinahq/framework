@@ -96,7 +96,9 @@ class ControllerTest extends TestCase
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
         $request->setLocation(new Location('/lk/1/cron-events'), new Location('/lk/1/cron-events'));
 
-        $endpoint = new CronEventEndpoint($request);
+        App::pushRequest($request);
+
+        $endpoint = new CronEventEndpoint();
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 

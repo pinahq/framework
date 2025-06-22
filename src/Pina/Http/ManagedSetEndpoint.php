@@ -38,7 +38,7 @@ abstract class ManagedSetEndpoint extends CollectionEndpoint
 
         /** @var HandledForm $form */
         $form = App::make(HandledForm::class);
-        $form->setMethod('delete')->setAction($this->location->link('@'));
+        $form->setMethod('delete')->setAction($this->location()->link('@'));
 
         $form->prepend($table);
         $form->append(App::make(SubmitButton::class)->setTitle(__('Удалить'))->setStyle('danger'));
@@ -54,7 +54,7 @@ abstract class ManagedSetEndpoint extends CollectionEndpoint
 
         $this->makeQuery()->put($normalized);
 
-        return Response::ok()->contentLocation($this->base->link('@'));
+        return Response::ok()->contentLocation($this->base()->link('@'));
     }
 
     public function destroy($id = null)

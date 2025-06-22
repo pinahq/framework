@@ -39,7 +39,7 @@ abstract class BulkEditEndpoint extends FixedCollectionEndpoint
         $table->load($data);
 
         $form = App::make(RecordForm::class);
-        $form->setMethod('post')->setAction($this->location->link('@'));
+        $form->setMethod('post')->setAction($this->location()->link('@'));
         $form->load(new DataRecord([], $this->getBulkEditSchema()));
 
         $form->prepend($table);

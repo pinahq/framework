@@ -2,6 +2,7 @@
 
 namespace Pina\Http;
 
+use Pina\App;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpFoundation\FileBag;
@@ -10,30 +11,19 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Endpoint
 {
-
-    /**
-     *
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     *
-     * @var Location
-     */
-    protected $location;
-
-    /**
-     *
-     * @var Location
-     */
-    protected $base;
-
-    public function __construct(Request $request)
+    private function routerRequest()
     {
-        $this->request = $request;
-        $this->location = $request->getLocation();
-        $this->base = $request->getBaseLocation();
+        return App::getActualRequest();
+    }
+
+    protected function base(): Location
+    {
+        return $this->routerRequest()->getBaseLocation();
+    }
+
+    protected function location(): Location
+    {
+        return $this->routerRequest()->getLocation();
     }
 
     /**
@@ -41,9 +31,9 @@ class Endpoint
      *
      * @return InputBag|ParameterBag
      */
-    public function request()
+    protected function request()
     {
-        return $this->request->request;
+        return $this->routerRequest()->request;
     }
 
     /**
@@ -51,9 +41,9 @@ class Endpoint
      *
      * @return InputBag
      */
-    public function query()
+    protected function query()
     {
-        return $this->request->query;
+        return $this->routerRequest()->query;
     }
 
     /**
@@ -61,25 +51,25 @@ class Endpoint
      *
      * @return ParameterBag
      */
-    public function attributes()
+    protected function attributes()
     {
-        return $this->request->attributes;
+        return $this->routerRequest()->attributes;
     }
 
     /**
      * @return InputBag
      */
-    public function filters()
+    protected function filters()
     {
-        return $this->request->filters();
+        return $this->routerRequest()->filters();
     }
 
     /**
      * @return InputBag
      */
-    public function context()
+    protected function context()
     {
-        return $this->request->context();
+        return $this->routerRequest()->context();
     }
 
     /**
@@ -87,9 +77,9 @@ class Endpoint
      *
      * @return ServerBag
      */
-    public function server()
+    protected function server()
     {
-        return $this->request->server;
+        return $this->routerRequest()->server;
     }
 
     /**
@@ -97,9 +87,9 @@ class Endpoint
      *
      * @return FileBag
      */
-    public function files()
+    protected function files()
     {
-        return $this->request->files;
+        return $this->routerRequest()->files;
     }
 
     /**
@@ -107,9 +97,9 @@ class Endpoint
      *
      * @return InputBag
      */
-    public function cookies()
+    protected function cookies()
     {
-        return $this->request->cookies;
+        return $this->routerRequest()->cookies;
     }
 
     /**
@@ -117,9 +107,9 @@ class Endpoint
      *
      * @return HeaderBag
      */
-    public function headers()
+    protected function headers()
     {
-        return $this->request->headers;
+        return $this->routerRequest()->headers;
     }
 
 

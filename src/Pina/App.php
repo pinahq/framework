@@ -20,6 +20,9 @@ class App
         ResourceManagerInterface::class => ResourceManager::class,
     );
 
+    /** @var \Pina\Http\Request[] */
+    private static $requestStack = [];
+
     /**
      * Иницирует приложение
      * @param string $env Режим работы (например, live или test)
@@ -635,6 +638,25 @@ class App
                 $callback
             );
         }
+    }
+
+    public static function pushRequest(\Pina\Http\Request $request)
+    {
+        array_push(static::$requestStack, $request);
+    }
+
+    public static function getActualRequest(): \Pina\Http\Request
+    {
+        $top = count(static::$requestStack) - 1;
+        if ($top < 0) {
+            throw new \Exception('wrong router stack state');
+        }
+        return static::$requestStack[$top];
+    }
+
+    public static function popRequest()
+    {
+        array_pop(static::$requestStack);
     }
 }
 

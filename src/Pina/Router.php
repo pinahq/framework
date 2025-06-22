@@ -89,6 +89,24 @@ class Router
         }
 
         $pattern = $this->items[$c]->getPattern();
+
+        App::pushRequest($this->makeRequest($resource, $c, $data, $pattern));
+        $inst = $this->items[$c]->makeEndpoint();
+
+        $action .= $this->calcDeeperAction($resource, $pattern);
+
+        if (!method_exists($inst, $action)) {
+            throw new NotFoundException();
+        }
+
+        $r = call_user_func_array([$inst, $action], $params);
+        App::popRequest();
+
+        return $r;
+    }
+
+    protected function makeRequest($resource, $c, $data, $pattern)
+    {
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
 
@@ -107,15 +125,7 @@ class Router
 
         $request->setContext($this->items[$c]->getContext());
 
-        $inst = $this->items[$c]->makeEndpoint($request);
-
-        $action .= $this->calcDeeperAction($resource, $pattern);
-
-        if (!method_exists($inst, $action)) {
-            throw new NotFoundException();
-        }
-
-        return call_user_func_array([$inst, $action], $params);
+        return $request;
     }
 
     public function findChilds(string $resource)

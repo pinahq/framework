@@ -16,26 +16,19 @@ use function Pina\__;
 
 class CronEventEndpoint extends RichEndpoint
 {
-
-    /** @var CollectionComposer  */
-    protected $composer;
-
-    public function __construct(Request $request)
+    public function title()
     {
-        parent::__construct($request);
-        /** @var CollectionComposer composer */
-        $this->composer = App::make(CollectionComposer::class);
-        $this->composer->configure(__('События'), '');
+        return __('События');
     }
 
     public function index()
     {
-        $this->composer->index($this->location);
+        $this->makeCollectionComposer($this->title())->index($this->location());
         $query = CronEventGateway::instance();
 
         $data = $query->get();
         $schema = $query->getQuerySchema();
-        $schema->pushHtmlProcessor(new CollectionItemLinkProcessor($schema, $this->location));
+        $schema->pushHtmlProcessor(new CollectionItemLinkProcessor($schema, $this->location()));
 
         return $this->makeTableView(new DataTable($data, $schema));
     }
@@ -58,10 +51,10 @@ class CronEventEndpoint extends RichEndpoint
         $view = App::make(RecordView::class);
         $view->load($record);
 
-        $this->composer->show($this->location, $record);
+        $this->makeCollectionComposer($this->title())->show($this->location(), $record);
 
         if (empty($data['worker_id'])) {
-            $view->append($this->makeActionButton(__('Удалить'), $this->location->resource('@'), 'delete'));
+            $view->append($this->makeActionButton(__('Удалить'), $this->location()->resource('@'), 'delete'));
         }
 
         return $view;
@@ -78,7 +71,7 @@ class CronEventEndpoint extends RichEndpoint
             return Response::badRequest();
         }
         CronEventGateway::instance()->whereId($id)->whereNull('worker_id')->delete();
-        return Response::ok()->contentLocation($this->base->link('@'));
+        return Response::ok()->contentLocation($this->base()->link('@'));
     }
 
     public function indexActiveTriggers()

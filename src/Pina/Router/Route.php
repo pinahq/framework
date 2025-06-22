@@ -45,10 +45,10 @@ class Route
         return $this->endpoint;
     }
 
-    public function makeEndpoint(Request $request): Endpoint
+    public function makeEndpoint(): Endpoint
     {
         $cl = $this->endpoint;
-        return new $cl($request);
+        return new $cl();
     }
 
     public function permit($groups)
