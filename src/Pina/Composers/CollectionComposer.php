@@ -102,12 +102,13 @@ class CollectionComposer
         }
         $title = $record->getMeta('title');
         if (empty($title)) {
+            $parts = [];
             foreach ($record->getSchema() as $field) {
                 if ($field->hasTag('title')) {
-                    $title = $record->getMeta($field->getName());
-                    break;
+                    $parts[] = $record->getMeta($field->getName());
                 }
             }
+            $title = implode(' ', $parts);
         }
         if (empty($title)) {
             $title = $record->getMeta('id');
