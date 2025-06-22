@@ -96,6 +96,7 @@ class Router
         $action .= $this->calcDeeperAction($resource, $pattern);
 
         if (!method_exists($inst, $action)) {
+            App::popRequest();
             throw new NotFoundException();
         }
 
