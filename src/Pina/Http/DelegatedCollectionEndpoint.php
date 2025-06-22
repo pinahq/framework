@@ -35,26 +35,17 @@ use function Pina\__;
 /**
  * Основной эндпоинт на замену CollectionEndpoint и FixedCollectionEndpoint
  * Предоставляет HTTP-интерфейс для управления коллекцией, которая пробрасывается
- * через поле $collection
+ * через абстрактный метод makeDataCollection
  */
-class DelegatedCollectionEndpoint extends RichEndpoint
+abstract class DelegatedCollectionEndpoint extends RichEndpoint
 {
-    /** @var CollectionComposer  */
-    protected $composer;
+    abstract protected function getCollectionTitle(): string;
 
-    /** @var DataCollection */
-    protected $collection;
+    abstract protected function makeDataCollection(): DataCollection;
 
-    /** @var DataCollection */
-    protected $export;
-
-    /** @var bool */
-    public function __construct(Request $request)
+    protected function makeExportDataCollection(): ?DataCollection
     {
-        parent::__construct($request);
-        /** @var CollectionComposer composer */
-        $this->composer = App::make(CollectionComposer::class);
-        $this->composer->configure(__('Перечень'), __('Создать'));
+        return null;
     }
 
     /**
@@ -63,12 +54,17 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      * @return string
      * @throws Exception
      */
-    public function title($id)
+    public function title($id = '')
     {
         if ($id) {
-            return $this->composer->getItemTitle($this->collection->getRecord($id, $this->context()->all()));
+            return $this->makeConfiguredCollectionComposer()->getItemTitle($this->makeDataCollection()->getRecord($id, $this->context()->all()));
         }
-        return $this->composer->getCollection();
+        return $this->getCollectionTitle();
+    }
+
+    protected function makeConfiguredCollectionComposer(): CollectionComposer
+    {
+        return $this->makeCollectionComposer($this->title(), __('Добавить'));
     }
 
     /**
@@ -82,11 +78,12 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
         $this->exportIfNeeded($contextAndFilters);
 
-        $data = $this->collection->getList($filters->getData(), $this->request()->get('page', 0), $this->request()->get("paging", 25), $this->context()->all());
+        $collection = $this->makeDataCollection();
+        $data = $collection->getList($filters->getData(), $this->request()->get('page', 0), $this->request()->get("paging", 25), $this->context()->all());
 
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location, [], $this->context()->all()));
 
-        $this->composer->index($this->location);
+        $this->makeConfiguredCollectionComposer()->index($this->location);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
         if ($data->count() || $this->query()->all()) {
@@ -94,7 +91,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             // то не имеет смысла показывать форму фильтрации,
             // а кнопка добавить внизу списка будет практически наверху, зачем ее дублировать
             $sidebarWrapper->addToSidebar($this->makeFilterForm());
-            if (!$this->collection->getCreationSchema()->isEmpty()) {
+            if (!$collection->getCreationSchema()->isEmpty()) {
                 $sidebarWrapper->addToSidebar($this->makeCreateButton());
             }
         }
@@ -112,9 +109,10 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $menu = App::make(Nav::class);
         $menu->appendLink(__('Открыть в новой вкладке'), $this->base->link('@/:id', ['id' => $id]), true);
 
-        $data = $this->collection->getRecord($id)->getData();
+        $collection = $this->makeDataCollection();
+        $data = $collection->getRecord($id)->getData();
 
-        $schema = $this->collection->getVariantAvailableSchema();
+        $schema = $collection->getVariantAvailableSchema();
         foreach ($schema as $field) {
             $title = $field->getTitle();
             $name = $field->getName();
@@ -228,14 +226,15 @@ class DelegatedCollectionEndpoint extends RichEndpoint
             return;
         }
 
-        if (!$this->export) {
+        $collection = $this->makeExportDataCollection();
+        if (!$collection) {
             throw new NotFoundException();
         }
 
         /** @var DefaultExport $export */
         $export = App::load(DefaultExport::class);
         $export->setFilename('export');
-        $export->load($this->export->getList($filters));
+        $export->load($collection->getList($filters));
         $export->download();
         exit;
     }
@@ -247,9 +246,9 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     {
         $context = $this->context()->all();
 
-        $record = $this->collection->getRecord($id, $context);
+        $record = $this->makeDataCollection()->getRecord($id, $context);
 
-        $this->composer->show($this->location, $record);
+        $this->makeConfiguredCollectionComposer()->show($this->location, $record);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
         $this->appendNestedResourceButtons($sidebarWrapper);
@@ -262,9 +261,9 @@ class DelegatedCollectionEndpoint extends RichEndpoint
      */
     public function create()
     {
-        $record = $this->collection->getNewRecord($this->query()->all(), $this->context()->all());
+        $record = $this->makeDataCollection()->getNewRecord($this->query()->all(), $this->context()->all());
 
-        $this->composer->create($this->location);
+        $this->makeConfiguredCollectionComposer()->create($this->location);
 
         return $this->makeCreateForm($record)->wrap($this->makeSidebarWrapper());
     }
@@ -279,7 +278,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
         $context = $this->context()->all();
 
-        $id = $this->collection->add($data, $context);
+        $id = $this->makeDataCollection()->add($data, $context);
 
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
@@ -295,7 +294,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
 
         $context = $this->context()->all();
 
-        $id = $this->collection->update($id, $data, $context);
+        $id = $this->makeDataCollection()->update($id, $data, $context);
 
         return Response::ok()->contentLocation($this->base->link('@/:id', ['id' => $id]));
     }
@@ -305,7 +304,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $data = $this->request()->all();
         $context = $this->context()->all();
 
-        $this->collection->update($id, $data, $context, array_keys($data));
+        $this->makeDataCollection()->update($id, $data, $context, array_keys($data));
 
         return Response::ok();
     }
@@ -319,7 +318,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $field = array_shift($keys);
         $value = $data[$field] ?? null;
 
-        $this->collection->addToRelation($id, $field, $value, $context);
+        $this->makeDataCollection()->addToRelation($id, $field, $value, $context);
 
         return Response::ok();
     }
@@ -333,7 +332,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
         $field = array_shift($keys);
         $value = $data[$field] ?? null;
 
-        $this->collection->deleteFromRelation($id, $field, $value, $context);
+        $this->makeDataCollection()->deleteFromRelation($id, $field, $value, $context);
 
         return Response::ok();
     }
@@ -342,7 +341,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     public function updateSortable()
     {
         $ids = $this->request()->all()['id'] ?? [];
-        $this->collection->reorder($ids);
+        $this->makeDataCollection()->reorder($ids);
 
         return Response::ok()->emptyContent();
     }
@@ -376,7 +375,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function getFilterRecord(): DataRecord
     {
         $context = $this->context()->all();
-        $schema = $this->collection->getFilterSchema($context)->setNullable()->setMandatory(false);
+        $schema = $this->makeDataCollection()->getFilterSchema($context)->setNullable()->setMandatory(false);
         $tabSchema = $this->getTabSchema();
         foreach ($tabSchema as $tabField) {
             $schema->forgetField($tabField->getName());
@@ -390,10 +389,10 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     {
         /** @var ButtonRow $buttons */
         $buttons = App::make(ButtonRow::class);
-        if ($this->export) {
+        if ($this->makeExportDataCollection()) {
             $buttons->append($this->makeExportButton());
         }
-        if (!$this->collection->getCreationSchema()->isEmpty()) {
+        if (!$this->makeDataCollection()->getCreationSchema()->isEmpty()) {
             $buttons->setMain($this->makeCreateButton()->setStyle('primary'));
         }
         return $buttons;
@@ -410,7 +409,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makePagingControl($paging)
     {
         //значимые фильтры, если расширить до всех параметров, то все будут попадать в пагинацию
-        $filters = Arr::only($this->query()->all(), $this->collection->getFilterSchema($this->context()->all())->getFieldKeys());
+        $filters = Arr::only($this->query()->all(), $this->makeDataCollection()->getFilterSchema($this->context()->all())->getFieldKeys());
 
         /** @var PagingControl $pagingControl */
         $pagingControl = App::make(PagingControl::class);
@@ -422,7 +421,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makePreviousButton(DataRecord $record): Control
     {
         $context = $this->context()->all();
-        $prevId = $this->collection->getPreviousId($record->getSinglePrimaryKey($context), $context);
+        $prevId = $this->makeDataCollection()->getPreviousId($record->getSinglePrimaryKey($context), $context);
         if (empty($prevId)) {
             return new RawHtml();
         }
@@ -432,7 +431,7 @@ class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makeNextButton(DataRecord $record): Control
     {
         $context = $this->context()->all();
-        $nextId = $this->collection->getNextId($record->getSinglePrimaryKey($context), $context);
+        $nextId = $this->makeDataCollection()->getNextId($record->getSinglePrimaryKey($context), $context);
         if (empty($nextId)) {
             return new RawHtml();
         }
