@@ -100,7 +100,7 @@ class Router
             throw new NotFoundException();
         }
 
-        $r = call_user_func_array([$inst, $action], $params);
+        $r = call_user_func_array([$inst, $action], array_values($params));
         App::popRequest();
 
         return $r;

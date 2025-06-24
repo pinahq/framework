@@ -7,7 +7,7 @@ namespace Pina;
 class ErrorHandler
 {
 
-    public static function handle($errno, $errstr, $errfile, $errline, $errcontext, $backtrace = [])
+    public static function handle($errno, $errstr, $errfile, $errline, $errcontext = [], $backtrace = [])
     {
         if (!(ini_get("error_reporting") & $errno)) {
             return;
