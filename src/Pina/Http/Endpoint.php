@@ -11,19 +11,19 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Endpoint
 {
-    private function routerRequest()
+    protected function getHttpRequest(): Request
     {
         return App::getActualRequest();
     }
 
     protected function base(): Location
     {
-        return $this->routerRequest()->getBaseLocation();
+        return $this->getHttpRequest()->getBaseLocation();
     }
 
     protected function location(): Location
     {
-        return $this->routerRequest()->getLocation();
+        return $this->getHttpRequest()->getLocation();
     }
 
     /**
@@ -33,7 +33,7 @@ class Endpoint
      */
     protected function request()
     {
-        return $this->routerRequest()->request;
+        return $this->getHttpRequest()->request;
     }
 
     /**
@@ -43,7 +43,7 @@ class Endpoint
      */
     protected function query()
     {
-        return $this->routerRequest()->query;
+        return $this->getHttpRequest()->query;
     }
 
     /**
@@ -53,7 +53,7 @@ class Endpoint
      */
     protected function attributes()
     {
-        return $this->routerRequest()->attributes;
+        return $this->getHttpRequest()->attributes;
     }
 
     /**
@@ -61,7 +61,7 @@ class Endpoint
      */
     protected function filters()
     {
-        return $this->routerRequest()->filters();
+        return $this->getHttpRequest()->filters();
     }
 
     /**
@@ -69,7 +69,7 @@ class Endpoint
      */
     protected function context()
     {
-        return $this->routerRequest()->context();
+        return $this->getHttpRequest()->context();
     }
 
     /**
@@ -79,7 +79,7 @@ class Endpoint
      */
     protected function server()
     {
-        return $this->routerRequest()->server;
+        return $this->getHttpRequest()->server;
     }
 
     /**
@@ -89,7 +89,7 @@ class Endpoint
      */
     protected function files()
     {
-        return $this->routerRequest()->files;
+        return $this->getHttpRequest()->files;
     }
 
     /**
@@ -99,7 +99,7 @@ class Endpoint
      */
     protected function cookies()
     {
-        return $this->routerRequest()->cookies;
+        return $this->getHttpRequest()->cookies;
     }
 
     /**
@@ -109,7 +109,7 @@ class Endpoint
      */
     protected function headers()
     {
-        return $this->routerRequest()->headers;
+        return $this->getHttpRequest()->headers;
     }
 
 
