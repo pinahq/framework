@@ -50,8 +50,11 @@ class ErrorHandler
             E_USER_ERROR => "User Error",
             E_USER_WARNING => "User Warning",
             E_USER_NOTICE => "User Notice",
-            E_STRICT => "Strict",
         );
+
+        if ((double)phpversion() < 8.4) {
+            $errortypes[E_STRICT] = 'Strict';
+        }
 
         $errortype = isset($errortypes[$errno]) ? $errortypes[$errno] : "Unknown Error";
 
@@ -76,23 +79,25 @@ class ErrorHandler
     public static function shutdown()
     {
         $error = error_get_last();
+        if (empty($error)) {
+            return;
+        }
 
-        if ($error !== NULL) {
-            $errno = $error["type"] ?? E_CORE_ERROR;
-            $errfile = $error["file"] ?? "unknown file";
-            $errline = $error["line"] ?? -1;
-            $errstr = $error["message"] ?? "shutdown";
+        $errno = $error["type"] ?? E_CORE_ERROR;
+        $errfile = $error["file"] ?? "unknown file";
+        $errline = $error["line"] ?? -1;
+        $errstr = $error["message"] ?? "shutdown";
 
-            $backtrace = [];
-            if (preg_match('/Stack trace:\s+(.*)$/si', $errstr, $matches)) {
-                $backtrace = explode("\n", trim($matches[1]));
-                $errstr = trim(str_replace($matches[0], '', $errstr));
-            }
+        $backtrace = [];
+        if (preg_match('/Stack trace:\s+(.*)$/si', $errstr, $matches)) {
+            $backtrace = explode("\n", trim($matches[1]));
+            $errstr = trim(str_replace($matches[0], '', $errstr));
+        }
 
-            @header("HTTP/1.1 500 Internal Server Error");
+        static::handle($errno, $errstr, $errfile, $errline, [], $backtrace);
 
-            static::handle($errno, $errstr, $errfile, $errline, [], $backtrace);
-
+        if (empty($_SERVER['argv']) && empty($_SERVER['argc'])) {
+            header("HTTP/1.1 500 Internal Server Error");
             Response::internalError()->send();
         }
     }
