@@ -20,12 +20,7 @@ class CheckTableView extends TableView
 {
     protected function buildHeader()
     {
-        $header = parent::buildHeader();
-        $header->prepend($this->makeCheckAll());
-
-        App::assets()->addScriptContent($this->getCheckAllScript());
-
-        return $header;
+        return parent::buildHeader()->prepend($this->makeCheckAll());
     }
 
     protected function makeRow(DataRecord $record)
@@ -60,18 +55,6 @@ class CheckTableView extends TableView
         $checkbox->setValue(1);
         $checkbox->wrap(new Wrapper("td"));
         return $checkbox;
-    }
-
-    protected function getCheckAllScript()
-    {
-        return <<<HEREDOC
-<script>
-    $("#bulk-edit-checkbox-all").on('change', function () {
-        var value = $(this).prop('checked');
-        $(this).parents('form').find('.bulk-edit-checkbox').prop('checked', value);
-    });
-</script>
-HEREDOC;
     }
 
 }
