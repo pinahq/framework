@@ -9,9 +9,9 @@ use Pina\Url;
 function smarty_block_form($ps, $content, &$view, &$repeat)
 {
     if ($repeat) {
-        return;
+        return '';
     }
-    
+
     $r = '<form';
 
     $add = '';
@@ -21,25 +21,25 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
     foreach ($map as $key) {
         unset($ps[$key]);
     }
-    
+
     if (empty($ps['method'])) {
         $ps['method'] = 'get';
     }
-    
+
     if (!empty($ps['action'])) {
         $ps['method'] = strtolower($ps['method']);
-        
+
         if ($ps['method'] != 'get' && $ps['method'] != 'post') {
             $ps['action'] = $ps['method'].'!'.$ps['action'];
         }
-        
+
         if ($ps['method'] != 'get') {
             $ps['method'] = 'post';
         }
-        
+
         $ps['action'] = '/'.$ps['action'];
     }
-    
+
     if (!empty($ps["action"])) {
         $r .= ' action="' . $ps["action"] . '"';
     }
@@ -67,12 +67,16 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
     if (!empty($ps["target"])) {
         $r .= ' target="' . $ps["target"] . '"';
     }
+    if (!empty($ps["redirect"])) {
+        $hasHost = parse_url($ps['redirect'], PHP_URL_HOST);
+        $r .= ' data-redirect="' . ($hasHost ? $ps['redirect'] : App::link($ps['redirect'])) . '"';
+    }
     $r .= '>';
     $r .= $add;
-    
+
     $ps['resource'] = $resource;
     $r .= Composer::draw(
-        'templater::form', 
+        'templater::form',
         $ps,
         $view
     );
