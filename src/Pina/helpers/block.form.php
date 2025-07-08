@@ -68,8 +68,8 @@ function smarty_block_form($ps, $content, &$view, &$repeat)
         $r .= ' target="' . $ps["target"] . '"';
     }
     if (!empty($ps["redirect"])) {
-        $hasHost = parse_url($ps['redirect'], PHP_URL_HOST);
-        $r .= ' data-redirect="' . ($hasHost ? $ps['redirect'] : App::link($ps['redirect'])) . '"';
+        $origRedirect = $ps["redirect"] == '#' || parse_url($ps['redirect'], PHP_URL_HOST);
+        $r .= ' data-redirect="' . ($origRedirect ? $ps['redirect'] : App::link($ps['redirect'])) . '"';
     }
     $r .= '>';
     $r .= $add;
