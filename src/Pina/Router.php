@@ -91,17 +91,21 @@ class Router
         $pattern = $this->items[$c]->getPattern();
 
         App::pushRequest($this->makeRequest($resource, $c, $data, $pattern));
-        $inst = $this->items[$c]->makeEndpoint();
+        try {
+            $inst = $this->items[$c]->makeEndpoint();
 
-        $action .= $this->calcDeeperAction($resource, $pattern);
+            $action .= $this->calcDeeperAction($resource, $pattern);
 
-        if (!method_exists($inst, $action)) {
+            if (!method_exists($inst, $action)) {
+                throw new NotFoundException();
+            }
+
+            $r = call_user_func_array([$inst, $action], array_values($params));
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
             App::popRequest();
-            throw new NotFoundException();
         }
-
-        $r = call_user_func_array([$inst, $action], array_values($params));
-        App::popRequest();
 
         return $r;
     }
