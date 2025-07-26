@@ -153,9 +153,24 @@ class Access
         self::$conditions[] = array($group, $condition);
     }
 
-    public static function getGroups()
+    public static function getPermittedGroups($resource): array
     {
-        return self::$groups;
+        $resource = Url::trim($resource);
+        if (!self::$sorted) {
+            self::sort();
+        }
+
+        foreach (self::$data as $line) {
+            $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
+            if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
+                $r = [];
+                foreach ($line[self::ACCESS_FIELD_GROUPS] as $permittedGroups) {
+                    $r[] = join($permittedGroups);
+                }
+                return $r;
+            }
+        }
+        return [];
     }
 
     public static function hasGroup($group)
