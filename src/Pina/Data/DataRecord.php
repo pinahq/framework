@@ -19,14 +19,16 @@ class DataRecord
      * @param Schema $schema
      * @throws \Exception
      */
-    public function __construct($data, $schema)
+    public function __construct($data, $schema, $filled = false)
     {
         //TODO: пока принимаем null, как возможный ответ из методов SQL first/find
         // нужно переделать вместе со строгими типами first/find
         if (is_null($data)) {
             $data = [];
         }
-        $schema->fill($data);
+        if (!$filled) {
+            $schema->fill($data);
+        }
         $this->data = $data;
         $this->schema = $schema;
     }

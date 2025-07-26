@@ -478,6 +478,9 @@ class Schema implements IteratorAggregate
     {
         $titles = [];
         foreach ($this->fields as $field) {
+            if ($field->isHidden()) {
+                continue;
+            }
             $titles[] = $field->getTitle();
         }
         foreach ($this->groups as $group) {
@@ -813,6 +816,7 @@ class Schema implements IteratorAggregate
     public function processListAsText(array &$data): array
     {
         foreach ($data as $k => $line) {
+
             $data[$k] = $this->processLineAsText($line);
         }
         return $data;

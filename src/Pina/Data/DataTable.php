@@ -24,6 +24,9 @@ class DataTable implements Iterator, Countable
      */
     public function __construct($data, $schema, ?Paging $paging = null)
     {
+        foreach ($data as &$line) {
+            $schema->fill($line);
+        }
         $this->data = $data;
         $this->schema = $schema;
 
@@ -81,7 +84,7 @@ class DataTable implements Iterator, Countable
      */
     public function current()
     {
-        return new DataRecord($this->data[$this->cursor], $this->schema);
+        return new DataRecord($this->data[$this->cursor], $this->schema, true);
     }
 
     public function key()
