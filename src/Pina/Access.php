@@ -153,6 +153,11 @@ class Access
         self::$conditions[] = array($group, $condition);
     }
 
+    public static function getGroups()
+    {
+        return self::$groups;
+    }
+
     public static function getPermittedGroups($resource): array
     {
         $resource = Url::trim($resource);
