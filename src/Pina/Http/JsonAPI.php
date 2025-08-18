@@ -67,8 +67,8 @@ class JsonAPI
     protected function makeHeaders($packet)
     {
         return [
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
+            'Content-Type: application/json',
+            'Accept: application/json',
         ];
     }
 
