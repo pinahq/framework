@@ -4,6 +4,8 @@
 namespace Pina;
 
 
+use Pina\Events\QueueableCommand;
+
 abstract class Command
 {
 
@@ -22,6 +24,23 @@ abstract class Command
     public function then(Command $command)
     {
         $this->after[] = $command;
+    }
+
+    public static function load(): Command
+    {
+        return App::load(static::class);
+    }
+
+    public static function run($input = '')
+    {
+        $cmd = static::load();
+        return $cmd($input);
+    }
+
+    public static function queue($input = '', $priority = \Pina\Event::PRIORITY_NORMAL)
+    {
+        $cmd = new QueueableCommand(static::class, $priority);
+        return $cmd($input);
     }
 
     public function __invoke($input = '')
