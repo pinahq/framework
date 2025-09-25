@@ -33,6 +33,10 @@ class DatabaseDriver implements DatabaseDriverInterface
         if ($config['charset']) {
             $this->query('SET NAMES ' . $this->escape($config['charset']));
         }
+
+        if (!empty($config['timezone'])) {
+            $this->query("SET time_zone = '" . $this->escape($config['timezone'])."'");
+        }
     }
 
     protected function reconnect()
