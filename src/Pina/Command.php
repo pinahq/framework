@@ -15,15 +15,16 @@ abstract class Command
 
     abstract protected function execute($input = '');
 
-    public function before(Command $command)
+    public function before(Command $command): Command
     {
         $this->before[] = $command;
         return $this;
     }
 
-    public function then(Command $command)
+    public function then(Command $command): Command
     {
         $this->after[] = $command;
+        return $this;
     }
 
     public static function load(): Command
