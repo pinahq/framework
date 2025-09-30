@@ -15,21 +15,28 @@ abstract class Command
 
     abstract protected function execute($input = '');
 
-    public function before(Command $command): Command
+    public static function before(Command $command): Command
     {
-        $this->before[] = $command;
-        return $this;
+        $instance = static::load();
+        $instance->before[] = $command;
+        return $instance;
     }
 
-    public function then(Command $command): Command
+    public static function then(Command $command): Command
     {
-        $this->after[] = $command;
-        return $this;
+        $instance = static::load();
+        $instance->after[] = $command;
+        return $instance;
     }
 
     public static function load(): Command
     {
         return App::load(static::class);
+    }
+
+    public static function queueable($priority = \Pina\Event::PRIORITY_NORMAL): QueueableCommand
+    {
+        return new QueueableCommand(static::class, $priority);
     }
 
     public static function run($input = '')
@@ -38,9 +45,9 @@ abstract class Command
         return $cmd($input);
     }
 
-    public static function queue($input = '', $priority = \Pina\Event::PRIORITY_NORMAL)
+    public static function enqueue($input = '', $priority = \Pina\Event::PRIORITY_NORMAL)
     {
-        $cmd = new QueueableCommand(static::class, $priority);
+        $cmd = static::queueable($priority);
         return $cmd($input);
     }
 

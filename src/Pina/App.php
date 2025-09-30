@@ -108,7 +108,7 @@ class App
         return static::load(ModuleRegistry::class);
     }
 
-    public static function event($name)
+    public static function event($name): \Pina\Events\EventHandlerRegistry
     {
         /** @var Container $events */
         $events = static::container()->get('events');
