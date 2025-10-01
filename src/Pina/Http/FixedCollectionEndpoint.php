@@ -22,9 +22,6 @@ use function Pina\__;
 
 abstract class FixedCollectionEndpoint extends RichEndpoint
 {
-
-    /** @var CollectionComposer  */
-    protected $composer;
     protected $exportAllowed = false;
 
     /** @return TableDataGateway */
