@@ -6,6 +6,7 @@ class Language
 {
 
     private static $code = null;
+    private static $translator = null;
     private static $data = [];
     /**
      * Available languages array
@@ -83,6 +84,10 @@ class Language
             return '';
         }
 
+        if (isset(static::$translator)) {
+            return static::$translator->translate(static::$code, $string);
+        }
+
         if (!isset(static::$data[static::$code])) {
             static::$data[static::$code] = [];
         }
@@ -93,6 +98,11 @@ class Language
         }
 
         return static::$data[static::$code][$string] ?? $string;
+    }
+
+    public static function setTranslator(TranslatorInterface $translator)
+    {
+        static::$translator = $translator;
     }
 
     /**
