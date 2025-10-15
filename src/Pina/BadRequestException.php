@@ -10,7 +10,7 @@ class BadRequestException extends RuntimeException
 
     protected $errors = [];
 
-    public function __construct($message = "", $code = 0, Throwable $previous = null)
+    public function __construct($message = "", $code = 0, ?Throwable $previous = null)
     {
         //вызов addError дополнит системное поле $this->message, поэтому в конструктор передавать не надо,
         // чтобы не дублировать

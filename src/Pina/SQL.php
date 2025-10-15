@@ -1259,7 +1259,7 @@ class SQL
         return $this->cache($cacheSeconds, App::load(StaticCache::class));
     }
 
-    public function cache($cacheSeconds = 1, CacheInterface $cacheStorage = null)
+    public function cache($cacheSeconds = 1, ?CacheInterface $cacheStorage = null)
     {
         $this->cacheSeconds = $cacheSeconds;
         $this->cacheStorage = $cacheStorage;

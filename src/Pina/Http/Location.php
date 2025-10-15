@@ -13,7 +13,7 @@ class Location
     /** @var \Pina\Http\Url  */
     protected $server;
 
-    public function __construct($resource, \Pina\Http\Url $server = null)
+    public function __construct($resource, ?\Pina\Http\Url $server = null)
     {
         $this->resource = $resource;
         $this->server = $server ?? new \Pina\Http\Url('');

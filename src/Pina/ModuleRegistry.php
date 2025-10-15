@@ -42,7 +42,7 @@ class ModuleRegistry implements IteratorAggregate
      * Итератор по модулям
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         return new ArrayIterator($this->registry);
     }

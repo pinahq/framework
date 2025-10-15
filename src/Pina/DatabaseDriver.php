@@ -77,12 +77,12 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $rc;
     }
 
-    protected function cache(string $key, CacheInterface $cache = null): CacheSlot
+    protected function cache(string $key, ?CacheInterface $cache = null): CacheSlot
     {
         return new CacheSlot($cache ? $cache : App::load(StaticCache::class), $key);
     }
 
-    public function table($sql, $cacheSeconds = 0, CacheInterface $cache = null)
+    public function table($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:table:'.$sql, $cache);
@@ -107,7 +107,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
-    public function row($sql, $cacheSeconds = 0, CacheInterface $cache = null)
+    public function row($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:row:'.$sql, $cache);
@@ -129,7 +129,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $r;
     }
 
-    public function col($sql, $cacheSeconds = 0, CacheInterface $cache = null)
+    public function col($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:col:'.$sql, $cache);
@@ -159,7 +159,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
-    public function one($sql, $cacheSeconds = 0, CacheInterface $cache = null)
+    public function one($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:col:'.$sql, $cache);

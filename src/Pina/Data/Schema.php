@@ -760,7 +760,7 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function formatLine(array &$line, string $onlyFieldName = null): array
+    protected function formatLine(array &$line, ?string $onlyFieldName = null): array
     {
         $processed = $this->processLineAsData($line);
 
@@ -822,7 +822,7 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function drawLine(array &$line, string $onlyFieldName = null): array
+    protected function drawLine(array &$line, ?string $onlyFieldName = null): array
     {
         $processed = $this->processLineAsData($line);
 
@@ -879,7 +879,7 @@ class Schema implements IteratorAggregate
         return $data;
     }
 
-    protected function playLine(array &$line, string $onlyFieldName = null): array
+    protected function playLine(array &$line, ?string $onlyFieldName = null): array
     {
         $processed = $this->processLineAsData($line);
 
@@ -991,7 +991,7 @@ class Schema implements IteratorAggregate
      * Итератор по полям схемы
      * @return Field[]
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         $fields = $this->fields;
         foreach ($this->getInnerSchemas() as $group) {

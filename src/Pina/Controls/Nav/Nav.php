@@ -46,7 +46,7 @@ class Nav extends Control
         return parent::drawInnerAfter($wrapper);
     }
 
-    protected function drawInnerBefore(Control $wrapper = null)
+    protected function drawInnerBefore(?Control $wrapper = null)
     {
         $this->processActive($this->innerBefore);
 
