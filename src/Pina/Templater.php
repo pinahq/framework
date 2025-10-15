@@ -6,6 +6,7 @@ use Smarty;
 
 class Templater extends Smarty
 {
+    protected array $strict_resources = [];
 
     public function __construct()
     {
@@ -13,7 +14,7 @@ class Templater extends Smarty
 
         $this->strict_resources = array();
         array_unshift(
-                $this->plugins_dir, __DIR__ . '/helpers'
+            $this->plugins_dir, __DIR__ . '/helpers'
         );
 
         $paths = App::modules()->getPaths();
@@ -34,7 +35,7 @@ class Templater extends Smarty
         }
         $this->template_dir[] = App::path() . "/default/";
 
-        $this->compile_dir = App::templaterCompiled() . '/' . md5($template);
+        $this->compile_dir = App::templaterCompiled() . '/' . md5($template ?? '');
         @mkdir($this->compile_dir);
 
         $this->cache_dir = App::templaterCache();
@@ -231,7 +232,7 @@ class Templater extends Smarty
 
     public static function getTemplateTrusted($template, &$view)
     {
-        
+
     }
 
     public static function getEmailTemplatePaths($template, &$view)
@@ -300,7 +301,7 @@ class Templater extends Smarty
 
     public static function getEmailTemplateTrusted($template, &$view)
     {
-        
+
     }
 
 }

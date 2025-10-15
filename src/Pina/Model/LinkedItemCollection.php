@@ -33,17 +33,17 @@ class LinkedItemCollection implements Iterator, Countable
         return $this->cursor;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->cursor++;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->cursor = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->items[$this->cursor]);
     }
@@ -51,7 +51,7 @@ class LinkedItemCollection implements Iterator, Countable
     /**
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->items);
     }

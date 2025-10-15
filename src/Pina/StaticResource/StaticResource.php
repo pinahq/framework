@@ -25,7 +25,7 @@ abstract class StaticResource
         $this->content = $content;
         return $this;
     }
-    
+
     public function getContent()
     {
         return $this->content;
@@ -47,7 +47,7 @@ abstract class StaticResource
 
     protected function makeLocalUrl()
     {
-        $static = \Pina\Config::get('app', 'static');
+        $static = \Pina\Config::get('app', 'static') ?? '';
         $version = \Pina\App::version();
         $v = $version ? ('?' . $version) : '';
         return rtrim($static, '/') . '/' . ltrim($this->src, '/') . $v;
