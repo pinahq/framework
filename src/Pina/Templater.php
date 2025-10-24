@@ -12,6 +12,8 @@ class Templater extends Smarty
     {
         parent::__construct();
 
+        $this->error_reporting = E_ALL & ~E_NOTICE & ~E_WARNING;
+
         $this->strict_resources = array();
         array_unshift(
             $this->plugins_dir, __DIR__ . '/helpers'
@@ -36,7 +38,9 @@ class Templater extends Smarty
         $this->template_dir[] = App::path() . "/default/";
 
         $this->compile_dir = App::templaterCompiled() . '/' . md5($template ?? '');
-        @mkdir($this->compile_dir);
+        if (!is_dir($this->compile_dir)) {
+            mkdir($this->compile_dir);
+        }
 
         $this->cache_dir = App::templaterCache();
         #$this->compile_check = false;

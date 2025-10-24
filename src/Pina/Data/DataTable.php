@@ -78,16 +78,12 @@ class DataTable implements Iterator, Countable
         return count($this->data);
     }
 
-    /**
-     *
-     * @return \Pina\Data\DataRecord
-     */
-    public function current()
+    public function current(): DataRecord
     {
         return new DataRecord($this->data[$this->cursor], $this->schema, true);
     }
 
-    public function key()
+    public function key(): int
     {
         return $this->cursor;
     }

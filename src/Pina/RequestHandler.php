@@ -116,7 +116,7 @@ class RequestHandler
 
         foreach ($keys as $k) {
 
-            $value = $this->input($k);
+            $value = $this->input($k) ?? "";
 
             $boolOrArray = is_bool($value) || is_array($value);
             if (!$boolOrArray && trim($value) === '') {

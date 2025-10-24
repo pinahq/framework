@@ -219,8 +219,8 @@ class DatabaseDriver implements DatabaseDriverInterface
             foreach ($str as $k => $tmp) {
                 $str[$k] = $this->escape($str[$k]);
             }
-        } else {
-            $str = mysqli_real_escape_string($this->conn, $str);
+        } elseif (!is_null($str)) {
+            $str = mysqli_real_escape_string($this->conn, $str ?? "");
         }
 
         return $str;
