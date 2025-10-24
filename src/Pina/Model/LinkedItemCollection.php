@@ -19,16 +19,12 @@ class LinkedItemCollection implements Iterator, Countable
         $this->items[] = $item;
     }
 
-    /**
-     *
-     * @return LinkedItemInterface
-     */
     public function current(): LinkedItemInterface
     {
         return $this->items[$this->cursor];
     }
 
-    public function key() /*: mixed */
+    public function key(): int
     {
         return $this->cursor;
     }
