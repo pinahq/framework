@@ -65,7 +65,6 @@ class App
         static::$container->share('types', $types);
 
         static::$container->share('events', new Container());
-        static::$container->share('schema', new Container());
     }
 
     /**

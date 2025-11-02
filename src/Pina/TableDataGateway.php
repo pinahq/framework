@@ -5,6 +5,7 @@ namespace Pina;
 use Exception;
 use League\Csv\Reader;
 use Pina\Data\Schema;
+use Pina\Data\SchemaExtension;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
 use Pina\Types\TypeInterface;
@@ -57,28 +58,18 @@ class TableDataGateway extends SQL
      */
     public function getSchema()
     {
-        return clone static::getSchemaExtensions();
+        /** @var SchemaExtension $container */
+        $container = App::load(SchemaExtension::class);
+        return $container->get(static::$table);
     }
 
     public static function addSchema(Schema $schema)
     {
-        $tableSchema = static::getSchemaExtensions();
-        $tableSchema->addGroup($schema);
-
-        /** @var Container\Container $container */
-        $container = App::load('schema');
-        $container->share(static::$table, $tableSchema);
-    }
-
-    protected static function getSchemaExtensions(): Schema
-    {
-        /** @var Container\Container $container */
-        $container = App::load('schema');
-        if ($container->has(static::$table)) {
-            return $container->get(static::$table);
-        }
-
-        return new Schema();
+        /** @var SchemaExtension $container */
+        $container = App::load(SchemaExtension::class);
+        $container->onGet(static::$table, function(Schema $base) use ($schema) {
+            $base->addGroup($schema);
+        });
     }
 
     /**

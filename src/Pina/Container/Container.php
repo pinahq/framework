@@ -20,6 +20,11 @@ class Container implements ContainerInterface
 
     public function onLoad($id, Callable $callable)
     {
+        //если объект уже проинициализирован, то считаем, что его инициализация была неполной и это ошибка
+        if (isset($this->sharedDefinitions[$id])) {
+            throw new \Exception($id . ' initialization has not been completed');
+        }
+
         if (!isset($this->onLoadCallbacks[$id])) {
             $this->onLoadCallbacks[$id] = [];
         }
@@ -44,7 +49,7 @@ class Container implements ContainerInterface
         $this->sharedDefinitions[$id] = $concrete;
     }
 
-    public function get($id)
+    public function get(string $id)
     {
         if (isset($this->shared[$id])) {
             return $this->shared[$id];
