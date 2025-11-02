@@ -193,7 +193,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
      * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
      * @return string
      */
-    protected function drawInnerBefore(Control $wrapper = null)
+    protected function drawInnerBefore(?Control $wrapper = null)
     {
         $r = '';
         foreach ($this->innerBefore as $c) {
@@ -220,7 +220,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
      * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
      * @return string
      */
-    protected function drawInnerAfter(Control $wrapper = null)
+    protected function drawInnerAfter(?Control $wrapper = null)
     {
         $r = '';
         foreach ($this->innerAfter as $c) {

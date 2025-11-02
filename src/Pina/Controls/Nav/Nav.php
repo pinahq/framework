@@ -39,7 +39,7 @@ class Nav extends Control
         );
     }
 
-    protected function drawInnerAfter(Control $wrapper = null)
+    protected function drawInnerAfter(?Control $wrapper = null)
     {
         $this->processActive($this->innerAfter);
 
