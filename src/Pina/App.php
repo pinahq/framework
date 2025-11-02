@@ -5,6 +5,8 @@ namespace Pina;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;
+use Pina\Queue\EventQueueInterface;
+use Pina\Queue\NoQueue;
 
 class App
 {
@@ -16,6 +18,7 @@ class App
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
     private static $defaultSharedDepencies = array(
+        EventQueueInterface::class => NoQueue::class,
         DatabaseDriverInterface::class => DatabaseDriver::class,
         ResourceManagerInterface::class => ResourceManager::class,
     );
@@ -97,6 +100,11 @@ class App
     public static function db()
     {
         return self::$container->get(DatabaseDriverInterface::class);
+    }
+
+    public static function queue()
+    {
+        return self::$container->get(EventQueueInterface::class);
     }
 
     /**

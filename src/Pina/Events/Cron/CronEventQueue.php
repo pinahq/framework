@@ -2,7 +2,7 @@
 
 namespace Pina\Events\Cron;
 
-use Pina\EventQueueInterface;
+use Pina\Queue\EventQueueInterface;
 
 class CronEventQueue implements EventQueueInterface
 {

@@ -1,7 +1,7 @@
 <?php
 
 use Pina\App;
-use Pina\EventQueueInterface;
+use Pina\Queue\EventQueueInterface;
 
 class TestEventQueue implements EventQueueInterface
 {

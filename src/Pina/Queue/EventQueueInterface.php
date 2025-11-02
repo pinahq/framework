@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina;
+namespace Pina\Queue;
 
 interface EventQueueInterface
 {

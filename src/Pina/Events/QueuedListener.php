@@ -3,7 +3,6 @@
 namespace Pina\Events;
 
 use Pina\App;
-use Pina\EventQueueInterface;
 
 class QueuedListener
 {
@@ -11,7 +10,7 @@ class QueuedListener
     protected $listener = '';
     protected $priority = 0;
 
-    public function __construct(string $listener, int $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function __construct(string $listener, int $priority = Priority::NORMAL)
     {
         $this->listener = $listener;
         $this->priority = $priority;
@@ -19,7 +18,7 @@ class QueuedListener
 
     public function __invoke(Event $event)
     {
-        if (!$event->queueable() || !App::container()->has(EventQueueInterface::class)) {
+        if (!$event->queueable()) {
             $handler = App::load($this->listener);
             return $handler($event);
         }
@@ -31,11 +30,6 @@ class QueuedListener
 
     protected function queue(string $data)
     {
-        $this->makeQueue()->push(QueueHandler::class, $data, $this->priority);
-    }
-
-    protected function makeQueue(): EventQueueInterface
-    {
-        return App::container()->get(EventQueueInterface::class);
+        App::queue()->push(QueueHandler::class, $data, $this->priority);
     }
 }

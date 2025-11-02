@@ -2,11 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\App;
-use Pina\Event;
-
-use Pina\Module;
-
-use function Pina\Events\queue;
+use Pina\Events\Priority;
 
 require __DIR__ . '/TestEventHandler.php';
 require __DIR__ . '/TestEventQueue.php';
@@ -22,8 +18,8 @@ class EventTest extends TestCase
 
         $testEventBuffer = '';
 
-        App::container()->share(\Pina\EventQueueInterface::class, new \TestEventQueue());
-        $queue = App::container()->get(\Pina\EventQueueInterface::class);
+        App::container()->share(\Pina\Queue\EventQueueInterface::class, new \TestEventQueue());
+        $queue = App::queue();
 
         App::event('order.placed')->subscribe(\TestEventCommand::queueable());
         App::event('order.placed')->trigger('2');
@@ -43,11 +39,11 @@ class EventTest extends TestCase
         $returnedText = '';
         TestEvent::subscribe(function(TestEvent $event) use (&$returnedText) {
             $returnedText .= '-' . $event->getText();
-        }, Event::PRIORITY_LOW);
+        }, Priority::LOW);
 
         TestEvent::subscribe(function(TestEvent $event) use (&$returnedText) {
             $returnedText .= '+' . $event->getText();
-        }, Event::PRIORITY_HIGH);
+        }, Priority::HIGH);
 
         $event = new TestEvent('A');
         $event->trigger();

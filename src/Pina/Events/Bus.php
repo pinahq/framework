@@ -7,7 +7,7 @@ class Bus
 
     protected $listeners = [];
 
-    public function subscribe(string $eventName, callable $handler, int $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function subscribe(string $eventName, callable $handler, int $priority = Priority::NORMAL)
     {
         if (!isset($this->listeners[$eventName])) {
             $this->listeners[$eventName] = [];

@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Pina\Events;
+namespace Pina\Queue;
 
 
 use Exception;
 use Pina\App;
 use Pina\Command;
-use Pina\EventQueueInterface;
+use Pina\Events\Priority;
 
 class QueueableCommand extends Command
 {
@@ -20,7 +20,7 @@ class QueueableCommand extends Command
      * @param int $priority
      * @throws Exception
      */
-    public function __construct(string $cmd, $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function __construct(string $cmd, int $priority = Priority::NORMAL)
     {
         if (!class_exists($cmd)) {
             throw new Exception('Expected an existsed class ' . $cmd);
@@ -34,16 +34,7 @@ class QueueableCommand extends Command
 
     protected function execute($data = '')
     {
-        if (!App::container()->has(EventQueueInterface::class)) {
-            /** @var Command $cmd */
-            $cmd = App::load($this->cmd);
-            return $cmd($data);
-        }
-
-        /** @var EventQueueInterface $queue */
-        $queue = App::container()->get(EventQueueInterface::class);
-        $queue->push($this->cmd, $data, $this->priority);
-
+        App::queue()->push($this->cmd, $data, $this->priority);
         return '';
     }
 

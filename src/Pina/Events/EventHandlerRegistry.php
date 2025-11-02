@@ -13,18 +13,28 @@ class EventHandlerRegistry
 
     public function __construct()
     {
-        $this->handlers[\Pina\Event::PRIORITY_HIGH] = [];
-        $this->handlers[\Pina\Event::PRIORITY_NORMAL] = [];
-        $this->handlers[\Pina\Event::PRIORITY_LOW] = [];
+        $this->handlers[Priority::HIGH] = [];
+        $this->handlers[Priority::NORMAL] = [];
+        $this->handlers[Priority::LOW] = [];
     }
 
-    public function subscribe(Command $handler, $priority = \Pina\Event::PRIORITY_NORMAL)
+    public function subscribe(Command $handler, $priority = Priority::NORMAL)
     {
         if (!isset($this->handlers[$priority])) {
             throw new Exception();
         }
         $this->handlers[$priority][] = $handler;
         return $this;
+    }
+
+    public function subscribeWithLowPriority(Command $handler)
+    {
+        return $this->subscribe($handler, Priority::LOW);
+    }
+
+    public function subscribeWithHighPriority(Command $handler)
+    {
+        return $this->subscribe($handler, Priority::HIGH);
     }
 
     public function trigger($data)
@@ -37,9 +47,4 @@ class EventHandlerRegistry
         return $this;
     }
 
-}
-
-function queue($className, $priority = \Pina\Event::PRIORITY_NORMAL)
-{
-    return new QueueableCommand($className, $priority);
 }

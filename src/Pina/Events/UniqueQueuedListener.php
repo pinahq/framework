@@ -2,12 +2,14 @@
 
 namespace Pina\Events;
 
+use Pina\App;
+
 class UniqueQueuedListener extends QueuedListener
 {
 
     protected function queue(string $data)
     {
-        $this->makeQueue()->push(QueueHandler::class, $data, $this->priority, true);
+        App::queue()->push(QueueHandler::class, $data, $this->priority, true);
     }
 
 }

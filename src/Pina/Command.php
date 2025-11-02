@@ -4,7 +4,8 @@
 namespace Pina;
 
 
-use Pina\Events\QueueableCommand;
+use Pina\Events\Priority;
+use Pina\Queue\QueueableCommand;
 
 abstract class Command
 {
@@ -34,7 +35,7 @@ abstract class Command
         return App::load(static::class);
     }
 
-    public static function queueable($priority = \Pina\Event::PRIORITY_NORMAL): QueueableCommand
+    public static function queueable($priority = Priority::NORMAL): QueueableCommand
     {
         return new QueueableCommand(static::class, $priority);
     }
@@ -45,7 +46,7 @@ abstract class Command
         return $cmd($input);
     }
 
-    public static function enqueue($input = '', $priority = \Pina\Event::PRIORITY_NORMAL)
+    public static function enqueue($input = '', $priority = Priority::NORMAL)
     {
         $cmd = static::queueable($priority);
         return $cmd($input);

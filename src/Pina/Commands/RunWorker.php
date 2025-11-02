@@ -8,6 +8,7 @@ use Pina\App;
 use Pina\Command;
 use Pina\Config;
 use Pina\Events\Cron\CronEventWorker;
+use Pina\Events\Priority;
 
 class RunWorker extends Command
 {
@@ -82,8 +83,8 @@ class RunWorker extends Command
 
     protected function calcPriority($number)
     {
-        $margin = $this->getMaxWorkers() - \Pina\Event::PRIORITY_LOW;
-        return  $number < $margin ? \Pina\Event::PRIORITY_LOW : $number - $margin;
+        $margin = $this->getMaxWorkers() - Priority::LOW;
+        return  $number < $margin ? Priority::LOW : $number - $margin;
     }
 
 }
