@@ -195,6 +195,11 @@ class App
         return static::container()->load($id);
     }
 
+    public static function onLoad($id, Callable $fn)
+    {
+        static::$container->onLoad($id, $fn);
+    }
+
     /**
      * Возвращает объект роутер
      * @return Router

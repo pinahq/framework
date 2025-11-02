@@ -11,10 +11,19 @@ class Container implements ContainerInterface
     protected $sharedDefinitions = [];
     protected $shared = [];
     protected $fallbacks = [];
+    protected $onLoadCallbacks = [];
 
     public function addFallback(ContainerInterface $fallback)
     {
         $this->fallbacks[] = $fallback;
+    }
+
+    public function onLoad($id, Callable $callable)
+    {
+        if (!isset($this->onLoadCallbacks[$id])) {
+            $this->onLoadCallbacks[$id] = [];
+        }
+        $this->onLoadCallbacks[$id][] = $callable;
     }
 
     public function set($id, $concrete)
@@ -104,6 +113,11 @@ class Container implements ContainerInterface
         if (class_exists($id)) {
             $inst = new $id;
             $this->share($id, $inst);
+            if (isset($this->onLoadCallbacks[$id])) {
+                foreach ($this->onLoadCallbacks[$id] as $fn) {
+                    $fn($inst);
+                }
+            }
             return $inst;
         }
 
