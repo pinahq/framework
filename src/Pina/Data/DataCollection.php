@@ -255,6 +255,17 @@ abstract class DataCollection
         return $id;
     }
 
+    /**
+     * Удаляет элемент коллекции
+     * @param string $id
+     * @return void
+     * @throws Exception
+     */
+    public function delete(string $id)
+    {
+        $this->makeQuery()->whereId($id)->delete();
+    }
+
     public function addToRelation(string $id, string $fieldName, $value, array $context)
     {
         $schema = $this->getSchema()->fieldset([$fieldName])->makeSchema();
