@@ -3,42 +3,44 @@
 namespace Pina;
 
 
-class DatabaseDriverStub implements DatabaseDriverInterface
+use Pina\Cache\CacheInterface;
+
+class DatabaseDriverStub extends DatabaseDriver
 {
 
     public function __construct()
     {
     }
 
-    public function query($sql)
+    public function query(string $sql)
     {
     }
 
-    public function table($sql)
-    {
-        return array();
-    }
-
-    public function row($sql)
+    public function table(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         return array();
     }
 
-    public function col($sql)
+    public function row(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         return array();
     }
 
-    public function one($sql)
+    public function col(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null): array
+    {
+        return array();
+    }
+
+    public function one(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         return 0;
     }
 
-    public function batch($queries)
+    public function batch(array $queries)
     {
     }
 
-    public function num($sql)
+    public function num(string $sql)
     {
         return 0;
     }

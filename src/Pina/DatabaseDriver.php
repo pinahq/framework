@@ -8,7 +8,7 @@ use Pina\Cache\CacheSlot;
 use Pina\Cache\StaticCache;
 use RuntimeException;
 
-class DatabaseDriver implements DatabaseDriverInterface
+class DatabaseDriver
 {
 
     protected $conn = null;
@@ -45,12 +45,12 @@ class DatabaseDriver implements DatabaseDriverInterface
         $this->connect();
     }
 
-    public function query($sql)
+    public function query(string $sql)
     {
         return $this->doQuery($sql, false);
     }
 
-    protected function doQuery($sql, $retry)
+    protected function doQuery(string $sql, bool $retry)
     {
         static $number = 0;
         static $total = 0;
@@ -82,7 +82,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return new CacheSlot($cache ? $cache : App::load(StaticCache::class), $key);
     }
 
-    public function table($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
+    public function table(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:table:'.$sql, $cache);
@@ -107,7 +107,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
-    public function row($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
+    public function row(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:row:'.$sql, $cache);
@@ -129,7 +129,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $r;
     }
 
-    public function col($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
+    public function col(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null): array
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:col:'.$sql, $cache);
@@ -159,7 +159,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $result;
     }
 
-    public function one($sql, $cacheSeconds = 0, ?CacheInterface $cache = null)
+    public function one(string $sql, int $cacheSeconds = 0, ?CacheInterface $cache = null)
     {
         if ($cacheSeconds > 0) {
             $cacheSlot = $this->cache('db:col:'.$sql, $cache);
@@ -181,12 +181,8 @@ class DatabaseDriver implements DatabaseDriverInterface
         return $row[0] ?? null;
     }
 
-    public function batch($queries)
+    public function batch(array $queries)
     {
-        if (!is_array($queries)) {
-            return;
-        }
-
         foreach ($queries as $q) {
             if (empty($q)) {
                 continue;
@@ -195,7 +191,7 @@ class DatabaseDriver implements DatabaseDriverInterface
         }
     }
 
-    public function num($sql)
+    public function num(string $sql)
     {
         $rc = $this->query($sql);
         $r = mysqli_num_rows($rc);

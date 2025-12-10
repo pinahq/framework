@@ -19,9 +19,7 @@ class TriggerUpgrade {
             return array();
         }
         
-        $db = App::container()->get(\Pina\DatabaseDriverInterface::class);
-        
-        $existedTriggers = $db->table("SHOW TRIGGERS");
+        $existedTriggers = App::db()->table("SHOW TRIGGERS");
         foreach ($existedTriggers as $k => $v) {
             $existedTriggers[$k]['key'] = static::makeTriggerName(
                 $v['Table'], $v['Timing'].' '.$v['Event']

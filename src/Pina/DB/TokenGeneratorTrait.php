@@ -8,32 +8,25 @@ trait TokenGeneratorTrait
     /**
      * @return string
      */
-    abstract public function singlePrimaryKeyField(): string;
+    abstract protected function singlePrimaryKeyField(): string;
 
     /**
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    abstract public function insert($data, $fields = false);
+    abstract public function insert(array $data, string $onDuplicate = '');
 
     /**
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    abstract public function put($data, $fields = false);
+    abstract public function put(array $data);
 
     /**
      * @param array|string $id
      * @return $this
      */
-    abstract public function whereId($id, $context = []);
+    abstract public function whereId($id, array $context = []);
 
-    /**
-     * @return bool
-     */
-    abstract public function exists();
+    abstract public function exists(): bool;
 
     protected $tokenPattern = '';
 
@@ -43,26 +36,26 @@ trait TokenGeneratorTrait
         return $this;
     }
 
-    public function insertGetId($data = array(), $fields = false)
+    public function insertGetId(array $data, string $onDuplicate = '')
     {
         $pk = $this->singlePrimaryKeyField();
         if (!isset($data[$pk])) {
             $data[$pk] = $this->getUniqueToken();
         }
 
-        $this->insert($data, $fields);
+        $this->insert($data, $onDuplicate);
 
         return $data[$pk];
     }
 
-    public function putGetId($data = array(), $fields = false)
+    public function putGetId(array $data)
     {
         $pk = $this->singlePrimaryKeyField();
         if (!isset($data[$pk])) {
             $data[$pk] = $this->getUniqueToken();
         }
 
-        $this->put($data, $fields);
+        $this->put($data);
 
         return $data[$pk];
     }

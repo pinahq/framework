@@ -19,7 +19,6 @@ class App
     private static $forcedMimeType = null;
     private static $defaultSharedDepencies = array(
         EventQueueInterface::class => NoQueue::class,
-        DatabaseDriverInterface::class => DatabaseDriver::class,
         ResourceManagerInterface::class => ResourceManager::class,
     );
 
@@ -94,14 +93,13 @@ class App
 
     /**
      * Возвращает объект для работы с БД
-     * @return DatabaseDriverInterface
      */
-    public static function db()
+    public static function db(): DatabaseDriver
     {
-        return self::$container->get(DatabaseDriverInterface::class);
+        return static::load(DatabaseDriver::class);
     }
 
-    public static function queue()
+    public static function queue(): EventQueueInterface
     {
         return self::$container->get(EventQueueInterface::class);
     }

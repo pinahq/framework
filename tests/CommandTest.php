@@ -9,10 +9,12 @@ class CommandTest extends TestCase
 
     public function testCommand()
     {
-        $accumulator = new AccumulatorCommand();
-        $command = new EchoCommand();
+        $accumulator = AccumulatorCommand::load();
+        $command = EchoCommand::load();
         $command->then($accumulator);
+
         $this->assertEquals('1', $command('1'));
+
         $this->assertEquals(1, $accumulator->get());
         $command('1');
         $this->assertEquals(2, $accumulator->get());

@@ -275,20 +275,11 @@ class TableDataGateway extends SQL
 
     /**
      * Проводит подготовку массива под вставку:
-     * - убирает лишние поля (которых нет в параметре $fields или в поле $field)
      * - добавляет значения контекста
      * @param array $data
-     * @param array $fields
      */
-    protected function adjustDataAndFields(&$data, &$fields)
+    protected function adjustDataAndFields(&$data)
     {
-        $myFields = $this->getFields();
-        if (!empty($fields)) {
-            $fields = array_intersect($fields, array_keys($myFields));
-        } else {
-            $fields = array_keys($myFields);
-        }
-
         foreach ($this->context as $field => $value) {
             if (!isset($data[0])) {
                 $data[$field] = $value;
@@ -370,10 +361,9 @@ class TableDataGateway extends SQL
     /**
      * Возвращает список ключей на обновление в случае, если будут дубликаты
      * По сути выбирает все имена полей кроме первичного ключа
-     * @param array $keys
      * @return array
      */
-    protected function getOnDuplicateKeys($keys)
+    protected function getOnDuplicateKeys(array $keys): array
     {
         $primaryKeys = !empty(static::$indexes['PRIMARY KEY']) ? static::$indexes['PRIMARY KEY'] : array();
         if (!is_array($primaryKeys)) {
@@ -386,15 +376,14 @@ class TableDataGateway extends SQL
     /**
      * Собирает и возвращает текст запроса на вставку данных в таблицу
      * @param array $data
-     * @param array $fields
      * @param string $cmd
      * @return string
      */
-    public function makeInsert($data = array(), $fields = false, $cmd = 'INSERT')
+    public function makeInsert(array $data, string $cmd = 'INSERT', string $onDuplicate = ''): string
     {
-        $this->adjustDataAndFields($data, $fields);
+        $this->adjustDataAndFields($data);
 
-        return parent::makeInsert($data, $fields, $cmd);
+        return parent::makeInsert($data, $cmd, $onDuplicate);
     }
 
     /**
@@ -403,10 +392,10 @@ class TableDataGateway extends SQL
      * @param array $fields
      * @return string
      */
-    public function makePut($data, $fields = false)
+    public function makePut($data)
     {
-        $this->adjustDataAndFields($data, $fields);
-        return parent::makePut($data, $fields);
+        $this->adjustDataAndFields($data);
+        return parent::makePut($data);
     }
 
     /**
@@ -431,7 +420,7 @@ class TableDataGateway extends SQL
      * @return $this
      * @throws Exception
      */
-    public function whereId($id, $context = [])
+    public function whereId($id, array $context = [])
     {
         $pk = $this->getPrimaryKey();
         //Если PK состоит из нескольких частей, то все кроме одной должны быть переданы через $context

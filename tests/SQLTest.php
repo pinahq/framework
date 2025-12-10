@@ -3,7 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Pina\App;
 use Pina\Config;
-use Pina\DatabaseDriverInterface;
 use Pina\DatabaseDriverStub;
 use Pina\SQL;
 
@@ -14,7 +13,7 @@ class SQLTest extends TestCase
     {
         Config::init(__DIR__.'/config');
         
-        App::container()->share(DatabaseDriverInterface::class, DatabaseDriverStub::class);
+        App::container()->share(\Pina\DatabaseDriver::class, DatabaseDriverStub::class);
 
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_VALUE, 5]);
         $this->assertEquals("`cody_product`.`product_id` = '5'", $q);
@@ -255,28 +254,28 @@ class SQLTest extends TestCase
                 ->select('product_variant_size')
             )
             
-            ->calculate('SUM(cody_product_variant.product_variant_amount) as product_variant_amount')
+            ->calculate('SUM(cody_product_variant.product_variant_amount)', 'product_variant_amount')
 
             ->leftJoin(
                 SQL::table('cody_product_reserv')->on('product_variant_id')
-                ->calculate('SUM(cody_product_reserv.product_reserv_amount) as product_reserv_amount')
+                ->calculate('SUM(cody_product_reserv.product_reserv_amount)', 'product_reserv_amount')
             )
             ->leftJoin(
                 SQL::table('cody_order_product')->on('product_variant_id')->onBy('order_product_amount_status', 'reserved')
-                ->calculate($useStock?'SUM(cody_order_product.order_product_amount) + SUM(cody_order_product.order_product_stock_amount) as order_product_amount':'SUM(cody_order_product.order_product_amount) as order_product_amount')
+                ->calculate($useStock?'SUM(cody_order_product.order_product_amount) + SUM(cody_order_product.order_product_stock_amount) as order_product_amount':'SUM(cody_order_product.order_product_amount)', 'order_product_amount')
             )
             ->calculate('SUM(cody_product_variant.product_variant_amount '
                 .($useStock?(' + cody_product_variant.product_variant_stock_amount - cody_product_variant.product_variant_stock_reserv - IFNULL(cody_order_product.order_product_stock_amount,0)'):'')
                 . ' - IFNULL(cody_product_reserv.product_reserv_amount,0)'
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'
-                . ') as stock')
+                . ')', 'stock')
 
             ->groupBy('cody_product_variant.product_variant_id')
             ->orderBy('brand_title asc, product_sku asc');
 
         $this->assertTrue(strpos($gw->make(), ' - IFNULL(cody_product_reserv.product_reserv_amount,0)'
                 . ' - IFNULL(cody_order_product.order_product_amount,0)'
-                . ') as stock') !== false);
+                . ') as `stock`') !== false);
 
         $gw = SQL::table('cody_product');
         $gw->selectWithPrefix('product_id', 'old');
@@ -314,6 +313,12 @@ class SQLTest extends TestCase
             'brand_id' => 1,
         ));
         $this->assertEquals("INSERT INTO `cody_product` SET `cody_product`.`product_title` = 'Toy', `cody_product`.`brand_id` = '1'", $q);
+
+        $q = SQL::table('cody_product')->makeInsert(array(
+            'product_title' => 'Toy',
+            'brand_id' => 1,
+        ), 'INSERT', 'cnt = cnt + 1');
+        $this->assertEquals("INSERT INTO `cody_product` SET `cody_product`.`product_title` = 'Toy', `cody_product`.`brand_id` = '1' ON DUPLICATE KEY UPDATE cnt = cnt + 1", $q);
     }
 
     public function testDelete()

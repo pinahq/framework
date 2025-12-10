@@ -57,11 +57,9 @@ class SQL
 
     /**
      * Создает объект запроса к БД на основе имени таблицы и драйвера БД
-     * @param string $table
-     * @param DatabaseDriverInterface $db
      * @return \Pina\SQL
      */
-    public static function table($table, $db = false)
+    public static function table($table, ?DatabaseDriver $db = null)
     {
         return new SQL($table, $db);
     }
@@ -106,12 +104,10 @@ class SQL
 
     /**
      * Создает конструктор запроса
-     * @param string $table
-     * @param DatabaseDriverInterface $db
      */
-    protected function __construct($table, $db = null)
+    protected function __construct($table, ?DatabaseDriver $db = null)
     {
-        $this->db = $db ? $db : App::container()->get(DatabaseDriverInterface::class);
+        $this->db = $db ?? App::db();
         $this->from = $table;
     }
 
@@ -347,16 +343,16 @@ class SQL
      * @param string $field
      * @return $this
      */
-    public function selectAsIfNotSelected($field, $alias)
+    public function selectAsIfNotSelected(string $field, string $alias)
     {
-        if ($this->isSelectedAs($field, $alias)) {
+        if ($this->isSelectedAs($alias)) {
             return $this;
         }
 
         return $this->selectAs($field, $alias);
     }
 
-    public function isSelected($field)
+    public function isSelected(string $field)
     {
         foreach ($this->select as $item) {
             if (isset($item[1]) && $item[1] == $field) {
@@ -376,7 +372,7 @@ class SQL
         return false;
     }
 
-    public function isSelectedAs($alias)
+    public function isSelectedAs(string $alias)
     {
         foreach ($this->select as $item) {
             if (isset($item[2]) && $item[2] == $alias) {
@@ -399,12 +395,9 @@ class SQL
      * @param string $field
      * @return $this
      */
-    public function select($field)
+    public function select(string $field)
     {
-        $fields = is_array($field) ? $field : array($field);
-        foreach ($fields as $v) {
-            $this->select[] = array(self::SQL_SELECT_FIELD, trim($v));
-        }
+        $this->select[] = array(self::SQL_SELECT_FIELD, trim($field));
         return $this;
     }
 
@@ -414,7 +407,7 @@ class SQL
      * @param string $alias
      * @return $this
      */
-    public function selectAs($field, $alias, $title = '')
+    public function selectAs(string $field, string $alias, string $title = '')
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($alias), $title);
         return $this;
@@ -426,7 +419,7 @@ class SQL
      * @param string $prefix
      * @return $this
      */
-    public function selectWithPrefix($field, $prefix)
+    public function selectWithPrefix(string $field, string $prefix)
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field), trim($prefix) . '_' . trim($field));
         return $this;
@@ -438,7 +431,7 @@ class SQL
      * @param string $alias
      * @return $this
      */
-    public function calculate($field, $alias = null, $title = '', $type = null)
+    public function calculate(string $field, string $alias, string $title = '', $type = null)
     {
         $this->select[] = array(self::SQL_SELECT_CONDITION, $field, $alias, $title, $type);
         return $this;
@@ -1118,10 +1111,9 @@ class SQL
 
     /**
      * Собирает и возвращает строку со списком полей на выборку
-     * @return string
      * @throws Exception
      */
-    public function makeFields()
+    public function makeFields(): string
     {
         $fields = $this->getFieldArray();
         $sql = join(', ', $fields);
@@ -1135,12 +1127,11 @@ class SQL
 
     /**
      * Возвращает подготовленный массив со списком полей
-     * @return array
      * @throws Exception
      */
-    public function getFieldArray()
+    public function getFieldArray(): array
     {
-        $fields = array();
+        $fields = [];
         foreach ($this->select as $k => $v) {
             $type = array_shift($v);
             $field = array_shift($v);
@@ -1182,9 +1173,9 @@ class SQL
      * Возвращает подготовленный массив со списком полей из вложенных через JOIN таблиц
      * @return array
      */
-    public function getJoinFieldArray()
+    public function getJoinFieldArray(): array
     {
-        $fields = array();
+        $fields = [];
         foreach ($this->joins as $line) {
             if (count($line) == 2) {
                 list($type, $table) = $line;
@@ -1196,10 +1187,9 @@ class SQL
 
     /**
      * Собирает и возвращает строку для конструкции COUNT
-     * @param string $field
      * @return string
      */
-    public function makeCountFields($field)
+    public function makeCountFields(string $field)
     {
         if (empty($field)) {
             $field = '*';
@@ -1474,29 +1464,20 @@ class SQL
         return $this->aggregate('sum', $what);
     }
 
-    /**
-     * @return bool
-     */
-    public function exists()
+    public function exists(): bool
     {
         return $this->limit(1)->count() > 0;
     }
 
     /**
      * Собирает строку запроса для конструкции SET
-     * @param array $data
-     * @param array|false $fields
      * @return boolean|string
      */
-    public function makeSetCondition($data, $fields = false)
+    public function makeSetCondition(array $data)
     {
         $first = true;
         $result = '';
         foreach ($data as $key => $value) {
-            if (is_array($fields) && !in_array($key, $fields)) {
-                continue;
-            }
-
             if ($first) {
                 $first = false;
             } else {
@@ -1522,7 +1503,7 @@ class SQL
      * @param string $parentAlias
      * @return string
      */
-    public function makeByCondition($condition, $parentAlias = '')//$fields, $needle, $operand = '='
+    public function makeByCondition($condition, $parentAlias = '')
     {
 
         $operation = $condition[0];
@@ -1688,13 +1669,11 @@ class SQL
 
     /**
      * Собирает и выполняет запрос на вставку (INSERT)
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    public function insert($data, $fields = false)
+    public function insert(array $data, string $onDuplicate = '')
     {
-        $q = $this->makeInsert($data, $fields);
+        $q = $this->makeInsert($data, 'INSERT', $onDuplicate);
         if (empty($q)) {
             return false;
         }
@@ -1703,13 +1682,11 @@ class SQL
 
     /**
      * Собирает и выполняет запрос на вставку с игнорированием дубликатов (INSERT IGNORE)
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    public function insertIgnore($data, $fields = false)
+    public function insertIgnore(array $data, string $onDuplicate = '')
     {
-        $q = $this->makeInsert($data, $fields, $a = 'INSERT IGNORE');
+        $q = $this->makeInsert($data, 'INSERT IGNORE', $onDuplicate);
         if (empty($q)) {
             return false;
         }
@@ -1718,59 +1695,52 @@ class SQL
 
     /**
      * Собирает и возвращает строку запроса на вставку
-     * @param array $data
-     * @param array|false $fields
-     * @param string $cmd
-     * @return string
      */
-    public function makeInsert($data, $fields = false, $cmd = 'INSERT')
+    public function makeInsert(array $data, string $cmd = 'INSERT', string $onDuplicate = ''): string
     {
         if (empty($data) || !is_array($data)) {
             return false;
         }
 
+        $collision = $onDuplicate ? (' ON DUPLICATE KEY UPDATE ' . $onDuplicate) : '';
+
         if (!is_array(reset($data))) {
-            return $cmd . " INTO " . $this->getFrom() . " SET " . $this->makeSetCondition($data, $fields);
+            return $cmd . " INTO " . $this->getFrom() . " SET " . $this->makeSetCondition($data) . $collision;
         }
 
-        list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
+        list($keys, $values) = $this->getKeyValuesCondition($data);
 
-        return $cmd . " INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values;
+        return $cmd . " INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES" . $values . $collision;
     }
 
     /**
      * Собирает и выполняет запрос на вставку (INSERT),
      * а также возвращает ID добавленной записи
      * @param array $data
-     * @param array|false $fields
      * @return string
      */
-    public function insertGetId($data, $fields = false)
+    public function insertGetId(array $data, string $onDuplicate = '')
     {
-        return $this->insert($data, $fields) ? $this->db->insertId() : 0;
+        return $this->insert($data, $onDuplicate) ? $this->db->insertId() : 0;
     }
 
     /**
      * Собирает и выполняет запрос на вставку с игнорированием дубликатов (INSERT IGNORE),
      * а также возвращает ID добавленной записи
-     * @param array $data
-     * @param array|false $fields
      * @return string
      */
-    public function insertIgnoreGetId($data, $fields = false)
+    public function insertIgnoreGetId(array $data, string $onDuplicate = '')
     {
-        return $this->insertIgnore($data, $fields) ? $this->db->insertId() : 0;
+        return $this->insertIgnore($data, $onDuplicate) ? $this->db->insertId() : 0;
     }
 
     /**
      * Собирает и выполняет запрос на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    public function put($data, $fields = false)
+    public function put(array $data)
     {
-        $q = $this->makePut($data, $fields);
+        $q = $this->makePut($data);
         if (empty($q)) {
             return false;
         }
@@ -1779,18 +1749,16 @@ class SQL
 
     /**
      * Собирает и возвращает строку запроса на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
-     * @param array $data
-     * @param array|false $fields
      * @return string
      */
-    public function makePut($data, $fields = false)
+    public function makePut(array $data)
     {
         if (empty($data) || !is_array($data)) {
             return false;
         }
 
         if (!is_array(reset($data))) {
-            $set = $this->makeSetCondition($data, $fields);
+            $set = $this->makeSetCondition($data);
             if (empty($set)) {
                 return false;
             }
@@ -1802,7 +1770,7 @@ class SQL
             return $sql;
         }
 
-        list($keys, $values) = $this->getKeyValuesCondition($data, $fields);
+        list($keys, $values) = $this->getKeyValuesCondition($data);
         $onDuplicate = $this->getOnDuplicateKeyCondition($keys);
 
         $sql = "INSERT INTO " . $this->getFrom() . "(`" . join("`,`", $keys) . "`) VALUES " . $values;
@@ -1815,21 +1783,17 @@ class SQL
     /**
      * Собирает и выполняет запрос на замену (INSERT INTO .. ON DUPLICATE KEY UPDATE)
      * а также возвращает ID добавленной записи
-     * @param array $data
-     * @param array|false $fields
      * @return string
      */
-    public function putGetId($data, $fields = false)
+    public function putGetId(array $data)
     {
-        return $this->put($data, $fields) ? $this->db->insertId() : 0;
+        return $this->put($data) ? $this->db->insertId() : 0;
     }
 
     /**
      * Собирает строку конструкции ON DUPLICATE KEY UPDATE
-     * @param array $keys
-     * @return string
      */
-    private function getOnDuplicateKeyCondition($keys)
+    private function getOnDuplicateKeyCondition(array $keys): string
     {
         $keys = $this->getOnDuplicateKeys($keys);
         if (empty($keys) || !is_array($keys)) {
@@ -1847,26 +1811,19 @@ class SQL
     }
 
     /**
-     * @param array $keys
      * @return array
      */
-    protected function getOnDuplicateKeys($keys)
+    protected function getOnDuplicateKeys(array $keys): array
     {
         return $keys;
     }
 
     /**
-     * @param array $data
-     * @param array|false $fields
      * @return array|false
      */
-    protected function getKeyValuesCondition($data, $fields)
+    protected function getKeyValuesCondition(array $data)
     {
         $keys = array_keys(current($data));
-
-        if (is_array($fields)) {
-            $keys = array_intersect($keys, $fields);
-        }
 
         $sql = "";
         foreach ($data as $line) {
@@ -1898,13 +1855,11 @@ class SQL
 
     /**
      * Собирает и выполняет запрос на обновление таблицы (UPDATE)
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    public function update($data, $fields = false)
+    public function update(array $data)
     {
-        $q = $this->makeUpdate($data, $fields);
+        $q = $this->makeUpdate($data);
         if (empty($q)) {
             return false;
         }
@@ -1913,47 +1868,40 @@ class SQL
 
     /**
      * Собирает строку запроса на обновление таблицы (UPDATE)
-     * @param array $data
-     * @param array|false $fields
      * @return boolean
      */
-    public function makeUpdate($data, $fields = false)
+    public function makeUpdate(array $data)
     {
         if (empty($data) || !is_array($data)) {
             return false;
         }
 
-        return $this->makeUpdateOperation($this->makeSetCondition($data, $fields));
+        return $this->makeUpdateOperation($this->makeSetCondition($data));
     }
 
     /**
      * Собирает и выполняет запрос на увеличение ячейки таблицы на заданное значение (UPDATE)
-     * @param string $field
-     * @param string $value
      * @return int
      */
-    public function increment($field, $value)
+    public function increment(string $field, string $value)
     {
         return $this->updateOperation('`' . $field . '` = `' . $field . '` + ' . $this->db->escape($value));
     }
 
     /**
      * Собирает и выполняет запрос на уменьшение ячейки таблицы на заданное значение (UPDATE)
-     * @param string $field
-     * @param string $value
      * @return int
      */
-    public function decrement($field, $value)
+    public function decrement(string $field, string $value)
     {
         return $this->updateOperation('`' . $field . '` = `' . $field . '` - ' . $this->db->escape($value));
     }
 
     /**
      * Собирает и выполняет запрос на произвольное обновление таблицы (UPDATE)
-     * @param string $operation
      * @return int
      */
-    protected function updateOperation($operation)
+    protected function updateOperation(string $operation)
     {
         $this->db->query($this->makeUpdateOperation($operation));
         return $this->db->affectedRows();
@@ -1961,10 +1909,8 @@ class SQL
 
     /**
      * Собирает и возвращает строку запроса на произвольное обновление таблицы (UPDATE)
-     * @param string $operation
-     * @return int
      */
-    protected function makeUpdateOperation($operation)
+    protected function makeUpdateOperation(string $operation): string
     {
         if (empty($operation)) {
             return '';
@@ -1977,17 +1923,16 @@ class SQL
      * @param string $what
      * @return bool
      */
-    public function delete($what = false)
+    public function delete(?string $what = null)
     {
         return $this->db->query($this->makeDelete($what));
     }
 
     /**
      * Собирает и возвращает строку запроса на удаление записей из таблицы (DELETE)
-     * @param string $what
      * @return bool
      */
-    public function makeDelete($what = false)
+    public function makeDelete(?string $what = null)
     {
         $field = ($what ? ('`' . $what . '`') : '');
         if (empty($field) && count($this->joins)) {
