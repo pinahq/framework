@@ -470,6 +470,21 @@ class Schema implements IteratorAggregate
         return $keys;
     }
 
+    public function getRealFieldNames()
+    {
+        $keys = array();
+        foreach ($this->fields as $field) {
+            if (!$field->makeSQLDeclaration([])) {
+                continue;
+            }
+            $keys[] = $field->getName();
+        }
+        foreach ($this->groups as $group) {
+            $keys = array_merge($keys, $group->getRealFieldNames());
+        }
+        return $keys;
+    }
+
     /**
      * Возвращает все наименования полей схемы
      * @return array
