@@ -13,13 +13,16 @@ use Pina\Types\UUIDType;
 class CronEventGateway extends TableDataGateway
 {
 
-    protected static $table = "cron_event";
+    public function getTable(): string
+    {
+        return "cron_event";
+    }
 
     /**
      * @return Schema
      * @throws \Exception
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         $schema = parent::getSchema();
         $schema->add('id', 'ID', UUIDType::class)->setMandatory();

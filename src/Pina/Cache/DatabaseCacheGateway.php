@@ -4,24 +4,24 @@ namespace Pina\Cache;
 
 use Pina\Data\Schema;
 use Pina\TableDataGateway;
-use Pina\Types\BlobType;
 use Pina\Types\IntegerType;
-use Pina\Types\StringType;
 use Pina\Types\TextType;
 use Pina\Types\TimestampType;
 use Pina\Types\TokenType;
-use Pina\Types\UUIDType;
 
 class DatabaseCacheGateway extends TableDataGateway
 {
 
-    protected static $table = "database_cache";
+    public function getTable(): string
+    {
+        return "database_cache";
+    }
 
     /**
      * @return Schema
      * @throws \Exception
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         $schema = parent::getSchema();
         $schema->add('id', 'ID', TokenType::class)->setMandatory();

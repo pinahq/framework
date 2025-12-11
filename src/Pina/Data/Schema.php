@@ -1072,6 +1072,20 @@ class Schema implements IteratorAggregate
         return false;
     }
 
+    public function hasReal(string $fieldKey)
+    {
+        foreach ($this->getIterator() as $field) {
+            if (!$field->makeSQLDeclaration([])) {
+                continue;
+            }
+            if ($field->getName() == $fieldKey) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     /**
      * @param string[] $fieldKeys
      */

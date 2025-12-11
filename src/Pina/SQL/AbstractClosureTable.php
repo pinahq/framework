@@ -17,7 +17,7 @@ abstract class AbstractClosureTable extends TableDataGateway
      * @return Schema
      * @throws \Exception
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         $schema = parent::getSchema();
         $schema->add('id', 'ID', IntegerType::class);
