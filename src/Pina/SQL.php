@@ -1477,7 +1477,15 @@ class SQL
     {
         $first = true;
         $result = '';
+        $schema = $this->getSchema();
+        $hasFields = !$schema->isEmpty();
+        $fields = $schema->getRealFieldNames();
+
         foreach ($data as $key => $value) {
+            if ($hasFields && !in_array($key, $fields)) {
+                continue;
+            }
+
             if ($first) {
                 $first = false;
             } else {

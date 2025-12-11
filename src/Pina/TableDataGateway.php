@@ -404,14 +404,14 @@ class TableDataGateway extends SQL
      * @param array $fields
      * @return string
      */
-    public function update($data, $fields = false)
+    public function update($data)
     {
         if (empty($data)) {
             return false;
         }
 
-        $this->adjustDataAndFields($data, $fields);
-        return parent::update($data, $fields);
+        $this->adjustDataAndFields($data);
+        return parent::update($data);
     }
 
     /**
