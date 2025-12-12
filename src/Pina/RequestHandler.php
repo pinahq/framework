@@ -180,12 +180,14 @@ class RequestHandler
 
     public function run()
     {
-        if (!Access::isHandlerPermitted($this->resource)) {
+        $router = App::router();
+
+        if (!$router->isPermitted($this->resource)) {
             return $this->forbidden();
         }
 
-        if (App::router()->exists($this->resource, $this->method)) {
-            $data = App::router()->run($this->resource, $this->method, $this->data);
+        if ($router->exists($this->resource, $this->method)) {
+            $data = $router->run($this->resource, $this->method, $this->data);
             if ($data instanceof Response) {
                 if (!$data->hasContent()) {
                     $content = App::createResponseContent([], $this->controller, $this->action);

@@ -24,6 +24,11 @@ class Router
         return $route;
     }
 
+    public function isPermitted($resource)
+    {
+        return Access::isHandlerPermitted($resource);
+    }
+
     public function makeGroup($tags = [])
     {
         return new RouteGroup($this, $tags);
