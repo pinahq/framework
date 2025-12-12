@@ -2,6 +2,11 @@
 
 namespace Pina;
 
+use Pina\Commands\ClearSmartyCache;
+use Pina\Commands\RunScheduler;
+use Pina\Commands\RunWorker;
+use Pina\Commands\Update;
+
 class Module implements ModuleInterface
 {
 
@@ -19,22 +24,16 @@ class Module implements ModuleInterface
     {
         return 'Framework';
     }
-    
-    public function http()
+
+    public function __construct()
     {
-        return [];
-    }
-    
-    public function cli()
-    {
-        return [
-            'system'
-        ];
-    }
-    
-    public function boot()
-    {
-        
+        App::onLoad(CLI::class, function (CLI $cli) {
+            $cli->register('system.clear-smarty-cache', ClearSmartyCache::class);
+            $cli->register('system.cron', RunScheduler::class);
+            $cli->register('system.events', RunWorker::class);
+            $cli->register('system.update', Update::class);
+        });
     }
 
+    
 }

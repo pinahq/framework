@@ -20,42 +20,7 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
 
 App::init('cli', $configDir);
 
-$modules = App::modules();
-$modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
-$modules->boot('cli');
+App::modules()->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
 
-while ($cmd = array_shift($argv)) {
-    if (!empty($cmd) && class_exists($cmd) && is_subclass_of($cmd, Command::class)) {
-        $input = array_shift($argv);
-        try {
-            list($msec, $sec) = explode(' ', microtime());
-            $startTime = (float)$msec + (float)$sec;
-
-            /** @var Command $command */
-            $command = App::load($cmd);
-            $output = $command($input);
-
-            list($msec, $sec) = explode(' ', microtime());
-            $totalTime = (float)$msec + (float)$sec - $startTime;
-            $memory = floor(memory_get_peak_usage() / 1000000);
-
-            $context = [
-                'cmd' => $cmd,
-                'input' => $input,
-                'output' => $output,
-                'time' => $totalTime,
-                'memory_peak' => $memory.'M',
-            ];
-            Log::info('command', $command->__toString() . ": " . $output, $context);
-            echo $output . "\n";
-            echo $command->__toString() . ' ' . round($totalTime, 4) . 's '.$memory.'M done.' . "\n";
-        } catch (Exception $e) {
-            Log::error('system', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
-            echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";
-            echo $command->__toString() . ' failed.' . "\n";
-        }
-        exit;
-    }
-}
-
-echo 'Command not found...' . "\n";
+echo 'Hello from Pina framework shell'."\n";
+App::cli()->run($argv);

@@ -2,88 +2,64 @@
 
 namespace Pina;
 
-use League\CLImate\CLImate;
-
 class CLI
 {
 
-    private static $driver = null;
+    protected $aliases = [];
 
-    public static function handle($argv, $scriptName)
+    public function register($alias, $class)
     {
-        self::$driver = new CLImate;
-
-        CLI::info('Hello from Pina framework shell');
-
-        list($cmd, $data) = self::parseParams($argv, $scriptName);
-
-        $modules = App::modules();
-        $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
-        $modules->boot('cli');
-
-        $parts = explode(".", $cmd);
-        if (count($parts) !== 2) {
-            CLI::error("Bad command");
-            exit;
-        }
-
-        list($group, $action) = $parts;
-
-        $owner = Route::owner($group);
-        if (empty($owner)) {
-            CLI::error("Such command has not been found");
-            exit;
-        }
-
-        CLI::info("Affected module: " . $owner->getTitle());
-
-        $path = $owner->getPath();
-
-        if (!file_exists($path . "/cli/" . $group . "/" . $action . ".php")) {
-            CLI::error("Command '" . $cmd . "' does not exist");
-            exit;
-        }
-        CLI::border('-');
-
-        include $path . "/cli/" . $group . "/" . $action . ".php";
-
-        CLI::border('-');
-        CLI::info("Memory Usage: " . round(memory_get_peak_usage() / 1024 / 1024, 3) . "M");
+        $this->aliases[$alias] = $class;
     }
 
-    private static function parseParams($argv, $scriptName)
+    protected function resolve($cmd): Command
     {
-        $cmd = '';
-        $data = array();
-        if (is_array($argv)) {
-            foreach ($argv as $v) {
-                if (strpos($v, $scriptName) !== false) {
-                    continue;
-                }
+        $cmd = $this->aliases[$cmd] ?? $cmd;
 
-                if (empty($cmd)) {
-                    $cmd = $v;
-                    continue;
-                }
-
-                $param = explode('=', $v);
-                if (count($param) != 2) {
-                    continue;
-                }
-
-                $data[$param[0]] = $param[1];
-            }
+        if (!empty($cmd) && class_exists($cmd) && is_subclass_of($cmd, Command::class)) {
+            return App::load($cmd);
         }
 
-        return array($cmd, $data);
+        throw new NotFoundException();
     }
 
-    public static function __callStatic($name, $arguments)
+    public function run($argv)
     {
+        $cmd = array_shift($argv);
+
         try {
-            return call_user_func_array(array(self::$driver, $name), $arguments);
+            $command = $this->resolve($cmd);
+        } catch (NotFoundException $e) {
+            echo 'Command not found...' . "\n";
+        }
+        $input = trim(implode(' ', $argv));
+
+        try {
+            list($msec, $sec) = explode(' ', microtime());
+            $startTime = (float)$msec + (float)$sec;
+
+            $command($input);
+            $output = $command($input);
+
+            list($msec, $sec) = explode(' ', microtime());
+            $totalTime = (float)$msec + (float)$sec - $startTime;
+            $memory = floor(memory_get_peak_usage() / 1000000);
+
+            $context = [
+                'cmd' => $cmd,
+                'input' => $input,
+                'output' => $output,
+                'time' => $totalTime,
+                'memory_peak' => $memory . 'M',
+            ];
+            Log::info('cli', $command->__toString() . ": " . $output, $context);
+            echo $output . "\n";
+            echo $command->__toString() . ' ' . round($totalTime, 4) . 's ' . $memory . 'M done.' . "\n";
+
         } catch (\Exception $e) {
-            die('Method CLI::' . $name . ' does not exist' . "\r\n");
+            Log::error('cli', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
+            echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";
+            echo $command->__toString() . ' failed.' . "\n";
         }
     }
 

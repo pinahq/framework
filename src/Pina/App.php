@@ -87,6 +87,11 @@ class App
         }
     }
 
+    public static function cli(): CLI
+    {
+        return static::load(CLI::class);
+    }
+
     /**
      * Возвращает объект для работы с БД
      */
