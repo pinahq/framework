@@ -12,7 +12,7 @@ class RunScheduler extends Command
 {
     protected function execute($input = '')
     {
-        $scheduler = new Scheduler();
+        $scheduler = App::load(Scheduler::class);
         $modules = App::modules();
         foreach ($modules as $module) {
             if (method_exists($module, 'schedule')) {
