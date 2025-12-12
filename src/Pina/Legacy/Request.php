@@ -2,12 +2,15 @@
 
 namespace Pina\Legacy;
 
+use Pina\Arr;
 use Pina\Url;
 
 class Request
 {
 
     protected static $stack = [];
+
+    protected static $places = [];
 
     public static function internal($call)
     {
@@ -86,7 +89,11 @@ class Request
 
     public static function input($name, $default = null)
     {
-        return self::top()->input($name, $default);
+        $top = self::top();
+        if ($top) {
+            return $top->input($name, $default);
+        }
+        return Arr::get($_REQUEST, $name, $default);
     }
 
     public static function only($keys)
@@ -153,11 +160,20 @@ class Request
 
     public static function setPlace($place, $content)
     {
-        self::top()->setPlace($place, $content);
+        $top = self::top();
+        if ($top) {
+            $top->setPlace($place, $content);
+        } else {
+            static::$places[$place] = $content;
+        }
     }
 
     public static function getPlace($place)
     {
+        if (empty(self::$stack)) {
+            return static::$places[$place] ?? '';
+        }
+
         $isolationLevel = 0;
 
         for ($i = count(self::$stack) - 1; $i > 0; $i --) {

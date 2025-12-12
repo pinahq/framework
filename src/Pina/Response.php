@@ -47,7 +47,7 @@ class Response implements ResponseInterface
     public static function partialContent($start, $end, $max)
     {
         return static::code('206 Partial Content')
-                ->header('Content-Range', 'bytes ' . intval($start) . '-' . intval($end) . '/' . intval($max));
+            ->header('Content-Range', 'bytes ' . intval($start) . '-' . intval($end) . '/' . intval($max));
     }
 
     /* HTTP Codes 3xx */
@@ -247,7 +247,12 @@ class Response implements ResponseInterface
             header($header[0] . ':' . $header[1]);
         }
 
-        if (!empty($this->content)) {
+        if (!empty($this->content) && is_string($this->content)) {
+            header('Content-Type: text/html; charset=' . App::charset());
+            echo $this->content;
+        }
+
+        if (!empty($this->content) && !is_string($this->content)) {
             header('Content-Type: ' . $this->content->getType());
             if ($this->errors) {
                 $this->content->setErrors($this->errors);
