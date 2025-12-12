@@ -7,8 +7,8 @@ namespace Pina\Commands;
 use Pina\App;
 use Pina\Command;
 use Pina\Config;
-use Pina\Events\Cron\CronEventWorker;
 use Pina\Events\Priority;
+use Pina\Queue\QueueWorker;
 
 class RunWorker extends Command
 {
@@ -28,8 +28,8 @@ class RunWorker extends Command
             return;
         }
 
-        /** @var CronEventWorker $worker */
-        $worker = App::make(CronEventWorker::class);
+        /** @var QueueWorker $worker */
+        $worker = App::make(QueueWorker::class);
         $worker->work(
             $this->workerId,
             isset($this->config['max_tasks']) ? $this->config['max_tasks'] : 10,

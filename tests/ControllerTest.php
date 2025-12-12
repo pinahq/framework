@@ -1,19 +1,18 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Data\DataRecord;
-use Pina\Data\Schema;
+use Pina\App;
 use Pina\Controls\Form;
 use Pina\Controls\FormInput;
 use Pina\Controls\FormStatic;
 use Pina\Controls\Paragraph;
 use Pina\Controls\RecordForm;
 use Pina\Controls\RecordView;
-use Pina\Events\Cron\CronEventEndpoint;
-use Pina\App;
-use Pina\CSRF;
+use Pina\Data\DataRecord;
+use Pina\Data\Schema;
 use Pina\Http\Location;
 use Pina\Http\Request;
+use Pina\Queue\QueueEndpoint;
 
 class ControllerTest extends TestCase
 {
@@ -65,11 +64,11 @@ class ControllerTest extends TestCase
             ],
         ];
 
-        Pina\Events\Cron\CronEventGateway::instance()->truncate();
-        Pina\Events\Cron\CronEventGateway::instance()->insert($data);
+        \Pina\Queue\QueueGateway::instance()->truncate();
+        \Pina\Queue\QueueGateway::instance()->insert($data);
         $tableContent = '';
         foreach ($data as $k => $v) {
-            $data[$k]['id'] = Pina\Events\Cron\CronEventGateway::instance()
+            $data[$k]['id'] = \Pina\Queue\QueueGateway::instance()
                 ->whereBy('created_at', $v['created_at'])
                 ->id();
 
@@ -98,11 +97,11 @@ class ControllerTest extends TestCase
 
         App::pushRequest($request);
 
-        $endpoint = new CronEventEndpoint();
+        $endpoint = new QueueEndpoint();
         $r = $endpoint->index();
         $this->assertEquals($expectedHtml, (string)$r);
 
-        $id = Pina\Events\Cron\CronEventGateway::instance()->id();
+        $id = \Pina\Queue\QueueGateway::instance()->id();
 
         $removeButton = '<a class="pina-action btn btn-default" href="#" data-resource="lk/1/cron-events" data-method="delete" data-params="">Удалить</a>';
 
@@ -115,7 +114,7 @@ class ControllerTest extends TestCase
 
         $router = App::router();
 //        $router->register('cron-events', CronEventEndpoint::class);
-        $router->register('lk/:profile_id/cron-events', CronEventEndpoint::class);
+        $router->register('lk/:profile_id/cron-events', QueueEndpoint::class);
 
 //        $html = $router->run("cron-events", 'get')->drawWithWrappers();
 //        $this->assertEquals($expectedHtml, $html);

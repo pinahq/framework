@@ -1,13 +1,13 @@
 <?php
 
-namespace Pina\Events\Cron;
+namespace Pina\Queue;
 
 use Exception;
 use Pina\App;
 use Pina\Command;
 use Pina\Log;
 
-class CronEventWorker
+class QueueWorker
 {
     /**
      * @param int $workerId
@@ -19,7 +19,7 @@ class CronEventWorker
      */
     public function work(int $workerId, int $taskLimit, int $restSeconds, int $pushOffSeconds, int $priority)
     {
-        Log::info('event', 'start worker ' . $workerId);
+        Log::info('queue', 'start worker ' . $workerId);
         $i = 0;
         while (1) {
             //Если при старте воркера обнаружились незавершенные задачи,
@@ -31,13 +31,13 @@ class CronEventWorker
 
             while ($this->assignTask($workerId, $priority)) {
                 while ($task = $this->getNextTask($workerId)) {
-                    Log::info('event', 'Worker ' . $workerId . ' has started ' . $task['event']);
+                    Log::info('queue', 'Worker ' . $workerId . ' has started ' . $task['handler']);
                     $this->startTask($task['id']);
                     try {
                         $this->runTask($task);
                         $this->deleteTask($task['id']);
                     } catch (Exception $e) {
-                        Log::error('event', $task['id'] . ' ' . $task['event'] . ': ' .$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
+                        Log::error('queue', $task['id'] . ' ' . $task['handler'] . ': ' .$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
                         //откладываем задачу на $pushOffSeconds
                         $this->pushOff($task['id'], $pushOffSeconds);
                     }
@@ -52,18 +52,18 @@ class CronEventWorker
 
     protected function runTask($task)
     {
-        if (class_exists($task['event']) && in_array(Command::class, class_parents($task['event']))) {
-            $cmd = App::load($task['event']);
-            $cmd($task['data']);
+        if (class_exists($task['handler']) && in_array(Command::class, class_parents($task['handler']))) {
+            $cmd = App::load($task['handler']);
+            $cmd($task['payload']);
         } else {
-            Log::error('event', 'Handler not found', $task);
+            Log::error('queue', 'Handler not found', $task);
         }
     }
 
     protected function assignTask(int $workerId, int $priority)
     {
-        /** @var CronEventGateway $query */
-        $taskId = CronEventGateway::instance()
+        /** @var QueueGateway $query */
+        $taskId = QueueGateway::instance()
             ->whereNull('worker_id')
             ->whereScheduled()
             //выбираем задачи с приоритетом не меньше воркера
@@ -72,7 +72,7 @@ class CronEventWorker
             ->orderBy('scheduled_at', 'asc')
             ->id();
 
-        return CronEventGateway::instance()
+        return QueueGateway::instance()
             ->whereId($taskId)
             ->whereNull('worker_id')
             ->update(['worker_id' => $workerId]);
@@ -80,7 +80,7 @@ class CronEventWorker
 
     protected function getNextTask($workerId)
     {
-        return CronEventGateway::instance()->whereBy('worker_id', $workerId)->first();
+        return QueueGateway::instance()->whereBy('worker_id', $workerId)->first();
     }
 
     /**
@@ -89,7 +89,7 @@ class CronEventWorker
      */
     protected function startTask(string $id)
     {
-        CronEventGateway::instance()->whereId($id)->start();
+        QueueGateway::instance()->whereId($id)->start();
     }
 
     /**
@@ -98,7 +98,7 @@ class CronEventWorker
      */
     protected function deleteTask(string  $id)
     {
-        CronEventGateway::instance()->whereId($id)->delete();
+        QueueGateway::instance()->whereId($id)->delete();
     }
 
     /**
@@ -108,7 +108,7 @@ class CronEventWorker
      */
     protected function pushOff(string $id, int $delay)
     {
-        CronEventGateway::instance()->whereId($id)->pushOff($delay);
+        QueueGateway::instance()->whereId($id)->pushOff($delay);
     }
 
 }

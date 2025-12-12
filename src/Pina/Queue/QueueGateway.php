@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina\Events\Cron;
+namespace Pina\Queue;
 
 use Pina\Data\Schema;
 use Pina\TableDataGateway;
@@ -10,12 +10,12 @@ use Pina\Types\StringType;
 use Pina\Types\TimestampType;
 use Pina\Types\UUIDType;
 
-class CronEventGateway extends TableDataGateway
+class QueueGateway extends TableDataGateway
 {
 
     public function getTable(): string
     {
-        return "cron_event";
+        return "queue";
     }
 
     /**
@@ -27,8 +27,8 @@ class CronEventGateway extends TableDataGateway
         $schema = parent::getSchema();
         $schema->add('id', 'ID', UUIDType::class)->setMandatory();
         $schema->setPrimaryKey('id');
-        $schema->add('event', 'Event', StringType::class)->setMandatory();
-        $schema->add('data', 'Data', BlobType::class);
+        $schema->add('handler', 'Handler', StringType::class)->setMandatory();
+        $schema->add('payload', 'Payload', BlobType::class);
         $schema->add('priority', 'Priority', IntegerType::class);
         $schema->add('delay', 'Delay', IntegerType::class);
         $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable();

@@ -5,8 +5,8 @@ use Pina\BadRequestException as BadRequestExceptionAlias;
 use Pina\Controls\TableView;
 use Pina\Data\DataTable;
 use Pina\Data\Schema;
-use Pina\Events\Cron\CronEventGateway;
 use Pina\Html;
+use Pina\Queue\QueueGateway;
 use Pina\Types\BooleanType;
 use Pina\Types\IntegerType;
 use Pina\Types\NumericType;
@@ -224,8 +224,8 @@ class SchemaTest extends TestCase
     {
         $expected = [
             'id' => "varchar(36) NOT NULL DEFAULT ''",
-            'event' => "varchar(512) NOT NULL DEFAULT ''",
-            'data' => "mediumblob DEFAULT NULL",
+            'handler' => "varchar(512) NOT NULL DEFAULT ''",
+            'payload' => "mediumblob DEFAULT NULL",
             'priority' => "int(11) NOT NULL DEFAULT 0",
             'delay' => "int(11) NOT NULL DEFAULT 0",
             'worker_id' => "int(11) DEFAULT NULL",
@@ -233,28 +233,28 @@ class SchemaTest extends TestCase
             'scheduled_at' => "timestamp DEFAULT NULL",
             'started_at' => "timestamp DEFAULT NULL",
         ];
-        $schema = CronEventGateway::instance()->getSchema();
+        $schema = QueueGateway::instance()->getSchema();
         $fields = $schema->makeSQLFields();
         $this->assertEquals($expected, $fields);
 
-        $schema = CronEventGateway::instance()
+        $schema = QueueGateway::instance()
             ->select('*')
             ->getQuerySchema();
 
         $this->assertEquals(array_keys($expected), $schema->getFieldKeys());
 
 
-        $schema = CronEventGateway::instance()
-            ->select('event')
+        $schema = QueueGateway::instance()
+            ->select('handler')
             ->innerJoin(
-                CronEventGateway::instance()->on('worker_id', 'worker_id')->alias('worker_tasks')
-                    ->selectAs('event', 'worker_event')
-                    ->select('data')
-                    ->calculate('CONCAT(event, data)', 'calculated', 'Some title')
+                QueueGateway::instance()->on('worker_id', 'worker_id')->alias('worker_tasks')
+                    ->selectAs('handler', 'worker_handler')
+                    ->select('payload')
+                    ->calculate('CONCAT(handler, payload)', 'calculated', 'Some title')
             )
             ->getQuerySchema();
 
-        $keys = ['event', 'worker_event', 'data', 'calculated'];
+        $keys = ['handler', 'worker_handler', 'payload', 'calculated'];
         $values = range(1, count($keys));
 
         $this->assertEquals($keys, $schema->getFieldKeys());
@@ -264,7 +264,7 @@ class SchemaTest extends TestCase
         $view = new TableView();
         $view->load($data);
 
-        $header = '<tr><th>Event</th><th>Event</th><th>Data</th><th>Some title</th></tr>';
+        $header = '<tr><th>Handler</th><th>Handler</th><th>Payload</th><th>Some title</th></tr>';
         $body = '<tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>';
         $html = '<div class="card"><div class="card-body"><table class="table table-hover">' . $header . $body . '</table></div></div>';
 

@@ -193,13 +193,13 @@ SQL;
     public function testCronEventUpgrade()
     {
         $tableCondition = <<<SQL
-CREATE TABLE `cron_event` (
+CREATE TABLE `queue` (
   `id` varchar(64) NOT NULL DEFAULT '',
-  `event` varchar(128) NOT NULL DEFAULT '',
-  `data` longblob,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `handler` varchar(128) NOT NULL DEFAULT '',
+  `payload` longblob,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `created` (`created`)
+  KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 SQL;
 
@@ -209,13 +209,13 @@ SQL;
 
         $fields = array(
             'id' => "varchar(64) NOT NULL DEFAULT ''",
-            'event' => "VARCHAR(128) NOT NULL default ''",
-            'data' => "longblob default NULL",
-            'created' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+            'handler' => "VARCHAR(128) NOT NULL default ''",
+            'payload' => "longblob default NULL",
+            'created_at' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
         );
         $indexes = array(
             'PRIMARY KEY' => 'id',
-            'KEY created' => 'created',
+            'KEY created_at' => 'created_at',
         );
 
         $parser = new StructureParser();

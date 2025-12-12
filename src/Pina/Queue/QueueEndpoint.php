@@ -1,30 +1,28 @@
 <?php
 
-namespace Pina\Events\Cron;
+namespace Pina\Queue;
 
 use Pina\App;
-use Pina\Composers\CollectionComposer;
-use Pina\Controls\UnorderedList;
 use Pina\Controls\RecordView;
+use Pina\Controls\UnorderedList;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\Http\Request;
 use Pina\Http\RichEndpoint;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
 use function Pina\__;
 
-class CronEventEndpoint extends RichEndpoint
+class QueueEndpoint extends RichEndpoint
 {
     public function title()
     {
-        return __('События');
+        return __('Очередь');
     }
 
     public function index()
     {
         $this->makeCollectionComposer($this->title())->index($this->location());
-        $query = CronEventGateway::instance();
+        $query = QueueGateway::instance();
 
         $data = $query->get();
         $schema = $query->getQuerySchema();
@@ -40,9 +38,9 @@ class CronEventEndpoint extends RichEndpoint
      */
     public function show($id)
     {
-        $data = CronEventGateway::instance()->findOrFail($id);
+        $data = QueueGateway::instance()->findOrFail($id);
 
-        $schema = CronEventGateway::instance()->getSchema();
+        $schema = QueueGateway::instance()->getSchema();
         $schema->forgetField('id');
 
         $record = new DataRecord($data, $schema);
@@ -70,7 +68,7 @@ class CronEventEndpoint extends RichEndpoint
         if (is_null($id)) {
             return Response::badRequest();
         }
-        CronEventGateway::instance()->whereId($id)->whereNull('worker_id')->delete();
+        QueueGateway::instance()->whereId($id)->whereNull('worker_id')->delete();
         return Response::ok()->contentLocation($this->base()->link('@'));
     }
 

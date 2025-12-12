@@ -18,7 +18,7 @@ class EventTest extends TestCase
 
         $testEventBuffer = '';
 
-        App::container()->share(\Pina\Queue\EventQueueInterface::class, new \TestEventQueue());
+        App::container()->share(\Pina\Queue\Queue::class, new \TestEventQueue());
         $queue = App::queue();
 
         App::event('order.placed')->subscribe(\TestEventCommand::queueable());

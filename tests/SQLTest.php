@@ -434,21 +434,21 @@ class SQLTest extends TestCase
 
     public function testHasField()
     {
-        $query = \Pina\Events\Cron\CronEventGateway::instance();
-        $this->assertTrue($query->hasField('event'));
+        $query = \Pina\Queue\QueueGateway::instance();
+        $this->assertTrue($query->hasField('handler'));
         $this->assertFalse($query->hasField('undefined'));
-        $this->assertTrue($query->hasAllFields(['event']));
-        $this->assertTrue($query->hasAllFields(['event', 'data']));
-        $this->assertFalse($query->hasAllFields(['event', 'data', 'undefined']));
+        $this->assertTrue($query->hasAllFields(['handler']));
+        $this->assertTrue($query->hasAllFields(['handler', 'payload']));
+        $this->assertFalse($query->hasAllFields(['handler', 'payload', 'undefined']));
         $this->assertFalse($query->hasAllFields(['undefined']));
         $this->assertFalse($query->hasAllFields([]));
     }
 
     public function testId()
     {
-        $query = \Pina\Events\Cron\CronEventGateway::instance();
+        $query = \Pina\Queue\QueueGateway::instance();
         $query->whereId(1);
-        $this->assertEquals("SELECT * FROM `cron_event` WHERE (`cron_event`.`id` = '1')", $query->make());
+        $this->assertEquals("SELECT * FROM `queue` WHERE (`queue`.`id` = '1')", $query->make());
 
     }
     

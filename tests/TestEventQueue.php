@@ -1,16 +1,15 @@
 <?php
 
 use Pina\App;
-use Pina\Queue\EventQueueInterface;
 
-class TestEventQueue implements EventQueueInterface
+class TestEventQueue extends \Pina\Queue\Queue
 {
     
     protected $data = [];
 
-    public function push(string $handler, string $data, int $priority, bool $unique = false)
+    public function push(string $handler, string $payload, int $priority, bool $unique = false)
     {
-        $this->data[] = [$handler, $data, $priority];
+        $this->data[] = [$handler, $payload, $priority];
         usort($this->data, [$this, 'sort']);
     }
     

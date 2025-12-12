@@ -5,8 +5,7 @@ namespace Pina;
 use Pina\Container\Container;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;
-use Pina\Queue\EventQueueInterface;
-use Pina\Queue\NoQueue;
+use Pina\Queue\Queue;
 
 class App
 {
@@ -17,9 +16,7 @@ class App
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
-    private static $defaultSharedDepencies = array(
-        EventQueueInterface::class => NoQueue::class,
-    );
+    private static $defaultSharedDepencies = [];
 
     /** @var \Pina\Http\Request[] */
     private static $requestStack = [];
@@ -103,9 +100,9 @@ class App
         return static::load(Access::class);
     }
 
-    public static function queue(): EventQueueInterface
+    public static function queue(): Queue
     {
-        return self::$container->get(EventQueueInterface::class);
+        return static::load(Queue::class);
     }
 
     /**
