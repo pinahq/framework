@@ -18,16 +18,18 @@ class Update extends Command
         $upgrades = App::getUpgrades();
 
         if ($input == 'test') {
-            return join("\r\n", $upgrades);
+            echo join("\n", $upgrades);
+            return;
         }
 
-        App::db()->batch($upgrades);
+        foreach ($upgrades as $upgrade) {
+            echo $upgrade . "\n";
+            App::db()->query($upgrade);
+        }
 
         App::walkModuleRootClasses('Installation', function($cl) {
             $cl->install();
         });
-
-        return join("\r\n", $upgrades);
     }
 
 }
