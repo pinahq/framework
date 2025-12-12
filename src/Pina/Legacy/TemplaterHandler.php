@@ -1,6 +1,10 @@
 <?php
 
-namespace Pina;
+namespace Pina\Legacy;
+
+use Pina\App;
+use Pina\Response;
+use Pina\Url;
 
 class TemplaterHandler extends RequestHandler
 {
@@ -29,7 +33,7 @@ class TemplaterHandler extends RequestHandler
             $this->set($k, $v);
         }
 
-        $this->module = Route::owner($this->controller);
+        $this->module = Route::router()->owner($this->controller);
         $this->layout = 'main';
     }
 

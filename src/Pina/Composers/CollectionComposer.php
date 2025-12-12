@@ -6,15 +6,14 @@ use Exception;
 use Pina\App;
 use Pina\Controls\BreadcrumbView;
 use Pina\Controls\Meta;
-use Pina\Data\DataTable;
 use Pina\Data\DataRecord;
+use Pina\Data\DataTable;
 use Pina\Data\Schema;
+use Pina\Http\Location;
+use Pina\Legacy\Request;
 use Pina\Model\LinkedItem;
 use Pina\Model\LinkedItemCollection;
-use Pina\Request;
-use Pina\Http\Location;
-
-use function \Pina\__;
+use function Pina\__;
 
 class CollectionComposer
 {

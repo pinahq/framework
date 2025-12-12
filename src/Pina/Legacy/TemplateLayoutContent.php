@@ -1,6 +1,9 @@
 <?php
 
-namespace Pina;
+namespace Pina\Legacy;
+
+use Pina\App;
+use Pina\ContentInterface;
 
 class TemplateLayoutContent implements ContentInterface
 {

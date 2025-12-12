@@ -13,6 +13,8 @@ class Router
     /** @var \Pina\Router\Route[]  */
     protected $items = [];
 
+    protected $fallbacks = [];
+
     /**
      * @param string $pattern
      * @param string $class
@@ -86,11 +88,15 @@ class Router
      */
     public function run($resource, $method, $data = [])
     {
+        if (!$this->isPermitted($resource)) {
+            return Response::forbidden();
+        }
+
         list($controller, $action, $params) = Url::route($resource, $method);
 
         $c = $this->base($controller);
         if ($c === null) {
-            throw new Container\NotFoundException;
+            return $this->fallback($resource, $method, $data);
         }
 
         $pattern = $this->items[$c]->getPattern();
@@ -136,6 +142,22 @@ class Router
         $request->setContext($this->items[$c]->getContext());
 
         return $request;
+    }
+
+    protected function fallback($resource, $method, $data)
+    {
+        foreach ($this->fallbacks as $fallback) {
+            $router = App::load($fallback);
+            if ($router->exists($resource, $method)) {
+                return $router->run($resource, $method, $data);
+            }
+        }
+        throw new Container\NotFoundException;
+    }
+
+    public function addFallback($class)
+    {
+        $this->fallbacks[] = $class;
     }
 
     public function findChilds(string $resource)

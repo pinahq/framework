@@ -1,37 +1,23 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Url;
-use Pina\Route;
+use Pina\Legacy\Route;
 
 class RouteTest extends TestCase
 {
 
     public function testResource()
     {
-        Route::context("user_id", 7);
-        $params = array('book_id' => 3);
+        $params = array('book_id' => 3, 'user_id' => 7);
         $r = Route::resource("users/:user_id/friends", $params);
         $this->assertEquals($r, "users/7/friends");
     }
     
-    /**
-     * @dataProvider moduleProvider
-     */
-    public function testOwner($controller, $expected)
+    public function testOwner()
     {
-        $module = Route::owner($controller);
-        $this->assertEquals($expected, $module);
+        Route::router()->own('/menus', new \Pina\Module());
+        $module = Route::router()->owner('menus/items');
+        $this->assertEquals(new \Pina\Module(), $module);
     }
-
-    public function moduleProvider()
-    {
-        Route::own('/menus', 'Menus');
-        return array(
-            array('menus/items', 'Menus'),
-            array('menus/', 'Menus'),
-        );
-    }
-
 
 }

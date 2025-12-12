@@ -3,8 +3,12 @@
 namespace Pina;
 
 use Pina\Container\Container;
+use Pina\Controls\Control;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;
+use Pina\Legacy\Request;
+use Pina\Legacy\ScriptRouter;
+use Pina\Legacy\TemplaterContent;
 use Pina\Queue\Queue;
 
 class App
@@ -267,21 +271,28 @@ class App
 
             $resource = DispatcherRegistry::dispatch($resource);
 
-            $handler = new RequestHandler($resource, $method, $data);
-
-            if (!CSRF::verify($handler->controller(), $data)) {
+            list($controller, $action, $parsed) = Url::route($resource, $method);
+            if (!CSRF::verify($controller, $data)) {
                 @header('HTTP/1.1 403 Forbidden');
                 exit;
             }
 
-            $defaultLayout = App::getDefaultLayout();
-            if ($defaultLayout) {
-                $handler->setLayout($defaultLayout);
-            }
+            App::router()->addFallback(ScriptRouter::class);
 
-            Request::push($handler);
-            $response = Request::run();
-            $response->send();
+            $response = App::router()->run($resource, $method, $data);
+            if ($response instanceof Control) {
+                $layout = $response->getLayout();
+                $content = $layout->append($response)->drawWithWrappers();
+                Response::ok()->setContent($content)->send();
+            } elseif ($response instanceof Response) {
+                if (!$response->hasContent()) {
+                    $content = App::createResponseContent([], $controller, $action);
+                    $response->setContent($content);
+                }
+                $response->send();
+            } else {
+                throw new NotFoundException;
+            }
         } catch (BadRequestException $e) {
             Response::badRequest()->setErrors($e->getErrors())->send();
         } catch (NotFoundException $e) {
@@ -289,24 +300,6 @@ class App
         } catch (ForbiddenException $e) {
             Response::forbidden()->send();
         }
-    }
-
-    /**
-     * Задает шаблон layout`а по умолчанию
-     * @param string $layout Имя шаблона layout`а
-     */
-    public static function setDefaultLayout($layout)
-    {
-        self::$layout = $layout;
-    }
-
-    /**
-     * Возвращает шаблон layout`а по умолчанию
-     * @return string
-     */
-    public static function getDefaultLayout()
-    {
-        return self::$layout;
     }
 
     /**

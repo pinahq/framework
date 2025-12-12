@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\RequestHandler;
+use Pina\Legacy\RequestHandler;
 
 class RequestTest extends TestCase
 {

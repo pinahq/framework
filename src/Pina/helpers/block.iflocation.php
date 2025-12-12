@@ -1,7 +1,7 @@
 <?php
 
+use Pina\Legacy\Route;
 use Pina\Url;
-use Pina\Route;
 
 function smarty_block_iflocation($params, $content, &$view, &$repeat) 
 {

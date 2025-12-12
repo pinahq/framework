@@ -1,6 +1,8 @@
 <?php
 
-namespace Pina;
+namespace Pina\Legacy;
+
+use Pina\Arr;
 
 class Composer
 {

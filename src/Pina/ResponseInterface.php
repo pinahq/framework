@@ -2,8 +2,6 @@
 
 namespace Pina;
 
-use Pina\Request;
-
 interface ResponseInterface
 {
 

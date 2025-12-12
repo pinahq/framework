@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use Pina\Legacy\Route;
+
 class Html extends \SimpleHtml\Html
 {
 
@@ -25,7 +27,7 @@ class Html extends \SimpleHtml\Html
             }
         }
 
-        $resource = Route::resource($pattern, $params);
+        $resource = Url::resource($pattern, $params);
 
         list($preg, $map) = Url::preg($pattern);
         $r = [

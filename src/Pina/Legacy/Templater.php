@@ -1,7 +1,9 @@
 <?php
 
-namespace Pina;
+namespace Pina\Legacy;
 
+use Pina\App;
+use Pina\Url;
 use Smarty;
 
 class Templater extends Smarty
@@ -167,7 +169,7 @@ class Templater extends Smarty
     {
         list($controller, $action, $display) = explode('!', $template);
 
-        $module = Route::owner($controller);
+        $module = Route::router()->owner($controller);
         if (empty($module)) {
             return [];
         }

@@ -2,7 +2,7 @@
 
 namespace Pina\Layouts;
 
-use Pina\TemplateLayoutContent;
+use Pina\Legacy\TemplateLayoutContent;
 
 class SmartyLayout extends DefaultLayout
 {

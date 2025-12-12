@@ -1,9 +1,8 @@
 <?php
 
 use Pina\App;
-use Pina\Composer;
-use Pina\Route;
-use Pina\CSRF;
+use Pina\Legacy\Composer;
+use Pina\Legacy\Route;
 use Pina\Url;
 
 function smarty_block_form($ps, $content, &$view, &$repeat)

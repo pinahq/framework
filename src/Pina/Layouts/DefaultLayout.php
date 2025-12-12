@@ -7,12 +7,12 @@ use Pina\App;
 use Pina\Config;
 use Pina\Controls\Control;
 use Pina\Controls\IconMeta;
+use Pina\Controls\Meta;
 use Pina\CSRF;
 use Pina\Html;
+use Pina\Legacy\Request;
 use Pina\Menu\MainMenu;
 use Pina\Menu\SectionMenuComposer;
-use Pina\Request;
-use Pina\Controls\Meta;
 
 class DefaultLayout extends Control
 {

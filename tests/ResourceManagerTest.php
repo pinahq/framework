@@ -2,9 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\App;
-use Pina\Url;
-use Pina\Route;
-use Pina\ResourceManager;
 
 class ResourceManagerTest extends TestCase
 {
@@ -14,7 +11,7 @@ class ResourceManagerTest extends TestCase
         App::init('test', __DIR__.'/config');
         
         $repeat = 0;
-        $view = new \Pina\Templater;
+        $view = new \Pina\Legacy\Templater;
 
         require_once __DIR__.'/../src/Pina/helpers/block.script.php';
         require_once __DIR__.'/../src/Pina/helpers/function.scripts.php';
@@ -70,7 +67,7 @@ class ResourceManagerTest extends TestCase
         App::init('test', __DIR__.'/config');
         
         $repeat = 0;
-        $view = new \Pina\Templater;
+        $view = new \Pina\Legacy\Templater;
 
         require_once __DIR__.'/../src/Pina/helpers/block.style.php';
         require_once __DIR__.'/../src/Pina/helpers/function.styles.php';

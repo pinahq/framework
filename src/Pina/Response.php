@@ -2,6 +2,9 @@
 
 namespace Pina;
 
+use Pina\Legacy\Request;
+use Pina\Legacy\TemplateLayoutContent;
+
 class Response implements ResponseInterface
 {
 

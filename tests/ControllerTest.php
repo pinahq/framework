@@ -25,7 +25,7 @@ class ControllerTest extends TestCase
     {
         App::init('test', __DIR__ . '/config');
 
-        \Pina\Request::push(new \Pina\RequestHandler('lk/1/cron-events', 'index', []));
+        \Pina\Legacy\Request::push(new \Pina\Legacy\RequestHandler('lk/1/cron-events', 'index', []));
         App::container()->set('base_url', new Location(''));
 
         $data = [
@@ -207,7 +207,7 @@ class ControllerTest extends TestCase
         $prop->setAccessible(true);
         $this->assertEquals('200 OK', $prop->getValue($r));
 
-        \Pina\Request::pop();
+        \Pina\Legacy\Request::pop();
     }
 
     /**

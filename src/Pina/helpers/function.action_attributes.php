@@ -1,9 +1,7 @@
 <?php
 
-use Pina\Route;
+use Pina\Legacy\Route;
 use Pina\Url;
-use Pina\App;
-use Pina\CSRF;
 
 function smarty_function_action_attributes($params, &$view)
 {

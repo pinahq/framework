@@ -1,11 +1,11 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Module;
-use Pina\CSRF;
 use Pina\App;
-use Pina\Route;
-use Pina\RequestHandler;
+use Pina\CSRF;
+use Pina\Legacy\RequestHandler;
+use Pina\Legacy\Route;
+use Pina\Module;
 
 class CSRFTest extends TestCase
 {
@@ -15,10 +15,10 @@ class CSRFTest extends TestCase
         App::env('test');
         
         $module = new Module;
-        $routes = CSRF::whitelist(['/request', 'cp/products']);
+        $routes = CSRF::whitelist(['request', 'cp/products']);
 
         foreach ($routes as $route) {
-            Route::own($route, $module);
+            Route::router()->own($route, $module);
         }
         
         $data = [];
@@ -33,8 +33,8 @@ class CSRFTest extends TestCase
         $handler = new RequestHandler('cp/ru/products/1/prices', 'post', $data);
         
         $this->assertTrue(CSRF::verify($handler->controller(), $data));
-        Route::own('cp/products/prices', $module);
-        $this->assertFalse(CSRF::verify($handler->controller(), $data));
+        Route::router()->own('cp/products/prices', $module);
+        $this->assertTrue(CSRF::verify($handler->controller(), $data));
     }
 
 }

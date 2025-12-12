@@ -1,12 +1,19 @@
 <?php
 
-namespace Pina;
+namespace Pina\Legacy;
+
+use Pina\App;
+use Pina\Arr;
+use Pina\ModuleInterface;
+use Pina\Response;
+use Pina\ResponseInterface;
+use Pina\Url;
 
 class RequestHandler
 {
 
     protected $data = [];
-    protected $module = '';
+    protected ?ModuleInterface $module;
     protected $layout = '';
     protected $places = [];
     protected $resource = null;
@@ -34,7 +41,7 @@ class RequestHandler
             $this->set($k, $v);
         }
 
-        $this->module = Route::owner($this->controller);
+        $this->module = Route::router()->owner($this->controller);
         $this->layout = 'main';
     }
 
@@ -180,32 +187,10 @@ class RequestHandler
 
     public function run()
     {
-        $router = App::router();
+        $access = App::access();
 
-        if (!$router->isPermitted($this->resource)) {
+        if (!$access->isPermitted($this->resource)) {
             return $this->forbidden();
-        }
-
-        if ($router->exists($this->resource, $this->method)) {
-            $data = $router->run($this->resource, $this->method, $this->data);
-            if ($data instanceof Response) {
-                if (!$data->hasContent()) {
-                    $content = App::createResponseContent([], $this->controller, $this->action);
-                    $data->setContent($content);
-                }
-                return $data;
-            }
-
-            $content = new TemplateLayoutContent;
-            if (Request::isExternalRequest()) {
-                //$content->drawLayout($data->drawWithWrappers());
-                $layout = $data->getLayout();
-                $r = $layout->append($data)->drawWithWrappers();
-                $content->setContent($r);
-            } else {
-                $content->setContent($data->drawWithWrappers());
-            }
-            return Response::ok()->setContent($content);
         }
 
         if (empty($this->module)) {

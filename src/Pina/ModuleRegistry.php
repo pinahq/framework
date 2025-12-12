@@ -2,8 +2,9 @@
 
 namespace Pina;
 
-use IteratorAggregate;
 use ArrayIterator;
+use IteratorAggregate;
+use Pina\Legacy\Route;
 
 class ModuleRegistry implements IteratorAggregate
 {
@@ -70,7 +71,7 @@ class ModuleRegistry implements IteratorAggregate
             }
 
             foreach ($routes as $route) {
-                Route::own($route, $module);
+                Route::router()->own($route, $module);
             }
         }
     }
