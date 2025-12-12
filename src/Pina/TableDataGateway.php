@@ -3,11 +3,11 @@
 namespace Pina;
 
 use Exception;
-use League\Csv\Reader;
 use Pina\Data\Schema;
 use Pina\Data\SchemaExtension;
 use Pina\DB\StructureParser;
 use Pina\DB\Structure;
+use Pina\SQL\DefinitionInterface;
 use Pina\Types\TypeInterface;
 
 /*
@@ -18,16 +18,22 @@ use Pina\Types\TypeInterface;
  * @copyright 2015
  */
 
-class TableDataGateway extends SQL
+abstract class TableDataGateway extends SQL implements DefinitionInterface
 {
+    abstract public function getTable(): string;
 
-    const LOAD_BUFFER_LIMIT = 1024000;
+    protected function getEngine(): string
+    {
+        return "InnoDB";
+    }
 
-    protected static $table = "";
-    protected static $fields = [];
-    protected static $indexes = [];
-    protected static $engine = "InnoDB";
-    protected static $charset = "utf8";
+    protected function getCharset(): string
+    {
+        if ($this->db->version() >= 8000) {
+            return 'utf8mb3';
+        }
+        return 'utf8';
+    }
 
     /**
      * Возвращает список триггеров
@@ -35,7 +41,7 @@ class TableDataGateway extends SQL
      */
     public function getTriggers()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -44,52 +50,37 @@ class TableDataGateway extends SQL
      */
     public function getForeignKeys()
     {
-        return array();
+        return [];
     }
 
     public function __construct()
     {
-        parent::__construct($this->getTable());
+        parent::__construct($this);
     }
 
     /**
      * Возвращает схему таблицы
      * @return Schema
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         /** @var SchemaExtension $container */
         $container = App::load(SchemaExtension::class);
-        return $container->get(static::$table);
+        return $container->get($this->getTable());
     }
 
     public static function addSchema(Schema $schema)
     {
         /** @var SchemaExtension $container */
         $container = App::load(SchemaExtension::class);
-        $container->onGet(static::$table, function(Schema $base) use ($schema) {
+        $container->onGet(static::instance()->getTable(), function(Schema $base) use ($schema) {
             $base->addGroup($schema);
         });
     }
 
-    /**
-     * Возвращает название таблицы
-     * @return string
-     */
-    public function getTable()
+    public function getSource(): string
     {
-        return static::$table;
-    }
-
-
-    /**
-     * Возвращает список полей
-     * @return array
-     * @throws Exception
-     */
-    public function getFields()
-    {
-        return $this->getSchema()->makeSQLFields(static::$fields);
+        return '`' . $this->getTable() . '`';
     }
 
     /**
@@ -98,24 +89,7 @@ class TableDataGateway extends SQL
      */
     public function getIndexes()
     {
-        return $this->getSchema()->makeSQLIndexes(static::$indexes);
-    }
-
-    /**
-     * Возвращает тип движка таблицы
-     * @return string
-     */
-    public function getEngine()
-    {
-        return static::$engine;
-    }
-
-    public function getCharset()
-    {
-        if ($this->db->version() >= 8000 && static::$charset == 'utf8') {
-            return 'utf8mb3';
-        }
-        return static::$charset;
+        return $this->getSchema()->makeSQLIndexes();
     }
 
     /**
@@ -126,8 +100,7 @@ class TableDataGateway extends SQL
      */
     public function getUpgrades()
     {
-        $fields = $this->getFields();
-        if (empty($fields) || empty($this->getTable())) {
+        if (empty($this->getSchema()->getRealFieldNames()) || empty($this->getTable())) {
             return array(array(), array());
         }
 
@@ -155,7 +128,7 @@ class TableDataGateway extends SQL
     {
         $parser = new StructureParser;
         $structure = new Structure;
-        $structure->setFields($parser->parseGatewayFields($this->getFields()));
+        $structure->setFields($parser->parseGatewayFields($this->getSchema()->makeSQLFields()));
         $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
         $structure->setForeignKeys($this->getForeignKeys());
         $structure->setEngine($this->getEngine());
@@ -177,34 +150,6 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * Возвращает набор корректных вариантов для поля типа ENUM на основании
-     * анализа описания этого поля
-     * @param string $field
-     * @return array
-     */
-    public function getEnumVariants($field)
-    {
-        $fields = $this->getFields();
-        if (empty($fields[$field])) {
-            return [];
-        }
-
-        $meta = $fields[$field];
-        if (!preg_match('/enum\((.*)\)/si', $meta, $matches)) {
-            return [];
-        }
-
-        $fields = explode(',', $matches[1]);
-        array_walk(
-            $fields,
-            function (&$s) {
-                $s = trim(trim($s, "'\""));
-            }
-        );
-        return $fields;
-    }
-
-    /**
      * Возвращает экземпляр конкретного класса
      * @return $this
      */
@@ -221,8 +166,7 @@ class TableDataGateway extends SQL
      */
     public function hasField($field)
     {
-        $fields = $this->getFields();
-        return isset($fields[$field]);
+        return $this->getSchema()->hasReal($field);
     }
 
     public function hasAllFields(array $fields): bool
@@ -231,7 +175,7 @@ class TableDataGateway extends SQL
         if ($count === 0) {
             return false;
         }
-        $keys = array_keys($this->getFields());
+        $keys = $this->getSchema()->getRealFieldNames();
         return count(array_intersect($keys, $fields)) === $count;
     }
 
@@ -292,37 +236,12 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * Возвращает названия поля первичного ключа
-     * Если первичный ключ составной, возвращает название первого поля
-     * первичого ключа
-     * @return string
-     * @deprecated в пользу getPrimaryKey & singlePrimaryKeyField
-     */
-    protected function primaryKey()
-    {
-        $schema = $this->getSchema();
-        $primaryKey = $schema->getPrimaryKey();
-        if (empty($primaryKey)) {
-            $primaryKey = static::$indexes['PRIMARY KEY'] ?? '';
-        }
-        return is_array($primaryKey) ? $primaryKey[0] : $primaryKey;
-    }
-
-    /**
      * Возвращает массив полей первичного ключа
      * @return string[]
      */
     protected function getPrimaryKey(): array
     {
-        $schema = $this->getSchema();
-        $primaryKey = $schema->getPrimaryKey();
-        if (empty($primaryKey)) {
-            $primaryKey = static::$indexes['PRIMARY KEY'] ?? [];
-            if (!is_array($primaryKey)) {
-                $primaryKey = [$primaryKey];
-            }
-        }
-        return $primaryKey;
+        return $this->getSchema()->getPrimaryKey();
     }
 
     public function getSinglePrimaryKey($context = [])
@@ -359,21 +278,6 @@ class TableDataGateway extends SQL
     }
 
     /**
-     * Возвращает список ключей на обновление в случае, если будут дубликаты
-     * По сути выбирает все имена полей кроме первичного ключа
-     * @return array
-     */
-    protected function getOnDuplicateKeys(array $keys): array
-    {
-        $primaryKeys = !empty(static::$indexes['PRIMARY KEY']) ? static::$indexes['PRIMARY KEY'] : array();
-        if (!is_array($primaryKeys)) {
-            $primaryKeys = array($primaryKeys);
-        }
-
-        return array_diff($keys, $primaryKeys);
-    }
-
-    /**
      * Собирает и возвращает текст запроса на вставку данных в таблицу
      * @param array $data
      * @param string $cmd
@@ -401,7 +305,6 @@ class TableDataGateway extends SQL
     /**
      * Собирает и возвращает текст запроса на обновление данных в таблице
      * @param array $data
-     * @param array $fields
      * @return string
      */
     public function update($data)
@@ -471,7 +374,7 @@ class TableDataGateway extends SQL
 
     public function selectAll()
     {
-        $selectedFields = array_keys($this->getFields());
+        $selectedFields = $this->getSchema()->getRealFieldNames();
         foreach ($selectedFields as $selectedField) {
             $this->select($selectedField);
         }
@@ -487,7 +390,7 @@ class TableDataGateway extends SQL
     {
         $excludedFields = is_array($field) ? $field : explode(",", $field);
         array_walk($excludedFields, 'trim');
-        $selectedFields = array_diff(array_keys($this->getFields()), $excludedFields);
+        $selectedFields = array_diff($this->getSchema()->getRealFieldNames(), $excludedFields);
         foreach ($selectedFields as $selectedField) {
             $this->select($selectedField);
         }
@@ -511,17 +414,6 @@ class TableDataGateway extends SQL
     public function selectTitle($alias = 'title')
     {
         return $this->selectAsIfNotSelected('title', $alias);
-    }
-
-    public function selectNonStatic()
-    {
-        $schema = $this->getSchema();
-        foreach ($schema as $field) {
-            if (!$field->isStatic()) {
-                $this->select($field->getName());
-            }
-        }
-        return $this;
     }
 
     /**
@@ -583,8 +475,7 @@ class TableDataGateway extends SQL
      */
     public function reorder($ids, $field = 'order')
     {
-        $fields = $this->getFields();
-        if (!isset($fields[$field])) {
+        if (!$this->getSchema()->hasReal($field)) {
             return;
         }
 
@@ -617,101 +508,6 @@ class TableDataGateway extends SQL
         }
     }
 
-    /**
-     * Проверяет входной массив на соответствие требованиям типа данных полей таблицы.
-     * Возвращает список ошибок.
-     * @param array $data
-     * @return array
-     */
-    public function validate($data)
-    {
-        $errors = [];
-        $fields = $this->getFields();
-        foreach ($data as $k => $v) {
-            $matches = array();
-            if (preg_match("/(varchar|decimal)\((\d+)(,(\d+))?\)/i", $fields[$k], $matches)) {
-                $length = 0;
-                $type = strtolower($matches[1]);
-                $maxLength = strtolower($matches[2]);
-                switch ($type) {
-                    case 'varchar':
-                        $length = strlen($v);
-                        break;
-                    case 'decimal':
-                        $length = strlen(floor(abs($v)));
-                        break;
-                }
-                if ($maxLength >= $length) {
-                    continue;
-                }
-                $errors[] = [
-                    'length',
-                    $k,
-                    $maxLength,
-                    $length,
-                ];
-            } else {
-                if ($variants = $this->getEnumVariants($k)) {
-                    if (!in_array($v, $variants)) {
-                        $errors[] = [
-                            'enum',
-                            $k,
-                            $variants,
-                            $v,
-                        ];
-                    }
-                }
-            }
-        }
-        return $errors;
-    }
-
-    /**
-     * Загружает данные из объекта читателя согласно схеме
-     * $schema = array("file_field" => "table_field");
-     *
-     * @param array $schema
-     * @param object $reader
-     * @return int
-     */
-    public function load($schema, $reader)
-    {
-        $cnt = 0;
-        $buffer = '';
-        $data = $reader->fetch();
-        foreach ($data as $line) {
-            $prepared = [];
-            foreach ($schema as $sourceKey => $targetKey) {
-                if (isset($line[$sourceKey])) {
-                    $prepared[$targetKey] = $line[$sourceKey];
-                }
-            }
-            list($ks, $valueCondition) = $this->getKeyValuesCondition($prepared, $schema);
-            if (strlen($valueCondition) > self::LOAD_BUFFER_LIMIT) {
-                $this->db->query("REPLACE INTO `" . $this->getFrom() . "` " . join($schema) . " VALUES " . $buffer);
-                $cnt += $this->db->affectedRows();
-            }
-            $buffer .= $valueCondition;
-        }
-        if (!empty($buffer)) {
-            $this->db->query("REPLACE INTO `" . $this->getFrom() . "` " . join($schema) . " VALUES " . $buffer);
-            $cnt += $this->db->affectedRows();
-        }
-        return $cnt;
-    }
-
-    /**
-     * Загружает CSV из файла по указанному пути согласно схеме
-     * @param array $schema
-     * @param string $path
-     * @return int
-     */
-    public function loadCSV($schema, $path)
-    {
-        $csv = Reader::createFromPath($path);
-        return $this->load($schema, $csv);
-    }
-
     public function whereSearch($search, Schema $schema)
     {
         $search = trim($search);
@@ -727,7 +523,7 @@ class TableDataGateway extends SQL
             if (!$table) {
                 $table = $this;
             }
-            if (!$table->hasField($field->getName())) {
+            if (!$table->getSchema()->hasReal($field->getName())) {
                 continue;
             }
             $conditions[] = $table->makeByCondition(array('LIKE', self::SQL_OPERAND_FIELD, $field->getName(), self::SQL_OPERAND_VALUE, '%' . $search . '%'));

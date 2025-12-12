@@ -234,7 +234,11 @@ class DatabaseDriver
 
     public function version(): int
     {
-        return mysqli_get_server_version($this->conn);
+        static $version = null;
+        if (is_null($version)) {
+            $version = mysqli_get_server_version($this->conn);
+        }
+        return $version;
     }
 
     /**

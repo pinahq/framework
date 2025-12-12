@@ -19,6 +19,9 @@ use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Data\FieldSet;
 use Pina\Data\Schema;
+use Pina\SQL\DefinitionInterface;
+use Pina\SQL\EmptyTableDefinition;
+use Pina\SQL\Subquery;
 use Pina\Types\StringType;
 
 class SQL
@@ -31,7 +34,7 @@ class SQL
 
     public $db = '';
     private $select = array();
-    private $from = '';
+    protected DefinitionInterface $definition;
     private $alias = '';
     private $joins = array();
     private $where = array();
@@ -61,7 +64,7 @@ class SQL
      */
     public static function table($table, ?DatabaseDriver $db = null)
     {
-        return new SQL($table, $db);
+        return new SQL(new EmptyTableDefinition($table), $db);
     }
 
     /**
@@ -69,9 +72,9 @@ class SQL
      * @param mixed $query
      * @return \Pina\SQL
      */
-    public static function subquery($query)
+    public static function subquery(SQL $query)
     {
-        return new SQL($query);
+        return new SQL(new Subquery($query));
     }
 
     /**
@@ -105,10 +108,10 @@ class SQL
     /**
      * Создает конструктор запроса
      */
-    protected function __construct($table, ?DatabaseDriver $db = null)
+    protected function __construct(DefinitionInterface $definition, ?DatabaseDriver $db = null)
     {
         $this->db = $db ?? App::db();
-        $this->from = $table;
+        $this->definition = $definition;
     }
 
     /**
@@ -133,9 +136,9 @@ class SQL
      * Возвращает схему таблицы
      * @return Schema
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
-        return new Schema();
+        return $this->definition->getSchema();
     }
 
     /**
@@ -295,11 +298,7 @@ class SQL
      */
     public function getFrom()
     {
-        if (is_string($this->from)) {
-            return '`' . $this->from . '`';
-        }
-
-        return '(' . $this->from . ')';
+        return $this->definition->getSource();
     }
 
     /**
@@ -1360,10 +1359,6 @@ class SQL
      */
     public function pagingCount($field = false, $useJoin = true)
     {
-        if ($this->from == '') {
-            return '';
-        }
-
         $sql = 'SELECT ';
         $sql .= $this->makeCountFields($field);
 
@@ -1384,10 +1379,6 @@ class SQL
      */
     public function count($field = false): int
     {
-        if ($this->from == '') {
-            return '';
-        }
-
         $sql = 'SELECT ';
         $sql .= $this->makeCountFields($field);
 
@@ -1410,10 +1401,6 @@ class SQL
      */
     private function aggregate($func, $what)
     {
-        if ($this->from == '') {
-            return '';
-        }
-
         $sql = 'SELECT ' . $func . '(' . $what . ')';
         $sql .= ' FROM ' . $this->makeFrom();
 
