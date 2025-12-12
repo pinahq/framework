@@ -12,7 +12,7 @@ class CLI
         $this->aliases[$alias] = $class;
     }
 
-    protected function resolve($cmd): Command
+    protected function resolve($cmd): ?Command
     {
         $cmd = $this->aliases[$cmd] ?? $cmd;
 
@@ -20,47 +20,48 @@ class CLI
             return App::load($cmd);
         }
 
-        throw new NotFoundException();
+        return null;
     }
 
     public function run($argv)
     {
-        $cmd = array_shift($argv);
-
-        try {
+        while ($cmd = array_shift($argv)) {
             $command = $this->resolve($cmd);
-        } catch (NotFoundException $e) {
-            echo 'Command not found...' . "\n";
-        }
-        $input = trim(implode(' ', $argv));
+            if (empty($command)) {
+                continue;
+            }
 
-        try {
-            list($msec, $sec) = explode(' ', microtime());
-            $startTime = (float)$msec + (float)$sec;
+            $input = trim(implode(' ', $argv));
 
-            $command($input);
-            $output = $command($input);
+            try {
+                list($msec, $sec) = explode(' ', microtime());
+                $startTime = (float)$msec + (float)$sec;
 
-            list($msec, $sec) = explode(' ', microtime());
-            $totalTime = (float)$msec + (float)$sec - $startTime;
-            $memory = floor(memory_get_peak_usage() / 1000000);
+                $command($input);
+                $output = $command($input);
 
-            $context = [
-                'cmd' => $cmd,
-                'input' => $input,
-                'output' => $output,
-                'time' => $totalTime,
-                'memory_peak' => $memory . 'M',
-            ];
-            Log::info('cli', $command->__toString() . ": " . $output, $context);
-            echo $output . "\n";
-            echo $command->__toString() . ' ' . round($totalTime, 4) . 's ' . $memory . 'M done.' . "\n";
+                list($msec, $sec) = explode(' ', microtime());
+                $totalTime = (float)$msec + (float)$sec - $startTime;
+                $memory = floor(memory_get_peak_usage() / 1000000);
 
-        } catch (\Exception $e) {
-            Log::error('cli', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
-            echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";
-            echo $command->__toString() . ' failed.' . "\n";
+                $context = [
+                    'cmd' => $cmd,
+                    'input' => $input,
+                    'output' => $output,
+                    'time' => $totalTime,
+                    'memory_peak' => $memory . 'M',
+                ];
+                Log::info('cli', $command->__toString() . ": " . $output, $context);
+                echo $output . "\n";
+                echo $command->__toString() . ' ' . round($totalTime, 4) . 's ' . $memory . 'M done.' . "\n";
+
+            } catch (\Exception $e) {
+                Log::error('cli', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
+                echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";
+                echo $command->__toString() . ' failed.' . "\n";
+            }
+
+            break;
         }
     }
-
 }
