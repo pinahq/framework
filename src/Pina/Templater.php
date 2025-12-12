@@ -39,7 +39,7 @@ class Templater extends Smarty
 
         $this->compile_dir = App::templaterCompiled() . '/' . md5($template ?? '');
         if (!is_dir($this->compile_dir)) {
-            mkdir($this->compile_dir);
+            mkdir($this->compile_dir, 0777, true);
         }
 
         $this->cache_dir = App::templaterCache();

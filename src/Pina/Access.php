@@ -5,10 +5,10 @@ namespace Pina;
 class Access
 {
 
-    private static $data = array();
-    private static $groups = array();
-    private static $conditions = array();
-    private static $sorted = false;
+    protected $data = [];
+    protected $groups = [];
+    protected $conditions = [];
+    protected $sorted = false;
 
     const ACCESS_FIELD_PRIORITY = 0;
     const ACCESS_FIELD_PREG = 1;
@@ -17,18 +17,7 @@ class Access
     const ACCESS_FIELD_CONDITION_GROUP = 0;
     const ACCESS_FIELD_CONDITION = 1;
 
-    public static function reset()
-    {
-        if (App::env() !== "test") {
-            return;
-        }
-
-        self::$data = array();
-        self::$groups = array();
-        self::$conditions = array();
-    }
-
-    public static function permit($pattern, $groups = array())
+    public function permit($pattern, $groups = array())
     {
         if (!is_array($groups)) {
             $groups = array_filter(explode(';', $groups));
@@ -48,34 +37,34 @@ class Access
         );
 
         $found = false;
-        foreach (self::$data as $k => $existed) {
+        foreach ($this->data as $k => $existed) {
             if ($existed[self::ACCESS_FIELD_PREG] == $line[self::ACCESS_FIELD_PREG]
                 && $existed[self::ACCESS_FIELD_PRIORITY] == $line[self::ACCESS_FIELD_PRIORITY]) {
-                self::$data[$k][self::ACCESS_FIELD_GROUPS] = array_merge(self::$data[$k][self::ACCESS_FIELD_GROUPS], $line[self::ACCESS_FIELD_GROUPS]);
+                $this->data[$k][self::ACCESS_FIELD_GROUPS] = array_merge($this->data[$k][self::ACCESS_FIELD_GROUPS], $line[self::ACCESS_FIELD_GROUPS]);
                 $found = true;
             }
         }
 
         if (!$found) {
-            self::$data[] = $line;
+            $this->data[] = $line;
         }
-        self::$sorted = false;
+        $this->sorted = false;
     }
 
-    public static function clear($pattern)
+    public function clear($pattern)
     {
         list($preg, $map) = Url::preg($pattern);
-        foreach (self::$data as $k => $existed) {
+        foreach ($this->data as $k => $existed) {
             if ($existed[self::ACCESS_FIELD_PREG] == $preg) {
-                unset(self::$data[$k]);
+                unset($this->data[$k]);
             }
         }
     }
 
-    public static function isPrivate($resource)
+    public function isPrivate($resource)
     {
         $resource = Url::trim($resource);
-        foreach (self::$data as $line) {
+        foreach ($this->data as $line) {
             $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
             if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
                 return true;
@@ -84,29 +73,29 @@ class Access
         return false;
     }
 
-    public static function isPermitted($resource)
+    public function isPermitted($resource)
     {
         $resource = Url::trim($resource);
-        if (!self::$sorted) {
+        if (!$this->sorted) {
             self::sort();
         }
 
-        foreach (self::$data as $line) {
+        foreach ($this->data as $line) {
             $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
             if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
                 foreach ($line[self::ACCESS_FIELD_GROUPS] as $permittedGroups) {
-                    $leftGroups = array_diff($permittedGroups, self::$groups);
+                    $leftGroups = array_diff($permittedGroups, $this->groups);
                     if (count($leftGroups) === 0) {
                         return true;
                     }
 
-                    if (!empty(self::$conditions)) {
+                    if (!empty($this->conditions)) {
 
                         $m = $matches;
                         unset($m[0]);
                         $params = array_combine($line[self::ACCESS_FIELD_MAP], array_values($m));
 
-                        foreach (self::$conditions as $condition) {
+                        foreach ($this->conditions as $condition) {
                             $p = array_diff_assoc($condition[self::ACCESS_FIELD_CONDITION], $params);
                             if (!empty($p)) {
                                 continue;
@@ -125,47 +114,47 @@ class Access
         return false;
     }
 
-    private static function sort()
+    protected function sort()
     {
-        usort(self::$data, function($a, $b) {
+        usort($this->data, function($a, $b) {
             return $b[self::ACCESS_FIELD_PRIORITY] - $a[self::ACCESS_FIELD_PRIORITY];
         });
-        self::$sorted = true;
+        $this->sorted = true;
     }
 
-    public static function isHandlerPermitted($resource)
+    public function isHandlerPermitted($resource)
     {
-        return Access::isPermitted($resource);
+        return $this->isPermitted($resource);
     }
 
-    public static function addGroup($group)
+    public function addGroup($group)
     {
         if (empty($group)) {
             return;
         }
 
-        self::$groups[] = $group;
+        $this->groups[] = $group;
     }
 
-    public static function addCondition($group, $key, $value = null)
+    public function addCondition($group, $key, $value = null)
     {
         $condition = empty($value) ? $key : array($key => $value);
-        self::$conditions[] = array($group, $condition);
+        $this->conditions[] = array($group, $condition);
     }
 
-    public static function getGroups()
+    public function getGroups()
     {
-        return self::$groups;
+        return $this->groups;
     }
 
-    public static function getPermittedGroups($resource): array
+    public function getPermittedGroups($resource): array
     {
         $resource = Url::trim($resource);
-        if (!self::$sorted) {
+        if (!$this->sorted) {
             self::sort();
         }
 
-        foreach (self::$data as $line) {
+        foreach ($this->data as $line) {
             $preg = $line[self::ACCESS_FIELD_PREG] . "\/";
             if (preg_match("/^" . $preg . "/si", $resource . "/", $matches)) {
                 $r = [];
@@ -178,9 +167,9 @@ class Access
         return [];
     }
 
-    public static function hasGroup($group)
+    public function hasGroup($group)
     {
-        return in_array($group, self::$groups);
+        return in_array($group, $this->groups);
     }
 
 }

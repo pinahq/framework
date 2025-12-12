@@ -11,7 +11,7 @@ class PermittedLinkedButton extends LinkedButton
     {
         $parsed = parse_url($this->link);
         if ($parsed['host'] == App::host()) {
-            if (!Access::isPermitted($parsed['path'])) {
+            if (!App::access()->isPermitted($parsed['path'])) {
                 return '';
             }
         }

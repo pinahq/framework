@@ -11,90 +11,91 @@ class AccessTest extends TestCase
     {
         App::init('test', __DIR__ . '/config');
 
-        Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');
-        $this->assertTrue(Access::isPrivate('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;provider,manager');
+        $this->assertTrue($access->isPrivate('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');
-        Access::addGroup('enabled');
-        Access::addGroup('provider');
-        Access::addGroup('owner');
-        Access::addCondition('self', array('user_id' => 2));
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;provider,manager');
+        $access->addGroup('enabled');
+        $access->addGroup('provider');
+        $access->addGroup('owner');
+        $access->addCondition('self', array('user_id' => 2));
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        $groups = Access::getGroups();
+        $groups = $access->getGroups();
         $this->assertEquals(['enabled', 'provider', 'owner'], $groups);
-        $this->assertTrue(Access::hasGroup('enabled'));
+        $this->assertTrue($access->hasGroup('enabled'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');
-        Access::addGroup('enabled');
-        Access::addGroup('provider');
-        $this->assertFalse(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;provider,manager');
+        $access->addGroup('enabled');
+        $access->addGroup('provider');
+        $this->assertFalse($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;provider,manager');
-        $this->assertFalse(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;provider,manager');
+        $this->assertFalse($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;self');
-        Access::addCondition('self', array('account_id' => 5));
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;self');
+        $access->addCondition('self', array('account_id' => 5));
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;self,provider');
-        Access::addGroup('provider');
-        Access::addCondition('self', array('account_id' => 5));
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;self,provider');
+        $access->addGroup('provider');
+        $access->addCondition('self', array('account_id' => 5));
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'provider,owner;self,provider');
-        Access::addGroup('provider');
-        Access::addCondition('self', array('account_id' => 4));
-        $this->assertFalse(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'provider,owner;self,provider');
+        $access->addGroup('provider');
+        $access->addCondition('self', array('account_id' => 4));
+        $this->assertFalse($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/users', 'provider;buyer');
-        Access::permit('accounts/:account_id/users/:user_id/lists', 'buyer');
-        Access::addGroup('provider');
-        $this->assertTrue(Access::isPermitted('accounts/5/users'));
-        $this->assertFalse(Access::isPermitted('accounts/5/users/5/lists'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/users', 'provider;buyer');
+        $access->permit('accounts/:account_id/users/:user_id/lists', 'buyer');
+        $access->addGroup('provider');
+        $this->assertTrue($access->isPermitted('accounts/5/users'));
+        $this->assertFalse($access->isPermitted('accounts/5/users/5/lists'));
 
-        Access::reset();
-        Access::permit('users/:user_id', 'self');
-        Access::addCondition('self', array('user_id' => 1));
-        $this->assertTrue(Access::isPermitted('users/1'));
-        $this->assertFalse(Access::isPermitted('users/5'));
+        $access = new Access();
+        $access->permit('users/:user_id', 'self');
+        $access->addCondition('self', array('user_id' => 1));
+        $this->assertTrue($access->isPermitted('users/1'));
+        $this->assertFalse($access->isPermitted('users/5'));
         //TODO:
-        //$this->assertTrue(Access::isPermitted('users/create'));
+        //$this->assertTrue($access->isPermitted('users/create'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'root');
-        Access::permit('accounts/:id/items', 'admin');
-        Access::addGroup('admin');
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'root');
+        $access->permit('accounts/:id/items', 'admin');
+        $access->addGroup('admin');
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'root');
-        Access::permit('accounts/:id/items', 'admin');
-        Access::addGroup('root');
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'root');
+        $access->permit('accounts/:id/items', 'admin');
+        $access->addGroup('root');
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'root;admin');
-        Access::addGroup('admin');
-        $this->assertTrue(Access::isPermitted('accounts/5/items'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'root;admin');
+        $access->addGroup('admin');
+        $this->assertTrue($access->isPermitted('accounts/5/items'));
 
-        Access::reset();
-        Access::permit('accounts/:account_id/items', 'root;admin');
-        Access::addGroup('admin');
-        $this->assertFalse(Access::isHandlerPermitted('users'));
+        $access = new Access();
+        $access->permit('accounts/:account_id/items', 'root;admin');
+        $access->addGroup('admin');
+        $this->assertFalse($access->isHandlerPermitted('users'));
 
-        Access::reset();
-        Access::permit('auth', 'public');
-        Access::permit('auth', 'root;registered');
-        Access::addGroup('public');
-        $this->assertTrue(Access::isPermitted('auth'));
+        $access = new Access();
+        $access->permit('auth', 'public');
+        $access->permit('auth', 'root;registered');
+        $access->addGroup('public');
+        $this->assertTrue($access->isPermitted('auth'));
     }
 
 }

@@ -26,7 +26,7 @@ class Router
 
     public function isPermitted($resource)
     {
-        return Access::isHandlerPermitted($resource);
+        return App::access()->isHandlerPermitted($resource);
     }
 
     public function makeGroup($tags = [])
@@ -169,7 +169,7 @@ class Router
             }
 
             $resource = Url::resource($pattern, []);
-            if (!Access::isPermitted($resource)) {
+            if (!App::access()->isPermitted($resource)) {
                 continue;
             }
 

@@ -442,7 +442,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
     {
         $childs = App::router()->findChilds($this->location()->resource('@'));
         foreach ($childs as $resource) {
-            if (!Access::isPermitted($resource)) {
+            if (!App::access()->isPermitted($resource)) {
                 continue;
             }
             try {

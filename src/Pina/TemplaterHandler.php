@@ -45,7 +45,7 @@ class TemplaterHandler extends RequestHandler
         }
         $params = $this->all();
 
-        if (!Access::isHandlerPermitted($this->resource)) {
+        if (!App::access()->isHandlerPermitted($this->resource)) {
             if (!empty($params['fallback'])) {
                 return $this->fallback($params);
             }

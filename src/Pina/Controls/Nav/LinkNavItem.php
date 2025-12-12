@@ -35,7 +35,7 @@ class LinkNavItem extends NavItem
         $parsed = parse_url($this->link);
 
         if (empty($parsed['host']) || $parsed['host'] == App::host()) {
-            return Access::isPermitted($parsed['path']);
+            return App::access()->isPermitted($parsed['path']);
         }
 
         return true;

@@ -99,6 +99,11 @@ class App
         return static::load(DatabaseDriver::class);
     }
 
+    public static function access(): Access
+    {
+        return static::load(Access::class);
+    }
+
     public static function queue(): EventQueueInterface
     {
         return self::$container->get(EventQueueInterface::class);

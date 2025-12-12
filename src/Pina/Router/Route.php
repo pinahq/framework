@@ -53,13 +53,13 @@ class Route
 
     public function permit($groups)
     {
-        Access::permit($this->pattern, $groups);
+        App::access()->permit($this->pattern, $groups);
         return $this;
     }
 
     public function clearPermission()
     {
-        Access::clear($this->pattern);
+        App::access()->clear($this->pattern);
         return $this;
     }
 

@@ -4,6 +4,7 @@
 namespace Pina\Controls\Nav;
 
 use Pina\Access;
+use Pina\App;
 
 class ActionNavItem extends LinkNavItem
 {
@@ -32,7 +33,7 @@ class ActionNavItem extends LinkNavItem
 
     protected function isPermitted(): bool
     {
-        return Access::isPermitted($this->resource);
+        return App::access()->isPermitted($this->resource);
     }
 
 }
