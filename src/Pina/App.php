@@ -19,7 +19,6 @@ class App
     private static $forcedMimeType = null;
     private static $defaultSharedDepencies = array(
         EventQueueInterface::class => NoQueue::class,
-        ResourceManagerInterface::class => ResourceManager::class,
     );
 
     /** @var \Pina\Http\Request[] */
@@ -211,9 +210,9 @@ class App
         return static::load(Router::class);
     }
 
-    public static function assets(): ResourceManagerInterface
+    public static function assets(): ResourceManager
     {
-        return static::container()->get(ResourceManagerInterface::class);
+        return static::load(ResourceManager::class);
     }
 
     /**

@@ -39,7 +39,7 @@ class ResourceManagerTest extends TestCase
             <script>alert('234');</script>
         ", smarty_function_scripts(array(), $view));
 
-        App::container()->get(\Pina\ResourceManagerInterface::class)->startLayout();
+        App::assets()->startLayout();
         smarty_block_script(array(), "<script>alert('!!!');</script>", $view, $repeat);
 
         $this->assertEquals("<script>alert('!!!');</script>\r\n
@@ -98,7 +98,7 @@ class ResourceManagerTest extends TestCase
             <style>h1{color: black;}</script>
         ", smarty_function_styles(array(), $view));
 
-        App::container()->get(\Pina\ResourceManagerInterface::class)->startLayout();
+        App::assets()->startLayout();
         smarty_block_style(array(), "<style>#id{display:hidden;}</style>", $view, $repeat);
 
         $this->assertEquals("<style>#id{display:hidden;}</style>\r\n

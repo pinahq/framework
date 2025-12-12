@@ -7,7 +7,7 @@ use Pina\StaticResource\Script;
 use Pina\StaticResource\StaticResource;
 use Pina\StaticResource\Style;
 
-class ResourceManager implements ResourceManagerInterface
+class ResourceManager
 {
 
     protected $data = array('layout' => array(), 'content' => array());
