@@ -37,7 +37,6 @@ class CLI
                 list($msec, $sec) = explode(' ', microtime());
                 $startTime = (float)$msec + (float)$sec;
 
-                $command($input);
                 $output = $command($input);
 
                 list($msec, $sec) = explode(' ', microtime());
@@ -63,7 +62,5 @@ class CLI
 
             break;
         }
-
-        echo 'Undefined command' . "\n";
     }
 }

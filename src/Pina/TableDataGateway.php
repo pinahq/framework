@@ -87,7 +87,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
      * Возвращает список индексов
      * @return array
      */
-    public function getIndexes()
+    public function makeSQLIndexes()
     {
         return $this->getSchema()->makeSQLIndexes();
     }
@@ -100,7 +100,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
      */
     public function getUpgrades()
     {
-        if (empty($this->getSchema()->getRealFieldNames()) || empty($this->getTable())) {
+        if (empty($this->makeSQLFields()) || empty($this->getTable())) {
             return array(array(), array());
         }
 
@@ -129,7 +129,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
         $parser = new StructureParser;
         $structure = new Structure;
         $structure->setFields($parser->parseGatewayFields($this->makeSQLFields()));
-        $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
+        $structure->setIndexes($parser->parseGatewayIndexes($this->makeSQLIndexes()));
         $structure->setForeignKeys($this->getForeignKeys());
         $structure->setEngine($this->getEngine());
         $structure->setCharset($this->getCharset());
