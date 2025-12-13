@@ -1263,7 +1263,7 @@ class Schema implements IteratorAggregate
      * @return array
      * @throws \Exception
      */
-    public function makeSQLFields($fields = [])
+    public function makeSQLFields($fields = []): array
     {
         foreach ($this->getIterator() as $field) {
             /** @var Field $field */
@@ -1280,7 +1280,7 @@ class Schema implements IteratorAggregate
         return $fields;
     }
 
-    public function makeSQLIndexes($indexes = [])
+    public function makeSQLIndexes($indexes = []): array
     {
         if ($this->primaryKey) {
             if (!isset($indexes['PRIMARY KEY'])) {

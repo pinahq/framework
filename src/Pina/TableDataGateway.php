@@ -87,7 +87,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
      * Возвращает список индексов
      * @return array
      */
-    public function makeSQLIndexes()
+    public function makeSQLIndexes(): array
     {
         return $this->getSchema()->makeSQLIndexes();
     }
