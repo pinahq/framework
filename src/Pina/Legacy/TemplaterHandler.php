@@ -42,7 +42,7 @@ class TemplaterHandler extends RequestHandler
         $this->view = $view;
     }
 
-    public function run()
+    public function run($isExternal = true)
     {
         if (empty($this->module)) {
             return Response::notFound();
@@ -58,13 +58,13 @@ class TemplaterHandler extends RequestHandler
 
         $template = $this->controller . '!' . $this->action . '!' . Request::input('display');
         if (!empty($params['fallback']) && !Templater::isTemplateExists($template, $this->view)) {
-            return $this->fallback($params);
+            return $this->fallback($params, $isExternal);
         }
-        $content = new TemplaterContent($params, 'pina:' . $template, Request::isExternalRequest());
+        $content = new TemplaterContent($params, 'pina:' . $template, $isExternal);
         return Response::ok()->setContent($content);
     }
 
-    private function fallback($params)
+    private function fallback($params, $isExternal = true)
     {
         $params['get'] = $params['fallback'];
         unset($params['fallback']);
@@ -74,7 +74,7 @@ class TemplaterHandler extends RequestHandler
         $params = array_merge($params, $parsed);
 
         $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
-        $content = new TemplaterContent($params, $template, Request::isExternalRequest());
+        $content = new TemplaterContent($params, $template, $isExternal);
 
         return Response::ok()->setContent($content);
     }

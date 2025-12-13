@@ -11,14 +11,18 @@ class Request
     protected static $stack = [];
 
     protected static $places = [];
+    protected static $layout = 'main';
 
     public static function internal($call)
     {
         self::push($call);
-        $response = self::run();
+        $response = self::run(false);
         self::pop();
         if ($call->isolation() === false) {
-            self::top()->mergePlaces($call);
+            $top = self::top();
+            if ($top) {
+                $top->mergePlaces($call);
+            }
         }
 
         return $response;
@@ -32,16 +36,6 @@ class Request
         }
 
         return self::$stack[$top];
-    }
-
-    public static function isInternalRequest()
-    {
-        return count(self::$stack) > 1;
-    }
-
-    public static function isExternalRequest()
-    {
-        return count(self::$stack) === 1;
     }
 
     public static function set($name, $value)
@@ -143,19 +137,30 @@ class Request
         array_pop(self::$stack);
     }
 
-    public static function run()
+    public static function run($isExternal = true)
     {
-        return self::top()->run();
+        return self::top()->run($isExternal);
     }
 
     public static function setLayout($layout)
     {
-        self::top()->setLayout($layout);
+        $top = self::top();
+
+        if ($top) {
+            $top->setLayout($layout);
+        } else {
+            static::$layout = $layout;
+        }
     }
 
     public static function getLayout()
     {
-        return self::top()->getLayout();
+        $top = self::top();
+        if ($top) {
+            return $top->getLayout();
+        }
+
+        return static::$layout;
     }
 
     public static function setPlace($place, $content)

@@ -535,8 +535,7 @@ class App
                 return new JsonContent($results);
         }
 
-        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
-        return new TemplaterContent($results, $template, Request::isExternalRequest());
+        return $results;
     }
 
     /**

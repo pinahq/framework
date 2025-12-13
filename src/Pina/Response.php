@@ -132,36 +132,6 @@ class Response implements ResponseInterface
     private static function stopWithCode($code)
     {
         $response = self::code($code);
-        if (Request::isExternalRequest()) {
-
-            $codeNumber = substr($code, 0, 3);
-            if (App::router()->exists($codeNumber, 'get')) {
-                $data = App::router()->run($codeNumber, 'get', []);
-                if ($data instanceof Response) {
-                    if (!$data->hasContent()) {
-                        $content = App::createResponseContent([], $codeNumber, 'index');
-                        $data->setContent($content);
-                    }
-                    return $data;
-                }
-
-                $content = new TemplateLayoutContent;
-                if (Request::isExternalRequest()) {
-                    $layout = $data->getLayout();
-                    $r = $layout->append($data)->drawWithWrappers();
-                    $content->setContent($r);
-                } else {
-                    $content->setContent($data->drawWithWrappers());
-                }
-                $response->setContent($content);
-                return $response;
-            }
-
-
-            $content = App::createResponseContent(['code' => $code], 'errors', 'show');
-            $response->setContent($content);
-            return $response;
-        }
         return $response->setContent(new EmptyContent);
     }
 

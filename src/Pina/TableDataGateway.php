@@ -149,7 +149,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
         return $parser->getStructure();
     }
 
-    protected function makeSQLFields(): array
+    public function makeSQLFields(): array
     {
         return $this->getSchema()->makeSQLFields();
     }

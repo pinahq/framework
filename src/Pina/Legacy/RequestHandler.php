@@ -4,6 +4,7 @@ namespace Pina\Legacy;
 
 use Pina\App;
 use Pina\Arr;
+use Pina\JsonContent;
 use Pina\ModuleInterface;
 use Pina\Response;
 use Pina\ResponseInterface;
@@ -185,7 +186,7 @@ class RequestHandler
         return $this->module;
     }
 
-    public function run()
+    public function run($isExternal = true)
     {
         $access = App::access();
 
@@ -209,14 +210,27 @@ class RequestHandler
 
         if ($r instanceof ResponseInterface) {
             if (!$r->hasContent()) {
-                $content = App::createResponseContent([], $this->controller, $this->action);
+                $content = $this->createResponseContent([], $this->controller, $this->action, $isExternal);
                 $r->setContent($content);
             }
             return $r;
         }
 
-        $content = App::createResponseContent($r, $this->controller, $this->action);
+        $content = $this->createResponseContent($r, $this->controller, $this->action, $isExternal);
         return Response::ok()->setContent($content);
+    }
+
+    public function createResponseContent($results, $controller, $action, $isExternal)
+    {
+        $mime = App::negotiateMimeType();
+        switch ($mime) {
+            case 'application/json':
+            case 'text/json':
+                return new JsonContent($results);
+        }
+
+        $template = 'pina:' . $controller . '!' . $action . '!' . Request::input('display');
+        return new TemplaterContent($results, $template, $isExternal);
     }
 
     private function forbidden()
