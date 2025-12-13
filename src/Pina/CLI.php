@@ -63,5 +63,7 @@ class CLI
 
             break;
         }
+
+        echo 'Undefined command' . "\n";
     }
 }
