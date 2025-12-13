@@ -48,7 +48,7 @@ class Templater extends Smarty
         #$this->compile_check = false;
 
         $this->register_resource('pina', [
-            "\Pina\Templater",
+            "\Pina\Legacy\Templater",
             "getTemplate",
             "getTemplateTimestamp",
             "getTemplateSecure",
@@ -56,7 +56,7 @@ class Templater extends Smarty
         ]);
 
         $this->register_resource('email', [
-            "\Pina\Templater",
+            "\Pina\Legacy\Templater",
             "getEmailTemplate",
             "getEmailTemplateTimestamp",
             "getEmailTemplateSecure",
