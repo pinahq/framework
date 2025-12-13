@@ -128,7 +128,7 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
     {
         $parser = new StructureParser;
         $structure = new Structure;
-        $structure->setFields($parser->parseGatewayFields($this->getSchema()->makeSQLFields()));
+        $structure->setFields($parser->parseGatewayFields($this->makeSQLFields()));
         $structure->setIndexes($parser->parseGatewayIndexes($this->getIndexes()));
         $structure->setForeignKeys($this->getForeignKeys());
         $structure->setEngine($this->getEngine());
@@ -147,6 +147,11 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
         $data = $this->db->row("SHOW CREATE TABLE `" . $this->getTable() . "`");
         $parser->parse($data['Create Table']);
         return $parser->getStructure();
+    }
+
+    protected function makeSQLFields(): array
+    {
+        return $this->getSchema()->makeSQLFields();
     }
 
     /**
