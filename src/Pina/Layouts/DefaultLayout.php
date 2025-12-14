@@ -10,7 +10,6 @@ use Pina\Controls\IconMeta;
 use Pina\Controls\Meta;
 use Pina\CSRF;
 use Pina\Html;
-use Pina\Legacy\Request;
 use Pina\Menu\MainMenu;
 use Pina\Menu\SectionMenuComposer;
 
@@ -71,11 +70,11 @@ class DefaultLayout extends Control
      */
     protected function drawPageHeader()
     {
-        $title = Request::getPlace('page_header');
+        $title = App::place('page_header')->make();
         if (empty($title)) {
             return '';
         }
-        $breadcrumb = Request::getPlace('breadcrumb');
+        $breadcrumb = App::place('breadcrumb')->make();
         return Html::zz(
             '.page-header(.container(%+h1%))',
             $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '',
@@ -136,7 +135,7 @@ class DefaultLayout extends Control
 
     protected function drawCanonical()
     {
-        $resource = Request::getPlace('canonical');
+        $resource = App::place('canonical')->make();
         if (empty($resource)) {
             return '';
         }

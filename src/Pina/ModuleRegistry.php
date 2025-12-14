@@ -4,7 +4,6 @@ namespace Pina;
 
 use ArrayIterator;
 use IteratorAggregate;
-use Pina\Legacy\Route;
 
 class ModuleRegistry implements IteratorAggregate
 {
@@ -48,6 +47,11 @@ class ModuleRegistry implements IteratorAggregate
         return new ArrayIterator($this->registry);
     }
 
+    /**
+     * @deprecated в пользу метода App::onLoad
+     * @param $method
+     * @return void
+     */
     public function boot($method = null)
     {
         $this->load(Module::class);
@@ -64,15 +68,7 @@ class ModuleRegistry implements IteratorAggregate
             if (!$method || !method_exists($module, $method)) {
                 continue;
             }
-            $routes = $module->$method();
-
-            if (!is_array($routes)) {
-                continue;
-            }
-
-            foreach ($routes as $route) {
-                Route::router()->own($route, $module);
-            }
+            $module->$method();
         }
     }
 

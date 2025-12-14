@@ -10,7 +10,6 @@ use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Http\Location;
-use Pina\Legacy\Request;
 use Pina\Model\LinkedItem;
 use Pina\Model\LinkedItemCollection;
 use function Pina\__;
@@ -49,8 +48,8 @@ class CollectionComposer
 
         $this->meta()->set('title', $this->collection);
 
-        Request::setPlace('page_header', $this->collection);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        App::place('page_header')->set($this->collection);
+        App::place('breadcrumb')->set($this->getBreadcrumb($links));
     }
 
     public function showTitle(Location $location, string $title)
@@ -61,8 +60,8 @@ class CollectionComposer
 
         $this->meta()->set('title', $title);
 
-        Request::setPlace('page_header', $title);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        App::place('page_header')->set($title);
+        App::place('breadcrumb')->set($this->getBreadcrumb($links));
     }
 
     public function show(Location $location, DataRecord $record)
@@ -78,8 +77,8 @@ class CollectionComposer
 
         $this->meta()->set('title', $this->creation);
 
-        Request::setPlace('page_header', $this->creation);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        App::place('page_header')->set($this->creation);
+        App::place('breadcrumb')->set($this->getBreadcrumb($links));
     }
 
     public function section(Location $location, string $section)
@@ -89,8 +88,8 @@ class CollectionComposer
 
         $this->meta()->set('title', $section);
 
-        Request::setPlace('page_header', $section);
-        Request::setPlace('breadcrumb', $this->getBreadcrumb($links));
+        App::place('page_header')->set($section);
+        App::place('breadcrumb')->set($this->getBreadcrumb($links));
     }
 
     public function getItemTitle(DataRecord $record)
