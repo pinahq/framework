@@ -6,9 +6,6 @@ use Pina\Container\Container;
 use Pina\Controls\Control;
 use Pina\DB\TriggerUpgrade;
 use Pina\Http\Location;
-use Pina\Legacy\Request;
-use Pina\Legacy\ScriptRouter;
-use Pina\Legacy\TemplaterContent;
 use Pina\Queue\Queue;
 
 class App
@@ -277,8 +274,6 @@ class App
                 exit;
             }
 
-            App::router()->addFallback(ScriptRouter::class);
-
             $response = App::router()->run($resource, $method, $data);
             if ($response instanceof Control) {
                 $layout = $response->getLayout();
@@ -467,9 +462,9 @@ class App
      * @param array $params Параметры
      * @return string
      */
-    public static function link($pattern, $params = array())
+    public static function link($pattern, $params = array(), $baseUrl = null)
     {
-        return self::baseUrl(Request::resource())->link($pattern, $params);
+        return self::baseUrl($baseUrl)->link($pattern, $params);
     }
 
     /**

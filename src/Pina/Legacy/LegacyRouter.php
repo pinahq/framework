@@ -5,7 +5,7 @@ namespace Pina\Legacy;
 use Pina\ModuleInterface;
 use Pina\Url;
 
-class ScriptRouter
+class LegacyRouter
 {
 
     protected $layout = '';

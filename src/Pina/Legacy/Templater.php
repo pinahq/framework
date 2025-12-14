@@ -114,7 +114,13 @@ class Templater extends Smarty
         $vars_backup = $view->_tpl_vars;
 
         $params['get'] = Route::resource($params['get'], $params);
-        $result = Request::internal(new RequestHandler($params['get'], 'get', $params))->fetchContent();
+
+        if (App::router()->exists($params['get'], 'get')) {
+            $result = App::router()->run($params['get'], 'get', $params);
+            return $result->drawWithWrappers();
+        } else {
+            $result = Request::internal(new RequestHandler($params['get'], 'get', $params))->fetchContent();
+        }
 
         $view->_tpl_vars = $vars_backup;
 

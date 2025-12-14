@@ -2,8 +2,6 @@
 
 namespace Pina;
 
-use Pina\Legacy\Route;
-
 class Html extends \SimpleHtml\Html
 {
 

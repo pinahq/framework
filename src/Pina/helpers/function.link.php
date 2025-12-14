@@ -24,7 +24,7 @@ function smarty_function_link($params, &$view)
         }
     }
 
-    $link = \Pina\App::link($params['get'], $params);
+    $link = \Pina\App::link($params['get'], $params, \Pina\Legacy\Request::resource());
 
     if ($assign) {
         $view->assign($assign, $link);

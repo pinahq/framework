@@ -8,9 +8,9 @@ use Pina\Url;
 class Route
 {
 
-    public static function router(): ScriptRouter
+    public static function router(): LegacyRouter
     {
-        return App::load(ScriptRouter::class);
+        return App::load(LegacyRouter::class);
     }
 
 
