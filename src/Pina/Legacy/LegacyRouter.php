@@ -17,6 +17,13 @@ class LegacyRouter
         $this->owners[$controller] = $module;
     }
 
+    public function ownList(ModuleInterface $module, array $controllerList)
+    {
+        foreach ($controllerList as $controller) {
+            $this->own($controller, $module);
+        }
+    }
+
     public function owner($controller): ?ModuleInterface
     {
         $c = $this->base($controller);
