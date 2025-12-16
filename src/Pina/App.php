@@ -264,15 +264,6 @@ class App
 
             $modules = self::modules();
             $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
-            $modules->boot('http');
-
-            $resource = DispatcherRegistry::dispatch($resource);
-
-            list($controller, $action, $parsed) = Url::route($resource, $method);
-            if (!CSRF::verify($controller, $data)) {
-                @header('HTTP/1.1 403 Forbidden');
-                exit;
-            }
 
             $response = App::router()->run($resource, $method, $data);
             if ($response instanceof Control) {
@@ -281,7 +272,7 @@ class App
                 Response::ok()->setContent($content)->send();
             } elseif ($response instanceof Response) {
                 if (!$response->hasContent()) {
-                    $content = App::createResponseContent([], $controller, $action);
+                    $content = App::createResponseContent();
                     $response->setContent($content);
                 }
                 $response->send();
@@ -521,7 +512,7 @@ class App
      * @param string $action Метод контроллера
      * @return ContentInterface
      */
-    public static function createResponseContent($results, $controller, $action)
+    public static function createResponseContent($results = [])
     {
         $mime = static::negotiateMimeType();
         switch ($mime) {

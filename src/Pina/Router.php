@@ -6,12 +6,16 @@ use Exception;
 use Pina\Http\Request;
 use Pina\Model\LinkedItem;
 use Pina\Model\LinkedItemCollection;
+use Pina\Router\DispatcherInterface;
 use Pina\Router\RouteGroup;
 
 class Router
 {
     /** @var \Pina\Router\Route[]  */
     protected $items = [];
+
+    /** @var DispatcherInterface[] */
+    protected $dispatchers = [];
 
     protected $fallbacks = [];
 
@@ -24,6 +28,11 @@ class Router
         $route = new \Pina\Router\Route($pattern, $class, $context);
         $this->items[$route->getController()] = $route;
         return $route;
+    }
+
+    public function registerDispatcher($dispatcher)
+    {
+        $this->dispatchers[] = $dispatcher;
     }
 
     public function isPermitted($resource)
@@ -88,11 +97,16 @@ class Router
      */
     public function run($resource, $method, $data = [])
     {
-        if (!$this->isPermitted($resource)) {
+        $resource = $this->dispatch($resource);
+
+        list($controller, $action, $params) = Url::route($resource, $method);
+        if (!CSRF::verify($controller, $data)) {
             return Response::forbidden();
         }
 
-        list($controller, $action, $params) = Url::route($resource, $method);
+        if (!$this->isPermitted($resource)) {
+            return Response::forbidden();
+        }
 
         $c = $this->base($controller);
         if ($c === null) {
@@ -142,6 +156,16 @@ class Router
         $request->setContext($this->items[$c]->getContext());
 
         return $request;
+    }
+
+    protected function dispatch(string $resource): string
+    {
+        foreach ($this->dispatchers as $dispatcher) {
+            if ($r = $dispatcher->dispatch($resource)) {
+                return $r;
+            }
+        }
+        return $resource;
     }
 
     protected function fallback($resource, $method, $data)
