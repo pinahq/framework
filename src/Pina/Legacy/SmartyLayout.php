@@ -1,8 +1,8 @@
 <?php
 
-namespace Pina\Layouts;
+namespace Pina\Legacy;
 
-use Pina\Legacy\TemplateLayoutContent;
+use Pina\Layouts\DefaultLayout;
 
 class SmartyLayout extends DefaultLayout
 {
