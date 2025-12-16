@@ -4,6 +4,6 @@ namespace Pina\Router;
 
 interface DispatcherInterface
 {
-    public function dispatch(string $resource): string;
+    public function dispatch(string $resource): ?string;
 
 }
