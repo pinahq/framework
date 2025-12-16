@@ -30,7 +30,7 @@ class Router
         return $route;
     }
 
-    public function registerDispatcher($dispatcher)
+    public function registerDispatcher(DispatcherInterface $dispatcher)
     {
         $this->dispatchers[] = $dispatcher;
     }
