@@ -4,6 +4,8 @@ namespace Pina\Legacy;
 
 use Pina\App;
 use Pina\Arr;
+use Pina\EmptyContent;
+use Pina\Http\ErrorContent;
 use Pina\JsonContent;
 use Pina\ModuleInterface;
 use Pina\Response;
@@ -191,11 +193,19 @@ class RequestHandler
         $access = App::access();
 
         if (!$access->isPermitted($this->resource)) {
-            return $this->forbidden();
+            $r = $this->forbidden();
+            if (!$isExternal) {
+                $r->setContent(new EmptyContent());
+            }
+            return $r;
         }
 
         if (empty($this->module)) {
-            return $this->notFound();
+            $r = $this->notFound();
+            if (!$isExternal) {
+                $r->setContent(new EmptyContent());
+            }
+            return $r;
         }
 
         $handler = $this->module->getPath() . '/' . Url::handler($this->controller, $this->action);
@@ -209,7 +219,10 @@ class RequestHandler
         }
 
         if ($r instanceof ResponseInterface) {
-            if (!$r->hasContent()) {
+            if (!$isExternal && $r->hasContent(ErrorContent::class)) {
+                $r->setContent(new EmptyContent());
+            }
+            if ($isExternal && !$r->hasContent()) {
                 $content = $this->createResponseContent([], $this->controller, $this->action, $isExternal);
                 $r->setContent($content);
             }

@@ -2,6 +2,8 @@
 
 namespace Pina;
 
+use Pina\Http\ErrorContent;
+
 class Response implements ResponseInterface
 {
 
@@ -129,7 +131,7 @@ class Response implements ResponseInterface
     private static function stopWithCode($code)
     {
         $response = self::code($code);
-        return $response->setContent(new EmptyContent);
+        return $response->setContent(new ErrorContent($code));
     }
 
     private static function failWithCode($code)
@@ -183,9 +185,12 @@ class Response implements ResponseInterface
         return $this;
     }
 
-    public function hasContent()
+    public function hasContent($type = null)
     {
-        return $this->content !== null;
+        if ($type) {
+            return !is_null($this->content) && $this->content instanceof $type;
+        }
+        return !is_null($this->content);
     }
 
     public function setContent($content)
