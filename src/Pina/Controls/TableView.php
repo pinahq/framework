@@ -7,6 +7,7 @@ use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Http\Location;
+use Pina\Input;
 
 class TableView extends Card
 {
@@ -23,7 +24,7 @@ class TableView extends Card
     public function __construct()
     {
         //клонировать не нужно, так как неизменяемый объект
-        $this->location = App::baseUrl()->location(App::resource());
+        $this->location = App::baseUrl()->location(Input::getResource());
     }
 
     public function setLocation(Location $location, array $context = [])

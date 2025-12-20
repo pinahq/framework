@@ -3,7 +3,7 @@
 function smarty_function_link($params, &$view)
 {
     if (empty($params['get'])) {
-        $params['get'] = \Pina\App::resource();
+        $params['get'] = \Pina\Input::getResource();
     }
 
     $assign = '';

@@ -17,7 +17,6 @@ class App
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
-    private static $defaultSharedDepencies = [];
 
     /** @var \Pina\Http\Request[] */
     private static $requestStack = [];
@@ -27,10 +26,8 @@ class App
      * @param string $env Режим работы (например, live или test)
      * @param string $configPath Путь к каталогу с настройками
      */
-    public static function init($env, $configPath)
+    public static function init($configPath)
     {
-        self::env($env);
-
         Config::init($configPath);
         self::$config = Config::load('app');
 
@@ -43,24 +40,13 @@ class App
 
         self::$container = new Container;
         self::$container->set('base_url', new Location('/', new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
-        if (isset(self::$config['depencies']) && is_array(self::$config['depencies'])) {
-            foreach (self::$config['depencies'] as $key => $value) {
-                self::$container->set($key, $value);
-            }
-        }
 
-        self::$config['sharedDepencies'] = Arr::merge(self::$defaultSharedDepencies, self::$config['sharedDepencies']);
-        if (isset(self::$config['sharedDepencies']) && is_array(self::$config['sharedDepencies'])) {
-            foreach (self::$config['sharedDepencies'] as $key => $value) {
-                self::$container->share($key, $value);
-            }
-        }
-
-        $types = new Container;
-        $types->share('string', Types\StringType::class);
-        static::$container->share('types', $types);
-
+        static::$container->share('types', new Container());
         static::$container->share('events', new Container());
+
+        if (Config::get('app', 'main')) {
+            App::modules()->load(Config::get('app', 'main'));
+        }
     }
 
     /**
@@ -219,95 +205,6 @@ class App
     }
 
     /**
-     * Запускает приложение: анализирует параметры,
-     * выбирает и выполняет цепочку контроллеров
-     * отрисовывает результат
-     */
-    public static function run()
-    {
-        if (self::host() != Input::getHost()) {
-            header('HTTP/1.1 301 Moved Permanently');
-            header('Location: ' . App::link($_SERVER['REQUEST_URI']));
-            exit;
-        }
-
-        $method = Input::getMethod();
-        if (!in_array($method, array('get', 'put', 'delete', 'post', 'options'))) {
-            @header("HTTP/1.1 501 Not Implemented");
-            exit;
-        }
-
-        $data = Input::getData();
-        if (empty($data[$method]) && !in_array($_SERVER['REQUEST_URI'], array($_SERVER['SCRIPT_NAME'], "", "/"))) {
-            $data[$method] = $_SERVER['REQUEST_URI'];
-        }
-
-        $resource = Input::getResource();
-
-        //TODO: get these paths based on config
-        $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
-        foreach ($staticFolders as $folder) {
-            if (strncasecmp($resource, $folder, strlen($folder)) === 0) {
-                @header('HTTP/1.1 404 Not Found');
-                exit;
-            }
-        }
-
-        $mime = App::negotiateMimeType();
-        if (empty($mime)) {
-            @header('HTTP/1.1 406 Not Acceptable');
-            exit;
-        }
-
-        try {
-            App::resource($resource);
-
-            $modules = self::modules();
-            $modules->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
-
-            $response = App::router()->run($resource, $method, $data);
-            if ($response instanceof Control) {
-                $layout = $response->getLayout();
-                $content = $layout->append($response)->drawWithWrappers();
-                Response::ok()->setContent($content)->send();
-            } elseif ($response instanceof Response) {
-                if (!$response->hasContent()) {
-                    $content = App::createResponseContent();
-                    $response->setContent($content);
-                }
-                $response->send();
-            } else {
-                throw new NotFoundException;
-            }
-        } catch (BadRequestException $e) {
-            Response::badRequest()->setErrors($e->getErrors())->send();
-        } catch (NotFoundException $e) {
-            Response::notFound()->send();
-        } catch (ForbiddenException $e) {
-            Response::forbidden()->send();
-        }
-    }
-
-    /**
-     * Инициализирует обрабатываемый ресурс (единожды во время запуска
-     * приложения, повторная инициализация запрещена)
-     * Возвращает текущий ресурс
-     * @staticvar string $item хранит текущий ресурс
-     * @param string $resource ресурс
-     * @return string
-     */
-    public static function resource($resource = '')
-    {
-        static $item = false;
-
-        if (!empty($resource) && empty($item)) {
-            $item = $resource;
-        }
-
-        return $item;
-    }
-
-    /**
      * Базовый URL на основе настроек схемы и домена приложения
      * @return string
      */
@@ -358,15 +255,6 @@ class App
     }
 
     /**
-     * Путь на диске к папке с загрузками (deprecated)
-     * @return string
-     */
-    public static function uploads()
-    {
-        return self::$config['uploads'];
-    }
-
-    /**
      * Кодировка приложения
      * @return string
      */
@@ -385,47 +273,12 @@ class App
     }
 
     /**
-     * Путь на диске к директории кэша шаблонизатора
-     * @return string
-     */
-    public static function templaterCache()
-    {
-        return self::$config['templater']['cache'];
-    }
-
-    /**
-     * Путь на диске к директории компилированных данных шаблонизатора
-     * @return string
-     */
-    public static function templaterCompiled()
-    {
-        return self::$config['templater']['compiled'];
-    }
-
-    /**
      * Версия приложения
      * @return string
      */
     public static function version()
     {
         return isset(self::$config['version']) ? self::$config['version'] : '';
-    }
-
-    /**
-     * Инициализирует и считывает окружение (режим работы) приложения
-     * @staticvar string $item хранит режим работы
-     * @param string $env режим работы
-     * @return string
-     */
-    public static function env($env = '')
-    {
-        static $item = false;
-
-        if (!empty($env) && empty($item)) {
-            $item = $env;
-        }
-
-        return $item;
     }
 
     /**
@@ -503,135 +356,6 @@ class App
             }
         }
         return 'text/html';
-    }
-
-    /**
-     * Инстанцирует контент в соответствии с mime-типом приложения
-     * @param mixed $results Результат выполнения запроса
-     * @param string $controller Контроллер
-     * @param string $action Метод контроллера
-     * @return ContentInterface
-     */
-    public static function createResponseContent($results = [])
-    {
-        $mime = static::negotiateMimeType();
-        switch ($mime) {
-            case 'application/json':
-            case 'text/json':
-                return new JsonContent($results);
-        }
-
-        return $results;
-    }
-
-    /**
-     * Предлагает набор обновлений для структуре БД
-     * @return array
-     */
-    public static function getUpgrades()
-    {
-        $firstUpgrades = array();
-        $lastUpgrades = array();
-        $triggers = array();
-        App::walkModuleClasses(
-            'Gateway',
-            function (TableDataGateway $gw) use (&$firstUpgrades, &$lastUpgrades, &$triggers) {
-                list($first, $last) = $gw->getUpgrades();
-                $firstUpgrades = array_merge($firstUpgrades, $first);
-                $lastUpgrades = array_merge($lastUpgrades, $last);
-                $triggers = array_merge($triggers, $gw->getTriggers());
-            }
-        );
-
-        $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers));
-
-        return $upgrades;
-    }
-
-    /**
-     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
-     * функцию-обработчик
-     * @param string $type Суффикс имени класса
-     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
-     */
-    public static function walkModuleRootClasses($type, $callback)
-    {
-        $paths = self::modules()->getPaths();
-        $suffix = $type . '.php';
-        $suffixLength = strlen($suffix);
-        foreach ($paths as $ns => $path) {
-            $files = array_filter(scandir($path), function ($s) use ($suffix, $suffixLength) {
-                return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
-            });
-
-            foreach ($files as $file) {
-                $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                try {
-                    $c = new $className;
-                    $callback($c);
-                } catch (\Throwable $e) {
-                }
-            }
-        }
-    }
-
-    /**
-     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
-     * функцию-обработчик
-     * @param string $type Суффикс имени класса
-     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
-     */
-    public static function walkModuleClasses(string $type, callable $callback)
-    {
-        static::walkModuleClassNames($type, function($className) use ($callback) {
-            try {
-                $c = new $className;
-                $callback($c);
-            } catch (\Throwable $e) {
-            }
-        });
-    }
-
-    /**
-     * Обходит именна классов, с заданным суффиксом и выполняет для каждого заданную
-     * функцию-обработчик
-     * @param string $type Суффикс имени класса
-     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
-     */
-    public static function walkModuleClassNames(string $type, callable $callback)
-    {
-        $paths = self::modules()->getPaths();
-        foreach ($paths as $ns => $path) {
-            static::walkClassNamesInPath($ns, $path, $type, $callback);
-        }
-    }
-
-    public static function walkClassNamesInPath(string $ns, string $path, string $type, callable $callback)
-    {
-        $suffix = $type . '.php';
-        $suffixLength = strlen($suffix);
-        $allFiles = scandir($path);
-        $toWalk = array_filter($allFiles, function ($s) use ($suffix, $suffixLength) {
-            return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
-        });
-
-        foreach ($toWalk as $file) {
-            $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
-            $callback($className);
-        }
-
-        $paths = array_filter($allFiles, function ($s) use ($path) {
-            return $s[0] >= 'A' && $s[0] <= 'Z' && is_dir($path . '/' . $s);
-        });
-
-        foreach ($paths as $file) {
-            static::walkClassNamesInPath(
-                $ns . '\\' . pathinfo($file, PATHINFO_FILENAME),
-                $path . '/' . $file,
-                $type,
-                $callback
-            );
-        }
     }
 
     public static function pushRequest(\Pina\Http\Request $request)

@@ -3,9 +3,8 @@
 
 namespace Pina\Commands;
 
-
-use Pina\App;
 use Pina\Command;
+use Pina\Config;
 
 class ClearSmartyCache extends Command
 {
@@ -13,7 +12,8 @@ class ClearSmartyCache extends Command
     protected function execute($input = '')
     {
         $list = [];
-        $root = App::templaterCompiled();
+        $config = Config::get('app', 'templater');
+        $root = $config['compiled'];
         $templates = array_diff(scandir($root), ['.', '..']);
         foreach ($templates as $template) {
             $path = $root . '/' . $template;

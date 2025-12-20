@@ -10,6 +10,7 @@ use Pina\Controls\IconMeta;
 use Pina\Controls\Meta;
 use Pina\CSRF;
 use Pina\Html;
+use Pina\Input;
 use Pina\Menu\MainMenu;
 use Pina\Menu\SectionMenuComposer;
 
@@ -86,7 +87,7 @@ class DefaultLayout extends Control
     {
         /** @var SectionMenuComposer $composer */
         $composer = App::load(SectionMenuComposer::class);
-        $menu = $composer->resolve(App::resource());
+        $menu = $composer->resolve(Input::getResource());
         $menu->addClass('bar');
         $r = strval($menu);
         return $r ? Html::nest('.section-header/.container', $r) : '';

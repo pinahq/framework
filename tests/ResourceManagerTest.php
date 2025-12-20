@@ -8,7 +8,7 @@ class ResourceManagerTest extends TestCase
 
     public function testJs()
     {
-        App::init('test', __DIR__.'/config');
+        App::init(__DIR__.'/config');
         
         $repeat = 0;
         $view = new \Pina\Legacy\Templater;
@@ -64,7 +64,7 @@ class ResourceManagerTest extends TestCase
     
     public function testCss()
     {
-        App::init('test', __DIR__.'/config');
+        App::init(__DIR__.'/config');
         
         $repeat = 0;
         $view = new \Pina\Legacy\Templater;

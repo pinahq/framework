@@ -33,11 +33,16 @@ class FieldSet
         }
     }
 
-    public function calc($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
+    public function calc($callable, $fieldKey, $fieldTitle, $fieldType)
     {
-        $this->schema->pushDataProcessor(function ($item) use ($callable, $fieldKey) {
+        if ($this->schema->has($fieldKey)) {
+            throw new \Exception('Field '.$fieldKey.' already exists');
+
+        }
+        $fieldset = $this;
+        $this->schema->pushDataProcessor(function ($item) use ($fieldset, $callable, $fieldKey) {
             $data = [];
-            foreach ($this->fields as $f) {
+            foreach ($fieldset->fields as $f) {
                 if (!isset($item[$f->getName()])) {
                     continue;
                 }
@@ -49,15 +54,12 @@ class FieldSet
         return $this->schema->add($fieldKey, $fieldTitle, $fieldType);
     }
 
-    public function join($callable, $fieldKey, $fieldTitle, $fieldType = 'string')
+    public function join($callable, $fieldKey, $fieldTitle, $fieldType)
     {
-        foreach ($this->fields as $f) {
-            $this->schema->forgetField($f->getName());
-        }
         return $this->calc($callable, $fieldKey, $fieldTitle, $fieldType);
     }
 
-    public function printf($pattern, $fieldKey, $fieldTitle, $fieltType = 'string')
+    public function printf($pattern, $fieldKey, $fieldTitle, $fieltType)
     {
         return $this->calc(function ($a) use ($pattern) {
             return vsprintf($pattern, $a);

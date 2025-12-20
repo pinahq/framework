@@ -87,6 +87,59 @@ class Router
         return isset($this->items[$c]) ? $this->items[$c]->getEndpoint() : null;
     }
 
+    public function handle()
+    {
+        if (App::host() != Input::getHost()) {
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . App::link($_SERVER['REQUEST_URI']));
+            exit;
+        }
+
+        $method = Input::getMethod();
+        if (!in_array($method, array('get', 'put', 'delete', 'post', 'options'))) {
+            @header("HTTP/1.1 501 Not Implemented");
+            exit;
+        }
+
+        $data = Input::getData();
+        if (empty($data[$method]) && !in_array($_SERVER['REQUEST_URI'], array($_SERVER['SCRIPT_NAME'], "", "/"))) {
+            $data[$method] = $_SERVER['REQUEST_URI'];
+        }
+
+        $resource = Input::getResource();
+
+        //TODO: get these paths based on config
+        $staticFolders = array('cache/', 'static/', 'uploads/', 'vendor/');
+        foreach ($staticFolders as $folder) {
+            if (strncasecmp($resource, $folder, strlen($folder)) === 0) {
+                @header('HTTP/1.1 404 Not Found');
+                exit;
+            }
+        }
+
+        $mime = App::negotiateMimeType();
+        if (empty($mime)) {
+            @header('HTTP/1.1 406 Not Acceptable');
+            exit;
+        }
+
+        try {
+            $response = $this->run($resource, $method, $data)->send();
+            if ($response instanceof ResponseInterface) {
+                $response->send();
+            } else {
+                throw new NotFoundException;
+            }
+        } catch (BadRequestException $e) {
+            Response::badRequest()->setErrors($e->getErrors())->send();
+        } catch (NotFoundException $e) {
+            Response::notFound()->send();
+        } catch (ForbiddenException $e) {
+            Response::forbidden()->send();
+        }
+
+    }
+
     /**
      *
      * @param string $resource

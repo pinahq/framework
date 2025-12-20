@@ -12,8 +12,6 @@ class CSRFTest extends TestCase
 
     public function testPermit()
     {
-        App::env('test');
-        
         $module = new Module;
         $routes = CSRF::whitelist(['request', 'cp/products']);
 

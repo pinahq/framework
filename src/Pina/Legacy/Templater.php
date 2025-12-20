@@ -3,6 +3,7 @@
 namespace Pina\Legacy;
 
 use Pina\App;
+use Pina\Config;
 use Pina\Url;
 use Smarty;
 
@@ -39,12 +40,14 @@ class Templater extends Smarty
         }
         $this->template_dir[] = App::path() . "/default/";
 
-        $this->compile_dir = App::templaterCompiled() . '/' . md5($template ?? '');
+        $config = Config::get('app', 'templater');
+
+        $this->compile_dir = $config['compiled'] . '/' . md5($template ?? '');
         if (!is_dir($this->compile_dir)) {
             mkdir($this->compile_dir, 0777, true);
         }
 
-        $this->cache_dir = App::templaterCache();
+        $this->cache_dir = $config['cache'];
         #$this->compile_check = false;
 
         $this->register_resource('pina', [

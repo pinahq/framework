@@ -83,7 +83,7 @@ class Paging
             'current' => $this->getCurrent(),
             'total' => $this->getPagesCount(),
             'items' => $this->total,
-            'resource' => App::resource(),
+            'resource' => Input::getResource(),
         ];
     }
 

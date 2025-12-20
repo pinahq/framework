@@ -124,18 +124,18 @@ class SchemaTest extends TestCase
         $concat = function ($a) {
             return implode(' ', $a);
         };
-        $schema->fieldset(['price', 'currency'])->join($concat, 'price', 'Price');
+        $schema->fieldset(['price', 'currency'])->join($concat, 'price_formatted', 'Price', StringType::class);
 
-        $this->assertEquals(['id', 'title', 'price'], $schema->getFieldKeys());
+        $this->assertEquals(['id', 'title', 'price', 'currency', 'price_formatted'], $schema->getFieldNames());
 
         $this->assertEquals(
-            ['id' => '5', 'title' => 'Test', 'price' => '4000 RUB'],
+            ['id' => '5', 'title' => 'Test', 'price' => 4000, 'currency' => 'RUB', 'price_formatted' => '4000 RUB'],
             $schema->processLineAsText($line)
         );
 
-//        $line = $this->makeLine();
+        $line = $this->makeLine();
         $schema = $this->makeSchema();
-        $schema->fieldset(['price', 'currency'])->printf('%d - %s', 'test', 'Test');
+        $schema->fieldset(['price', 'currency'])->printf('%d - %s', 'test', 'Test', StringType::class);
         $this->assertEquals(
             ['id' => 5, 'title' => 'Test', 'price' => 4000, 'currency' => 'RUB', 'test' => '4000 - RUB'],
             $schema->processLineAsData($line)

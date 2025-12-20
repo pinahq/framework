@@ -18,9 +18,7 @@ if (file_exists(__DIR__ . '/../../autoload.php')) {
     throw new RuntimeException('Unable to locate autoload.php file.');
 }
 
-App::init('cli', $configDir);
-
-App::modules()->load(Config::get('app', 'main') ? Config::get('app', 'main') : \Pina\Modules\App\Module::class);
+App::init($configDir);
 
 echo 'Hello from Pina framework shell'."\n";
 App::cli()->run($argv);

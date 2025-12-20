@@ -5,6 +5,7 @@ namespace Pina\Controls\Nav;
 use Pina\App;
 use Pina\Controls\Control;
 use Pina\Html;
+use Pina\Input;
 use Pina\Url;
 
 class Nav extends Control
@@ -17,7 +18,7 @@ class Nav extends Control
 
     public function __construct()
     {
-        $this->location = App::link(App::resource());
+        $this->location = App::link(Input::getResource());
     }
 
     public function setLocation(string $location)

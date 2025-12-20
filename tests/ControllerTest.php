@@ -23,7 +23,7 @@ class ControllerTest extends TestCase
      */
     public function test()
     {
-        App::init('test', __DIR__ . '/config');
+        App::init(__DIR__ . '/config');
 
         \Pina\Legacy\Request::push(new \Pina\Legacy\RequestHandler('lk/1/cron-events', 'index', []));
         App::container()->set('base_url', new Location(''));
@@ -216,7 +216,7 @@ class ControllerTest extends TestCase
     public function testHidden()
     {
         $schema = new Schema();
-        $schema->add('mode', 'title', 'string')->setHidden();
+        $schema->add('mode', 'title', \Pina\Types\StringType::class)->setHidden();
         $form = new RecordForm();
         $form->load(new DataRecord(['mode' => 'test'], $schema));
         $r = $form->drawWithWrappers();

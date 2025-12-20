@@ -92,4 +92,92 @@ class ModuleRegistry implements IteratorAggregate
         return $paths;
     }
 
+
+    /**
+     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
+    public function walkRootClasses($type, $callback)
+    {
+        $paths = $this->getPaths();
+        $suffix = $type . '.php';
+        $suffixLength = strlen($suffix);
+        foreach ($paths as $ns => $path) {
+            $files = array_filter(scandir($path), function ($s) use ($suffix, $suffixLength) {
+                return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
+            });
+
+            foreach ($files as $file) {
+                $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
+                try {
+                    $c = new $className;
+                    $callback($c);
+                } catch (\Throwable $e) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Обходит классы, с заданным суффиксом и выполняет для каждого заданную
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
+    public function walkClasses(string $type, callable $callback)
+    {
+        $this->walkClassNames($type, function($className) use ($callback) {
+            try {
+                $c = new $className;
+                $callback($c);
+            } catch (\Throwable $e) {
+            }
+        });
+    }
+
+    /**
+     * Обходит именна классов, с заданным суффиксом и выполняет для каждого заданную
+     * функцию-обработчик
+     * @param string $type Суффикс имени класса
+     * @param callable $callback Функция, которую необходимо вызывать с объектами найденных классов в виде параметра
+     */
+    public function walkClassNames(string $type, callable $callback)
+    {
+    $paths = $this->getPaths();
+        foreach ($paths as $ns => $path) {
+            $this->walkClassNamesInPath($ns, $path, $type, $callback);
+        }
+    }
+
+    public function walkClassNamesInPath(string $ns, string $path, string $type, callable $callback)
+    {
+        $suffix = $type . '.php';
+        $suffixLength = strlen($suffix);
+        $allFiles = scandir($path);
+        $toWalk = array_filter($allFiles, function ($s) use ($suffix, $suffixLength) {
+            return strrpos($s, $suffix) === (strlen($s) - $suffixLength);
+        });
+
+        foreach ($toWalk as $file) {
+            $className = $ns . '\\' . pathinfo($file, PATHINFO_FILENAME);
+            $callback($className);
+        }
+
+        $paths = array_filter($allFiles, function ($s) use ($path) {
+            return $s[0] >= 'A' && $s[0] <= 'Z' && is_dir($path . '/' . $s);
+        });
+
+        foreach ($paths as $file) {
+            $this->walkClassNamesInPath(
+                $ns . '\\' . pathinfo($file, PATHINFO_FILENAME),
+                $path . '/' . $file,
+                $type,
+                $callback
+            );
+        }
+    }
+
+
 }

@@ -16,7 +16,7 @@ function smarty_block_iflocation($params, $content, &$view, &$repeat)
         return '';
     }
 
-    $resource = Url::trim(\Pina\App::resource());
+    $resource = Url::trim(\Pina\Input::getResource());
 
     if (strpos($resource, $needed) !== 0)
         return '';

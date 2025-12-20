@@ -9,7 +9,7 @@ class AccessTest extends TestCase
 
     public function testPermit()
     {
-        App::init('test', __DIR__ . '/config');
+        App::init(__DIR__ . '/config');
 
         $access = new Access();
         $access->permit('accounts/:account_id/items', 'provider,owner;provider,manager');

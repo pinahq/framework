@@ -3,6 +3,7 @@
 namespace Pina\Controls;
 
 use Pina\Html;
+use Pina\Input;
 use Pina\Paging;
 use Pina\App;
 
@@ -45,6 +46,8 @@ class PagingControl extends Control
             return '';
         }
 
+        $resource = Input::getResource();
+
         for ($i = 1; $i <= $this->paging->getPagesCount(); $i++) {
             $digits = ($i <= $current && $i >= $current - 1)
                 || ($i >= $current && $i <= $current + 1)
@@ -60,7 +63,7 @@ class PagingControl extends Control
                     'li',
                     Html::a(
                         $i,
-                        App::link(App::resource(), array_merge($this->linkContext, ['page' => $i])),
+                        App::link($resource, array_merge($this->linkContext, ['page' => $i])),
                         ['class' => 'page-link']
                     ),
                     ['class' => 'page-item' . ($i == $current ? ' active' : '')]
