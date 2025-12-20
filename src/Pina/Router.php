@@ -124,7 +124,7 @@ class Router
         }
 
         try {
-            $response = $this->run($resource, $method, $data)->send();
+            $response = $this->run($resource, $method, $data);
             if ($response instanceof ResponseInterface) {
                 $response->send();
             } else {

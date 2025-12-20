@@ -4,6 +4,7 @@ namespace Pina\Controls;
 
 use Pina\App;
 use Pina\Layouts\DefaultLayout;
+use Pina\Response;
 use Pina\ResponseInterface;
 
 abstract class Control extends AttributedBlock implements ResponseInterface
@@ -249,9 +250,9 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 
     public function send()
     {
-        header('HTTP/1.1 200 OK');
-        header('Content-Type: text/html');
-        echo $this->__toString();
+        $layout = $this->getLayout();
+        $content = $layout->append($this)->drawWithWrappers();
+        Response::ok()->setContent($content)->send();
     }
 
 }
