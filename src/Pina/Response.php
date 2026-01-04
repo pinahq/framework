@@ -219,6 +219,16 @@ class Response implements ResponseInterface
             header($header[0] . ':' . $header[1]);
         }
 
+        if (empty($this->content)) {
+            $mime = App::negotiateMimeType();
+            switch ($mime) {
+                case 'application/json':
+                case 'text/json':
+                    $r = [];
+                    $this->content = new JsonContent($r);
+            }
+        }
+
         if (!empty($this->content) && is_string($this->content)) {
             header('Content-Type: text/html; charset=' . App::charset());
             echo $this->content;
