@@ -120,7 +120,7 @@ class CollectionComposer
             $links = new LinkedItemCollection();
             try {
                 $title = App::router()->run('/', 'title');
-                if ($title) {
+                if (is_string($title)) {
                     $links->add(new LinkedItem($title, '/'));
                 }
             } catch (Exception $e) {
