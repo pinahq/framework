@@ -10,21 +10,16 @@ class ResourceManagerTest extends TestCase
     {
         App::init(__DIR__.'/config');
         
-        $repeat = 0;
-        $view = new \Pina\Legacy\Templater;
-
-        require_once __DIR__.'/../src/Pina/helpers/block.script.php';
-        require_once __DIR__.'/../src/Pina/helpers/function.scripts.php';
-        smarty_block_script(array(), "
+        App::assets()->addScriptContent("
             <script>
                 alert('123');
                 alert('234');
             </script>
-        ", $view, $repeat);
-        
-        smarty_block_script(array(), "
+        ");
+
+        App::assets()->addScriptContent("
             <script>alert('234');</script>
-        ", $view, $repeat);
+        ");
         
 
         $this->assertEquals("
@@ -34,10 +29,10 @@ class ResourceManagerTest extends TestCase
             </script>
         \r\n
             <script>alert('234');</script>
-        ", smarty_function_scripts(array(), $view));
+        ", App::assets()->fetch('js'));
 
         App::assets()->startLayout();
-        smarty_block_script(array(), "<script>alert('!!!');</script>", $view, $repeat);
+        App::assets()->addScriptContent("<script>alert('!!!');</script>");
 
         $this->assertEquals("<script>alert('!!!');</script>\r\n
             <script>
@@ -46,10 +41,10 @@ class ResourceManagerTest extends TestCase
             </script>
         \r\n
             <script>alert('234');</script>
-        ", smarty_function_scripts(array(), $view));
-        
-        smarty_block_script(array('src' => "http://github.com/123/123/test.js"), '', $view, $repeat);
-        smarty_block_script(array('src' => "/static/test.js"), '', $view, $repeat);
+        ", App::assets()->fetch('js'));
+
+        App::assets()->addScript("http://github.com/123/123/test.js");
+        App::assets()->addScript("/static/test.js");
         
         $this->assertEquals("<script>alert('!!!');</script>\r\n<script type=\"text/javascript\" src=\"http://github.com/123/123/test.js\"></script>\r\n<script type=\"text/javascript\" src=\"/static/test.js?1\"></script>\r\n
             <script>
@@ -58,7 +53,7 @@ class ResourceManagerTest extends TestCase
             </script>
         \r\n
             <script>alert('234');</script>
-        ", smarty_function_scripts(array(), $view));
+        ", App::assets()->fetch('js'));
         
     }
     
@@ -67,22 +62,19 @@ class ResourceManagerTest extends TestCase
         App::init(__DIR__.'/config');
         
         $repeat = 0;
-        $view = new \Pina\Legacy\Templater;
 
-        require_once __DIR__.'/../src/Pina/helpers/block.style.php';
-        require_once __DIR__.'/../src/Pina/helpers/function.styles.php';
-        smarty_block_style(array(), "
+        App::assets()->addStyleContent("
             <style>
                 body {background-color: black;}
                 div {
                     color: white;
                 }
             </style>
-        ", $view, $repeat);
+        ");
 
-        smarty_block_style(array(), "
+        App::assets()->addStyleContent("
             <style>h1{color: black;}</script>
-        ", $view, $repeat);
+        ");
 
         $this->assertEquals("
             <style>
@@ -93,10 +85,10 @@ class ResourceManagerTest extends TestCase
             </style>
         \r\n
             <style>h1{color: black;}</script>
-        ", smarty_function_styles(array(), $view));
+        ", App::assets()->fetch('css'));
 
         App::assets()->startLayout();
-        smarty_block_style(array(), "<style>#id{display:hidden;}</style>", $view, $repeat);
+        App::assets()->addStyleContent("<style>#id{display:hidden;}</style>");
 
         $this->assertEquals("<style>#id{display:hidden;}</style>\r\n
             <style>
@@ -107,10 +99,10 @@ class ResourceManagerTest extends TestCase
             </style>
         \r\n
             <style>h1{color: black;}</script>
-        ", smarty_function_styles(array(), $view));
-        
-        smarty_block_style(array('src' => "http://github.com/123/123/test.css"), '', $view, $repeat);
-        smarty_block_style(array('src' => "/static/test.css"), '', $view, $repeat);
+        ", App::assets()->fetch('css'));
+
+        App::assets()->addStyle("http://github.com/123/123/test.css");
+        App::assets()->addStyle("/static/test.css");
         
         $this->assertEquals("<style>#id{display:hidden;}</style>\r\n<link href=\"http://github.com/123/123/test.css\" rel=\"stylesheet\">\r\n<link href=\"/static/test.css?1\" rel=\"stylesheet\">\r\n
             <style>
@@ -121,7 +113,7 @@ class ResourceManagerTest extends TestCase
             </style>
         \r\n
             <style>h1{color: black;}</script>
-        ", smarty_function_styles(array(), $view));
+        ", App::assets()->fetch('css'));
         
     }
 

@@ -132,7 +132,7 @@ class CollectionComposer
 
         try {
             $title = App::router()->run($location->resource('@'), 'title');
-            if ($title) {
+            if ($title && is_string($title)) {
                 $links->add(new LinkedItem($title, $location->link('@')));
             }
         } catch (Exception $e) {

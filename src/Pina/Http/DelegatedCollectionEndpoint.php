@@ -447,7 +447,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             }
             try {
                 $title = App::router()->run($resource, 'title');
-                if ($title) {
+                if ($title && is_string($title)) {
                     $control->addToSidebar($this->makeLinkedButton($title, $this->location()->link($resource)));
                 }
             } catch (Exception $e) {

@@ -50,7 +50,7 @@ class Input
             return isset($_REQUEST[self::ACTION_PARAM]) ? $_REQUEST[self::ACTION_PARAM] : '';
         }
 
-        return ltrim(urldecode($_SERVER['REQUEST_URI']), '/');
+        return ltrim(urldecode($_SERVER['REQUEST_URI'] ?? ''), '/');
     }
 
     public static function getMethod()

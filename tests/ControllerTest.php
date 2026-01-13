@@ -25,14 +25,13 @@ class ControllerTest extends TestCase
     {
         App::init(__DIR__ . '/config');
 
-        \Pina\Legacy\Request::push(new \Pina\Legacy\RequestHandler('lk/1/cron-events', 'index', []));
         App::container()->set('base_url', new Location(''));
 
         $data = [
             [
                 'id' => 1,
-                'event' => 'order.paid',
-                'data' => '123',
+                'handler' => 'order.paid',
+                'payload' => '123',
                 'priority' => '1',
                 'delay' => '0',
                 'worker_id' => null,
@@ -42,8 +41,8 @@ class ControllerTest extends TestCase
             ],
             [
                 'id' => 2,
-                'event' => 'order.canceled',
-                'data' => '124',
+                'handler' => 'order.canceled',
+                'payload' => '124',
                 'priority' => '2',
                 'delay' => '0',
                 'worker_id' => null,
@@ -53,8 +52,8 @@ class ControllerTest extends TestCase
             ],
             [
                 'id' => 3,
-                'event' => 'order.returned',
-                'data' => '125',
+                'handler' => 'order.returned',
+                'payload' => '125',
                 'priority' => '1',
                 'delay' => '0',
                 'worker_id' => null,
@@ -86,7 +85,7 @@ class ControllerTest extends TestCase
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>ID</th><th>Event</th><th>Data</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
+            . '<tr><th>ID</th><th>Handler</th><th>Payload</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
             . $tableContent
             . '</table>'
             . '</div></div>';
@@ -206,8 +205,6 @@ class ControllerTest extends TestCase
         $prop = $class->getProperty('code');
         $prop->setAccessible(true);
         $this->assertEquals('200 OK', $prop->getValue($r));
-
-        \Pina\Legacy\Request::pop();
     }
 
     /**
