@@ -227,7 +227,7 @@ class SQL
             list($type, $table) = $line;
 
             /** @var SQL $table */
-            $schema->merge($table->grabQuerySchema());
+            $schema->addGroup($table->grabQuerySchema());
         }
 
         return $schema;

@@ -1032,6 +1032,14 @@ class Schema implements IteratorAggregate
         return $schema;
     }
 
+    public function setInnerGroupStatic()
+    {
+        foreach ($this->groups as $group) {
+            $group->setStatic();
+        }
+        return $this;
+    }
+
     /**
      * @return Schema[]
      */

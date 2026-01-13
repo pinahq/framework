@@ -18,4 +18,14 @@ class QueryDataCollection extends DataCollection
         return clone $this->query;
     }
 
+    public function getSchema(): Schema
+    {
+        return $this->makeQuery()->getQuerySchema()->setInnerGroupStatic();
+    }
+
+    public function getListSchema(): Schema
+    {
+        return $this->makeQuery()->getQuerySchema()->forgetDetailed();
+    }
+
 }
