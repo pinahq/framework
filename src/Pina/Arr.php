@@ -208,6 +208,8 @@ class Arr
 
     public static function get($array, $path, $default = null)
     {
+        $path = str_replace(['[', ']'], ['.'. ''], $path);
+
         if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
             return $default;
         }
@@ -265,6 +267,8 @@ class Arr
 
     public static function set(&$array, $path, $value)
     {
+        $path = str_replace(['[', ']'], ['.'. ''], $path);
+
         if (!is_numeric($path) && !is_string($path) && !is_array($path)) {
             return;
         }

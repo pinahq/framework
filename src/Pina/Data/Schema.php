@@ -759,7 +759,8 @@ class Schema implements IteratorAggregate
      */
     public function processValueAsData(array &$line, string $key)
     {
-        return $this->processLineAsData($line)[$key] ?? null;
+        $processed = $this->processLineAsData($line);
+        return Arr::get($processed, $key);
     }
 
     /**
@@ -788,10 +789,13 @@ class Schema implements IteratorAggregate
                 continue;
             }
             $key = $field->getName();
-            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
+            $value = Arr::get($processed, $key);
+            if (is_null($value) || $value == '') {
+                $value = $field->getDefault();
+            }
             $type = App::type($field->getType());
             $type->setContext($line);
-            $formatted[$key] = $type->format($value);
+            Arr::set($formatted, $key, $type->format($value));
         }
         return $formatted;
     }
@@ -799,7 +803,7 @@ class Schema implements IteratorAggregate
     public function formatValue(array &$line, string $fieldName): string
     {
         $formatted = $this->formatLine($line, $fieldName);
-        return $formatted[$fieldName] ?? '';
+        return Arr::get($formatted, $fieldName) ?? '';
     }
 
     /**
@@ -820,7 +824,8 @@ class Schema implements IteratorAggregate
     public function processValueAsText(array &$line, string $fieldName): string
     {
         $formatted = $this->formatLine($line, $fieldName);
-        return $this->callTextProcessors($formatted, $line)[$fieldName] ?? '';
+        $processed = $this->callTextProcessors($formatted, $line);
+        return Arr::get($processed, $fieldName) ?? '';
     }
 
     /**
@@ -850,10 +855,13 @@ class Schema implements IteratorAggregate
                 continue;
             }
             $key = $field->getName();
-            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
+            $value = Arr::get($processed, $key);
+            if (is_null($value) || $value == '') {
+                $value = $field->getDefault();
+            }
             $type = App::type($field->getType());
             $type->setContext($line);
-            $formatted[$key] = $type->draw($value);
+            Arr::set($formatted, $key, $type->draw($value));
         }
         return $formatted;
     }
@@ -861,7 +869,7 @@ class Schema implements IteratorAggregate
     public function drawValue(array &$line, string $fieldName): string
     {
         $formatted = $this->drawLine($line, $fieldName);
-        return $formatted[$fieldName] ?? '';
+        return Arr::get($formatted, $fieldName) ?? '';
     }
 
     /**
@@ -878,7 +886,8 @@ class Schema implements IteratorAggregate
     public function processValueAsHtml(array &$line, string $fieldName): string
     {
         $formatted = $this->drawLine($line, $fieldName);
-        return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
+        $processed = $this->callHtmlProcessors($formatted, $line);
+        return Arr::get($processed, $fieldName) ?? '';
     }
 
     /**
@@ -907,10 +916,14 @@ class Schema implements IteratorAggregate
                 continue;
             }
             $key = $field->getName();
-            $value = (!isset($processed[$key]) || $processed[$key] == '') ? $field->getDefault() : $processed[$key];
+            $value = Arr::get($processed, $key);
+            if (is_null($value) || $value == '') {
+                $value = $field->getDefault();
+            }
+
             $type = App::type($field->getType());
             $type->setContext($line);
-            $formatted[$key] = $type->play($value);
+            Arr::set($formatted, $key, $type->play($value));
         }
         return $formatted;
     }
@@ -918,7 +931,7 @@ class Schema implements IteratorAggregate
     public function playValue(array &$line, string $fieldName): string
     {
         $formatted = $this->playLine($line, $fieldName);
-        return $formatted[$fieldName] ?? '';
+        return Arr::get($formatted, $fieldName) ?? '';
     }
 
     /**
@@ -935,7 +948,8 @@ class Schema implements IteratorAggregate
     public function processValueAsInteractive(array &$line, string $fieldName): string
     {
         $formatted = $this->playLine($line, $fieldName);
-        return $this->callHtmlProcessors($formatted, $line)[$fieldName] ?? '';
+        $processed = $this->callHtmlProcessors($formatted, $line);
+        return Arr::get($processed, $fieldName) ?? '';
     }
 
     /**
@@ -1241,8 +1255,10 @@ class Schema implements IteratorAggregate
     {
         foreach ($this as $field) {
             $name = $field->getName();
-            if (!isset($data[$name])) {
-                $data[$name] = $field->getDefault();
+            $value = Arr::get($data, $name);
+
+            if (is_null($value)) {
+                Arr::set($data, $name, $field->getDefault());
             }
         }
     }
@@ -1259,8 +1275,7 @@ class Schema implements IteratorAggregate
             if ($field->isStatic()) {
                 continue;
             }
-            $path = str_replace(['[', ']'], ['.', ''], $field->getName());
-            $value = Arr::get($data, $path, null);
+            $value = Arr::get($data, $field->getName());
 
             App::type($field->getType())->setData($id, $value);
         }

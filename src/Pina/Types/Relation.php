@@ -31,16 +31,24 @@ class Relation extends DirectoryType
 
     protected $cacheSeconds = 0;
 
+    protected $context = [];
+
     public function __construct(
         TableDataGateway $relationTable,
-        $relationField,
-        $directoryField,
+                         $relationField,
+                         $directoryField,
         TableDataGateway $directoryTable
     ) {
         $this->relationTable = $relationTable;
         $this->relationField = $relationField;
         $this->directoryField = $directoryField;
         $this->directoryTable = $directoryTable;
+    }
+
+    public function setContext($context)
+    {
+        $this->context = $context;
+        return $this;
     }
 
     protected function makeDirectoryQuery(): TableDataGateway
@@ -100,7 +108,7 @@ class Relation extends DirectoryType
 
         $r = [];
         foreach ($list as $item) {
-            $r[] = App::type($type)->play($item['id']);
+            $r[] = App::type($type)->setContext($this->context)->play($item['id']);
         }
         return implode(', ', $r);
     }

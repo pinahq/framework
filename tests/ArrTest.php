@@ -60,6 +60,9 @@ class ArrTest extends TestCase
         $this->assertEquals(['something', 'something3'], Arr::get($a, 'deep.*.deepest'));
         $this->assertEquals(['something', 'something2', 'something3', 'something4'], Arr::get($a, 'deep.*.*'));
 
+        $this->assertEquals('something', Arr::get($a, 'deep[deeper][deepest]'));
+        $this->assertEquals(['deepest' => 'something', 'deepest2' => 'something2'], Arr::get($a, 'deep[deeper]'));
+
         $this->assertEquals('value', Arr::get($a, 'name', 12));
         $this->assertEquals(12, Arr::get($a, 'name2', 12));
     }

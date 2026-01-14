@@ -69,9 +69,7 @@ class RecordForm extends HandledForm implements InputFactoryInterface
     {
         $type = $field->getType();
         $name = $field->getName();
-        $data = $record->getData();
-        $value = isset($data[$name]) ? $data[$name] : null;
-        return App::type($type)->setContext($data)->makeControl($field, $value);
+        return App::type($type)->setContext($record->getData())->makeControl($field, $record->getValue($name));
     }
 
     protected function drawFooter()
