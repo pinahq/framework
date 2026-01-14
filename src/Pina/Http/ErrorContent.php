@@ -12,6 +12,7 @@ use Pina\Layouts\DefaultLayout;
 class ErrorContent implements ContentInterface
 {
     protected $code;
+    protected $errors = [];
 
     public function __construct($code)
     {
@@ -24,7 +25,7 @@ class ErrorContent implements ContentInterface
         switch ($mime) {
             case 'application/json':
             case 'text/json':
-                return json_encode(['code' => $this->code]);
+                return json_encode(['code' => $this->code, 'errors' => $this->errors], JSON_UNESCAPED_UNICODE);
         }
 
         /** @var ErrorPage $view */
@@ -40,6 +41,7 @@ class ErrorContent implements ContentInterface
 
     public function setErrors($errors)
     {
+        $this->errors = $errors;
     }
 
     public function getType()
