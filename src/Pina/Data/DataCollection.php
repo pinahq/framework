@@ -29,21 +29,21 @@ abstract class DataCollection
      * Основная схема просмотра и редактирования карточки
      * @return Schema
      */
-    public function getSchema(): Schema
+    public function getSchema($context = []): Schema
     {
         return $this->makeQuery()->getSchema();
     }
 
-    public function getRecordSchema(): Schema
+    public function getRecordSchema($context = []): Schema
     {
-        return $this->getSchema()->setImmutableStatic();
+        return $this->getSchema($context)->setImmutableStatic();
     }
 
     /**
      * Схема списка (таблицы)
      * @return Schema
      */
-    public function getListSchema(): Schema
+    public function getListSchema($context = []): Schema
     {
         return $this->makeQuery()->getSchema()->forgetDetailed();
     }
@@ -52,14 +52,14 @@ abstract class DataCollection
      * Схема формы создания элемента
      * @return Schema
      */
-    public function getCreationSchema(): Schema
+    public function getCreationSchema($context = []): Schema
     {
-        return $this->getSchema()->forgetStatic();
+        return $this->getSchema($context)->forgetStatic();
     }
 
-    public function getVariantAvailableSchema()
+    public function getVariantAvailableSchema($context = []): Schema
     {
-        $schema = $this->getSchema();
+        $schema = $this->getSchema($context);
         $schema->setImmutableStatic();
         $schema->forgetStatic();
 
@@ -80,10 +80,10 @@ abstract class DataCollection
     public function getFilterSchema($context = []): Schema
     {
         $schema = new Schema();
-        if ($this->getSchema()->hasSearchable()) {
+        if ($this->getSchema($context)->hasSearchable()) {
             $schema->add('search', __('Поиск'), SearchType::class);
         }
-        $schema->merge($this->getSchema()->forgetNotFiltrable());
+        $schema->merge($this->getSchema($context)->forgetNotFiltrable());
         $schema->setStatic(false)->setNullable()->setMandatory(false);
         foreach ($context as $k => $v) {
             $schema->forgetField($k);
@@ -105,7 +105,7 @@ abstract class DataCollection
             $paging = new Paging($page, $perPage);
             $query->paging($paging);
         }
-        $schema = $this->getListSchema();
+        $schema = $this->getListSchema($context);
         $schema->fieldset(array_keys($context))->setHidden();
         $schema->restrictPrimaryKeyContext(array_keys($context));
         return new DataTable($query->get(), $schema, $paging);
@@ -120,7 +120,7 @@ abstract class DataCollection
     public function getRecord(string $id, array $context = []): DataRecord
     {
         $query = $this->makeRecordQuery();
-        $schema = $this->getRecordSchema();
+        $schema = $this->getRecordSchema($context);
 
         if ($context) {
             $contextSchema = $schema->fieldset(array_keys($context))->makeSchema();
@@ -174,7 +174,7 @@ abstract class DataCollection
     public function getNewRecord(array $data, array $context): DataRecord
     {
         $data = array_merge($data, $context);
-        $schema = $this->getCreationSchema();
+        $schema = $this->getCreationSchema($context);
         foreach ($context as $key => $value) {
             $schema->forgetField($key);
         }
@@ -190,7 +190,7 @@ abstract class DataCollection
      */
     public function add(array $data, array $context = []): string
     {
-        $schema = $this->getCreationSchema();
+        $schema = $this->getCreationSchema($context);
 
         $normalized = $this->normalize(array_merge($context, $data), $schema, $context);
 
@@ -233,7 +233,7 @@ abstract class DataCollection
      */
     public function update(string $id, array $data, array $context = [], array $fields = []): string
     {
-        $schema = $this->getRecordSchema();
+        $schema = $this->getRecordSchema($context);
         if ($fields) {
             $schema = $schema->forgetAllExcept($fields);
         }
@@ -268,7 +268,7 @@ abstract class DataCollection
 
     public function addToRelation(string $id, string $fieldName, $value, array $context)
     {
-        $schema = $this->getSchema()->fieldset([$fieldName])->makeSchema();
+        $schema = $this->getSchema($context)->fieldset([$fieldName])->makeSchema();
         if ($schema->isEmpty()) {
             return;
         }
@@ -289,7 +289,7 @@ abstract class DataCollection
 
     public function deleteFromRelation(string $id, string $fieldName, $value, array $context)
     {
-        $schema = $this->getSchema()->fieldset([$fieldName])->makeSchema();
+        $schema = $this->getSchema($context)->fieldset([$fieldName])->makeSchema();
         if ($schema->isEmpty()) {
             return;
         }
@@ -319,7 +319,7 @@ abstract class DataCollection
             return;
         }
 
-        $schema = $this->getListSchema()->forgetStatic();
+        $schema = $this->getListSchema($context)->forgetStatic();
 
         $normalizedData = [];
         foreach ($data as $id => $v) {
@@ -432,7 +432,7 @@ abstract class DataCollection
     protected function makeListQuery(array $filters, array $context): TableDataGateway
     {
         $schema = $this->getFilterSchema($context);
-        $contextSchema = $this->getSchema()->fieldset(array_keys($context))->makeSchema();
+        $contextSchema = $this->getSchema($context)->fieldset(array_keys($context))->makeSchema();
         $schema->merge($contextSchema);
         return $this->makeQuery()->whereSearch($filters['search'] ?? '', $this->getSchema())->whereFilters(array_merge($filters, $context), $schema);
     }
