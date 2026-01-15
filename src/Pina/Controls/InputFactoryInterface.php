@@ -7,5 +7,5 @@ use Pina\Data\Field;
 
 interface InputFactoryInterface
 {
-    public function makeInput(Field $field, DataRecord $record);
+    public function makeInput(Field $field);
 }

@@ -33,7 +33,7 @@ class RecordView extends Control implements InputFactoryInterface
     {
         /** @var RecordFormCompiler $compiler */
         $compiler = App::make(RecordFormCompiler::class);
-        $compiler->load($record, $this);
+        $compiler->load($record->getSchema(), $this);
 
         return $compiler;
     }
@@ -44,14 +44,13 @@ class RecordView extends Control implements InputFactoryInterface
      * @return Control|FormControl
      * @throws \Exception
      */
-    public function makeInput(Field $field, DataRecord $record)
+    public function makeInput(Field $field)
     {
-        $title = $field->getTitle();
-        $key = $field->getName();
-        $value = $this->record->getInteractiveValue($key);
+        $name = $field->getName();
+        $value = $this->record->getInteractiveValue($name);
         return $this->makeFormStatic()
-            ->setName($key)
-            ->setTitle($title)
+            ->setName($name)
+            ->setTitle($field->getTitle())
             ->setValue($value);
     }
 

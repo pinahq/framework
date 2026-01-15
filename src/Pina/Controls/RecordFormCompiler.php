@@ -3,23 +3,23 @@
 namespace Pina\Controls;
 
 use Pina\App;
-use Pina\Data\DataRecord;
+use Pina\Data\Schema;
 
 class RecordFormCompiler extends Control
 {
 
-    protected $record;
+    protected Schema $schema;
     protected $factory;
 
-    public function load(DataRecord $record, InputFactoryInterface $factory)
+    public function load(Schema $schema, InputFactoryInterface $factory)
     {
-        $this->record = $record;
+        $this->schema = $schema;
         $this->factory = $factory;
     }
 
     protected function draw()
     {
-        $groupedSchema = clone $this->record->getSchema();
+        $groupedSchema = clone $this->schema;
         $groupedSchema->forgetHiddenStatic();
 
         $content = '';
@@ -48,7 +48,7 @@ class RecordFormCompiler extends Control
                     $inputs = [];
                 }
 
-                $inputs[] = $this->factory->makeInput($field, $this->record);
+                $inputs[] = $this->factory->makeInput($field);
                 $widthGained += $width;
             }
             $this->flushInputs($card, $inputs);

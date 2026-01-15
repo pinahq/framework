@@ -54,7 +54,7 @@ class RecordForm extends HandledForm implements InputFactoryInterface
     {
         /** @var RecordFormCompiler $compiler */
         $compiler = App::make(RecordFormCompiler::class);
-        $compiler->load($record, $this);
+        $compiler->load($record->getSchema(), $this);
 
         return $compiler;
     }
@@ -65,11 +65,11 @@ class RecordForm extends HandledForm implements InputFactoryInterface
      * @return Control|FormControl
      * @throws \Exception
      */
-    public function makeInput(Field $field, DataRecord $record)
+    public function makeInput(Field $field)
     {
         $type = $field->getType();
         $name = $field->getName();
-        return App::type($type)->setContext($record->getData())->makeControl($field, $record->getValue($name));
+        return App::type($type)->setContext($this->record->getData())->makeControl($field, $this->record->getValue($name));
     }
 
     protected function drawFooter()
