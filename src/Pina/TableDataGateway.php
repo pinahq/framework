@@ -386,6 +386,24 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
         return $this;
     }
 
+    public function selectFull()
+    {
+        $schema = $this->getSchema();
+        foreach ($schema as $field) {
+            if ($field->makeSQLDeclaration([])) {
+                $this->select($field->getName());
+            } else {
+                $pk = $schema->getPrimaryKey();
+                if (count($pk) == 1) {
+                    $link = uniqid('dy');
+                    $this->selectAs($pk[0], $link);
+                    $this->selectDynamic($field, $link);
+                }
+            }
+        }
+        return $this;
+    }
+
     /**
      * Добавляет в запрос выборку всех полей кроме заданных
      * @param array|string $field
