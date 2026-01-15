@@ -1159,6 +1159,12 @@ class Schema implements IteratorAggregate
                 }
             } catch (ValidateException $e) {
                 $errors[] = [$e->getMessage(), $field->getName()];
+            } catch (BadRequestException $e) {
+                $es = $e->getErrors();
+                foreach ($es as $error) {
+                    $error[1] = $field->getName() . $error[1];
+                    $errors[] = $error;
+                }
             }
 
             if ($path) {
