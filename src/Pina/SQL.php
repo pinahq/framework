@@ -34,6 +34,7 @@ class SQL
 
     public $db = '';
     private $select = array();
+    private $dynamic = [];
     protected DefinitionInterface $definition;
     private $alias = '';
     private $joins = array();
@@ -202,7 +203,9 @@ class SQL
                 continue;
             }
 
-            if ($tableSchema->has($field)) {
+            if ($field instanceof Field) {
+                $selected->add($field);
+            } elseif ($tableSchema->has($field)) {
                 $selected->select($field);
             } else {
                 $f = new Field($field, $title, $fieldType);
@@ -398,6 +401,11 @@ class SQL
     {
         $this->select[] = array(self::SQL_SELECT_FIELD, trim($field));
         return $this;
+    }
+
+    public function selectDynamic(Field $field, $link)
+    {
+        $this->dynamic[] = [$field, $link];
     }
 
     /**
@@ -1261,7 +1269,33 @@ class SQL
      */
     public function get()
     {
-        return $this->db->table($this->make(), $this->cacheSeconds, $this->cacheStorage);
+        $table = $this->db->table($this->make(), $this->cacheSeconds, $this->cacheStorage);
+        $this->enrichTable($table);
+        return $table;
+    }
+
+    protected function enrichTable(&$table)
+    {
+        foreach ($this->dynamic as $v) {
+            /** @var Field $field */
+            $field = array_shift($v);
+            $link = array_shift($v);
+
+            foreach ($table as $k => $row) {
+                $table[$k][$field->getName()] = App::type($field->getType())->setContext($row)->getData($row[$link]);
+            }
+        }
+    }
+
+    protected function enrichRow(&$row)
+    {
+        foreach ($this->dynamic as $k => $v) {
+            /** @var Field $field */
+            $field = array_shift($v);
+            $link = array_shift($v);
+
+            $row[$field->getName()] = App::type($field->getType())->setContext($row)->getData($row[$link]);
+        }
     }
 
     /**
@@ -1272,7 +1306,9 @@ class SQL
     {
         $this->limit(1);
 
-        return $this->db->row($this->make(), $this->cacheSeconds, $this->cacheStorage);
+        $row = $this->db->row($this->make(), $this->cacheSeconds, $this->cacheStorage);
+        $this->enrichRow($row);
+        return $row;
     }
 
     /**
