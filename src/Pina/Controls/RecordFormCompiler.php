@@ -27,7 +27,7 @@ class RecordFormCompiler extends Control
             if ($schema->isEmpty()) {
                 continue;
             }
-            $card = $this->makeCard()->setTitle($schema->getTitle());
+            $card = $this->resolveCard($schema)->setTitle($schema->getTitle());
 
             $description = $schema->getDescription();
             if ($description) {
@@ -74,12 +74,25 @@ class RecordFormCompiler extends Control
         }
     }
 
+    protected function resolveCard(Schema $schema)
+    {
+        if ($schema->hasTag('nowrapper')) {
+            return $this->makeBodyLessCard();
+        }
+        return $this->makeCard();
+    }
+
     /**
      * @return Card
      */
     protected function makeCard()
     {
         return App::make(Card::class);
+    }
+
+    protected function makeBodyLessCard()
+    {
+        return App::make(BodyLessCard::class);
     }
 
     /**
