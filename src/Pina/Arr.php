@@ -130,6 +130,22 @@ class Arr
         return $result;
     }
 
+    public static function groupUniqueWithoutKey($data, $key, $default = '')
+    {
+        $result = array();
+
+        if (is_array($data)) {
+            foreach ($data as $d) {
+                $k = isset($d[$key]) ? $d[$key] : $default;
+                unset($d[$key]);
+                $result[$k] = $d;
+            }
+        }
+
+        return $result;
+    }
+
+
     public static function groupColumn($data, $key, $column)
     {
         $result = array();

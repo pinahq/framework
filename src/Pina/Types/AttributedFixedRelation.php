@@ -149,8 +149,8 @@ class AttributedFixedRelation extends Relation
 
     public function getData($id)
     {
-        $raw = $this->makeRelationQuery()->whereBy($this->relationField, $id)->get();
-        return Arr::groupUnique($raw, $this->directoryField);
+        $raw = $this->makeRelationQuery()->whereBy($this->relationField, $id)->selectAllExcept($this->relationField)->get();
+        return Arr::groupUniqueWithoutKey($raw, $this->directoryField);
     }
 
     protected function makeSelect()
