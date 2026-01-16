@@ -3,6 +3,7 @@
 namespace Pina;
 
 use Exception;
+use Pina\Data\Field;
 use Pina\Data\Schema;
 use Pina\Data\SchemaExtension;
 use Pina\DB\StructureParser;
@@ -393,13 +394,30 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
             if ($field->makeSQLDeclaration([])) {
                 $this->select($field->getName());
             } else {
-                $pk = $schema->getPrimaryKey();
-                if (count($pk) == 1) {
-                    $link = uniqid('dy');
-                    $this->selectAs($pk[0], $link);
-                    $this->selectDynamic($field, $link);
-                }
+                $this->selectRelationField($schema, $field);
             }
+        }
+        return $this;
+    }
+
+    public function selectRelation(string $fieldName)
+    {
+        $schema = $this->getSchema();
+        foreach ($schema as $field) {
+            if ($field->getName() == $fieldName) {
+                $this->selectRelationField($schema, $field);
+            }
+        }
+        return $this;
+    }
+
+    public function selectRelationField(Schema $schema, Field $field)
+    {
+        $pk = $schema->getPrimaryKey();
+        if (count($pk) == 1) {
+            $link = uniqid('dy');
+            $this->selectAs($pk[0], $link);
+            $this->selectDynamic($field, $link);
         }
         return $this;
     }
