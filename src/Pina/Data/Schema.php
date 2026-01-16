@@ -73,6 +73,8 @@ class Schema implements IteratorAggregate
      */
     protected $definitions = [];
 
+    protected $tags = [];
+
     public function __clone()
     {
         foreach ($this->groups as $k => $group) {
@@ -108,6 +110,18 @@ class Schema implements IteratorAggregate
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    public function tag($tag)
+    {
+        $this->tags[] = $tag;
+        $this->tags = array_unique($this->tags);
+        return $this;
+    }
+
+    public function hasTag($tag)
+    {
+        return in_array($tag, $this->tags);
     }
 
     /**
