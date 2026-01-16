@@ -17,6 +17,7 @@ use Pina\Data\DataRecord;
 use Pina\Data\Field;
 use Pina\Controls\FieldsetRecordFormCompiler;
 use Pina\Controls\FlatRecordFormCompiler;
+use Pina\TableDataGateway;
 
 class AttributedFixedRelation extends Relation
 {
@@ -169,6 +170,42 @@ class AttributedFixedRelation extends Relation
             ->selectId()
             ->selectTitle()
             ->cacheStatic($this->cacheSeconds)->get();
+    }
+
+    public static function makeTriggers(TableDataGateway $relation, TableDataGateway $firstDirectory, string $firstFK, TableDataGateway $secondDirectory, string $secondFK, array $intersectedFields = [])
+    {
+        $table = $relation->getTable();
+        $first = $firstDirectory->getTable();
+        $second = $secondDirectory->getTable();
+
+        $conditions = [];
+        foreach ($intersectedFields as $field) {
+            $conditions[] = $field .'=NEW.' .$field;
+        }
+        $where = $conditions ? (' WHERE ' . implode(' AND ', $conditions)) : '';
+
+        return [
+            [
+                $first,
+                'after insert',
+                "INSERT IGNORE INTO `{$table}` ({$firstFK}, {$secondFK}) SELECT NEW.id, id FROM `{$second}`" . $where,
+            ],
+            [
+                $first,
+                'after delete',
+                "DELETE FROM $table WHERE {$firstFK}=OLD.id",
+            ],
+            [
+                $second,
+                'after insert',
+                "INSERT IGNORE INTO $table ({$firstFK}, {$secondFK}) SELECT id, NEW.id FROM `{$first}`" . $where,
+            ],
+            [
+                $second,
+                'after delete',
+                "DELETE FROM {$table} WHERE {$secondFK}=OLD.id",
+            ]
+        ];
     }
 
 }
