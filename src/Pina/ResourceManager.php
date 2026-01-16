@@ -38,6 +38,20 @@ class ResourceManager
         $this->append((new Script())->setContent($content));
     }
 
+    public function addScriptValue(string $key, $value)
+    {
+        $this->append((new Script())->setContent('<script>var ' . $key . '=' . json_encode($value, JSON_UNESCAPED_UNICODE) . '</script>'));
+    }
+
+    public function addScriptCall(string $fn, ...$values)
+    {
+        $params = [];
+        foreach ($values as $value) {
+            $params[] = json_encode($value, JSON_UNESCAPED_UNICODE);
+        }
+        $this->append((new Script())->setContent('<script>' . $fn . '(' . implode(',', $params) . ')</script>'));
+    }
+
     /**
      * @param StaticResource $resource
      */
