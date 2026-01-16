@@ -34,7 +34,7 @@ class RunWorker extends Command
             $this->workerId,
             isset($this->config['max_tasks']) ? $this->config['max_tasks'] : 10,
             isset($this->config['rest_seconds']) ? $this->config['rest_seconds'] : 10,
-            isset($this->config['push_off_seconds']) ? $this->config['push_off_seconds'] : 300,
+            isset($this->config['push_off_seconds']) ? $this->config['push_off_seconds'] : 60,
             $this->calcPriority($this->workerId)
         );
 

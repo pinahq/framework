@@ -6,6 +6,7 @@ use Pina\Data\Schema;
 use Pina\TableDataGateway;
 use Pina\Types\BlobType;
 use Pina\Types\IntegerType;
+use Pina\Types\LongStringType;
 use Pina\Types\StringType;
 use Pina\Types\TimestampType;
 use Pina\Types\UUIDType;
@@ -31,6 +32,7 @@ class QueueGateway extends TableDataGateway
         $schema->add('payload', 'Payload', BlobType::class);
         $schema->add('priority', 'Priority', IntegerType::class);
         $schema->add('delay', 'Delay', IntegerType::class);
+        $schema->add('error', 'Error', LongStringType::class)->setDetailed();
         $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable();
         $schema->addCreatedAt('Created at');
         $schema->add('scheduled_at', 'Scheduled at', TimestampType::class)->setNullable();
@@ -60,14 +62,16 @@ class QueueGateway extends TableDataGateway
         return $this->updateOperation($this->getAlias() . '.started_at=NOW()');
     }
 
-    public function pushOff($delay)
+    public function pushOff($delay, $message)
     {
         $delay = intval($delay);
+        $message = substr($message,0, 1000);
         $alias = $this->getAlias();
         return $this->updateOperation(
             "$alias.worker_id=NULL,"
             . "$alias.scheduled_at=NOW() + INTERVAL $alias.delay SECOND + INTERVAL $delay SECOND,"
-            . "$alias.delay=$alias.delay + $delay"
+            . "$alias.delay=$alias.delay * 2 + $delay,"
+            . "$alias.error='" . $this->db->escape($message) . "'"
         );
     }
 

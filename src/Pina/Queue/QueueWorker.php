@@ -26,7 +26,7 @@ class QueueWorker
             //скорее всего старый воркер выпал по какой-то ошибке
             //и мы отложим их на более поздний срок, чтобы не блокировать новые задачи
             while ($task = $this->getNextTask($workerId)) {
-                $this->pushOff($task['id'], $pushOffSeconds);
+                $this->pushOff($task['id'], $pushOffSeconds, 'reload');
             }
 
             while ($this->assignTask($workerId, $priority)) {
@@ -38,8 +38,9 @@ class QueueWorker
                         $this->deleteTask($task['id']);
                     } catch (Exception $e) {
                         Log::error('queue', $task['id'] . ' ' . $task['handler'] . ': ' .$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
+
                         //откладываем задачу на $pushOffSeconds
-                        $this->pushOff($task['id'], $pushOffSeconds);
+                        $this->pushOff($task['id'], $pushOffSeconds, (get_class($e)) .': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
                     }
                 }
                 if ($i++ > $taskLimit) {
@@ -106,9 +107,9 @@ class QueueWorker
      * @param int $delay
      * @throws Exception
      */
-    protected function pushOff(string $id, int $delay)
+    protected function pushOff(string $id, int $delay, string $message)
     {
-        QueueGateway::instance()->whereId($id)->pushOff($delay);
+        QueueGateway::instance()->whereId($id)->pushOff($delay, $message);
     }
 
 }
