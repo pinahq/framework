@@ -178,6 +178,9 @@ class AttributedFixedRelation extends Relation
         $first = $firstDirectory->getTable();
         $second = $secondDirectory->getTable();
 
+        $firstPK = $firstDirectory->getSinglePrimaryKey(array_flip($intersectedFields));
+        $secondPK = $secondDirectory->getSinglePrimaryKey(array_flip($intersectedFields));
+
         $conditions = [];
         foreach ($intersectedFields as $field) {
             $conditions[] = $field .'=NEW.' .$field;
@@ -188,22 +191,22 @@ class AttributedFixedRelation extends Relation
             [
                 $first,
                 'after insert',
-                "INSERT IGNORE INTO `{$table}` ({$firstFK}, {$secondFK}) SELECT NEW.id, id FROM `{$second}`" . $where,
+                "INSERT IGNORE INTO `{$table}` ({$firstFK}, {$secondFK}) SELECT NEW.{$firstPK}, {$secondPK} FROM `{$second}`" . $where,
             ],
             [
                 $first,
                 'after delete',
-                "DELETE FROM $table WHERE {$firstFK}=OLD.id",
+                "DELETE FROM $table WHERE {$firstFK}=OLD.{$firstPK}",
             ],
             [
                 $second,
                 'after insert',
-                "INSERT IGNORE INTO $table ({$firstFK}, {$secondFK}) SELECT id, NEW.id FROM `{$first}`" . $where,
+                "INSERT IGNORE INTO $table ({$firstFK}, {$secondFK}) SELECT {$firstPK}, NEW.{$secondPK} FROM `{$first}`" . $where,
             ],
             [
                 $second,
                 'after delete',
-                "DELETE FROM {$table} WHERE {$secondFK}=OLD.id",
+                "DELETE FROM {$table} WHERE {$secondFK}=OLD.{$secondPK}",
             ]
         ];
     }
