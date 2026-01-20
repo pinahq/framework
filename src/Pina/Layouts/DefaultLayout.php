@@ -12,6 +12,7 @@ use Pina\CSRF;
 use Pina\Html;
 use Pina\Input;
 use Pina\Menu\MainMenu;
+use Pina\Menu\RouterSiblingMenu;
 use Pina\Menu\SectionMenuComposer;
 
 class DefaultLayout extends Control
@@ -77,9 +78,10 @@ class DefaultLayout extends Control
         }
         $breadcrumb = App::place('breadcrumb')->make();
         return Html::zz(
-            '.page-header(.container(%+h1%))',
+            '.page-header(.container(%+h1%+%))',
             $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '',
-            $title
+            $title,
+            App::load(RouterSiblingMenu::class)
         );
     }
 
