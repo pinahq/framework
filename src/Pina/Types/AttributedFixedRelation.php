@@ -21,6 +21,11 @@ use Pina\TableDataGateway;
 
 class AttributedFixedRelation extends Relation
 {
+    public function isFiltrable(): bool
+    {
+        return false;
+    }
+
     public function format($value): string
     {
         return parent::format(array_keys($value));
