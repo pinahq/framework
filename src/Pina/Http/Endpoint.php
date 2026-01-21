@@ -65,11 +65,12 @@ class Endpoint
     }
 
     /**
-     * @return InputBag
+     * @deprecated в пользу attributes()
+     * @return ParameterBag
      */
     protected function context()
     {
-        return $this->getHttpRequest()->context();
+        return $this->attributes();
     }
 
     /**

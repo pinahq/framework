@@ -15,14 +15,12 @@ class Route
 
     protected $pattern = '';
     protected $endpoint = '';
-    protected $context = [];
     protected $tags = [];
 
-    public function __construct(string $pattern, string $class, array $context = [])
+    public function __construct(string $pattern, string $class)
     {
         $this->pattern = $pattern;
         $this->endpoint = $class;
-        $this->context = $context;
     }
 
     public function getController()
@@ -33,11 +31,6 @@ class Route
     public function getPattern()
     {
         return $this->pattern;
-    }
-
-    public function getContext()
-    {
-        return $this->context;
     }
 
     public function getEndpoint()

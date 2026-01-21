@@ -23,9 +23,9 @@ class Router
      * @param string $pattern
      * @param string $class
      */
-    public function register($pattern, $class, $context = []): \Pina\Router\Route
+    public function register($pattern, $class): \Pina\Router\Route
     {
-        $route = new \Pina\Router\Route($pattern, $class, $context);
+        $route = new \Pina\Router\Route($pattern, $class);
         $this->items[$route->getController()] = $route;
         return $route;
     }
@@ -101,11 +101,6 @@ class Router
             exit;
         }
 
-        $data = Input::getData();
-        if (empty($data[$method]) && !in_array($_SERVER['REQUEST_URI'], array($_SERVER['SCRIPT_NAME'], "", "/"))) {
-            $data[$method] = $_SERVER['REQUEST_URI'];
-        }
-
         $resource = Input::getResource();
 
         //TODO: get these paths based on config
@@ -124,7 +119,7 @@ class Router
         }
 
         try {
-            $response = $this->run($resource, $method, $data);
+            $response = $this->run($resource, $method, Input::getData());
             if ($response instanceof ResponseInterface) {
                 $response->send();
             } else {
@@ -192,8 +187,9 @@ class Router
     {
         $parsed = [];
         $this->parse($resource, $pattern, $parsed);
+        unset($parsed['']);
 
-        $request = new Request($_GET, Input::getData(), array_merge($data, $parsed), $_COOKIE, $_FILES, $_SERVER);
+        $request = new Request($_GET, $data, $parsed, $_COOKIE, $_FILES, $_SERVER);
 
         $location = App::baseUrl()->location($resource);
 
@@ -205,8 +201,6 @@ class Router
         $base = App::baseUrl()->location($baseResource);
 
         $request->setLocation($base, $location);
-
-        $request->setContext($this->items[$c]->getContext());
 
         return $request;
     }
