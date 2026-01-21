@@ -251,7 +251,6 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         $this->makeConfiguredCollectionComposer()->show($this->location(), $record);
 
         $sidebarWrapper = $this->makeSidebarWrapper();
-        $this->appendNestedResourceButtons($sidebarWrapper);
 
         return $this->resolveRecordView($record)->wrap($sidebarWrapper);
     }
@@ -436,25 +435,6 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             return new RawHtml();
         }
         return $this->makeLinkedButton('⟶', $this->base()->link('@/:id', ['id' => $nextId]), 'info');
-    }
-
-    protected function appendNestedResourceButtons(SidebarWrapper $control)
-    {
-        $childs = App::router()->findChilds($this->location()->resource('@'));
-        foreach ($childs as $resource) {
-            if (!App::access()->isPermitted($resource)) {
-                continue;
-            }
-            try {
-                $title = App::router()->run($resource, 'title');
-                if ($title && is_string($title)) {
-                    $control->addToSidebar($this->makeLinkedButton($title, $this->location()->link($resource)));
-                }
-            } catch (Exception $e) {
-
-            }
-        }
-        return $control;
     }
 
     /**
