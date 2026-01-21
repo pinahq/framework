@@ -76,12 +76,16 @@ class DefaultLayout extends Control
         if (empty($title)) {
             return '';
         }
-        $breadcrumb = App::place('breadcrumb')->make();
+        $menu = strval(App::load(RouterSiblingMenu::class));
+        if (empty($menu)) {
+            $breadcrumb = App::place('breadcrumb')->make();
+            $menu = $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '';
+        }
+
         return Html::zz(
-            '.page-header(.container(%+h1%+%))',
-            $breadcrumb ? Html::nest('nav.breadcrumbs', $breadcrumb) : '',
-            $title,
-            App::load(RouterSiblingMenu::class)
+            '.page-header(.container(%+h1%))',
+            $menu,
+            $title
         );
     }
 
