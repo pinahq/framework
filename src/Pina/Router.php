@@ -191,14 +191,14 @@ class Router
 
         $request = new Request($_GET, $data, $parsed, $_COOKIE, $_FILES, $_SERVER);
 
-        $location = App::baseUrl()->location($resource);
+        $location = App::location($resource);
 
         $controllerCount = count(explode('/', $c));
         $amount = $controllerCount * 2 - 1;
 
         $baseResource = implode('/', array_slice(explode('/', trim($resource, '/')), 0, $amount));
 
-        $base = App::baseUrl()->location($baseResource);
+        $base = App::location($baseResource);
 
         $request->setLocation($base, $location);
 

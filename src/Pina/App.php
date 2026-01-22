@@ -39,7 +39,7 @@ class App
         }
 
         self::$container = new Container;
-        self::$container->set('base_url', new Location('/', new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
+        self::$container->set('base_url', new Location(Input::getResource(), new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
 
         static::$container->share('types', new Container());
         static::$container->share('events', new Container());
@@ -208,14 +208,10 @@ class App
      * Базовый URL на основе настроек схемы и домена приложения
      * @return string
      */
-    public static function baseUrl($resource = ''): Location
+    protected static function baseUrl(): Location
     {
         /** @var Location $location */
-        $location = static::$container->get('base_url');
-        if ($resource) {
-            return $location->location($resource);
-        }
-        return $location;
+        return static::$container->get('base_url');
     }
 
     /**
@@ -306,9 +302,19 @@ class App
      * @param array $params Параметры
      * @return string
      */
-    public static function link($pattern, $params = array(), $baseUrl = null)
+    public static function link($pattern, $params = []): string
     {
-        return self::baseUrl($baseUrl)->link($pattern, $params);
+        return self::baseUrl()->link($pattern, $params);
+    }
+
+    public static function location($pattern = '', $params = []): Location
+    {
+        return self::baseUrl()->location($pattern, $params);
+    }
+
+    public static function resource($pattern = '', $params = []): string
+    {
+        return self::baseUrl()->resource($pattern, $params);
     }
 
     /**

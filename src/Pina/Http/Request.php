@@ -9,10 +9,10 @@ class Request extends SymfonyRequest
 {
 
     /** @var Location */
-    protected $base;
+    protected Location $base;
 
     /** @var Location */
-    protected $location;
+    protected Location $location;
 
     public function setLocation(Location $base, Location $location)
     {
@@ -22,12 +22,12 @@ class Request extends SymfonyRequest
 
     public function getBaseLocation(): Location
     {
-        return $this->base ?? App::baseUrl();
+        return $this->base ?? App::location();
     }
 
     public function getLocation(): Location
     {
-        return $this->location ?? App::baseUrl();
+        return $this->location ?? App::location();
     }
 
     public function filters()

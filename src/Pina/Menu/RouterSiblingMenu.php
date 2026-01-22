@@ -39,7 +39,7 @@ class RouterSiblingMenu extends Nav
         try {
             $title = App::router()->run($resource, 'title');
             if ($title && is_string($title)) {
-                $this->appendLink($title, App::baseUrl()->link($resource));
+                $this->appendLink($title, App::link($resource));
             }
         } catch (\Exception $e) {
         }
@@ -53,7 +53,7 @@ class RouterSiblingMenu extends Nav
         try {
             $title = App::router()->run($resource, 'title');
             if ($title && is_string($title)) {
-                $this->prependLink($title, App::baseUrl()->link($resource));
+                $this->prependLink($title, App::link($resource));
             }
         } catch (\Exception $e) {
         }
