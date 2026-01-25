@@ -17,7 +17,7 @@ class Update extends Command
             $cl->prepare();
         });
 
-        $upgrades = $this->getUpgrades();
+        $upgrades = $this->getUpgrades($input == 'force');
 
         if ($input == 'test') {
             echo join("\n", $upgrades);
@@ -34,7 +34,7 @@ class Update extends Command
         });
     }
 
-    protected function getUpgrades()
+    protected function getUpgrades($forceTriggers = false)
     {
         $firstUpgrades = array();
         $lastUpgrades = array();
@@ -49,7 +49,7 @@ class Update extends Command
             }
         );
 
-        $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers));
+        $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers, $forceTriggers));
 
         return $upgrades;
     }
