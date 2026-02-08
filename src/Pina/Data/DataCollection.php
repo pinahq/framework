@@ -202,6 +202,8 @@ abstract class DataCollection
 
         $schema->onUpdate($id, $normalized);
 
+        $this->onAdd($id);
+
         return $id;
     }
 
@@ -252,6 +254,8 @@ abstract class DataCollection
 
         $schema->onUpdate($id, $normalized);
 
+        $this->onUpdate($id);
+
         return $id;
     }
 
@@ -264,6 +268,8 @@ abstract class DataCollection
     public function delete(string $id)
     {
         $this->makeQuery()->whereId($id)->delete();
+
+        $this->onDelete($id);
     }
 
     public function addToRelation(string $id, string $fieldName, $value, array $context)
@@ -332,6 +338,8 @@ abstract class DataCollection
             $this->filterQueryByPrimaryKey($query, $schema, $id, $normalizedData, $context);
 
             $query->update($normalized);
+
+            $this->onUpdate($id);
         }
     }
 
@@ -444,6 +452,27 @@ abstract class DataCollection
     protected function makeRecordQuery(): TableDataGateway
     {
         return $this->makeQuery();
+    }
+
+    protected function onAdd(string $id)
+    {
+        $this->onEvent('added', $id);
+    }
+
+    protected function onUpdate(string $id)
+    {
+        $this->onEvent('updated', $id);
+    }
+
+    protected function onDelete(string $id)
+    {
+        $this->onEvent('deleted', $id);
+    }
+
+    protected function onEvent(string $event, string $id)
+    {
+        $table = $this->makeQuery()->getTable();
+        App::event($table . '.' . $event)->trigger($id);
     }
 
 }
