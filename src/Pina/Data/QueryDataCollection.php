@@ -18,12 +18,12 @@ class QueryDataCollection extends DataCollection
         return clone $this->query;
     }
 
-    public function getSchema(): Schema
+    public function getSchema($context = []): Schema
     {
         return $this->makeQuery()->getQuerySchema()->setInnerGroupStatic();
     }
 
-    public function getListSchema(): Schema
+    public function getListSchema($context = []): Schema
     {
         return $this->makeQuery()->getQuerySchema()->forgetDetailed();
     }
