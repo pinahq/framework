@@ -40,6 +40,11 @@ abstract class Command
         return new QueueableCommand(static::class, $priority);
     }
 
+    public static function queueableAsUnique($priority = Priority::NORMAL): QueueableCommand
+    {
+        return new QueueableCommand(static::class, $priority, true);
+    }
+
     public static function run($input = '')
     {
         $cmd = static::load();
@@ -49,6 +54,12 @@ abstract class Command
     public static function enqueue($input = '', $priority = Priority::NORMAL)
     {
         $cmd = static::queueable($priority);
+        return $cmd($input);
+    }
+
+    public static function enqueueAsUnique($input = '', $priority = Priority::NORMAL)
+    {
+        $cmd = static::queueableAsUnique($priority);
         return $cmd($input);
     }
 

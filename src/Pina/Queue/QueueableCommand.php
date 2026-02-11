@@ -13,6 +13,7 @@ class QueueableCommand extends Command
 {
     protected $cmd;
     protected $priority;
+    protected bool $unique;
 
     /**
      * QueueableCommand constructor.
@@ -20,7 +21,7 @@ class QueueableCommand extends Command
      * @param int $priority
      * @throws Exception
      */
-    public function __construct(string $cmd, int $priority = Priority::NORMAL)
+    public function __construct(string $cmd, int $priority = Priority::NORMAL, bool $unique = false)
     {
         if (!class_exists($cmd)) {
             throw new Exception('Expected an existsed class ' . $cmd);
@@ -30,13 +31,13 @@ class QueueableCommand extends Command
         }
         $this->cmd = $cmd;
         $this->priority = $priority;
+        $this->unique = $unique;
     }
 
     protected function execute($data = '')
     {
-        App::queue()->push($this->cmd, $data, $this->priority);
+        App::queue()->push($this->cmd, $data, $this->priority, $this->unique);
         return '';
     }
-
 
 }
