@@ -55,6 +55,10 @@ class QueueEndpoint extends RichEndpoint
             $view->append($this->makeActionButton(__('Удалить'), $this->location()->resource('@'), 'delete'));
         }
 
+        if (empty($data['worker_id']) && !empty($data['delay'])) {
+            $view->append($this->makeActionButton(__('В начало очереди'), $this->location()->resource('@'), 'put'));
+        }
+
         return $view;
     }
 
@@ -70,6 +74,15 @@ class QueueEndpoint extends RichEndpoint
         }
         QueueGateway::instance()->whereId($id)->whereNull('worker_id')->delete();
         return Response::ok()->contentLocation($this->base()->link('@'));
+    }
+
+    public function update($id)
+    {
+        if (is_null($id)) {
+            return Response::badRequest();
+        }
+        QueueGateway::instance()->whereId($id)->whereNull('worker_id')->whereNotBy('delay', 0)->pullToHead();
+        return Response::ok()->contentLocation($this->location()->link('@'));
     }
 
     public function indexActiveTriggers()

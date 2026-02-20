@@ -75,4 +75,10 @@ class QueueGateway extends TableDataGateway
         );
     }
 
+    public function pullToHead()
+    {
+        $alias = $this->getAlias();
+        return $this->updateOperation($alias . '.scheduled_at=NOW(), ' . $alias . '.delay=0');
+    }
+
 }
