@@ -18,6 +18,19 @@ class DatabaseDriver
         $this->connect();
     }
 
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    public function close()
+    {
+        if ($this->conn) {
+            mysqli_close($this->conn);
+            $this->conn = null;
+        }
+    }
+
     protected function connect()
     {
         $config = Config::load('db');
