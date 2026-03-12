@@ -48,6 +48,11 @@ abstract class DataCollection
         return $this->makeQuery()->getSchema()->forgetDetailed();
     }
 
+    public function getFilterSearchSchema($context = []): Schema
+    {
+        return $this->getSchema($context);
+    }
+
     /**
      * Схема формы создания элемента
      * @return Schema
@@ -80,10 +85,10 @@ abstract class DataCollection
     public function getFilterSchema($context = []): Schema
     {
         $schema = new Schema();
-        if ($this->getSchema($context)->hasSearchable()) {
+        if ($this->getFilterSearchSchema($context)->hasSearchable()) {
             $schema->add('search', __('Поиск'), SearchType::class);
         }
-        $schema->merge($this->getSchema($context)->forgetNotFiltrable());
+        $schema->merge($this->getFilterSearchSchema($context)->forgetNotFiltrable());
         $schema->setStatic(false)->setNullable()->setMandatory(false);
         foreach ($context as $k => $v) {
             $schema->forgetField($k);
@@ -442,7 +447,7 @@ abstract class DataCollection
         $schema = $this->getFilterSchema($context);
         $contextSchema = $this->getSchema($context)->fieldset(array_keys($context))->makeSchema();
         $schema->merge($contextSchema);
-        return $this->makeQuery()->whereSearch($filters['search'] ?? '', $this->getSchema())->whereFilters(array_merge($filters, $context), $schema);
+        return $this->makeQuery()->whereSearch($filters['search'] ?? '', $this->getFilterSearchSchema())->whereFilters(array_merge($filters, $context), $schema);
     }
 
     /**
