@@ -89,11 +89,11 @@ class Router
 
     public function handle()
     {
-        if (App::host() != Input::getHost()) {
-            header('HTTP/1.1 301 Moved Permanently');
-            header('Location: ' . App::link($_SERVER['REQUEST_URI']));
-            exit;
-        }
+//        if (App::host() != Input::getHost()) {
+//            header('HTTP/1.1 301 Moved Permanently');
+//            header('Location: ' . App::link($_SERVER['REQUEST_URI']));
+//            exit;
+//        }
 
         $method = Input::getMethod();
         if (!in_array($method, array('get', 'put', 'delete', 'post', 'options'))) {
