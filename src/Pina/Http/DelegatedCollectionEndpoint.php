@@ -73,34 +73,42 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
      */
     public function index()
     {
+        $this->makeConfiguredCollectionComposer()->index($this->location());
+
         $filters = $this->getFilterRecord();
         $contextAndFilters = array_merge($filters->getData(), $this->context()->all());
 
         $this->exportIfNeeded($contextAndFilters);
 
-        $collection = $this->makeDataCollection();
-        $data = $collection->getList($filters->getData(), $this->request()->get('page', 0), $this->request()->get("paging", 25), $this->context()->all());
+        $data = $this->makeDataCollection()->getList($filters->getData(), $this->request()->get('page', 0), $this->request()->get("paging", 25), $this->context()->all());
 
+        $this->pushIndexProcessors($data);
+
+        return $this->makeCollectionView($data)
+            ->after($this->makePagingControl($data->getPaging()))
+            ->after($this->makeIndexButtons())
+            ->before($this->makeTabs())
+            ->wrap($this->makeIndexSidebarWrapper($data));
+    }
+
+    protected function pushIndexProcessors(DataTable $data)
+    {
         $data->getSchema()->pushHtmlProcessor(new CollectionItemLinkProcessor($data->getSchema(), $this->location(), [], $this->context()->all()));
+    }
 
-        $this->makeConfiguredCollectionComposer()->index($this->location());
-
+    protected function makeIndexSidebarWrapper(DataTable $data): SidebarWrapper
+    {
         $sidebarWrapper = $this->makeSidebarWrapper();
         if ($data->count() || $this->query()->all()) {
             //если данных нет и нет поискового запроса, который обнулил данные,
             // то не имеет смысла показывать форму фильтрации,
             // а кнопка добавить внизу списка будет практически наверху, зачем ее дублировать
             $sidebarWrapper->addToSidebar($this->makeFilterForm());
-            if (!$collection->getCreationSchema()->isEmpty()) {
+            if (!$this->makeDataCollection()->getCreationSchema()->isEmpty()) {
                 $sidebarWrapper->addToSidebar($this->makeCreateButton());
             }
         }
-
-        return $this->makeCollectionView($data)
-            ->after($this->makePagingControl($data->getPaging()))
-            ->after($this->makeIndexButtons())
-            ->before($this->makeTabs())
-            ->wrap($sidebarWrapper);
+        return $sidebarWrapper;
     }
 
     public function indexContextMenu($id)
