@@ -11,6 +11,16 @@ class ModuleRegistry implements IteratorAggregate
     protected $bootOrder = [];
     protected $registry = [];
 
+    public function __construct()
+    {
+        $modules = Config::load('modules');
+        if (is_array($modules)) {
+            foreach ($modules as $module) {
+                $this->load($module);
+            }
+        }
+    }
+
     public function load($module)
     {
         if (isset($this->registry[$module])) {
@@ -45,31 +55,6 @@ class ModuleRegistry implements IteratorAggregate
     public function getIterator(): \Traversable
     {
         return new ArrayIterator($this->registry);
-    }
-
-    /**
-     * @deprecated в пользу метода App::onLoad
-     * @param $method
-     * @return void
-     */
-    public function boot($method = null)
-    {
-        $this->load(Module::class);
-
-        $modules = Config::load('modules');
-        if (is_array($modules)) {
-            foreach ($modules as $ns) {
-                $this->load($ns . '\\Module');
-            }
-        }
-
-        foreach ($this->bootOrder as $ns) {
-            $module = $this->registry[$ns];
-            if (!$method || !method_exists($module, $method)) {
-                continue;
-            }
-            $module->$method();
-        }
     }
 
     public function get($module)
@@ -145,7 +130,7 @@ class ModuleRegistry implements IteratorAggregate
      */
     public function walkClassNames(string $type, callable $callback)
     {
-    $paths = $this->getPaths();
+        $paths = $this->getPaths();
         foreach ($paths as $ns => $path) {
             $this->walkClassNamesInPath($ns, $path, $type, $callback);
         }
