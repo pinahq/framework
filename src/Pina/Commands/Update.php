@@ -13,10 +13,20 @@ class Update extends Command
 
     protected function execute($input = '')
     {
+        $this->prepare();
+        $this->upgrade($input);
+        $this->install();
+    }
+
+    protected function prepare()
+    {
         App::modules()->walkRootClasses('Installation', function($cl) {
             $cl->prepare();
         });
+    }
 
+    protected function upgrade($input)
+    {
         $upgrades = $this->getUpgrades($input == 'force');
 
         if ($input == 'test') {
@@ -24,14 +34,7 @@ class Update extends Command
             return;
         }
 
-        foreach ($upgrades as $upgrade) {
-            echo $upgrade . "\n";
-            App::db()->query($upgrade);
-        }
-
-        App::modules()->walkRootClasses('Installation', function($cl) {
-            $cl->install();
-        });
+        $this->doUpgrades($upgrades);
     }
 
     protected function getUpgrades($forceTriggers = false)
@@ -52,6 +55,21 @@ class Update extends Command
         $upgrades = array_merge($firstUpgrades, $lastUpgrades, TriggerUpgrade::getUpgrades($triggers, $forceTriggers));
 
         return $upgrades;
+    }
+
+    protected function doUpgrades($upgrades)
+    {
+        foreach ($upgrades as $upgrade) {
+            echo $upgrade . "\n";
+            App::db()->query($upgrade);
+        }
+    }
+
+    protected function install()
+    {
+        App::modules()->walkRootClasses('Installation', function($cl) {
+            $cl->install();
+        });
     }
 
 }
