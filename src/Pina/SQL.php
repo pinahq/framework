@@ -432,6 +432,11 @@ class SQL
         return $this;
     }
 
+    public function selectDistinct(string $field)
+    {
+        return $this->calculate('DISTINCT ' . $this->getAlias() . '.' . $field, $field);
+    }
+
     /**
      * Добавляет в запрос вычисление поля с псевданимом
      * @param string $field
