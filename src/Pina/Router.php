@@ -173,7 +173,7 @@ class Router
                 throw new NotFoundException();
             }
 
-            $r = call_user_func_array([$inst, $action], array_values($params));
+            $r = call_user_func_array([$inst, $action], $this->resolveParams($params, $c));
         } catch (\Exception $e) {
             throw $e;
         } finally {
@@ -181,6 +181,13 @@ class Router
         }
 
         return $r;
+    }
+
+    protected function resolveParams($params, $c)
+    {
+        $parts = count(explode('/', $c));
+        $offset = $parts - 1;
+        return array_slice(array_reverse(array_values($params)), $offset);
     }
 
     protected function makeRequest($resource, $c, $data, $pattern)
