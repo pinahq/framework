@@ -34,6 +34,7 @@ class ControllerTest extends TestCase
                 'payload' => '123',
                 'priority' => '1',
                 'delay' => '0',
+                'error' => '',
                 'worker_id' => null,
                 'created_at' => '2020-01-02 03:04:05',
                 'scheduled_at' => null,
@@ -45,6 +46,7 @@ class ControllerTest extends TestCase
                 'payload' => '124',
                 'priority' => '2',
                 'delay' => '0',
+                'error' => '',
                 'worker_id' => null,
                 'created_at' => '2020-01-02 04:05:06',
                 'scheduled_at' => null,
@@ -56,6 +58,7 @@ class ControllerTest extends TestCase
                 'payload' => '125',
                 'priority' => '1',
                 'delay' => '0',
+                'error' => '',
                 'worker_id' => null,
                 'created_at' => '2020-01-02 05:06:07',
                 'scheduled_at' => null,
@@ -85,7 +88,7 @@ class ControllerTest extends TestCase
 
         $expectedHtml = '<div class="card"><div class="card-body">'
             . '<table class="table table-hover">'
-            . '<tr><th>ID</th><th>Handler</th><th>Payload</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
+            . '<tr><th>ID</th><th>Handler</th><th>Payload</th><th>Priority</th><th>Delay</th><th>Error</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
             . $tableContent
             . '</table>'
             . '</div></div>';
@@ -113,7 +116,8 @@ class ControllerTest extends TestCase
 
         $router = App::router();
 //        $router->register('cron-events', CronEventEndpoint::class);
-        $router->register('lk/:profile_id/cron-events', QueueEndpoint::class);
+        $router->register('lk/:profile_id/cron-events', QueueEndpoint::class)->permit('public');
+        App::access()->addGroup('public');
 
 //        $html = $router->run("cron-events", 'get')->drawWithWrappers();
 //        $this->assertEquals($expectedHtml, $html);
@@ -231,10 +235,11 @@ class ControllerTest extends TestCase
 
     private function getStaticFormInner()
     {
-        return '<div class="form-group"><label class="control-label">Event</label><div class="form-control-static">order.paid</div></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><div class="form-control-static">123</div></div>'
+        return '<div class="form-group"><label class="control-label">Handler</label><div class="form-control-static">order.paid</div></div>'
+            . '<div class="form-group"><label class="control-label">Payload</label><div class="form-control-static">123</div></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><div class="form-control-static">1</div></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><div class="form-control-static">0</div></div>'
+            . '<div class="form-group"><label class="control-label">Error</label><div class="form-control-static"></div></div>'
             . '<div class="form-group"><label class="control-label">Worker ID</label><div class="form-control-static">-</div></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
@@ -243,10 +248,11 @@ class ControllerTest extends TestCase
 
     private function getEditFormInner()
     {
-        return '<div class="form-group"><label class="control-label">Event *</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+        return '<div class="form-group"><label class="control-label">Handler *</label><input type="text" class="form-control" name="handler" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Payload</label><textarea class="form-control" name="payload" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
+            . '<div class="form-group"><label class="control-label">Error</label><input type="text" class="form-control" name="error" value=""></div>'
             . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><div class="form-control-static">2020-01-02 03:04:05</div></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'
@@ -254,10 +260,11 @@ class ControllerTest extends TestCase
     }
     private function getForcedEditFormInner()
     {
-        return '<div class="form-group"><label class="control-label">Event *</label><input type="text" class="form-control" name="event" value="order.paid"></div>'
-            . '<div class="form-group"><label class="control-label">Data</label><textarea class="form-control" name="data" rows="3">123</textarea></div>'
+        return '<div class="form-group"><label class="control-label">Handler *</label><input type="text" class="form-control" name="handler" value="order.paid"></div>'
+            . '<div class="form-group"><label class="control-label">Payload</label><textarea class="form-control" name="payload" rows="3">123</textarea></div>'
             . '<div class="form-group"><label class="control-label">Priority</label><input type="text" class="form-control" name="priority" value="1"></div>'
             . '<div class="form-group"><label class="control-label">Delay</label><input type="text" class="form-control" name="delay" value="0"></div>'
+            . '<div class="form-group"><label class="control-label">Error</label><input type="text" class="form-control" name="error" value=""></div>'
             . '<div class="form-group"><label class="control-label">Worker ID</label><input type="text" class="form-control" name="worker_id"></div>'
             . '<div class="form-group"><label class="control-label">Created at</label><input type="text" class="form-control" name="created_at" value="2020-01-02 03:04:05"></div>'
             . '<div class="form-group"><label class="control-label">Scheduled at</label><input type="text" class="form-control" name="scheduled_at" value="2020-01-02 03:04:05"></div>'

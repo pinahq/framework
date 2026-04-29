@@ -228,6 +228,7 @@ class SchemaTest extends TestCase
             'payload' => "mediumblob DEFAULT NULL",
             'priority' => "int(11) NOT NULL DEFAULT 0",
             'delay' => "int(11) NOT NULL DEFAULT 0",
+            'error' => "varchar(1000) NOT NULL DEFAULT ''",
             'worker_id' => "int(11) DEFAULT NULL",
             'created_at' => "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
             'scheduled_at' => "timestamp DEFAULT NULL",
