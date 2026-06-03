@@ -11,7 +11,6 @@ class Queue
             $queued = QueueGateway::instance()
                 ->whereBy('handler', $handler)
                 ->whereBy('payload', $payload)
-                ->whereNull('worker_id')
                 ->exists();
 
             if ($queued) {
