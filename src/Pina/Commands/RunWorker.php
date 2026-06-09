@@ -87,4 +87,8 @@ class RunWorker extends Command
         return  $number < $margin ? Priority::LOW : $number - $margin;
     }
 
+    protected function log($message, $output = null)
+    {
+        //команда не фиксирует свой запуск в лог
+    }
 }

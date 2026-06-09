@@ -21,4 +21,9 @@ class RunScheduler extends Command
         }
         $scheduler->run();
     }
+
+    protected function log($message, $output = null)
+    {
+        //команда не фиксирует свой запуск в лог
+    }
 }

@@ -65,9 +65,9 @@ abstract class Command
 
     public function __invoke($input = '')
     {
-        Log::info('command', 'Started', ['class' => get_class($this), 'input' => $input]);
-
         $this->input = $input;
+
+        $this->log('Started');
 
         foreach ($this->before as $cmd) {
             $cmd($input);
@@ -79,13 +79,29 @@ abstract class Command
             $cmd($input);
         }
 
-        Log::info('command', 'Done', ['class' => get_class($this), 'input' => $input, 'output' => $output]);
+        $this->log('Done', $output);
+
         return $output;
     }
 
     public function __toString()
     {
         return get_class($this) . '(' . $this->input . ')';
+    }
+
+    protected function log($message, $output = null)
+    {
+        $log = $this->__toString() . ' ' . $message;
+        $context = [];
+        if (!empty($output)) {
+            if (is_object($output)) {
+                $context['output'] = $output;
+            }
+            if (is_string($output)) {
+                $log .= ': ' . $output;
+            }
+        }
+        Log::info('command', $log, $context);
     }
 
 }
