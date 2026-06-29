@@ -55,9 +55,11 @@ class CLI
                 echo $command->__toString() . ' ' . round($totalTime, 4) . 's ' . $memory . 'M done.' . "\n";
 
             } catch (\Exception $e) {
-                Log::error('cli', $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
+                $errorCode = $e->getCode() ?: 1;
+                Log::error('cli', 'Error ' . $errorCode. ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), $e->getTrace());
                 echo $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n";
                 echo $command->__toString() . ' failed.' . "\n";
+                exit($errorCode);
             }
 
             break;
