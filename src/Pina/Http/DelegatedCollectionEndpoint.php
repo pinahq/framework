@@ -306,7 +306,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         return Response::ok()->contentLocation($this->base()->link('@/:id', ['id' => $id]));
     }
 
-    public function updateField($tmp, $id)
+    public function updateField($id)
     {
         $data = $this->request()->all();
         $context = $this->context()->all();
@@ -316,7 +316,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         return Response::ok();
     }
 
-    public function storeRelation($tmp, $id)
+    public function storeRelation($id)
     {
         $data = $this->request()->all();
         $context = $this->context()->all();
@@ -330,7 +330,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
         return Response::ok();
     }
 
-    public function destroyRelation($tmp, $id)
+    public function destroyRelation($id)
     {
         $data = $this->request()->all();
         $context = $this->context()->all();
