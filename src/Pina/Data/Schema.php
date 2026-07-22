@@ -784,10 +784,11 @@ class Schema implements IteratorAggregate
      */
     public function processListAsData(array &$data): array
     {
+        $r = [];
         foreach ($data as $k => $line) {
-            $data[$k] = $this->processLineAsData($line);
+            $r[$k] = $this->processLineAsData($line);
         }
-        return $data;
+        return $r;
     }
 
     protected function formatLine(array &$line, ?string $onlyFieldName = null): array
@@ -849,11 +850,11 @@ class Schema implements IteratorAggregate
      */
     public function processListAsText(array &$data): array
     {
+        $r = [];
         foreach ($data as $k => $line) {
-
-            $data[$k] = $this->processLineAsText($line);
+            $r[$k] = $this->processLineAsText($line);
         }
-        return $data;
+        return $r;
     }
 
     protected function drawLine(array &$line, ?string $onlyFieldName = null): array
@@ -911,10 +912,11 @@ class Schema implements IteratorAggregate
      */
     public function processListAsHtml(array &$data): array
     {
+        $r = [];
         foreach ($data as $k => $line) {
-            $data[$k] = $this->processLineAsHtml($line);
+            $r[$k] = $this->processLineAsHtml($line);
         }
-        return $data;
+        return $r;
     }
 
     protected function playLine(array &$line, ?string $onlyFieldName = null): array
@@ -973,10 +975,11 @@ class Schema implements IteratorAggregate
      */
     public function processListAsInteractive(array &$data): array
     {
+        $r = [];
         foreach ($data as $k => $line) {
-            $data[$k] = $this->processLineAsInteractive($line);
+            $r[$k] = $this->processLineAsInteractive($line);
         }
-        return $data;
+        return $r;
     }
 
 
