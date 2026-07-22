@@ -109,7 +109,7 @@ class SQL
     /**
      * Создает конструктор запроса
      */
-    protected function __construct(DefinitionInterface $definition, ?DatabaseDriver $db = null)
+    public function __construct(DefinitionInterface $definition, ?DatabaseDriver $db = null)
     {
         $this->db = $db ?? App::db();
         $this->definition = $definition;
