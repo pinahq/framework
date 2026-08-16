@@ -103,7 +103,7 @@ class CollectionComposer
             $parts = [];
             foreach ($record->getSchema() as $field) {
                 if ($field->hasTag('title')) {
-                    $parts[] = $record->getMeta($field->getName());
+                    $parts[] = $record->getTextValue($field->getName());
                 }
             }
             $title = implode(' ', $parts);
