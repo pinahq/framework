@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Pina\Controls;
 
+use Pina\Container\Overridable;
 
-class AttributedBlock
+class AttributedBlock extends Overridable
 {
     /**
      * @var string[]
