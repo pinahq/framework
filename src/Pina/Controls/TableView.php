@@ -34,6 +34,13 @@ class TableView extends Card
         return $this;
     }
 
+    public static function make(?DataTable $dataTable = null)
+    {
+        $inst = parent::make();
+        $inst->dataTable = $dataTable;
+        return $inst;
+    }
+
     /**
      * @param DataTable $dataTable
      */
