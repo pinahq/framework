@@ -91,7 +91,7 @@ class ControllerTest extends TestCase
             . '<tr><th>ID</th><th>Handler</th><th>Payload</th><th>Priority</th><th>Delay</th><th>Error</th><th>Worker ID</th><th>Created at</th><th>Scheduled at</th><th>Started at</th></tr>'
             . $tableContent
             . '</table>'
-            . '</div></div>';
+            . '</div></div><a class="btn btn-default" href="lk/1/cron-events/create">Добавить</a>';
 
 
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);

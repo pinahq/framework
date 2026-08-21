@@ -3,6 +3,7 @@
 namespace Pina\Queue;
 
 use Pina\App;
+use Pina\Command;
 use Pina\Controls\RecordView;
 use Pina\Controls\UnorderedList;
 use Pina\Data\DataRecord;
@@ -28,7 +29,7 @@ class QueueEndpoint extends RichEndpoint
         $schema = $query->getQuerySchema();
         $schema->pushHtmlProcessor(new CollectionItemLinkProcessor($schema, $this->location()));
 
-        return $this->makeTableView(new DataTable($data, $schema));
+        return $this->makeTableView(new DataTable($data, $schema))->after($this->makeLinkedButton(__('Добавить'), $this->location()->link('@/create')));
     }
 
     /**
@@ -83,6 +84,31 @@ class QueueEndpoint extends RichEndpoint
         }
         QueueGateway::instance()->whereId($id)->whereNull('worker_id')->whereNotBy('delay', 0)->pullToHead();
         return Response::ok()->contentLocation($this->location()->link('@'));
+    }
+
+    public function create()
+    {
+        $this->makeCollectionComposer($this->title(), __('Добавить'))->create($this->location());
+
+        return $this->makeRecordForm($this->base()->link('@'), 'post', new DataRecord([], $this->getCreationSchema()));
+    }
+
+    public function store()
+    {
+        $normalized = $this->getCreationSchema()->normalize($this->request()->all());
+        if (!class_exists($normalized['handler'])) {
+            return Response::badRequest(__('Класс не существует'), 'handler');
+        }
+        if (!is_subclass_of($normalized['handler'], Command::class)) {
+            return Response::badRequest(__('Класс не является командой'), 'handler');
+        }
+        call_user_func([$normalized['handler'], 'enqueue'], $normalized['payload']);
+        return Response::ok()->contentLocation($this->base()->link('@'));
+    }
+
+    protected function getCreationSchema()
+    {
+        return QueueGateway::instance()->getSchema()->fieldset(['handler', 'payload'])->makeSchema();
     }
 
     public function indexActiveTriggers()
