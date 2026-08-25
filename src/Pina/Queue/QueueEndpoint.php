@@ -2,65 +2,54 @@
 
 namespace Pina\Queue;
 
-use Pina\App;
 use Pina\Command;
-use Pina\Controls\RecordView;
+use Pina\Controls\ButtonRow;
 use Pina\Controls\UnorderedList;
+use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
-use Pina\Data\DataTable;
-use Pina\Http\RichEndpoint;
-use Pina\Processors\CollectionItemLinkProcessor;
+use Pina\Data\QueryDataCollection;
+use Pina\Http\DelegatedCollectionEndpoint;
 use Pina\Response;
 use function Pina\__;
 
-class QueueEndpoint extends RichEndpoint
+class QueueEndpoint extends DelegatedCollectionEndpoint
 {
-    public function title()
+    protected function getCollectionTitle(): string
     {
         return __('Очередь');
     }
 
-    public function index()
+    protected function makeDataCollection(): DataCollection
     {
-        $this->makeCollectionComposer($this->title())->index($this->location());
-        $query = QueueGateway::instance();
-
-        $data = $query->get();
-        $schema = $query->getQuerySchema();
-        $schema->pushHtmlProcessor(new CollectionItemLinkProcessor($schema, $this->location()));
-
-        return $this->makeTableView(new DataTable($data, $schema))->after($this->makeLinkedButton(__('Добавить'), $this->location()->link('@/create')));
+        return new QueryDataCollection(QueueGateway::instance());
     }
 
-    /**
-     * @param $id
-     * @return RecordView
-     * @throws \Exception
-     */
-    public function show($id)
+    protected function makeViewButtonRow(DataRecord $record): ButtonRow
     {
-        $data = QueueGateway::instance()->findOrFail($id);
+        $row = parent::makeViewButtonRow($record);
 
-        $schema = QueueGateway::instance()->getSchema();
-        $schema->forgetField('id');
-
-        $record = new DataRecord($data, $schema);
-
-        /** @var RecordView $view */
-        $view = App::make(RecordView::class);
-        $view->load($record);
-
-        $this->makeCollectionComposer($this->title())->show($this->location(), $record);
-
-        if (empty($data['worker_id'])) {
-            $view->append($this->makeActionButton(__('Удалить'), $this->location()->resource('@'), 'delete'));
+        if (!$record->getValue('worker_id')) {
+            $row->append($this->makeActionButton(__('Удалить'), $this->location()->resource('@'), 'delete'));
         }
 
-        if (empty($data['worker_id']) && !empty($data['delay'])) {
-            $view->append($this->makeActionButton(__('В начало очереди'), $this->location()->resource('@'), 'put'));
+        if (!$record->getValue('worker_id') && $record->getValue('delay') > 0) {
+            $row->append($this->makeActionButton(__('В начало очереди'), $this->location()->resource('@'), 'put'));
         }
 
-        return $view;
+        return $row;
+    }
+
+    public function store()
+    {
+        $normalized = $this->makeDataCollection()->getCreationSchema()->normalize($this->request()->all());
+        if (!class_exists($normalized['handler'])) {
+            return Response::badRequest(__('Класс не существует'), 'handler');
+        }
+        if (!is_subclass_of($normalized['handler'], Command::class)) {
+            return Response::badRequest(__('Класс не является командой'), 'handler');
+        }
+        call_user_func([$normalized['handler'], 'enqueue'], $normalized['payload'], $normalized['priority']);
+        return Response::ok()->contentLocation($this->base()->link('@'));
     }
 
     /**
@@ -84,31 +73,6 @@ class QueueEndpoint extends RichEndpoint
         }
         QueueGateway::instance()->whereId($id)->whereNull('worker_id')->whereNotBy('delay', 0)->pullToHead();
         return Response::ok()->contentLocation($this->location()->link('@'));
-    }
-
-    public function create()
-    {
-        $this->makeCollectionComposer($this->title(), __('Добавить'))->create($this->location());
-
-        return $this->makeRecordForm($this->base()->link('@'), 'post', new DataRecord([], $this->getCreationSchema()));
-    }
-
-    public function store()
-    {
-        $normalized = $this->getCreationSchema()->normalize($this->request()->all());
-        if (!class_exists($normalized['handler'])) {
-            return Response::badRequest(__('Класс не существует'), 'handler');
-        }
-        if (!is_subclass_of($normalized['handler'], Command::class)) {
-            return Response::badRequest(__('Класс не является командой'), 'handler');
-        }
-        call_user_func([$normalized['handler'], 'enqueue'], $normalized['payload']);
-        return Response::ok()->contentLocation($this->base()->link('@'));
-    }
-
-    protected function getCreationSchema()
-    {
-        return QueueGateway::instance()->getSchema()->fieldset(['handler', 'payload'])->makeSchema();
     }
 
     public function indexActiveTriggers()

@@ -26,17 +26,17 @@ class QueueGateway extends TableDataGateway
     public function getSchema(): Schema
     {
         $schema = parent::getSchema();
-        $schema->add('id', 'ID', UUIDType::class)->setMandatory();
+        $schema->add('id', 'ID', UUIDType::class)->setMandatory()->setImmutable()->setStatic();
         $schema->setPrimaryKey('id');
-        $schema->add('handler', 'Handler', StringType::class)->setMandatory();
-        $schema->add('payload', 'Payload', BlobType::class);
-        $schema->add('priority', 'Priority', IntegerType::class);
-        $schema->add('delay', 'Delay', IntegerType::class);
-        $schema->add('error', 'Error', LongStringType::class)->setDetailed();
-        $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable();
+        $schema->add('handler', 'Handler', StringType::class)->setMandatory()->setImmutable();
+        $schema->add('payload', 'Payload', BlobType::class)->setImmutable();
+        $schema->add('priority', 'Priority', IntegerType::class)->setImmutable();
+        $schema->add('delay', 'Delay', IntegerType::class)->setStatic();
+        $schema->add('error', 'Error', LongStringType::class)->setDetailed()->setStatic();
+        $schema->add('worker_id', 'Worker ID', IntegerType::class)->setNullable()->setStatic();
         $schema->addCreatedAt('Created at');
-        $schema->add('scheduled_at', 'Scheduled at', TimestampType::class)->setNullable();
-        $schema->add('started_at', 'Started at', TimestampType::class)->setNullable();
+        $schema->add('scheduled_at', 'Scheduled at', TimestampType::class)->setNullable()->setStatic();
+        $schema->add('started_at', 'Started at', TimestampType::class)->setNullable()->setStatic();
         $schema->addKey(['priority', 'scheduled_at']);
         return $schema;
     }
