@@ -16,7 +16,7 @@ class App
     /** @var SingletonContainer */
     private static $singletons = null;
 
-    /** @var ContainerInterface */
+    /** @var Container */
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
