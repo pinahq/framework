@@ -8,84 +8,19 @@ use Pina\Model\LinkedItem;
 use Pina\Model\LinkedItemCollection;
 use Pina\Router\DispatcherInterface;
 use Pina\Router\RouteGroup;
+use Pina\Router\RouteLocator;
 
-class Router
+class Router extends RouteGroup
 {
-    /** @var \Pina\Router\Route[]  */
-    protected $items = [];
 
     /** @var DispatcherInterface[] */
     protected $dispatchers = [];
-
-    protected $fallbacks = [];
-
-    /**
-     * @param string $pattern
-     * @param string $class
-     */
-    public function register($pattern, $class): \Pina\Router\Route
-    {
-        $route = new \Pina\Router\Route($pattern, $class);
-        $this->items[$route->getController()] = $route;
-        return $route;
-    }
 
     public function registerDispatcher(DispatcherInterface $dispatcher)
     {
         $this->dispatchers[] = $dispatcher;
     }
 
-    public function isPermitted($resource)
-    {
-        return App::access()->isHandlerPermitted($resource);
-    }
-
-    public function makeGroup($tags = [])
-    {
-        return new RouteGroup($this, $tags);
-    }
-
-    public function getPatterns()
-    {
-        $patterns = [];
-        foreach ($this->items as $item) {
-            $patterns[] = $item->getPattern();
-        }
-        return $patterns;
-    }
-
-    /**
-     * @param string $resource
-     * @param string $method
-     * @return bool
-     */
-    public function exists($resource, $method)
-    {
-        list($controller, $action, $params) = Url::route($resource, $method);
-
-        $c = $this->base($controller);
-
-        if (is_null($c)) {
-            return false;
-        }
-
-        $action .= $this->calcDeeperAction($resource, $this->items[$c]->getPattern());
-
-        return method_exists($this->items[$c]->getEndpoint(), $action);
-    }
-
-    public function getEndpointClass($resource): ?string
-    {
-        $controller = Url::controller($resource);
-
-        $c = $this->base($controller);
-
-        if (is_null($c)) {
-            return null;
-        }
-
-        return isset($this->items[$c]) ? $this->items[$c]->getEndpoint() : null;
-    }
 
     public function handle()
     {
@@ -118,13 +53,13 @@ class Router
             exit;
         }
 
+        if (!CSRF::verify()) {
+            Response::forbidden()->send();
+            return;
+        }
+
         try {
-            $response = $this->run($resource, $method, Input::getData());
-            if ($response instanceof ResponseInterface) {
-                $response->send();
-            } else {
-                throw new NotFoundException;
-            }
+            $this->run($this->dispatch($resource), $method, Input::getData());
         } catch (BadRequestException $e) {
             Response::badRequest()->setErrors($e->getErrors())->send();
         } catch (NotFoundException $e) {
@@ -132,7 +67,28 @@ class Router
         } catch (ForbiddenException $e) {
             Response::forbidden()->send();
         }
+    }
 
+    /**
+     * @param string $resource
+     * @param string $method
+     * @return bool
+     */
+    public function exists($resource, $method)
+    {
+        if (!$this->isPermitted($resource)) {
+            return null;
+        }
+
+        list($controller, $action, $params) = Url::route($resource, $method);
+
+        $locator = $this->locateRoute($controller);
+        if ($locator === null) {
+            return false;
+        }
+
+        $action .= $locator->calcDeeperAction($resource);
+        return $locator->getRoute()->exists($action);
     }
 
     /**
@@ -143,51 +99,48 @@ class Router
      * @return mixed
      * @throws Container\NotFoundException
      */
-    public function run($resource, $method, $data = [])
+    public function call($resource, $method, $data = [])
     {
-        $resource = $this->dispatch($resource);
-
-        list($controller, $action, $params) = Url::route($resource, $method);
-        if (!CSRF::verify($controller, $data)) {
-            return Response::forbidden();
-        }
-
         if (!$this->isPermitted($resource)) {
-            return Response::forbidden();
+            return null;
         }
 
-        $c = $this->base($controller);
-        if ($c === null) {
-            return $this->fallback($resource, $method, $data);
+        $r = null;
+        $this->locate($resource, $method, $data, function(RouteLocator $locator, $action, $params) use (&$r) {
+            $r = $locator->callRoute($action, $params);
+        });
+        return $r;
+    }
+
+    protected function run($resource, $method, $data = [])
+    {
+        if (!$this->isPermitted($resource)) {
+            Response::forbidden()->send();
+            return;
         }
 
-        $pattern = $this->items[$c]->getPattern();
+        $this->locate($resource, $method, $data, function(RouteLocator $locator, $action, $params) {
+            $locator->runRoute($action, $params);
+        });
+    }
 
-        App::pushRequest($this->makeRequest($resource, $c, $data, $pattern));
+    protected function locate($resource, $method, $data, callable $fn)
+    {
+        list($controller, $action, $params) = Url::route($resource, $method);
+        $locator = $this->locateRoute($controller);
+        if ($locator === null) {
+            return;
+        }
+
+        App::pushRequest($this->makeRequest($resource, $locator->getRoute()->getController(), $data, $locator->getRoute()->getPattern()));
         try {
-            $inst = $this->items[$c]->makeEndpoint();
-
-            $action .= $this->calcDeeperAction($resource, $pattern);
-
-            if (!method_exists($inst, $action)) {
-                throw new NotFoundException();
-            }
-
-            $r = call_user_func_array([$inst, $action], $this->resolveParams($params, $c));
+            $action .= $locator->calcDeeperAction($resource);
+            $fn($locator, $action, $params);
         } catch (\Exception $e) {
             throw $e;
         } finally {
             App::popRequest();
         }
-
-        return $r;
-    }
-
-    protected function resolveParams($params, $c)
-    {
-        $parts = count(explode('/', $c));
-        $offset = $parts - 1;
-        return array_slice(array_reverse(array_values($params)), $offset);
     }
 
     protected function makeRequest($resource, $c, $data, $pattern)
@@ -220,22 +173,6 @@ class Router
             }
         }
         return $resource;
-    }
-
-    protected function fallback($resource, $method, $data)
-    {
-        foreach ($this->fallbacks as $fallback) {
-            $router = App::load($fallback);
-            if ($router->exists($resource, $method)) {
-                return $router->run($resource, $method, $data);
-            }
-        }
-        throw new Container\NotFoundException;
-    }
-
-    public function addFallback($class)
-    {
-        $this->fallbacks[] = $class;
     }
 
     public function findChilds(string $resource)
@@ -274,7 +211,7 @@ class Router
             }
 
             try {
-                $title = $this->run($resource, 'title');
+                $title = $this->call($resource, 'title');
                 if ($title) {
                     $menu->add(new LinkedItem($title, '/' . $resource));
                 }
@@ -284,96 +221,6 @@ class Router
         return $menu;
     }
 
-    public function forgetByTag($tag)
-    {
-        foreach ($this->items as $k => $route) {
-            if ($route->hasTag($tag)) {
-                $route->clearPermission();
-                unset($this->items[$k]);
-            }
-        }
-    }
 
-    /**
-     * @param string $controller
-     * @return string|null
-     */
-    public function base($controller)
-    {
-        $controller = trim($controller, "/");
-        if (!empty($this->items[$controller])) {
-            return $controller;
-        }
-
-        $parts = explode("/", $controller);
-        for ($i = count($parts) - 2; $i >= 0; $i--) {
-            $c = implode("/", array_slice($parts, 0, $i + 1));
-            if (isset($this->items[$c])) {
-                return $c;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param string $resource
-     * @param string $pattern
-     * @param array $parsed
-     * @return bool
-     */
-    public function parse($resource, $pattern, &$parsed)
-    {
-        list($preg, $map) = Url::preg($pattern);
-        return $this->pregParse($resource, $preg, $map, $parsed);
-    }
-
-    /**
-     * @param string $resource
-     * @param string $preg
-     * @param array $map
-     * @param array $parsed
-     * @return bool
-     */
-    public function pregParse($resource, $preg, $map, &$parsed)
-    {
-        $parsed = [];
-        if (preg_match("/^" . $preg . "/si", $resource, $matches)) {
-            unset($matches[0]);
-            $matches = array_values($matches);
-            $parsed = array_combine($map, $matches);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @param string $resource
-     * @param string $pattern
-     * @return string
-     */
-    private function calcDeeperAction($resource, $pattern)
-    {
-        $deeper = [];
-        if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
-            $deeperAction = pathinfo($deeper['__action'], PATHINFO_FILENAME);
-
-            return $this->ucfirstEveryWord($deeperAction);
-        }
-
-        return '';
-    }
-
-    /**
-     * @param string $s
-     * @return string
-     */
-    private function ucfirstEveryWord($s)
-    {
-        $parts = preg_split("/[^\w]/s", $s);
-        foreach ($parts as $k => $v) {
-            $parts[$k] = ucfirst($v);
-        }
-        return implode($parts);
-    }
 
 }

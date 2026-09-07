@@ -119,7 +119,7 @@ class CollectionComposer
         if (!$location->resource('@')) {
             $links = new LinkedItemCollection();
             try {
-                $title = App::router()->run('/', 'title');
+                $title = App::router()->call('/', 'title');
                 if (is_string($title)) {
                     $links->add(new LinkedItem($title, '/'));
                 }
@@ -131,7 +131,7 @@ class CollectionComposer
         $links = $this->getParentLinks($location->location('@@'));
 
         try {
-            $title = App::router()->run($location->resource('@'), 'title');
+            $title = App::router()->call($location->resource('@'), 'title');
             if ($title && is_string($title)) {
                 $links->add(new LinkedItem($title, $location->link('@')));
             }

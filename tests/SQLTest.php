@@ -13,7 +13,7 @@ class SQLTest extends TestCase
     {
         Config::init(__DIR__.'/config');
         
-        App::container()->share(\Pina\DatabaseDriver::class, DatabaseDriverStub::class);
+        App::singletons()->set(\Pina\DatabaseDriver::class, DatabaseDriverStub::class);
 
         $q = SQL::table('cody_product')->makeByCondition(['=', SQL::SQL_OPERAND_FIELD, 'product_id', SQL::SQL_OPERAND_VALUE, 5]);
         $this->assertEquals("`cody_product`.`product_id` = '5'", $q);

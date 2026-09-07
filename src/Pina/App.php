@@ -3,16 +3,18 @@
 namespace Pina;
 
 use Pina\Container\Container;
-use Pina\Controls\Control;
-use Pina\DB\TriggerUpgrade;
+use Pina\Container\Environment;
+use Pina\Container\SingletonContainer;
 use Pina\Http\Location;
 use Pina\Queue\Queue;
 
 class App
 {
-
     private static $config = false;
-    private static $layout = null;
+
+    /** @var SingletonContainer */
+    private static $singletons = null;
+
     /** @var Container */
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
@@ -39,10 +41,12 @@ class App
         }
 
         self::$container = new Container;
-        self::$container->set('base_url', new Location(Input::getResource(), new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
 
-        static::$container->share('types', new Container());
-        static::$container->share('events', new Container());
+        self::$singletons = new SingletonContainer;
+        self::$singletons->set('base_url', new Location(Input::getResource(), new \Pina\Http\Url(self::scheme() . "://" . self::host() . "/")));
+
+        static::$singletons->set('types', new SingletonContainer());
+        static::$singletons->set('events', new SingletonContainer());
 
         if (Config::get('app', 'main')) {
             App::modules()->load(Config::get('app', 'main'));
@@ -58,19 +62,22 @@ class App
         return self::$container;
     }
 
+    public static function singletons()
+    {
+        return self::$singletons;
+    }
+
     public static function call(Container $env, Callable $fn)
     {
-        $back = static::$container;
-
-        $env->addFallback(static::$container);
-        static::$container = $env;
+        $environment = new Environment($env, static::$container);
+        static::$container = $environment;
 
         try {
             $fn();
         } catch (\Exception $e) {
             throw $e;
         } finally {
-            static::$container = $back;
+            static::$container = $environment->getParent();
         }
     }
 
@@ -109,21 +116,20 @@ class App
     public static function event($name): \Pina\Events\EventHandlerRegistry
     {
         /** @var Container $events */
-        $events = static::container()->get('events');
+        $events = static::singletons()->get('events');
         if ($events->has($name)) {
             return $events->get($name);
         }
-        $events->share($name, $e = new \Pina\Events\EventHandlerRegistry());
+        $events->set($name, $e = new \Pina\Events\EventHandlerRegistry());
         return $e;
     }
 
     /**
-     * Возвращает DI контейнер
-     * @return Container
+     * @return SingletonContainer
      */
     public static function types()
     {
-        return static::container()->get('types');
+        return static::singletons()->get('types');
     }
 
     /**
@@ -155,12 +161,12 @@ class App
         static $container = null;
 
         if (is_null($container)) {
-            $container = new Container();
+            $container = new SingletonContainer();
         }
 
         if (!$container->has($key)) {
             $composer = new Place\PlaceComposer($key);
-            $container->share($key, $composer);
+            $container->set($key, $composer);
         } else {
             /** @var Place\PlaceComposer $composer */
             $composer = $container->load($key);
@@ -174,7 +180,7 @@ class App
      */
     public static function make($id)
     {
-        return static::container()->make($id);
+        return static::container()->get($id);
     }
 
     /**
@@ -182,12 +188,12 @@ class App
      */
     public static function load($id)
     {
-        return static::container()->load($id);
+        return static::singletons()->load($id);
     }
 
     public static function onLoad($id, Callable $fn)
     {
-        static::$container->onLoad($id, $fn);
+        static::singletons()->onLoad($id, $fn);
     }
 
     /**
@@ -211,7 +217,7 @@ class App
     protected static function baseUrl(): Location
     {
         /** @var Location $location */
-        return static::$container->get('base_url');
+        return static::singletons()->get('base_url');
     }
 
     /**

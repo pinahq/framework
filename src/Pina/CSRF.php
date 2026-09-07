@@ -4,7 +4,7 @@ namespace Pina;
 
 class CSRF
 {
-    
+
     private static $whitelist = [];
     private static $expired = 3600;
     private static $saveMethods = ['get', 'head', 'options'];
@@ -18,12 +18,12 @@ class CSRF
         self::$whitelist = array_unique(array_merge(self::$whitelist, $list));
         return $list;
     }
-    
+
     public static function skipMethod($method)
     {
         self::$saveMethods[] = $method;
     }
-    
+
     private static function generate()
     {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ0123456789";
@@ -47,24 +47,30 @@ class CSRF
         if (!self::$token) {
             self::$token = self::generate();
         }
-        
+
         $expired = Config::get('app', 'csrf_token_expired');
         if (is_null($expired)) {
-             $expired = self::$expired;
+            $expired = self::$expired;
         }
-        
+
         @setcookie('csrf_token', self::$token, time() + $expired, '/');
     }
-    
+
     public static function token()
     {
         self::init();
         return self::$token;
     }
 
-    public static function verify($controller, $data)
+    public static function verify()
     {
-        if (in_array(Input::getMethod(), self::$saveMethods)) {
+        $resource = Input::getResource();
+        $method = Input::getMethod();
+        $data = Input::getData();
+
+        list($controller, $action, $params) = Url::route($resource, $method);
+
+        if (in_array($method, self::$saveMethods)) {
             return true;
         }
 
@@ -85,12 +91,12 @@ class CSRF
         if (!empty($header)) {
             return $header === $cookie;
         }
-        
+
         if (empty($data['csrf_token'])) {
             return false;
         }
-        
+
         return $data['csrf_token'] === $cookie;
     }
-    
+
 }

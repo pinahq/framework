@@ -27,7 +27,7 @@ class ContainerTest extends TestCase
         $this->assertEquals(1, $container->get('paging')->getCurrent());
         
         $paging = new \Pina\Paging(1, 10);
-        $container->share('paging', $paging);
+        $container->set('paging', $paging);
         $this->assertEquals(1, $container->get('paging')->getCurrent());
     }
     

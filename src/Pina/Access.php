@@ -2,7 +2,9 @@
 
 namespace Pina;
 
-class Access
+use Pina\Container\Singleton;
+
+class Access extends Singleton
 {
 
     protected $data = [];

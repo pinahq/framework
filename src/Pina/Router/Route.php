@@ -2,12 +2,12 @@
 
 namespace Pina\Router;
 
-use Pina\Access;
 use Pina\App;
 use Pina\Controls\Nav\Nav;
 use Pina\CSRF;
 use Pina\Http\Endpoint;
-use Pina\Http\Request;
+use Pina\NotFoundException;
+use Pina\ResponseInterface;
 use Pina\Url;
 
 class Route
@@ -15,7 +15,6 @@ class Route
 
     protected $pattern = '';
     protected $endpoint = '';
-    protected $tags = [];
 
     public function __construct(string $pattern, string $class)
     {
@@ -65,7 +64,7 @@ class Route
 
     public function addToMenu(Nav ...$menus)
     {
-        $endpoint = $this->makeEndpoint(new Request());
+        $endpoint = $this->makeEndpoint();
         if (!method_exists($endpoint, 'title')) {
             return $this;
         }
@@ -89,15 +88,35 @@ class Route
         return $this;
     }
 
-    public function addTag($tag)
+    public function exists($action)
     {
-        $this->tags[] = $tag;
-        return $this;
+        return method_exists($this->makeEndpoint(), $action);
     }
 
-    public function hasTag($tag): bool
+    public function run($action, $params)
     {
-        return in_array($tag, $this->tags);
+        $r = $this->call($action, $params);
+        if ($r) {
+            if ($r instanceof ResponseInterface) {
+                $r->send();
+            }
+        } else {
+            throw new NotFoundException();
+        }
+    }
+
+    public function call($action, $params = [])
+    {
+        $inst = $this->makeEndpoint();
+        if (!method_exists($inst, $action)) {
+            return null;
+        }
+        $r = call_user_func_array([$inst, $action], $params);
+        if ($r) {
+            return $r;
+        }
+
+        return null;
     }
 
 }
