@@ -7,6 +7,7 @@ use Pina\Container\Environment;
 use Pina\Container\SingletonContainer;
 use Pina\Http\Location;
 use Pina\Queue\Queue;
+use Psr\Container\ContainerInterface;
 
 class App
 {
@@ -15,7 +16,7 @@ class App
     /** @var SingletonContainer */
     private static $singletons = null;
 
-    /** @var Container */
+    /** @var ContainerInterface */
     private static $container = null;
     private static $supportedMimeTypes = ['text/html', 'application/json', '*/*'];
     private static $forcedMimeType = null;
@@ -67,7 +68,7 @@ class App
         return self::$singletons;
     }
 
-    public static function call(Container $env, Callable $fn)
+    public static function call(ContainerInterface $env, Callable $fn)
     {
         $environment = new Environment($env, static::$container);
         static::$container = $environment;
