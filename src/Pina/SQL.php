@@ -1253,12 +1253,12 @@ class SQL
 
     public function cacheShared($cacheSeconds = 1)
     {
-        return $this->cache($cacheSeconds, App::load(SharedCache::class));
+        return $this->cache($cacheSeconds, SharedCache::load());
     }
 
     public function cacheStatic($cacheSeconds = 1)
     {
-        return $this->cache($cacheSeconds, App::load(StaticCache::class));
+        return $this->cache($cacheSeconds, StaticCache::load());
     }
 
     public function cache($cacheSeconds = 1, ?CacheInterface $cacheStorage = null)

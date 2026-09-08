@@ -2,8 +2,11 @@
 
 namespace Pina\Events;
 
+use Pina\Container\SingletonTrait;
+
 class Bus
 {
+    use SingletonTrait;
 
     protected $listeners = [];
 

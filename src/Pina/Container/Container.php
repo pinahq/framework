@@ -2,20 +2,17 @@
 
 namespace Pina\Container;
 
-use Psr\Container\ContainerInterface;
-
-class Container implements ContainerInterface
+class Container extends AbstractCallbackContainer
 {
-
     protected $definitions = [];
-    protected $onMakeCallbacks = [];
+    protected $onTypeCallbacks = [];
 
-    public function onMake($type, Callable $callable)
+    public function onTypeGet($type, Callable $callable)
     {
-        if (!isset($this->onMakeCallbacks[$type])) {
-            $this->onMakeCallbacks[$type] = [];
+        if (!isset($this->onTypeCallbacks[$type])) {
+            $this->onTypeCallbacks[$type] = [];
         }
-        $this->onMakeCallbacks[$type][] = $callable;
+        $this->onTypeCallbacks[$type][] = $callable;
     }
 
     public function set($id, $concrete)
@@ -24,17 +21,17 @@ class Container implements ContainerInterface
         $this->definitions[$id] = $concrete;
     }
 
-    public function get(string $id)
+    public function resolve(string $id)
     {
         if (isset($this->definitions[$id])) {
             if (is_object($this->definitions[$id])) {
-                return $this->processOnMake(clone($this->definitions[$id]), $id);
+                return clone($this->definitions[$id]);
             }
 
             if (is_string($this->definitions[$id])) {
                 $className = $this->definitions[$id];
                 if (class_exists($className)) {
-                    return $this->processOnMake(new $className, $id);
+                    return new $className;
                 }
 
                 throw new NotFoundException(
@@ -48,7 +45,7 @@ class Container implements ContainerInterface
         }
 
         if (class_exists($id)) {
-            return $this->processOnMake(new $id, $id);
+            return new $id;
         }
 
         throw new NotFoundException(
@@ -56,10 +53,11 @@ class Container implements ContainerInterface
         );
     }
 
-    public function processOnMake($instance, $alias)
+    public function get(string $id)
     {
-        foreach ($this->onMakeCallbacks as $class => $fn) {
-            if ($class === $alias || $instance instanceof $class) {
+        $instance = parent::get($id);
+        foreach ($this->onTypeCallbacks as $type => $fn) {
+            if ($instance instanceof $type) {
                 $fn($instance);
             }
         }
@@ -75,5 +73,4 @@ class Container implements ContainerInterface
     {
         return array_unique(array_keys($this->definitions));
     }
-
 }

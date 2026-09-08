@@ -3,11 +3,14 @@
 namespace Pina\Menu;
 
 use Pina\App;
+use Pina\Container\SingletonTrait;
 use Pina\Controls\Control;
 use Pina\Controls\Nav\Nav;
 
 class SectionMenuComposer
 {
+    use SingletonTrait;
+
     protected $resources = [];
 
     public function register($link, SectionMenu $menu)

@@ -65,16 +65,12 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
      */
     public function getSchema(): Schema
     {
-        /** @var SchemaExtension $container */
-        $container = App::load(SchemaExtension::class);
-        return $container->get($this->getTable());
+        return SchemaExtension::load()->get($this->getTable());
     }
 
     public static function addSchema(Schema $schema)
     {
-        /** @var SchemaExtension $container */
-        $container = App::load(SchemaExtension::class);
-        $container->onGet(static::instance()->getTable(), function(Schema $base) use ($schema) {
+        SchemaExtension::load()->onGet(static::instance()->getTable(), function(Schema $base) use ($schema) {
             $base->addGroup($schema);
         });
     }

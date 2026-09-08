@@ -4,13 +4,13 @@ namespace Pina\Container;
 
 use Pina\App;
 
-class Overridable
+trait SingletonTrait
 {
     /**
      * @return static
      */
-    public static function make()
+    public static function load()
     {
-        return App::make(static::class);
+        return App::load(static::class);
     }
 }

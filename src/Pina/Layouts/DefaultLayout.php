@@ -91,8 +91,7 @@ class DefaultLayout extends Control
 
     protected function drawSectionMenu()
     {
-        /** @var SectionMenuComposer $composer */
-        $composer = App::load(SectionMenuComposer::class);
+        $composer = SectionMenuComposer::load();
         $menu = $composer->resolve(Input::getResource());
         $menu->addClass('bar');
         $r = strval($menu);

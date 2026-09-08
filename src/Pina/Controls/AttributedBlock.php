@@ -2,10 +2,12 @@
 
 namespace Pina\Controls;
 
-use Pina\Container\Overridable;
+use Pina\Container\ContainerItemTrait;
 
-class AttributedBlock extends Overridable
+class AttributedBlock
 {
+    use ContainerItemTrait;
+
     /**
      * @var string[]
      */

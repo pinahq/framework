@@ -6,9 +6,11 @@ namespace Pina;
 use GO\FailedJob;
 use GO\Job;
 use GO\Scheduler as GoScheduler;
+use Pina\Container\SingletonTrait;
 
 class Scheduler
 {
+    use SingletonTrait;
 
     /** @var GoScheduler */
     protected $handler;

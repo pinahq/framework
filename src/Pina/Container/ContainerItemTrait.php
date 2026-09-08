@@ -4,13 +4,13 @@ namespace Pina\Container;
 
 use Pina\App;
 
-class Singleton
+trait ContainerItemTrait
 {
     /**
      * @return static
      */
-    public static function load()
+    public static function make()
     {
-        return App::load(static::class);
+        return App::make(static::class);
     }
 }

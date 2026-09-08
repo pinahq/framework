@@ -3,7 +3,6 @@
 namespace Pina\Http;
 
 use Exception;
-use Pina\Access;
 use Pina\App;
 use Pina\Arr;
 use Pina\Composers\CollectionComposer;
@@ -155,7 +154,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             $menu->appendDropdown($title, $dropdown);
         }
 
-        return $menu->setLayout(App::load(EmptyLayout::class));
+        return $menu->setLayout(EmptyLayout::make());
     }
 
     protected function getTabSchema(): Schema

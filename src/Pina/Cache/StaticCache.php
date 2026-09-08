@@ -2,8 +2,11 @@
 
 namespace Pina\Cache;
 
+use Pina\Container\SingletonTrait;
+
 class StaticCache implements CacheInterface
 {
+    use SingletonTrait;
 
     protected $data = [];
 

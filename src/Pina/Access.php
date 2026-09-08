@@ -2,10 +2,11 @@
 
 namespace Pina;
 
-use Pina\Container\Singleton;
+use Pina\Container\SingletonTrait;
 
-class Access extends Singleton
+class Access
 {
+    use SingletonTrait;
 
     protected $data = [];
     protected $groups = [];

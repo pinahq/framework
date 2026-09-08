@@ -2,8 +2,11 @@
 
 namespace Pina\Queue;
 
+use Pina\Container\SingletonTrait;
+
 class Queue
 {
+    use SingletonTrait;
 
     public function push(string $handler, string $payload, int $priority, bool $unique = false)
     {

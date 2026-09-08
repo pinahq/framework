@@ -39,9 +39,7 @@ class SectionMenu extends Nav
 
     public function register($link)
     {
-        /** @var SectionMenuComposer $composer */
-        $composer = App::load(SectionMenuComposer::class);
-        $composer->register($link, $this);
+        SectionMenuComposer::load()->register($link, $this);
     }
 
     protected function calcScore($link)
