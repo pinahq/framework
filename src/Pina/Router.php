@@ -87,7 +87,7 @@ class Router extends RouteGroup
             return false;
         }
 
-        $action .= $locator->calcDeeperAction($resource);
+        $action .= $this->calcDeeperAction($resource, $locator->getRoute()->getPattern());
         return $locator->getRoute()->exists($action);
     }
 
@@ -134,7 +134,7 @@ class Router extends RouteGroup
 
         App::pushRequest($this->makeRequest($resource, $locator->getRoute()->getController(), $data, $locator->getRoute()->getPattern()));
         try {
-            $action .= $locator->calcDeeperAction($resource);
+            $action .= $this->calcDeeperAction($resource, $locator->getRoute()->getPattern());
             $fn($locator, $action, $params);
         } catch (\Exception $e) {
             throw $e;
@@ -142,6 +142,37 @@ class Router extends RouteGroup
             App::popRequest();
         }
     }
+
+    /**
+     * @param string $resource
+     * @param string $pattern
+     * @return string
+     */
+    public function calcDeeperAction($resource, $pattern)
+    {
+        $deeper = [];
+        if ($this->parse($resource, $pattern . "/:id/:__action", $deeper)) {
+            $deeperAction = pathinfo($deeper['__action'], PATHINFO_FILENAME);
+
+            return $this->ucfirstEveryWord($deeperAction);
+        }
+
+        return '';
+    }
+
+    /**
+     * @param string $s
+     * @return string
+     */
+    private function ucfirstEveryWord($s)
+    {
+        $parts = preg_split("/[^\w]/s", $s);
+        foreach ($parts as $k => $v) {
+            $parts[$k] = ucfirst($v);
+        }
+        return implode($parts);
+    }
+
 
     protected function makeRequest($resource, $c, $data, $pattern)
     {
@@ -221,6 +252,35 @@ class Router extends RouteGroup
         return $menu;
     }
 
+    /**
+     * @param string $resource
+     * @param string $pattern
+     * @param array $parsed
+     * @return bool
+     */
+    public function parse($resource, $pattern, &$parsed)
+    {
+        list($preg, $map) = Url::preg($pattern);
+        return $this->pregParse($resource, $preg, $map, $parsed);
+    }
 
+    /**
+     * @param string $resource
+     * @param string $preg
+     * @param array $map
+     * @param array $parsed
+     * @return bool
+     */
+    public function pregParse($resource, $preg, $map, &$parsed)
+    {
+        $parsed = [];
+        if (preg_match("/^" . $preg . "/si", $resource, $matches)) {
+            unset($matches[0]);
+            $matches = array_values($matches);
+            $parsed = array_combine($map, $matches);
+            return true;
+        }
+        return false;
+    }
 
 }

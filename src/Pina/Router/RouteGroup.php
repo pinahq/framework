@@ -4,7 +4,7 @@ namespace Pina\Router;
 
 use Pina\App;
 use Pina\Container\Container;
-use Pina\Url;
+use Pina\Container\Environment;
 
 class RouteGroup
 {
@@ -91,14 +91,16 @@ class RouteGroup
         return null;
     }
 
-    protected function findRegistered($controller): ?RouteLocator
+    protected function findRegistered($controller, $parentContainer = null): ?RouteLocator
     {
+        $container = $parentContainer ? new Environment($this->container, $parentContainer) : $this->container;
+
         if (isset($this->items[$controller])) {
-            return new RouteLocator($this->items[$controller], $this);
+            return new RouteLocator($this->items[$controller], $container);
         }
 
         foreach ($this->groups as $group) {
-            if ($locator = $group->findRegistered($controller)) {
+            if ($locator = $group->findRegistered($controller, $this->getContainer())) {
                 return $locator;
             }
         }
@@ -126,34 +128,4 @@ class RouteGroup
         return null;
     }
 
-    /**
-     * @param string $resource
-     * @param string $pattern
-     * @param array $parsed
-     * @return bool
-     */
-    public function parse($resource, $pattern, &$parsed)
-    {
-        list($preg, $map) = Url::preg($pattern);
-        return $this->pregParse($resource, $preg, $map, $parsed);
-    }
-
-    /**
-     * @param string $resource
-     * @param string $preg
-     * @param array $map
-     * @param array $parsed
-     * @return bool
-     */
-    public function pregParse($resource, $preg, $map, &$parsed)
-    {
-        $parsed = [];
-        if (preg_match("/^" . $preg . "/si", $resource, $matches)) {
-            unset($matches[0]);
-            $matches = array_values($matches);
-            $parsed = array_combine($map, $matches);
-            return true;
-        }
-        return false;
-    }
 }
