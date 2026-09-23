@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\BadRequestException as BadRequestExceptionAlias;
-use Pina\Controls\TableView;
+use Pina\Controls\Record\TableView;
 use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Html;
@@ -103,7 +103,7 @@ class SchemaTest extends TestCase
         $schema2->addGroup($schema3);
 
         $expected = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'];
-        $this->assertEquals($expected, $schema->getFieldKeys());
+        $this->assertEquals($expected, $schema->getFieldNames());
 
         $expected = ['Title1', 'Title2', 'Title3', 'Title4', 'Title5', 'Title6'];
         $this->assertEquals($expected, $schema->getFieldTitles());
@@ -242,7 +242,7 @@ class SchemaTest extends TestCase
             ->select('*')
             ->getQuerySchema();
 
-        $this->assertEquals(array_keys($expected), $schema->getFieldKeys());
+        $this->assertEquals(array_keys($expected), $schema->getFieldNames());
 
 
         $schema = QueueGateway::instance()
@@ -258,7 +258,7 @@ class SchemaTest extends TestCase
         $keys = ['handler', 'worker_handler', 'payload', 'calculated'];
         $values = range(1, count($keys));
 
-        $this->assertEquals($keys, $schema->getFieldKeys());
+        $this->assertEquals($keys, $schema->getFieldNames());
 
 
         $data = new DataTable([array_combine($keys, $values)], $schema);

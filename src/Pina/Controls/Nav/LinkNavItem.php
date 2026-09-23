@@ -41,20 +41,15 @@ class LinkNavItem extends NavItem
         return true;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
         if (!$this->isPermitted()) {
             return '';
         }
 
-        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        $content = $this->drawContent();
 
-        return Html::li(Html::a($inner, $this->link, $this->makeLinkAttributes()), $this->makeAttributes());
-    }
-
-    protected function drawInner()
-    {
-        return $this->title;
+        return Html::li(Html::a($content, $this->link, $this->makeLinkAttributes()), $this->makeAttributes());
     }
 
     protected function makeLinkAttributes()

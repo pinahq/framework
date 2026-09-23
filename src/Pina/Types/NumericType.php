@@ -2,9 +2,6 @@
 
 namespace Pina\Types;
 
-use Pina\Controls\FormControl;
-use Pina\Data\Field;
-
 use function Pina\__;
 
 class NumericType extends IntegerType

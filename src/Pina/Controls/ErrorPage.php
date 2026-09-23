@@ -11,7 +11,7 @@ class ErrorPage extends Control
         $this->code = $code;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
         return $this->resolveText();
     }

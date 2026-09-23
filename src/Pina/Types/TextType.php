@@ -3,7 +3,7 @@
 namespace Pina\Types;
 
 use Pina\App;
-use Pina\Controls\FormTextarea;
+use Pina\Controls\Form\FormTextarea;
 
 class TextType extends StringType
 {

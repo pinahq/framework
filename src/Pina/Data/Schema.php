@@ -454,23 +454,6 @@ class Schema implements IteratorAggregate
     /**
      * Возвращяет все ключи полей схемы
      * @return array
-     * @deprecated в пользу getFieldNames
-     */
-    public function getFieldKeys()
-    {
-        $keys = array();
-        foreach ($this->fields as $field) {
-            $keys[] = $field->getName();
-        }
-        foreach ($this->groups as $group) {
-            $keys = array_merge($keys, $group->getFieldKeys());
-        }
-        return $keys;
-    }
-
-    /**
-     * Возвращяет все ключи полей схемы
-     * @return array
      */
     public function getFieldNames()
     {

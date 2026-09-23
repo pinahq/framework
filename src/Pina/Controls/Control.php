@@ -12,7 +12,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 
     /**
      * Обёртки контрола
-     * @var Control[]
+     * @var ControlContainer[]
      */
     protected $wrappers = [];
 
@@ -29,44 +29,28 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     protected $before = [];
 
     /**
-     * Элементы, располагающиеся внутри контейнера данного контрола после внутреннего контента
-     * @var Control[]
-     */
-    protected $innerAfter = [];
-
-    /**
-     * Элементы, располагающиеся внутри контейнера данного контрола до внутреннего контента
-     * @var Control[]
-     */
-    protected $innerBefore = [];
-
-    /**
-     * @var Control|null
-     */
-    protected $layout = null;
-
-    /**
      * Логика отрисовки контрола
      * @return string
      */
-    abstract protected function draw();
+    abstract protected function draw(): string;
 
     /**
+     * @deprecated в пользу прямой работы с контейнером или конкретных реализаций контролов
      * @param Control $layout
      * @return $this
      */
     public function setLayout($layout)
     {
-        $this->layout = $layout;
+        App::container()->set(DefaultLayout::class, $layout);
         return $this;
     }
 
     /**
      * @return Control
      */
-    public function getLayout()
+    public function makeLayout()
     {
-        return is_null($this->layout) ? App::make(DefaultLayout::class) : $this->layout;
+        return App::make(DefaultLayout::class);
     }
 
     /**
@@ -92,34 +76,11 @@ abstract class Control extends AttributedBlock implements ResponseInterface
     }
 
     /**
-     * Добавить элемент внутри контейнера после основного контента
-     * @param Control $control
-     * @return $this
-     */
-    public function append($control)
-    {
-        $this->innerAfter[] = $control;
-        return $this;
-    }
-
-    /**
-     * Добавить элемент внутри контейна до основного контента
-     * @param Control $control
-     * @return $this
-     */
-    public function prepend($control)
-    {
-        array_unshift($this->innerBefore, $control);
-        return $this;
-    }
-
-
-    /**
      * Обернуть контрол оберткой
-     * @param Control $wrapper
+     * @param ControlContainer $wrapper
      * @return $this
      */
-    public function wrap($wrapper)
+    public function wrap(ControlContainer $wrapper)
     {
         return $this->pushWrapper($wrapper);
     }
@@ -179,58 +140,11 @@ abstract class Control extends AttributedBlock implements ResponseInterface
             $r .= $c->drawWithWrappers();
         }
         foreach ($this->wrappers as $w) {
-            $raw = new RawHtml();
-            $raw->setText($r);
-            array_push($w->innerAfter, $raw);
+            $w->append(new RawHtml($r));
             $r = $w->drawWithWrappers();
-            array_pop($w->innerAfter);
+            $w->cancelAppend();
         }
 
-        return $r;
-    }
-
-    /**
-     * Отрисовать связанные элементы внутри контейнера до основного контента
-     * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
-     * @return string
-     */
-    protected function drawInnerBefore(?Control $wrapper = null)
-    {
-        $r = '';
-        foreach ($this->innerBefore as $c) {
-            if ($wrapper) {
-                $r .= (clone $wrapper)->append($c);
-            } else {
-                $r .= $c;
-            }
-        }
-        return $r;
-    }
-
-    /**
-     * Отрисовать основной контент
-     * @return string
-     */
-    protected function drawInner()
-    {
-        return '';
-    }
-
-    /**
-     * Отрисовать связанные элементы внутри контейнера после основного контента
-     * @param Control $wrapper Если нужно каждый элемент обернуть в другой контрол, то он передается в параметре
-     * @return string
-     */
-    protected function drawInnerAfter(?Control $wrapper = null)
-    {
-        $r = '';
-        foreach ($this->innerAfter as $c) {
-            if ($wrapper) {
-                $r .=  (clone $wrapper)->append($c);
-            } else {
-                $r .= $c;
-            }
-        }
         return $r;
     }
 
@@ -250,7 +164,7 @@ abstract class Control extends AttributedBlock implements ResponseInterface
 
     public function send()
     {
-        $layout = $this->getLayout();
+        $layout = $this->makeLayout();
         $content = $layout->append($this)->drawWithWrappers();
         Response::ok()->setContent($content)->send();
     }

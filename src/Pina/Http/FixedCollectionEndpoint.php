@@ -4,20 +4,20 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Arr;
-use Pina\Controls\ButtonRow;
+use Pina\Composers\CollectionComposer;
+use Pina\Controls\Components\ButtonRow;
+use Pina\Controls\Components\PagingControl;
 use Pina\Controls\Control;
-use Pina\Controls\FilterForm;
-use Pina\Controls\PagingControl;
-use Pina\Controls\TableView;
+use Pina\Controls\Form\FilterForm;
+use Pina\Controls\Record\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
 use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
 use Pina\NotFoundException;
 use Pina\Paging;
+use Pina\ResponseInterface;
 use Pina\TableDataGateway;
-use Pina\Composers\CollectionComposer;
-
 use function Pina\__;
 
 abstract class FixedCollectionEndpoint extends RichEndpoint
@@ -63,12 +63,12 @@ abstract class FixedCollectionEndpoint extends RichEndpoint
     }
 
     /**
-     * @return mixed
+     * @return ResponseInterface
      * @throws \Exception
      */
     public function index()
     {
-        $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getFieldKeys());
+        $filters = Arr::only($this->query()->all(), $this->getFilterSchema()->getFieldNames());
 
         $this->exportIfNeeded($filters);
 

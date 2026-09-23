@@ -4,11 +4,12 @@ namespace Pina\Controls\Nav;
 
 use Pina\App;
 use Pina\Controls\Control;
+use Pina\Controls\ControlContainer;
 use Pina\Html;
 use Pina\Input;
 use Pina\Url;
 
-class Nav extends Control
+class Nav extends ControlContainer
 {
 
     protected $scores = [];
@@ -26,9 +27,9 @@ class Nav extends Control
         $this->location = $location;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
-        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        $inner = $this->drawContent();
         if (empty($inner)) {
             return '';
         }
@@ -40,18 +41,11 @@ class Nav extends Control
         );
     }
 
-    protected function drawInnerAfter(?Control $wrapper = null)
+    protected function drawContent(): string
     {
-        $this->processActive($this->innerAfter);
+        $this->processActive($this->inner);
 
-        return parent::drawInnerAfter($wrapper);
-    }
-
-    protected function drawInnerBefore(?Control $wrapper = null)
-    {
-        $this->processActive($this->innerBefore);
-
-        return parent::drawInnerBefore($wrapper);
+        return parent::drawContent();
     }
 
     /**

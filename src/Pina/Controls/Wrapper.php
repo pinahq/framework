@@ -6,7 +6,7 @@ namespace Pina\Controls;
 
 use Pina\Html;
 
-class Wrapper extends Control
+class Wrapper extends ControlContainer
 {
 
     protected $path = '';
@@ -16,13 +16,9 @@ class Wrapper extends Control
         $this->path = $path;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
-        return Html::nest(
-            $this->path,
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
-            $this->makeAttributes()
-        );
+        return Html::nest($this->path, $this->drawContent(), $this->makeAttributes());
     }
 
 }

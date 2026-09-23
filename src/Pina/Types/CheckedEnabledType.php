@@ -4,11 +4,11 @@
 namespace Pina\Types;
 
 use Pina\App;
-use Pina\Controls\FormFlagStatic;
-use Pina\Controls\FormControl;
-use Pina\Controls\FormStatic;
+use Pina\Controls\Form\FormCheckbox;
+use Pina\Controls\Form\FormControl;
+use Pina\Controls\Form\FormFlagStatic;
+use Pina\Controls\Form\FormStatic;
 use Pina\Data\Field;
-use Pina\Controls\FormCheckbox;
 
 class CheckedEnabledType extends EnabledType
 {

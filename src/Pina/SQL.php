@@ -251,7 +251,7 @@ class SQL
             }
 
             if ($s[1] == '*') {
-                $keys = $this->getSchema()->getFieldKeys();
+                $keys = $this->getSchema()->getFieldNames();
                 foreach ($keys as $key) {
                     if ($field->match($key)) {
                         return $this;

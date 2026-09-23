@@ -7,14 +7,13 @@ namespace Pina\Http;
 use Pina\App;
 use Pina\Arr;
 use Pina\Controls\Control;
-use Pina\Controls\HandledForm;
-use Pina\Controls\SubmitButton;
+use Pina\Controls\Form\HandledForm;
+use Pina\Controls\Form\SubmitButton;
+use Pina\Controls\Record\CheckTableView;
 use Pina\Data\DataTable;
 use Pina\Data\Schema;
-use Pina\Controls\CheckTableView;
 use Pina\Processors\KeyMetaProcessor;
 use Pina\Response;
-
 use function Pina\__;
 
 abstract class ManagedSetEndpoint extends CollectionEndpoint

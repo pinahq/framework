@@ -5,9 +5,9 @@ namespace Pina\Layouts;
 use Exception;
 use Pina\App;
 use Pina\Config;
-use Pina\Controls\Control;
-use Pina\Controls\IconMeta;
-use Pina\Controls\Meta;
+use Pina\Controls\ControlContainer;
+use Pina\Controls\Place\IconMeta;
+use Pina\Controls\Place\Meta;
 use Pina\CSRF;
 use Pina\Html;
 use Pina\Input;
@@ -15,14 +15,14 @@ use Pina\Menu\MainMenu;
 use Pina\Menu\RouterSiblingMenu;
 use Pina\Menu\SectionMenuComposer;
 
-class DefaultLayout extends Control
+class DefaultLayout extends ControlContainer
 {
 
     /**
      * @return string
      * @throws Exception
      */
-    protected function draw()
+    protected function draw(): string
     {
         $this->loadResources();
 
@@ -46,9 +46,7 @@ class DefaultLayout extends Control
         return $this->drawHeader()
             . $this->drawSectionMenu()
             . $this->drawPageHeader()
-            . $this->drawInnerBefore()
-            . $this->drawInner()
-            . $this->drawInnerAfter()
+            . $this->drawContent()
             . $this->drawFooter();
     }
 

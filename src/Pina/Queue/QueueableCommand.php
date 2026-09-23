@@ -34,9 +34,9 @@ class QueueableCommand extends Command
         $this->unique = $unique;
     }
 
-    protected function execute($data = '')
+    protected function execute($input = '')
     {
-        App::queue()->push($this->cmd, $data, $this->priority, $this->unique);
+        App::queue()->push($this->cmd, $input, $this->priority, $this->unique);
         return '';
     }
 

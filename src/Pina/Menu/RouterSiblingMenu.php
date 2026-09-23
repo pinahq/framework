@@ -20,13 +20,13 @@ class RouterSiblingMenu extends Nav
         $location = new Location($current);
         $itemResource = $location->resource($action == 'show' ? '@' : '@@');
 
-        $count = count($this->innerAfter);
+        $count = count($this->inner);
 
         $childs = App::router()->findChilds($itemResource);
         foreach ($childs as $resource) {
             $this->appendItem($resource);
         }
-        if (count($this->innerAfter) > $count) {
+        if (count($this->inner) > $count) {
             $this->prependItem($itemResource);
         }
     }

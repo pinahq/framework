@@ -41,7 +41,7 @@ class CollectionItemLinkProcessor
     public function __invoke($processed, $raw)
     {
         //собираемся преобразовать все поля схемы
-        $linedKeys = $this->schema->getFieldKeys();
+        $linedKeys = $this->schema->getFieldNames();
         $primaryKey = $this->schema->getPrimaryKey();
         foreach ($primaryKey as $k => $pkElement) {
             if (isset($this->context[$pkElement])) {

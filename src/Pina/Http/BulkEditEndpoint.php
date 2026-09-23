@@ -5,11 +5,11 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Arr;
-use Pina\Controls\RecordForm;
-use Pina\Controls\TableView;
+use Pina\Controls\Record\CheckTableView;
+use Pina\Controls\Record\RecordForm;
+use Pina\Controls\Record\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;
-use Pina\Controls\CheckTableView;
 use Pina\Processors\KeyMetaProcessor;
 use Pina\Response;
 

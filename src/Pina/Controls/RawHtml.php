@@ -26,12 +26,7 @@ class RawHtml extends Control
         return $this;
     }
 
-    protected function draw()
-    {
-        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
-    }
-
-    protected function drawInner()
+    protected function draw(): string
     {
         return $this->text;
     }

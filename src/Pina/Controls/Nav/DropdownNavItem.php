@@ -23,14 +23,14 @@ class DropdownNavItem extends LinkNavItem
         return true;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
         $submenu = $this->drawDropdown();
         if (empty($submenu)) {
             return '';
         }
 
-        $inner = $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        $inner = $this->drawContent();
 
         return Html::li(Html::a($inner, $this->link, $this->makeLinkAttributes()) . $submenu, $this->makeAttributes());
     }

@@ -2,12 +2,12 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\App;
-use Pina\Controls\Form;
-use Pina\Controls\FormInput;
-use Pina\Controls\FormStatic;
-use Pina\Controls\Paragraph;
-use Pina\Controls\RecordForm;
-use Pina\Controls\RecordView;
+use Pina\Controls\Form\Form;
+use Pina\Controls\Form\FormInput;
+use Pina\Controls\Form\FormStatic;
+use Pina\Controls\Form\Paragraph;
+use Pina\Controls\Record\RecordForm;
+use Pina\Controls\Record\RecordView;
 use Pina\Data\DataRecord;
 use Pina\Data\Schema;
 use Pina\Http\Location;
@@ -93,7 +93,7 @@ class ControllerTest extends TestCase
             . '<tr><th>ID</th><th>Handler</th><th>Payload</th><th>Priority</th><th>Delay</th><th>Worker ID</th><th>Scheduled at</th><th>Started at</th></tr>'
             . $tableContent
             . '</table>'
-            . '</div></div><a class="btn btn-primary" href="lk/1/cron-events/create">Добавить</a></div><div class="col-lg-4"><form class="fm6a9d9f360e46e form" action="" method="get"><div class="card"><div class="card-body"><div class="form-group"><label class="control-label">Поиск</label><input type="text" class="form-control" name="search"></div></div></div><div class="row"><div class="col-sm-4"><button type="submit" class="btn btn-primary">Искать</button></div><div class="col-sm-8 text-right"><a class="btn btn-default" href="lk/1/cron-events">Сбросить</a></div></div></form><a class="btn btn-default" href="lk/1/cron-events/create">Добавить</a></div></div>';
+            . '</div></div><div class="buttons"><a class="btn btn-primary" href="lk/1/cron-events/create">Добавить</a></div></div><div class="col-lg-4"><form class="fm6a9d9f360e46e form" action="" method="get"><div class="card"><div class="card-body"><div class="form-group"><label class="control-label">Поиск</label><input type="text" class="form-control" name="search"></div></div></div><div class="buttons row"><div class="col-sm-4"><button type="submit" class="btn btn-primary">Искать</button></div><div class="col-sm-8 text-right"><a class="btn btn-default" href="lk/1/cron-events">Сбросить</a></div></div></form><a class="btn btn-default" href="lk/1/cron-events/create">Добавить</a></div></div>';
 
 
         $request = new Request($_GET, [], [], $_COOKIE, $_FILES, $_SERVER);
@@ -115,7 +115,7 @@ class ControllerTest extends TestCase
             . '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner($id)
             . '</div></div></div>'
-            . '<div class="row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton.'</div></div>'
+            . '<div class="buttons row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton.'</div></div>'
             . '</div></div>'
         ;
 
@@ -150,7 +150,7 @@ class ControllerTest extends TestCase
             . '<div class="card"><div class="card-body">'
             . $this->getEditFormInner($id)
             . '</div></div>'
-            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '<div class="buttons"><button type="submit" class="btn btn-primary">Сохранить</button></div>'
             . '</form>';
 
 
@@ -171,7 +171,7 @@ class ControllerTest extends TestCase
             . '<div class="card"><div class="card-body">'
             . $this->getForcedEditFormInner($id)
             . '</div></div>'
-            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '<div class="buttons"><button type="submit" class="btn btn-primary">Сохранить</button></div>'
             . '</form>';
 
         App::container()->set(FormStatic::class, FormInput::class);
@@ -179,9 +179,9 @@ class ControllerTest extends TestCase
         App::container()->set(FormStatic::class, FormStatic::class);
 
         $r = $router->call("lk/1/cron-events/" . $id, 'get');
-        $r->wrap(new Pina\Controls\TableCell);
-        $r->wrap(new Pina\Controls\TableRow);
-        $r->wrap(new Pina\Controls\Table);
+        $r->wrap(new \Pina\Controls\Wrapper('td'));
+        $r->wrap(new \Pina\Controls\Components\TableRow);
+        $r->wrap(new \Pina\Controls\Components\Table);
         $note = (new Paragraph)->setText('note');
         $form = (new Form)->setAction('/')->setMethod('delete');
         $form->append($note);
@@ -196,7 +196,7 @@ class ControllerTest extends TestCase
             . '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner($id)
             . '</div></div></div>'
-            . '<div class="row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton .'</div></div>'
+            . '<div class="buttons row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton .'</div></div>'
             . '</div></div>'
             . '</td></tr></table>'
             . '</form>';
@@ -208,7 +208,7 @@ class ControllerTest extends TestCase
             . '<div><div class="card"><div class="card-body">'
             . $this->getStaticFormInner($id)
             . '</div></div></div>'
-            . '<div class="row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton . '</div></div>'
+            . '<div class="buttons row"><div class="col-sm-4"></div><div class="col-sm-8 text-right">' . $removeButton . '</div></div>'
             . '</div></div>'
             . '</td></tr></table>';
 
@@ -244,7 +244,7 @@ class ControllerTest extends TestCase
             . '<div class="card"><div class="card-body">'
             . '<input type="hidden" name="mode" value="test">'
             . '</div></div>'
-            . '<button type="submit" class="btn btn-primary">Сохранить</button>'
+            . '<div class="buttons"><button type="submit" class="btn btn-primary">Сохранить</button></div>'
             . '</form>';
         $this->assertEquals($expected, $r);
     }

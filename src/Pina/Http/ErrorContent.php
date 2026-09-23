@@ -4,10 +4,7 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\ContentInterface;
-use Pina\Controls\Control;
 use Pina\Controls\ErrorPage;
-use Pina\JsonContent;
-use Pina\Layouts\DefaultLayout;
 
 class ErrorContent implements ContentInterface
 {
@@ -32,11 +29,7 @@ class ErrorContent implements ContentInterface
         $view = App::make(ErrorPage::class);
         $view->load($this->code);
 
-        $layout = $view->getLayout();
-        if ($layout) {
-            return $view->wrap($layout);
-        }
-        return $view->wrap(App::make(DefaultLayout::class));
+        return $view;
     }
 
     public function setErrors($errors)

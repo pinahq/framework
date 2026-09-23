@@ -82,7 +82,7 @@ class Route
         foreach ($menus as $menu) {
             $menuItem = $menu->appendLink($title, App::link($this->pattern));
             foreach ($badges as $badge) {
-                $menuItem->append($badge);
+                $menuItem->setBadge($badge);
             }
         }
         return $this;

@@ -2,14 +2,14 @@
 
 namespace Pina\Layouts;
 
-use Pina\Controls\Control;
+use Pina\Controls\ControlContainer;
 
-class EmptyLayout extends Control
+class EmptyLayout extends ControlContainer
 {
 
-    protected function draw()
+    protected function draw(): string
     {
-        return $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter();
+        return $this->drawContent();
     }
 
 }

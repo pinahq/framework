@@ -6,24 +6,22 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Composers\CollectionComposer;
-use Pina\Controls\ActionButton;
-use Pina\Controls\Badge;
-use Pina\Controls\ButtonRow;
+use Pina\Controls\Components\ActionButton;
+use Pina\Controls\Components\Badge;
+use Pina\Controls\Components\ButtonRow;
+use Pina\Controls\Components\LinkedButton;
 use Pina\Controls\Control;
-use Pina\Controls\EditableTableView;
-use Pina\Controls\HandledForm;
-use Pina\Controls\LinkedButton;
+use Pina\Controls\Form\HandledForm;
+use Pina\Controls\Form\SubmitButton;
 use Pina\Controls\RawHtml;
-use Pina\Controls\RecordForm;
-use Pina\Controls\RecordView;
+use Pina\Controls\Record\EditableTableView;
+use Pina\Controls\Record\RecordForm;
+use Pina\Controls\Record\RecordView;
+use Pina\Controls\Record\TableView;
 use Pina\Controls\SidebarWrapper;
-use Pina\Controls\SubmitButton;
-use Pina\Controls\TableView;
 use Pina\Controls\Wrapper;
 use Pina\Data\DataRecord;
-
 use Pina\Data\DataTable;
-
 use function Pina\__;
 
 class RichEndpoint extends Endpoint

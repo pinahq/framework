@@ -11,7 +11,7 @@ class PrintTablesWithoutPK extends Command
 
     protected function execute($input = '')
     {
-        App::walkModuleClasses(
+        App::modules()->walkClasses(
             'Gateway',
             function (TableDataGateway $gw) {
                 $table = $gw->getTable();

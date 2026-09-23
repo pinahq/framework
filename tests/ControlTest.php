@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Pina\Controls\Card;
+use Pina\Controls\Components\Card;
 use Pina\Controls\Wrapper;
 
 class ControlTest extends TestCase
@@ -9,7 +9,7 @@ class ControlTest extends TestCase
 
     public function testControl()
     {
-        $link = new Pina\Controls\LinkedButton;
+        $link = new \Pina\Controls\Components\LinkedButton;
         $link->setTitle('Title');
         $link->setLink('http://mywebsite.com/some-page');
 
@@ -44,7 +44,7 @@ class ControlTest extends TestCase
 
     public function testWrapper()
     {
-        $link = new Pina\Controls\LinkedButton;
+        $link = new \Pina\Controls\Components\LinkedButton;
         $link->setTitle('Title');
         $link->setLink('http://mywebsite.com/some-page');
         $expected = '<div id="my" class="card card-primary"><div class="card-body">'

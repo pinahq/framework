@@ -3,14 +3,13 @@
 namespace Pina\Types;
 
 use Pina\App;
-use Pina\Controls\FormControl;
-use Pina\Controls\FormInput;
-use Pina\Controls\FormStatic;
-use Pina\Controls\HiddenInput;
-use Pina\Controls\NoInput;
+use Pina\Controls\Form\FormControl;
+use Pina\Controls\Form\FormInput;
+use Pina\Controls\Form\FormStatic;
+use Pina\Controls\Form\HiddenInput;
+use Pina\Controls\Form\NoInput;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
-
 use function Pina\__;
 use function sprintf;
 

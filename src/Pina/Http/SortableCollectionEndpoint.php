@@ -4,7 +4,7 @@ namespace Pina\Http;
 
 use Pina\App;
 use Pina\Controls\RawHtml;
-use Pina\Controls\SortableListView;
+use Pina\Controls\Record\SortableListView;
 use Pina\Data\DataTable;
 
 abstract class SortableCollectionEndpoint extends CollectionEndpoint

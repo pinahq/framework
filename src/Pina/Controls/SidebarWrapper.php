@@ -4,7 +4,7 @@ namespace Pina\Controls;
 
 use Pina\Html;
 
-class SidebarWrapper extends Control
+class SidebarWrapper extends ControlContainer
 {
 
     /**
@@ -31,11 +31,11 @@ class SidebarWrapper extends Control
         return $this;
     }
 
-    protected function draw()
+    protected function draw(): string
     {
         $left = Html::tag(
             'div',
-            $this->drawInnerBefore() . $this->drawInner() . $this->drawInnerAfter(),
+            $this->drawContent(),
             ['class' => 'col-lg-' . $this->width]
         );
 

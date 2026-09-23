@@ -5,18 +5,19 @@ namespace Pina\Types;
 use Pina\App;
 use Pina\Arr;
 use Pina\BadRequestException;
-use Pina\Controls\FormContentControl;
-use Pina\Controls\FormControl;
-use Pina\Controls\FormStatic;
-use Pina\Controls\InputFactoryInterface;
-use Pina\Controls\RawHtml;
-use Pina\Controls\RecordForm;
-use Pina\Controls\RecordFormCompiler;
-use Pina\Controls\RecordView;
+use Pina\Controls\ControlContainer;
+use Pina\Controls\Form\FormContentControl;
+use Pina\Controls\Form\FormControl;
+use Pina\Controls\Form\FormStatic;
+use Pina\Controls\Form\InputFactoryInterface;
+use Pina\Controls\Record\FieldsetRecordFormCompiler;
+use Pina\Controls\Record\FlatRecordFormCompiler;
+use Pina\Controls\Record\RecordForm;
+use Pina\Controls\Record\RecordFormCompiler;
+use Pina\Controls\Record\RecordView;
 use Pina\Data\DataRecord;
 use Pina\Data\Field;
-use Pina\Controls\FieldsetRecordFormCompiler;
-use Pina\Controls\FlatRecordFormCompiler;
+use Pina\Data\SchemaProviderInterface;
 use Pina\TableDataGateway;
 
 class AttributedFixedRelation extends Relation
@@ -44,7 +45,7 @@ class AttributedFixedRelation extends Relation
             $form = App::make(RecordView::class);
             $form->load($record);
 
-            $list .= $this->resolveFormCompiler($form, $record, $variant['title']);
+            $list .= $this->resolveFormCompiler($form, $form, $record, $variant['title']);
         }
 
         return $list;
@@ -63,7 +64,7 @@ class AttributedFixedRelation extends Relation
         if (!$field->isHidden() && !$field->isStatic()) {
             $variants = $this->getVariants();
 
-            $container = new RawHtml();
+            $container = new ControlContainer();
 
             foreach ($variants as $variant) {
                 $schema = $this->getSchema();
@@ -78,7 +79,7 @@ class AttributedFixedRelation extends Relation
                 $form = App::make(RecordForm::class);
                 $form->load($record);
 
-                $container->append($this->resolveFormCompiler($form, $record, $variant['title']));
+                $container->append($this->resolveFormCompiler($form, $form, $record, $variant['title']));
             }
 
             $control->setValue($container);
@@ -86,7 +87,7 @@ class AttributedFixedRelation extends Relation
         return $control;
     }
 
-    protected function resolveFormCompiler(InputFactoryInterface $form, DataRecord $record, $title): RecordFormCompiler
+    protected function resolveFormCompiler(SchemaProviderInterface $schemaProvider, InputFactoryInterface $factory, DataRecord $record, $title): RecordFormCompiler
     {
         $schema = $record->getSchema();
 
@@ -95,7 +96,7 @@ class AttributedFixedRelation extends Relation
 
             /** @var FieldsetRecordFormCompiler $compiler */
             $compiler = App::make(FieldsetRecordFormCompiler::class);
-            $compiler->load($record->getSchema(), $form);
+            $compiler->load($schemaProvider, $factory);
 
             return $compiler;
         }
@@ -104,7 +105,7 @@ class AttributedFixedRelation extends Relation
         }
         /** @var FlatRecordFormCompiler $compiler */
         $compiler = App::make(FlatRecordFormCompiler::class);
-        $compiler->load($record->getSchema(), $form);
+        $compiler->load($schemaProvider, $factory);
 
         return $compiler;
     }

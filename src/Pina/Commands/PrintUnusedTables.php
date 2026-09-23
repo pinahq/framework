@@ -15,7 +15,7 @@ class PrintUnusedTables extends Command
 
         $usedTables = [];
 
-        App::walkModuleClasses(
+        App::modules()->walkClasses(
             'Gateway',
             function (TableDataGateway $gw) use (&$usedTables) {
                 $table = $gw->getTable();

@@ -7,6 +7,8 @@ class SingletonContainer
     protected $definitions = [];
     protected $loaded = [];
 
+    protected $onLoadCallbacks = [];
+
     public function onLoad($id, Callable $callable)
     {
         //если объект уже проинициализирован, то считаем, что его инициализация была неполной и это ошибка

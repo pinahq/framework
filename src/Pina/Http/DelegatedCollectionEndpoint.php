@@ -6,11 +6,12 @@ use Exception;
 use Pina\App;
 use Pina\Arr;
 use Pina\Composers\CollectionComposer;
-use Pina\Controls\ButtonRow;
+use Pina\Controls\Components\ButtonRow;
+use Pina\Controls\Components\PagingControl;
 use Pina\Controls\Control;
-use Pina\Controls\FilterForm;
+use Pina\Controls\Form\FilterForm;
+use Pina\Controls\Nav\ContextMenu;
 use Pina\Controls\Nav\Nav;
-use Pina\Controls\PagingControl;
 use Pina\Controls\RawHtml;
 use Pina\Controls\SidebarWrapper;
 use Pina\Controls\Wrapper;
@@ -20,15 +21,13 @@ use Pina\Data\DataTable;
 use Pina\Data\Field;
 use Pina\Data\Schema;
 use Pina\Export\DefaultExport;
+use Pina\Layouts\DefaultLayout;
 use Pina\Layouts\EmptyLayout;
 use Pina\NotFoundException;
 use Pina\Processors\CollectionItemLinkProcessor;
 use Pina\Response;
-
 use Pina\Types\DirectoryType;
-
 use Pina\Types\Relation;
-
 use function Pina\__;
 
 /**
@@ -112,8 +111,8 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
 
     public function indexContextMenu($id)
     {
-        /** @var Nav $menu */
-        $menu = App::make(Nav::class);
+        /** @var ContextMenu $menu */
+        $menu = App::make(ContextMenu::class);
         $menu->appendLink(__('Открыть в новой вкладке'), $this->base()->link('@/:id', ['id' => $id]), true);
 
         $collection = $this->makeDataCollection();
@@ -154,7 +153,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             $menu->appendDropdown($title, $dropdown);
         }
 
-        return $menu->setLayout(EmptyLayout::make());
+        return $menu;
     }
 
     protected function getTabSchema(): Schema
@@ -201,7 +200,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
             $menuItem = $nav->appendLink($variant['title'], $this->location()->link('@', array_merge($data, [$field->getName() => $variant['id']])));
             if (!empty($variant['badges']) && is_array($variant['badges'])) {
                 foreach ($variant['badges'] as $badge) {
-                    $menuItem->append($this->makeBadge($badge));
+                    $menuItem->setBadge($this->makeBadge($badge));
                 }
             }
         }
@@ -415,7 +414,7 @@ abstract class DelegatedCollectionEndpoint extends RichEndpoint
     protected function makePagingControl($paging)
     {
         //значимые фильтры, если расширить до всех параметров, то все будут попадать в пагинацию
-        $filters = Arr::only($this->query()->all(), $this->makeDataCollection()->getFilterSchema($this->context()->all())->getFieldKeys());
+        $filters = Arr::only($this->query()->all(), $this->makeDataCollection()->getFilterSchema($this->context()->all())->getFieldNames());
 
         /** @var PagingControl $pagingControl */
         $pagingControl = App::make(PagingControl::class);

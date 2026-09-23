@@ -3,8 +3,8 @@
 namespace Pina\Queue;
 
 use Pina\Command;
-use Pina\Controls\ButtonRow;
-use Pina\Controls\UnorderedList;
+use Pina\Controls\Components\ButtonRow;
+use Pina\Controls\Components\UnorderedList;
 use Pina\Data\DataCollection;
 use Pina\Data\DataRecord;
 use Pina\Data\QueryDataCollection;

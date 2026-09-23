@@ -3,7 +3,7 @@
 namespace Pina\Types;
 
 use Pina\Controls\Control;
-use Pina\Controls\FormControl;
+use Pina\Controls\Form\FormControl;
 use Pina\Data\Field;
 use Pina\TableDataGateway;
 

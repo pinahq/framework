@@ -3,7 +3,6 @@
 
 namespace Pina\Controls\Nav;
 
-use Pina\Access;
 use Pina\App;
 
 class ActionNavItem extends LinkNavItem
