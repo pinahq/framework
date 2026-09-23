@@ -1,10 +1,9 @@
 <?php
 
-namespace Pina\Controls\Form;
+namespace Pina\Controls\Record;
 
 use Pina\App;
 use Pina\Controls\Components\BodyLessCard;
-use Pina\Controls\Record\RecordFormCompiler;
 
 class BodyLessRecordFormCompiler extends RecordFormCompiler
 {
