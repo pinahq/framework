@@ -37,12 +37,17 @@ class LinkedListItem extends ListItem
         return Html::tag(
             'li',
             Html::a(
-                $this->text,
+                $this->drawContent(),
                 $this->link,
                 ['class' => $this->linkClass]
             ),
             $this->makeAttributes()
         );
+    }
+
+    protected function drawContent(): string
+    {
+        return $this->text;
     }
 
 }
