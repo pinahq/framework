@@ -5,10 +5,10 @@ namespace Pina\Controls\Record;
 use Pina\App;
 use Pina\Controls\Components\BodyLessCard;
 use Pina\Controls\Components\Card;
+use Pina\Controls\Components\Paragraph;
 use Pina\Controls\Control;
 use Pina\Controls\Form\FormRow;
 use Pina\Controls\Form\InputFactoryInterface;
-use Pina\Controls\Form\Paragraph;
 use Pina\Data\Schema;
 use Pina\Data\SchemaProviderInterface;
 

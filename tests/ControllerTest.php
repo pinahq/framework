@@ -2,10 +2,10 @@
 
 use PHPUnit\Framework\TestCase;
 use Pina\App;
+use Pina\Controls\Components\Paragraph;
 use Pina\Controls\Form\Form;
 use Pina\Controls\Form\FormInput;
 use Pina\Controls\Form\FormStatic;
-use Pina\Controls\Form\Paragraph;
 use Pina\Controls\Record\RecordForm;
 use Pina\Controls\Record\RecordView;
 use Pina\Data\DataRecord;

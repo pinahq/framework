@@ -1,6 +1,6 @@
 <?php
 
-namespace Pina\Controls\Form;
+namespace Pina\Controls\Components;
 
 use Pina\Controls\Control;
 use Pina\Html;
