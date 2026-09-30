@@ -8,7 +8,7 @@ use Pina\Composers\CollectionComposer;
 use Pina\Controls\Components\ButtonRow;
 use Pina\Controls\Components\PagingControl;
 use Pina\Controls\Control;
-use Pina\Controls\Form\FilterForm;
+use Pina\Controls\Record\FilterForm;
 use Pina\Controls\Record\TableView;
 use Pina\Data\DataRecord;
 use Pina\Data\DataTable;

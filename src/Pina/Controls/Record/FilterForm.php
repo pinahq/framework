@@ -1,9 +1,9 @@
 <?php
 
-namespace Pina\Controls\Form;
+namespace Pina\Controls\Record;
 
 use Pina\App;
-use Pina\Controls\Record\RecordForm;
+use Pina\Controls\Form\SubmitButton;
 use function Pina\__;
 
 /**
