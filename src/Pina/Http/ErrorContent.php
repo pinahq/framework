@@ -28,8 +28,8 @@ class ErrorContent implements ContentInterface
         /** @var ErrorPage $view */
         $view = App::make(ErrorPage::class);
         $view->load($this->code);
-
-        return $view;
+        $layout = $view->makeLayout();
+        return $layout->append($view);
     }
 
     public function setErrors($errors)

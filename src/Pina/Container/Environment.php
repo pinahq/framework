@@ -35,4 +35,10 @@ class Environment implements ContainerInterface
         return $this->parent->get($id);
     }
 
+    /** @todo в абстракции ContainerInterface этого метода нет, но он используется в устаревшем Control::setLayout */
+    public function set($id, $concrete)
+    {
+        $this->container->set($id, $concrete);
+    }
+
 }
