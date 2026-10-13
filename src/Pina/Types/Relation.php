@@ -67,7 +67,7 @@ class Relation extends DirectoryType
      */
     public function getVariants()
     {
-        return $this->makeDirectoryQuery()->selectId()->selectTitle()->cacheStatic($this->cacheSeconds)->get();
+        return $this->makeDirectoryQuery()->selectId()->selectTitle()->orderByTitle()->cacheStatic($this->cacheSeconds)->get();
     }
 
     protected function makeSelect()

@@ -453,6 +453,11 @@ abstract class TableDataGateway extends SQL implements DefinitionInterface
         return $this->selectAsIfNotSelected('title', $alias);
     }
 
+    public function orderByTitle()
+    {
+        return $this->orderBy('title', 'asc');
+    }
+
     /**
      * Собирает и возвращает текст запроса, отвечающего за сортировку (для ORDER BY)
      * @param string $s
