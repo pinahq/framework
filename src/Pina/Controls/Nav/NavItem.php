@@ -32,7 +32,7 @@ abstract class NavItem extends Control
 
     protected function drawContent(): string
     {
-        return ($this->badge ?? '') . $this->title;
+        return $this->title . ($this->badge ?? '');
     }
 
 }
