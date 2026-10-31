@@ -5,6 +5,7 @@ namespace Pina\Router;
 use Pina\App;
 use Pina\Container\Container;
 use Pina\Container\Environment;
+use Pina\Controls\Nav\Nav;
 
 class RouteGroup
 {
@@ -126,6 +127,13 @@ class RouteGroup
             }
         }
         return null;
+    }
+
+    public function addToMenu(Nav ...$menus)
+    {
+        foreach ($this->items as $item) {
+            $item->addToMenu(...$menus);
+        }
     }
 
 }
