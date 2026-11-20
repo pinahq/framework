@@ -111,7 +111,7 @@ class CollectionComposer
         if (empty($title)) {
             $title = $record->getMeta('id');
         }
-        return trim($title);
+        return trim($title ?? '');
     }
 
     protected function getParentLinks(Location $location): LinkedItemCollection
